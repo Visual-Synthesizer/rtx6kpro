@@ -140,11 +140,6 @@ Speculative decoding works by:
 
 This verification guarantees output matches what the target model would generate without speculation.
 
-### Known SGLang bugs (mitigated)
-- NEXTN + shared-experts fusion accuracy loss (mitigated by `--disable-shared-experts-fusion`)
-- SGLang v0.5.9 "Spec V2 Critical bug fix" for speculative verification
-- topk>1 garbage output bug (mitigated by `--speculative-eagle-topk 1`)
-
 ---
 
 ## Overall Conclusions
