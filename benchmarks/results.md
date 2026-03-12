@@ -5,6 +5,7 @@
 - [Qwen3.5-397B Benchmarks](#qwen35-397b-benchmarks)
   - [Single-Batch Decode Speed](#qwen35-single-batch-decode-speed)
   - [MTP Scaling](#qwen35-mtp-scaling)
+  - [MTP Quality (GPQA)](#qwen35-mtp-quality-gpqa)
   - [Context Length Scaling](#qwen35-context-length-scaling)
   - [High Concurrency](#qwen35-high-concurrency)
 - [Kimi K2.5 Benchmarks](#kimi-k25-benchmarks)
@@ -57,6 +58,24 @@ vLLM, nvidia NVFP4, 4x RTX 6000 Pro, MTP=2:
 Peak throughput: **1127.1 tok/s** at 50 users with 1K context.
 
 MTP acceptance stats: 89.2% acceptance rate, mean acceptance length 2.73-3.69 tokens.
+
+### Qwen3.5 MTP Quality (GPQA)
+
+Does MTP speculative decoding affect accuracy? GPQA Diamond (198 questions), 8 repeats, temperature=0.0, thinking enabled, simple-evals framework.
+
+| Run | lukealonso MTP | lukealonso No MTP | nvidia MTP |
+|:---:|:---:|:---:|:---:|
+| 1 | 0.889 | 0.864 | 0.859 |
+| 2 | 0.879 | 0.874 | 0.904 |
+| 3 | 0.869 | 0.894 | 0.859 |
+| 4 | 0.884 | 0.869 | 0.884 |
+| 5 | 0.904 | 0.889 | 0.879 |
+| 6 | 0.884 | 0.864 | 0.859 |
+| 7 | 0.879 | 0.874 | 0.874 |
+| 8 | 0.874 | 0.874 | 0.879 |
+| **Mean** | **0.8826** | **0.8750** | **0.8744** |
+
+MTP vs no-MTP difference: +0.76pp, p=0.18 (not significant). MTP is **~18% faster** (~89 min vs ~108 min) with no quality loss. Full analysis: [mtp-quality-evaluation.md](mtp-quality-evaluation.md).
 
 ### Qwen3.5 Context Length Scaling
 
