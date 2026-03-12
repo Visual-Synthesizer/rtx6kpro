@@ -51,30 +51,32 @@ nvidia/Qwen3.5-397B-A17B-NVFP4            0.108526     0.027302   0.467703   1.4
 
 ### Throughput Benchmark (MTP Speculative Decoding)
 
-All models tested with MTP enabled (`--speculative-algorithm NEXTN --disable-radix-cache`), SGLang with `--enable-metrics`, 4x RTX PRO 6000 Blackwell (TP4). Throughput measured from server-side `sglang:gen_throughput` Prometheus metric.
+All models tested with identical SGLang configuration, MTP enabled (NEXTN, 5 steps, 6 draft tokens), `--mamba-scheduler-strategy extra_buffer`, 4x RTX PRO 6000 Blackwell (TP4). Throughput measured from server-side `sglang:gen_throughput` Prometheus metric.
 
 ```
-Decode throughput (tok/s), context=0, MTP accept rate ~73-78%
+Decode throughput (tok/s), context=0
 =========================================================================
 
 Model                                 C=1    C=4    C=16    C=32
 ---------------------------------------------------------------------
-QuantTrio/Qwen3.5-397B-A17B-AWQ      138    410    1015    1404
-lukealonso/Qwen3.5-397B-A17B-NVFP4   109    370     870    1360
-nvidia/Qwen3.5-397B-A17B-NVFP4       119    333     846    1266
+QuantTrio/Qwen3.5-397B-A17B-AWQ      125    412    1013    1470
+lukealonso/Qwen3.5-397B-A17B-NVFP4   129    361     879    1063
+nvidia/Qwen3.5-397B-A17B-NVFP4       111    343     828    1032
 ```
 
-**AWQ wins on both quality AND throughput** for this model class on Blackwell. The AWQ model uses INT4 GEMM on standard Tensor Cores, while NVFP4 uses dedicated Blackwell FP4 Tensor Cores — but the AWQ model's MTP draft model runs faster (no FP4 quant overhead on draft model), resulting in higher overall throughput.
+**AWQ wins on both quality AND throughput** at high concurrency. At C=32, AWQ is 38% faster than NVFP4 (1470 vs 1063/1032 tok/s). At C=1 all models are similar (~110-130 tok/s).
+
+For full reproduction details, server launch commands, and the benchmark script, see [inference-throughput/](inference-throughput/).
 
 #### MTP setup (critical)
 
 MTP (Multi-Token Prediction) speculative decoding requires **both**:
 1. `SGLANG_ENABLE_SPEC_V2=True` (environment variable)
-2. `--speculative-algorithm NEXTN` (CLI flag)
+2. `--speculative-algo NEXTN` (CLI flag)
 
 The env var alone does NOT enable MTP. Without the CLI flag, `speculative_algorithm=None` in the server config and MTP is completely disabled.
 
-VLM-format models (`Qwen3_5MoeForConditionalGeneration`) additionally require `--disable-radix-cache` for MTP to work — SGLang's radix cache is incompatible with speculative decoding for this model architecture.
+VLM-format models (`Qwen3_5MoeForConditionalGeneration`) require `--mamba-scheduler-strategy extra_buffer` for MTP to work.
 
 ### Interpretation scale
 
