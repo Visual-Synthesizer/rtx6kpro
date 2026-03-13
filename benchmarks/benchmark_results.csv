@@ -47,3 +47,11 @@ nvidia/Qwen3.5-397B-A17B-NVFP4,GSM8K,no,yes,1,39.0,200,2048
 QuantTrio/Qwen3.5-397B-A17B-AWQ,HardMath,no,yes,1,89.5,19,2048
 lukealonso/Qwen3.5-397B-A17B-NVFP4,HardMath,no,yes,1,89.5,19,2048
 nvidia/Qwen3.5-397B-A17B-NVFP4,HardMath,no,yes,1,84.2,19,2048
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,1,91.9,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,2,87.9,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,3,89.4,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,4,85.9,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,5,86.4,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,6,88.4,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,7,89.9,198,64000
+nvidia/Qwen3.5-397B-A17B-NVFP4 (vLLM),GPQA,yes,yes,8,88.4,198,64000
