@@ -69,7 +69,7 @@ For 8-repeat tests, each repeat was run sequentially (not parallel) to avoid ser
 
 | Benchmark | AWQ (QuantTrio) | lukealonso NVFP4 | nvidia NVFP4 | Notes |
 |-----------|----------------|------------------|--------------|-------|
-| **GPQA** (thinking, 8-repeat mean) | **88.40%** | 88.26% | 87.44% | 198 examples, MTP ON |
+| **GPQA** (thinking, 8-repeat mean) | **88.40%** ±1.39 | 88.28% ±1.06 | 87.46% ±1.57 | 198 examples, 8 runs, MTP ON |
 | **GSM8K** (thinking) | **99.0%** | **99.0%** | 97.5% | 200 examples, max-tokens 16000 |
 | **Hard Math** (no thinking) | **89.5%** (17/19) | **89.5%** (17/19) | 84.2% (16/19) | 19 custom questions |
 | **KL Divergence** (vs FP8) | **0.024** | 0.035 | 0.109 | 204,800 positions, WikiText-2 |
