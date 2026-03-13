@@ -70,7 +70,7 @@ For 8-repeat tests, each repeat was run sequentially (not parallel) to avoid ser
 | Benchmark | AWQ (QuantTrio) | lukealonso NVFP4 | nvidia NVFP4 | nvidia NVFP4 (vLLM) | Notes |
 |-----------|----------------|------------------|--------------|---------------------|-------|
 | **GPQA** (thinking, 8-repeat mean) | **88.40%** ±1.39 | 88.28% ±1.06 | 87.46% ±1.57 | **88.53%** ±1.92 | 198 examples, 8 runs, MTP ON |
-| **GSM8K** (thinking) | **99.0%** | **99.0%** | 97.5% | — | 200 examples, max-tokens 16000 |
+| **GSM8K** (thinking) | **99.0%** | **99.0%** | 97.5% | 98.5% | 200 examples, max-tokens 16000 |
 | **Hard Math** (no thinking) | **89.5%** (17/19) | **89.5%** (17/19) | 84.2% (16/19) | — | 19 custom questions |
 | **KL Divergence** (vs FP8) | **0.024** | 0.035 | 0.109 | — | 204,800 positions, WikiText-2 |
 
@@ -127,12 +127,14 @@ For full KLD methodology, reproduction steps, and automation script, see [kld-ev
 | 2 | lukealonso NVFP4 | 88.28% | 88.9, 87.9, 86.9, 88.4, 90.4, 88.4, 87.9, 87.4 | 1.06 | ~24 min |
 | 3 | nvidia NVFP4 | 87.46% | 85.9, 90.4, 85.9, 88.4, 87.9, 85.9, 87.4, 87.9 | 1.57 | ~24 min |
 
-### GPQA 8-Repeat Detail (nvidia NVFP4 on vLLM, thinking mode, MTP ON)
+### GPQA 8-Repeat Detail (nvidia NVFP4 on vLLM, thinking mode, MTP ON vs OFF)
 
-| # | Model | Engine | GPQA Mean | Scores (8 repeats) | Std |
-|---|-------|--------|-----------|---------------------|-----|
-| 1 | nvidia NVFP4 | **vLLM** | **88.53%** | 91.9, 87.9, 89.4, 85.9, 86.4, 88.4, 89.9, 88.4 | 1.92 |
-| 2 | nvidia NVFP4 | SGLang | 87.46% | 85.9, 90.4, 85.9, 88.4, 87.9, 85.9, 87.4, 87.9 | 1.57 |
+| # | Model | Engine | MTP | GPQA Mean | Scores (8 repeats) | Std |
+|---|-------|--------|-----|-----------|---------------------|-----|
+| 1 | nvidia NVFP4 | vLLM | ON | **88.53%** | 91.9, 87.9, 89.4, 85.9, 86.4, 88.4, 89.9, 88.4 | 1.92 |
+| 2 | nvidia NVFP4 | vLLM | OFF | 86.90% | 87.4, 86.4, 86.9, 86.9, 85.9, 85.9, 89.4, 86.4 | 1.13 |
+| 3 | nvidia NVFP4 | SGLang | ON | 87.46% | 85.9, 90.4, 85.9, 88.4, 87.9, 85.9, 87.4, 87.9 | 1.57 |
+| 4 | nvidia NVFP4 | SGLang | OFF | 86.58% | 86.4, 85.9, 86.9, 86.4, 84.8, 86.4, 86.9, 88.9 | 1.15 |
 
 vLLM server config:
 ```bash
@@ -155,9 +157,11 @@ python3 -m vllm.entrypoints.openai.api_server \
   --enable-prefix-caching --enable-chunked-prefill
 ```
 
-nvidia NVFP4 scores +1.07% higher on vLLM than SGLang (88.53% vs 87.46%), though the difference is not statistically significant (Welch t=1.22, p>0.05).
+MTP ON vs OFF on vLLM: Δ=+1.62%, t=2.06, p>0.05 (borderline, not significant).
+MTP ON vs OFF on SGLang: Δ=+0.88%, t=1.28, p>0.05 (not significant).
+Without MTP, both engines converge: vLLM 86.90% vs SGLang 86.58% (Δ=+0.31%, t=0.61, ns).
 
-**Statistical significance (Welch t-test, two-tailed, all pairs):**
+**Statistical significance (Welch t-test, two-tailed, all MTP-ON pairs):**
 - AWQ (SGLang) vs lukealonso (SGLang): Δ=+0.12%, t=0.20, p>0.05 — **not significant**
 - AWQ (SGLang) vs nvidia (SGLang): Δ=+0.94%, t=1.27, p>0.05 — **not significant**
 - AWQ (SGLang) vs nvidia (vLLM): Δ=−0.13%, t=0.15, p>0.05 — **not significant**
@@ -165,6 +169,8 @@ nvidia NVFP4 scores +1.07% higher on vLLM than SGLang (88.53% vs 87.46%), though
 - nvidia (vLLM) vs nvidia (SGLang): Δ=+1.07%, t=1.22, p>0.05 — **not significant**
 
 95% confidence intervals overlap for all configurations. With 8 repeats and std ~1.0–1.9, the GPQA benchmark cannot distinguish these quantizations or inference engines at the 95% confidence level.
+
+For full MTP quality analysis including per-run data, see [mtp-quality-evaluation.md](mtp-quality-evaluation.md).
 
 ### GPQA 8-Repeat Detail (lukealonso & nvidia, MTP OFF)
 
@@ -188,13 +194,14 @@ MTP does NOT degrade accuracy — both models score marginally higher with MTP (
 
 ### GSM8K with thinking mode (200 examples, max-tokens 16000)
 
-| Model | Score | Std |
-|-------|-------|-----|
-| **AWQ (QuantTrio)** | **99.0%** | — |
-| lukealonso NVFP4 | **99.0%** | 0.099 |
-| nvidia NVFP4 | 97.5% | 0.156 |
+| Model | Engine | Score | Std |
+|-------|--------|-------|-----|
+| **AWQ (QuantTrio)** | SGLang | **99.0%** | — |
+| lukealonso NVFP4 | SGLang | **99.0%** | 0.099 |
+| nvidia NVFP4 | vLLM | 98.5% | — |
+| nvidia NVFP4 | SGLang | 97.5% | 0.156 |
 
-AWQ and lukealonso tie at 99.0%. nvidia lags at 97.5% with higher variance.
+AWQ and lukealonso tie at 99.0%. nvidia on vLLM (98.5%) outperforms nvidia on SGLang (97.5%).
 
 ### GSM8K without thinking (5-shot, lukealonso vs nvidia only)
 
@@ -271,7 +278,7 @@ For full decode + prefill tables across context lengths, see [inference-throughp
 |--------|-----|------------------|--------------|---------------------|
 | GPQA (8-repeat mean) | 88.40% | 88.28% | 87.46% | **88.53%** |
 | GPQA (std) | 1.39 | **1.06** | 1.57 | 1.92 |
-| GSM8K | **99.0%** | **99.0%** | 97.5% | — |
+| GSM8K | **99.0%** | **99.0%** | 97.5% | 98.5% |
 | Hard Math | **89.5%** | **89.5%** | 84.2% | — |
 | KL Divergence | **0.024** | 0.035 | 0.109 | — |
 | Throughput (C=64) | **1662 tok/s** | 1202 tok/s | — | — |
