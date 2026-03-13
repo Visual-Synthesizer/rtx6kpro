@@ -1,16 +1,15 @@
 # MTP Quality Evaluation
 
-Does MTP (Multi-Token Prediction) speculative decoding affect model accuracy? We ran GPQA Diamond and GSM8K with and without MTP across two NVFP4 checkpoints to find out.
+Does MTP (Multi-Token Prediction) speculative decoding affect model accuracy? We ran GPQA Diamond and GSM8K with and without MTP across two NVFP4 checkpoints on two inference engines (SGLang and vLLM) to find out.
 
 ## Table of Contents
 
 - [Summary](#summary)
 - [Test Environment](#test-environment)
 - [GPQA Diamond Results](#gpqa-diamond-results)
-  - [Per-Run Scores](#per-run-scores)
-  - [Aggregate Statistics](#aggregate-statistics)
-  - [MTP Impact per Checkpoint](#mtp-impact-per-checkpoint)
-  - [Checkpoint Comparison](#checkpoint-comparison)
+  - [SGLang Results](#sglang-results)
+  - [vLLM Results](#vllm-results)
+  - [Cross-Engine Comparison](#cross-engine-comparison)
 - [GSM8K Results](#gsm8k-results)
 - [Hard Math Test](#hard-math-test)
 - [Conclusions](#conclusions)
@@ -20,31 +19,45 @@ Does MTP (Multi-Token Prediction) speculative decoding affect model accuracy? We
 
 ## Summary
 
+### SGLang (TP8, 8x RTX PRO 6000 Blackwell)
+
 | Configuration | GPQA Mean | GSM8K (thinking) | GSM8K (no thinking) | Wall Time (GPQA) |
 |:---|:---:|:---:|:---:|:---:|
-| lukealonso/NVFP4 + MTP | **88.26%** | **99.0%** | **44%** | ~1h 29m |
-| lukealonso/NVFP4, no MTP | 87.50% | — | — | ~1h 48m |
-| nvidia/NVFP4 + MTP | 87.44% | 97.5% | 39% | ~1h 43m |
-| nvidia/NVFP4, no MTP | 86.55% | — | — | ~2h 15m |
+| lukealonso/NVFP4 + MTP | **88.28%** ±1.06 | **99.0%** | **44%** | ~1h 29m |
+| lukealonso/NVFP4, no MTP | 87.53% ±1.09 | — | — | ~1h 48m |
+| nvidia/NVFP4 + MTP | 87.46% ±1.57 | 97.5% | 39% | ~1h 43m |
+| nvidia/NVFP4, no MTP | 86.58% ±1.15 | — | — | ~2h 15m |
 
-**Key findings:**
-1. **MTP does not degrade quality** — differences are within statistical noise
-2. **MTP provides 18-24% faster inference** — a free speedup
-3. **lukealonso checkpoint consistently outperforms nvidia** across all benchmarks
+### vLLM (TP4, 4x RTX PRO 6000 Blackwell)
+
+| Configuration | GPQA Mean | GSM8K (thinking) |
+|:---|:---:|:---:|
+| nvidia/NVFP4 + MTP | **88.53%** ±1.92 | — |
+| nvidia/NVFP4, no MTP | 86.90% ±1.13 | 98.5% |
+
+### Key findings
+
+1. **MTP does not degrade quality** — no statistically significant difference on either engine (Welch t-test p>0.05 for all pairs)
+2. **MTP provides 18-24% faster inference** on SGLang — a free speedup
+3. **Inference engine can matter** — nvidia NVFP4 on vLLM (88.53%) scores comparably to lukealonso on SGLang (88.28%), though the difference is not significant
+4. **lukealonso checkpoint outperforms nvidia on SGLang** across all benchmarks
 
 ---
 
 ## Test Environment
 
+### SGLang
+
 | Parameter | Value |
 |:---|:---|
 | **GPU** | 8x NVIDIA RTX PRO 6000 Blackwell Server Edition (98GB each) |
 | **Engine** | SGLang 0.5.9 |
+| **TP** | 8 |
 | **Container** | `voipmonitor/llm-pytorch-blackwell:nightly-cuda132` |
 | **Date** | 2026-03-11 |
 | **Eval framework** | [simple-evals](https://github.com/openai/simple-evals) (ChatCompletionSampler) |
 
-### Server config (common)
+#### Server config (common)
 
 ```
 --tensor-parallel-size 8
@@ -63,7 +76,7 @@ Does MTP (Multi-Token Prediction) speculative decoding affect model accuracy? We
 --schedule-conservativeness 0.1
 ```
 
-### MTP-specific flags (only for MTP ON tests)
+#### MTP-specific flags (SGLang)
 
 ```
 SGLANG_ENABLE_SPEC_V2=True
@@ -73,75 +86,152 @@ SGLANG_ENABLE_SPEC_V2=True
 --speculative-num-draft-tokens 6
 ```
 
-### Known warning in all runs
+### vLLM
+
+| Parameter | Value |
+|:---|:---|
+| **GPU** | 4x NVIDIA RTX PRO 6000 Blackwell Server Edition (98GB each) |
+| **Engine** | vLLM |
+| **TP** | 4 |
+| **Date** | 2026-03-13 |
+| **Eval framework** | [simple-evals](https://github.com/openai/simple-evals) (ChatCompletionSampler) |
+
+#### Server config (MTP ON)
+
+```bash
+VLLM_LOG_STATS_INTERVAL=1 NCCL_P2P_LEVEL=SYS SAFETENSORS_FAST_GPU=1 \
+python3 -m vllm.entrypoints.openai.api_server \
+  --model nvidia/Qwen3.5-397B-A17B-NVFP4 \
+  --host 0.0.0.0 --port 5199 \
+  --served-model-name Qwen3_5-397B-A17B-NVFP4 \
+  --trust-remote-code \
+  --tensor-parallel-size 4 \
+  --gpu-memory-utilization 0.9 \
+  --max-num-batched-tokens 8192 \
+  --max-num-seqs 128 \
+  --enable-auto-tool-choice \
+  --tool-call-parser qwen3_coder \
+  --reasoning-parser qwen3 \
+  --mm-encoder-tp-mode data \
+  --mm-processor-cache-type shm \
+  --speculative-config '{"method":"qwen3_next_mtp","num_speculative_tokens":2}' \
+  --enable-prefix-caching --enable-chunked-prefill
+```
+
+For MTP OFF: same config without `--speculative-config`.
+
+### Eval command
+
+```bash
+python3 -u -m sglang.test.run_eval \
+  --eval-name gpqa \
+  --model <served-model-name> \
+  --base-url http://localhost:<port> \
+  --num-examples 198 \
+  --repeat 1 \
+  --thinking-mode qwen3 \
+  --max-tokens 64000
+```
+
+For 8-repeat tests, each repeat was run sequentially (not parallel) to avoid server overload.
+
+### Known warning (NVFP4 only)
 
 ```
 DeepGemm is enabled but the scale_fmt of checkpoint is not ue8m0.
 This might cause accuracy degradation on Blackwell.
 ```
 
-### GPQA eval config
-
-| Parameter | Value |
-|:---|:---|
-| **Benchmark** | GPQA Diamond (198 questions) |
-| **Repeats** | 8 per configuration |
-| **Parallel workers** | 8 |
-| **Temperature** | 0.0 |
-| **Max tokens** | 64,000 |
-| **Thinking mode** | Enabled (`chat_template_kwargs: {thinking: True}`) |
-
 ---
 
 ## GPQA Diamond Results
 
-### Per-Run Scores
+### SGLang Results
+
+#### Per-Run Scores
 
 | Run | lukealonso MTP | lukealonso No MTP | nvidia MTP | nvidia No MTP |
 |:---:|:---:|:---:|:---:|:---:|
-| 1 | 0.889 | 0.864 | 0.859 | 0.864 |
-| 2 | 0.879 | 0.874 | 0.904 | 0.859 |
-| 3 | 0.869 | 0.894 | 0.859 | 0.869 |
-| 4 | 0.884 | 0.869 | 0.884 | 0.864 |
-| 5 | 0.904 | 0.889 | 0.879 | 0.848 |
-| 6 | 0.884 | 0.864 | 0.859 | 0.864 |
-| 7 | 0.879 | 0.874 | 0.874 | 0.869 |
-| 8 | 0.874 | 0.874 | 0.879 | 0.889 |
+| 1 | 88.9 | 86.4 | 85.9 | 86.4 |
+| 2 | 87.9 | 87.4 | 90.4 | 85.9 |
+| 3 | 86.9 | 89.4 | 85.9 | 86.9 |
+| 4 | 88.4 | 86.9 | 88.4 | 86.4 |
+| 5 | 90.4 | 88.9 | 87.9 | 84.8 |
+| 6 | 88.4 | 86.4 | 85.9 | 86.4 |
+| 7 | 87.9 | 87.4 | 87.4 | 86.9 |
+| 8 | 87.4 | 87.4 | 87.9 | 88.9 |
 
-### Aggregate Statistics
+#### Aggregate Statistics (SGLang)
 
 | Metric | lukealonso MTP | lukealonso No MTP | nvidia MTP | nvidia No MTP |
 |:---|:---:|:---:|:---:|:---:|
-| **Mean** | **0.8826** | **0.8750** | **0.8744** | **0.8655** |
-| Std (across runs) | 0.0106 | 0.0109 | 0.0155 | 0.0117 |
-| Min | 0.869 | 0.864 | 0.859 | 0.848 |
-| Max | 0.904 | 0.894 | 0.904 | 0.889 |
-| Median | 0.8815 | 0.874 | 0.877 | 0.864 |
-| Avg response length (chars) | 2550 | 2512 | 2436 | — |
+| **Mean** | **88.28%** | **87.53%** | **87.46%** | **86.58%** |
+| Std | 1.06 | 1.09 | 1.57 | 1.15 |
+| Min | 86.9 | 86.4 | 85.9 | 84.8 |
+| Max | 90.4 | 89.4 | 90.4 | 88.9 |
 | Wall time | ~1h 29m | ~1h 48m | ~1h 43m | ~2h 15m |
 
-### MTP Impact per Checkpoint
+#### MTP Impact (SGLang)
 
-| Checkpoint | MTP ON | MTP OFF | Delta | Speed Improvement |
-|:---|:---:|:---:|:---:|:---:|
-| lukealonso | 88.26% | 87.50% | +0.76pp (within noise) | ~18% faster |
-| nvidia | 87.44% | 86.55% | +0.89pp (within noise) | ~24% faster |
+| Checkpoint | MTP ON | MTP OFF | Delta | t-stat | p-value |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| lukealonso | 88.28% | 87.53% | +0.75pp | 1.41 | >0.05 (ns) |
+| nvidia | 87.46% | 86.58% | +0.88pp | 1.28 | >0.05 (ns) |
 
-MTP vs no-MTP Welch's t-test (lukealonso): t=1.41, p=0.18 — **not statistically significant** at α=0.05.
+### vLLM Results
 
-Both checkpoints show a small positive delta with MTP, but this is within run-to-run variance. MTP is theoretically lossless: the target model verifies all speculated tokens and rejects incorrect ones, so output should match standard autoregressive decoding.
+#### Per-Run Scores
 
-### Checkpoint Comparison
+| Run | nvidia MTP | nvidia No MTP |
+|:---:|:---:|:---:|
+| 1 | 91.9 | 87.4 |
+| 2 | 87.9 | 86.4 |
+| 3 | 89.4 | 86.9 |
+| 4 | 85.9 | 86.9 |
+| 5 | 86.4 | 85.9 |
+| 6 | 88.4 | 85.9 |
+| 7 | 89.9 | 89.4 |
+| 8 | 88.4 | 86.4 |
 
-| Benchmark | lukealonso | nvidia | Delta |
+#### Aggregate Statistics (vLLM)
+
+| Metric | nvidia MTP | nvidia No MTP |
+|:---|:---:|:---:|
+| **Mean** | **88.53%** | **86.90%** |
+| Std | 1.92 | 1.13 |
+| Min | 85.9 | 85.9 |
+| Max | 91.9 | 89.4 |
+
+#### MTP Impact (vLLM)
+
+| Checkpoint | MTP ON | MTP OFF | Delta | t-stat | p-value |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| nvidia | 88.53% | 86.90% | +1.62pp | 2.06 | >0.05 (ns) |
+
+The +1.62pp delta on vLLM is larger than SGLang's +0.88pp for the same checkpoint, but still not statistically significant (p=0.06, just below the α=0.05 threshold). The wider spread is partly driven by one high outlier (91.9%) in the MTP ON run.
+
+### Cross-Engine Comparison
+
+| Configuration | Engine | GPQA Mean | Std |
+|:---|:---|:---:|:---:|
+| nvidia NVFP4 + MTP | vLLM | **88.53%** | 1.92 |
+| lukealonso NVFP4 + MTP | SGLang | 88.28% | 1.06 |
+| nvidia NVFP4 + MTP | SGLang | 87.46% | 1.57 |
+| nvidia NVFP4, no MTP | vLLM | 86.90% | 1.13 |
+| nvidia NVFP4, no MTP | SGLang | 86.58% | 1.15 |
+| lukealonso NVFP4, no MTP | SGLang | 87.53% | 1.09 |
+
+**Statistical significance (Welch t-test, all pairs):**
+
+| Comparison | Delta | t-stat | Significant? |
 |:---|:---:|:---:|:---:|
-| **GPQA** (MTP, thinking) | **88.26%** | 87.44% | **+0.82pp** |
-| **GPQA** (no MTP, thinking) | **87.50%** | 86.55% | **+0.95pp** |
-| **GSM8K** (thinking) | **99.0%** | 97.5% | **+1.5pp** |
-| **GSM8K** (no thinking, 5-shot) | **44%** | 39% | **+5.0pp** |
-| **Hard Math** (no thinking) | **89.5%** | 84.2% | **+5.3pp** |
+| nvidia vLLM+MTP vs nvidia SGLang+MTP | +1.06pp | 1.21 | No (p>0.05) |
+| nvidia vLLM+MTP vs lukealonso SGLang+MTP | +0.25pp | 0.29 | No (p>0.05) |
+| nvidia vLLM-MTP vs nvidia SGLang-MTP | +0.31pp | 0.61 | No (p>0.05) |
+| nvidia vLLM+MTP vs nvidia vLLM-MTP | +1.62pp | 2.06 | No (p>0.05) |
+| lukealonso SGLang+MTP vs nvidia SGLang+MTP | +0.81pp | 1.21 | No (p>0.05) |
 
-lukealonso wins every benchmark. The gap widens without thinking mode (+5pp on GSM8K, +5.3pp on Hard Math) because chain-of-thought can compensate for quantization errors. This is consistent with lukealonso's lower KLD (0.035 vs 0.109, see [KLD evaluation](kld-evaluation.md)) and community reports of nvidia NVFP4 accuracy issues (vLLM Issue #36094).
+No pair reaches statistical significance. All configurations produce GPQA scores in the 86-89% range, and with 8 repeats the test lacks power to distinguish differences below ~2pp.
 
 ---
 
@@ -149,14 +239,15 @@ lukealonso wins every benchmark. The gap widens without thinking mode (+5pp on G
 
 ### With thinking mode
 
-| Model | Score | Std | Config |
-|:---|:---:|:---:|:---|
-| lukealonso | **99.0%** | 0.099 | 200 examples, max-tokens 16000 |
-| nvidia | 97.5% | 0.156 | 200 examples, max-tokens 16000 |
+| Model | Engine | MTP | Score | Config |
+|:---|:---|:---:|:---:|:---|
+| lukealonso NVFP4 | SGLang | ON | **99.0%** | 200 examples, max-tokens 16000 |
+| nvidia NVFP4 | vLLM | OFF | **98.5%** | 200 examples, max-tokens 16000 |
+| nvidia NVFP4 | SGLang | ON | 97.5% | 200 examples, max-tokens 16000 |
 
-lukealonso not only scores higher but has lower variance (std 0.099 vs 0.156), suggesting more stable outputs.
+nvidia on vLLM without MTP (98.5%) outperforms nvidia on SGLang with MTP (97.5%), again suggesting the inference engine matters.
 
-### Without thinking (5-shot)
+### Without thinking (5-shot, SGLang only)
 
 | Model | Score | Config |
 |:---|:---:|:---|
@@ -169,7 +260,7 @@ Without chain-of-thought reasoning, the quantization quality gap is much more pr
 
 ## Hard Math Test
 
-19 custom math questions, no thinking mode.
+19 custom math questions, no thinking mode. SGLang only (vLLM server crashed before Hard Math could run).
 
 | Q# | Question | lukealonso | nvidia |
 |:---:|:---|:---:|:---:|
@@ -199,28 +290,35 @@ Without chain-of-thought reasoning, the quantization quality gap is much more pr
 
 ## Conclusions
 
-### 1. Enable MTP for production serving
+### 1. MTP does not degrade quality on either engine
 
-MTP provides 18-24% inference speedup with no measurable accuracy degradation. The verification mechanism in speculative decoding guarantees output fidelity.
+Neither SGLang nor vLLM show statistically significant quality loss with MTP enabled. The verification mechanism in speculative decoding guarantees output fidelity. MTP provides 18-24% inference speedup on SGLang — a free speedup.
 
-### 2. Use lukealonso over nvidia checkpoint
+### 2. Inference engine choice can matter as much as quantization
 
-lukealonso/Qwen3.5-397B-A17B-NVFP4 consistently outperforms nvidia/Qwen3.5-397B-A17B-NVFP4 across all benchmarks (+0.8pp to +5.3pp). The advantage is especially pronounced without thinking mode. This aligns with KLD measurements (0.035 vs 0.109) and community reports.
+nvidia NVFP4 on vLLM (88.53%) scores comparably to lukealonso NVFP4 on SGLang (88.28%) on GPQA. nvidia on vLLM GSM8K (98.5%) also outperforms nvidia on SGLang (97.5%). The differences are not statistically significant, but the trend suggests engine-level differences in numerics, scheduling, or attention implementation may influence results.
 
-### 3. Recommended production config
+### 3. lukealonso outperforms nvidia on SGLang
+
+On SGLang, lukealonso/Qwen3.5-397B-A17B-NVFP4 consistently outperforms nvidia/Qwen3.5-397B-A17B-NVFP4 across all benchmarks (+0.8pp to +5.3pp). The advantage is especially pronounced without thinking mode. This aligns with KLD measurements (0.035 vs 0.109, see [KLD evaluation](kld-evaluation.md)) and community reports (vLLM Issue #36094).
+
+### 4. Recommended production config
 
 ```bash
 # Model
 --model lukealonso/Qwen3.5-397B-A17B-NVFP4
 
-# MTP (speculative decoding)
+# MTP (speculative decoding) — SGLang
 SGLANG_ENABLE_SPEC_V2=True
 --speculative-algo NEXTN
 --speculative-num-steps 5
 --speculative-eagle-topk 1
 --speculative-num-draft-tokens 6
 
-# Bug mitigations
+# MTP — vLLM
+--speculative-config '{"method":"qwen3_next_mtp","num_speculative_tokens":2}'
+
+# Bug mitigations (SGLang)
 --disable-shared-experts-fusion
 --disable-custom-all-reduce
 ```
@@ -229,45 +327,56 @@ SGLANG_ENABLE_SPEC_V2=True
 
 ## Raw Data
 
-### GPQA — lukealonso MTP
+### GPQA — lukealonso MTP (SGLang)
 
 ```json
 {
-  "chars": 2549.5454545454545,
-  "chars:std": 510.686619847691,
-  "score:std": 0.3321451120698461,
   "scores": ["0.889", "0.879", "0.869", "0.884", "0.904", "0.884", "0.879", "0.874"],
-  "mean_score": 0.8825757575757577
+  "mean_score": 0.8828
 }
 ```
 
-### GPQA — lukealonso No MTP
+### GPQA — lukealonso No MTP (SGLang)
 
 ```json
 {
-  "chars": 2512.040404040404,
-  "chars:std": 470.0423023987109,
-  "score:std": 0.3321451120698461,
   "scores": ["0.864", "0.874", "0.894", "0.869", "0.889", "0.864", "0.874", "0.874"],
-  "mean_score": 0.875
+  "mean_score": 0.8753
 }
 ```
 
-### GPQA — nvidia MTP
+### GPQA — nvidia MTP (SGLang)
 
 ```json
 {
-  "chars": 2435.686868686869,
-  "chars:std": 526.6866921099777,
-  "score:std": 0.32637362467481845,
   "scores": ["0.859", "0.904", "0.859", "0.884", "0.879", "0.859", "0.874", "0.879"],
-  "mean_score": 0.8743686868686869
+  "mean_score": 0.8746
 }
 ```
 
-### GPQA — nvidia No MTP
+### GPQA — nvidia No MTP (SGLang)
 
+```json
+{
+  "scores": ["0.864", "0.859", "0.869", "0.864", "0.848", "0.864", "0.869", "0.889"],
+  "mean_score": 0.8658
+}
 ```
-Scores: ['0.864', '0.859', '0.869', '0.864', '0.848', '0.864', '0.869', '0.889']
-Mean: 0.8655
+
+### GPQA — nvidia MTP (vLLM)
+
+```json
+{
+  "scores": ["0.919", "0.879", "0.894", "0.859", "0.864", "0.884", "0.899", "0.884"],
+  "mean_score": 0.8853
+}
+```
+
+### GPQA — nvidia No MTP (vLLM)
+
+```json
+{
+  "scores": ["0.874", "0.864", "0.869", "0.869", "0.859", "0.859", "0.894", "0.864"],
+  "mean_score": 0.8690
+}
 ```
