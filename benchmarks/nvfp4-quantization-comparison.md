@@ -94,9 +94,14 @@ All GPQA results are 8-repeat means with thinking mode enabled, 198 examples.
 | **GSM8K** (thinking) | **99.0%** | **99.0%** | 97.5% | 98.5% |
 | **Hard Math** (no thinking) | **89.5%** | **89.5%** | 84.2% | 84.2% |
 | **KL Divergence** (vs FP8) | **0.024** | 0.035 | 0.109 | — |
-| **Throughput ctx=0** (C=128, MTP ON) | **3519** | 3220 | 3232 | — |
-| **Throughput ctx=64k** (C=64, MTP ON) | 1747 | **1905** | **1912** | — |
-| **Throughput ctx=128k** (C=1, MTP ON) | **40** | **122** | **123** | — |
+
+Throughput benchmarks were all run on **vLLM 0.17.0rc1 (TP4)**, not SGLang:
+
+| Benchmark (vLLM TP4) | AWQ | lukealonso NVFP4 | nvidia NVFP4 |
+|-----------------------|-----|-----------------|--------------|
+| **Throughput ctx=0** (C=128, MTP ON) | **3519** | 3220 | 3232 |
+| **Throughput ctx=64k** (C=64, MTP ON) | 1747 | **1905** | **1912** |
+| **Throughput ctx=128k** (C=1, MTP ON) | **40** | **122** | **123** |
 
 **Key findings:**
 - **GPQA with MTP ON:** all four configurations are statistically indistinguishable (Welch t-test p>0.05 for all pairs)
@@ -320,9 +325,12 @@ For full results across all context lengths, see [inference-throughput/](inferen
 | GSM8K | **99.0%** | **99.0%** | 97.5% | 98.5% |
 | Hard Math | **89.5%** | **89.5%** | 84.2% | 84.2% |
 | KL Divergence | **0.024** | 0.035 | 0.109 | — |
-| Throughput ctx=0 (C=128, MTP) | **3519 tok/s** | 3220 tok/s | 3232 tok/s | — |
-| Throughput ctx=64k (C=64, MTP) | 1747 tok/s | **1905 tok/s** | **1912 tok/s** | — |
-| Throughput ctx=128k (C=1, MTP) | **40 tok/s** | **122 tok/s** | **123 tok/s** | — |
+
+| Throughput (vLLM TP4) | AWQ | lukealonso NVFP4 | nvidia NVFP4 |
+|-----------------------|-----|-----------------|--------------|
+| ctx=0 (C=128, MTP) | **3519 tok/s** | 3220 tok/s | 3232 tok/s |
+| ctx=64k (C=64, MTP) | 1747 tok/s | **1905 tok/s** | **1912 tok/s** |
+| ctx=128k (C=1, MTP) | **40 tok/s** | **122 tok/s** | **123 tok/s** |
 
 On GPQA, no pair of configurations is statistically distinguishable (p>0.05 for all). nvidia on vLLM (88.53%) and AWQ on SGLang (88.40%) score highest, but with std 1.0–1.9, 8 repeats cannot resolve differences below ~2pp.
 
