@@ -242,9 +242,25 @@ Without MTP, the two NVFP4 checkpoints have **identical throughput** (within mea
 
 ---
 
-## Legacy: SGLang Results (2026-03-11)
+## vLLM vs SGLang Engine Comparison
 
-Previous measurements on SGLang 0.5.9 (TP4) with MTP ON only. These used a different benchmark method (Prometheus `sglang:gen_throughput` metric) and are not directly comparable to the vLLM results above.
+A full side-by-side throughput benchmark of vLLM vs SGLang (both TP4, same hardware) is available at **[vllm-vs-sglang.md](vllm-vs-sglang.md)**.
+
+Key findings for lukealonso NVFP4 (C=1, tok/s):
+
+| ctx | SGLang MTP | vLLM MTP | Ratio | SGLang no-MTP | vLLM no-MTP | Ratio |
+|-----|-----------|---------|-------|--------------|------------|-------|
+| 0 | 130 | 127 | 1.02x | 74 | 81 | 0.91x |
+| 16k | 79 | 127 | 0.62x | 65 | 80 | 0.82x |
+| 32k | 58 | 127 | 0.45x | 58 | 80 | 0.73x |
+| 64k | 37 | 128 | 0.29x | 48 | 78 | 0.61x |
+| 128k | 29 | 122 | **0.24x** | 35 | 77 | **0.46x** |
+
+**vLLM is dramatically faster at long context** — 4.2x at 128k with MTP, 2.2x without MTP. SGLang also hits KV cache limits much earlier, skipping high-concurrency cells that vLLM handles fine. **Use vLLM for production long-context workloads.**
+
+### Legacy: SGLang Prometheus Results (2026-03-11)
+
+Earlier measurements on SGLang 0.5.9 (TP4) with MTP ON only, using the Prometheus `sglang:gen_throughput` metric (not directly comparable to the `llm_decode_bench.py` results above).
 
 ```
 SGLang MTP ON — Aggregate decode throughput (tok/s), context=0
@@ -255,5 +271,3 @@ Model                                 C=1    C=8    C=16    C=32    C=64
 QuantTrio/Qwen3.5-397B-A17B-AWQ      152    665     976    1516    1662
 lukealonso/Qwen3.5-397B-A17B-NVFP4   132    581     852    1191    1202
 ```
-
-Note: SGLang numbers are lower at high concurrency because `--max-running-requests 64` was used vs 128 for vLLM. The relative ranking (AWQ > NVFP4) is consistent across both engines.

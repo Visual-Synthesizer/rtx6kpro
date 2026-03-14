@@ -310,7 +310,7 @@ All models tested on vLLM 0.17.0rc1, 4x RTX PRO 6000 Blackwell (TP4), with and w
 
 **AWQ is fastest at short context (ctx=0)** but NVFP4 overtakes at long context (64k+) with MTP ON. AWQ has a severe anomaly at 128k/C=128 MTP ON (646 tok/s, queue=81%). The root cause is under investigation — all models share identical vocab_size (248320) and VLM architecture, so the degradation is specific to AWQ INT4 + MTP interaction in vLLM. Without MTP, all models converge at 128k to ~1527 tok/s.
 
-For full results across all context lengths, see [inference-throughput/](inference-throughput/).
+For full results across all context lengths, see [inference-throughput/](inference-throughput/). For vLLM vs SGLang engine comparison, see [inference-throughput/vllm-vs-sglang.md](inference-throughput/vllm-vs-sglang.md).
 
 ---
 
@@ -346,15 +346,19 @@ MTP becomes actively harmful for AWQ at ctx=32k+ (slower than AWQ without MTP). 
 
 lukealonso NVFP4 ties AWQ on GSM8K (99.0%) and Hard Math (89.5%). nvidia is consistently weaker: GSM8K 97.5-98.5%, Hard Math 84.2% (same failures on both engines). nvidia has 3x worse KLD (0.109 vs 0.035), consistent with community reports (vLLM Issue #36094).
 
-### 5. Inference engine does not significantly affect accuracy
+### 5. Use vLLM over SGLang for throughput; accuracy is equivalent on both
 
-nvidia NVFP4 scores similarly on vLLM and SGLang across all benchmarks. Hard Math produces identical results (same questions wrong, same wrong answers). Without MTP, GPQA converges to ~86.6-86.9% on both engines.
+nvidia NVFP4 scores similarly on vLLM and SGLang across all accuracy benchmarks. Hard Math produces identical results (same questions wrong, same wrong answers). Without MTP, GPQA converges to ~86.6-86.9% on both engines.
+
+However, **vLLM is dramatically faster than SGLang at long context.** For lukealonso NVFP4 at C=1 ctx=128k: vLLM MTP delivers 122 tok/s vs SGLang MTP's 29 tok/s (4.2x faster). Even without MTP, vLLM is 2.2x faster (77 vs 35 tok/s). SGLang also hits KV cache limits much earlier. See [vLLM vs SGLang comparison](inference-throughput/vllm-vs-sglang.md) for full data.
 
 ### 6. Enable MTP for production serving — with context-length awareness
 
 MTP provides 40-57% inference speedup with no measurable accuracy degradation on either engine (p>0.05 for all MTP ON vs OFF comparisons). However, **MTP is only universally beneficial for NVFP4.** For AWQ, MTP should be disabled when context exceeds ~16k tokens.
 
 ### 7. Recommended production config
+
+**Preferred engine: vLLM** — 4.2x faster than SGLang at 128k context with MTP, better KV cache scaling.
 
 **For short-context / batch workloads (ctx < 16k):**
 ```bash
