@@ -293,13 +293,19 @@ The two cross-NUMA hops (GPU3→4 and GPU7→0) at ~37 GB/s are the ring bottlen
 
 | Size | Custom (us) | NCCL (us) | Winner |
 |---|---|---|---|
-| 256 B | 5.8 | 13.4 | Custom 2.3x |
-| 4 KB | 6.2 | 13.1 | Custom 2.1x |
-| 32 KB | 9.4 | 13.2 | Custom 1.4x |
-| 64 KB | 12.3 | 13.4 | Custom 1.1x |
-| 128 KB | 17.4 | 15.6 | NCCL 1.1x |
-| 1 MB | 95.3 | 58.5 | NCCL 1.6x |
-| 32 MB | 2883 | 1277 | NCCL 2.3x |
+| 256 B | 6.2 | 20.4 | Custom 3.3x |
+| 4 KB | 6.2 | 14.1 | Custom 2.3x |
+| 16 KB | 8.2 | 15.0 | Custom 1.8x |
+| 32 KB | 9.6 | 15.4 | Custom 1.6x |
+| 64 KB | 12.3 | 16.8 | Custom 1.4x |
+| 128 KB | 17.4 | 24.6 | Custom 1.4x |
+| 256 KB | 28.8 | 40.7 | Custom 1.4x |
+| 512 KB | 50.9 | 72.0 | Custom 1.4x |
+| 1 MB | 95.3 | 86.3 | NCCL 1.1x |
+| 4 MB | 362.7 | 234.0 | NCCL 1.5x |
+| 32 MB | 2882 | 1629 | NCCL 1.8x |
+
+Custom allreduce wins up to **512 KB** on this topology — significantly further than on other systems where NCCL takes over around 64 KB.
 
 ### AllReduce: Custom vs NCCL (8 GPU, fp16)
 
