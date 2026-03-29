@@ -24,7 +24,7 @@ Standard benchmarks (MMLU, HumanEval, etc.) are noisy and coarse. KL divergence 
 
 ## Results
 
-All measurements taken on 8x RTX PRO 6000 Blackwell Server Edition, SGLang with `--attention-backend triton`, same container and reference for all models.
+All measurements taken on 8x RTX PRO 6000 Blackwell Server Edition, SGLang with `--attention-backend triton`, same container and reference for all models. Log-probabilities stored in float32 (computed on CPU), MTP speculative-head logits excluded via call-stack filtering.
 
 ```
 KLD Evaluation Results (ref: Qwen3.5-397B-A17B-FP8, dataset: wikitext-2, 204,800 positions)
@@ -32,15 +32,30 @@ KLD Evaluation Results (ref: Qwen3.5-397B-A17B-FP8, dataset: wikitext-2, 204,800
 
 Model                                      Mean KLD   Median KLD    P95 KLD    P99 KLD    Max KLD
 ------------------------------------------------------------------------------------------------
-QuantTrio/Qwen3.5-397B-A17B-AWQ (INT4)    0.024042     0.004788   0.097537   0.346614     3.7282
-lukealonso/Qwen3.5-397B-A17B-NVFP4        0.035269     0.006830   0.146239   0.529040     4.5687
+QuantTrio/Qwen3.5-397B-A17B-AWQ (INT4)    0.024057     0.004778   0.097600   0.349900     4.3300
+lukealonso/Qwen3.5-397B-A17B-NVFP4        0.035637     0.006939   0.147900   0.534100     4.4300
 nvidia/Qwen3.5-397B-A17B-NVFP4            0.108526     0.027302   0.467703   1.411015    19.6018
 ```
+
+### MoE Backend Comparison (lukealonso/NVFP4)
+
+Different MoE/FP4 backends produce equivalent KLD — the MoE kernel choice does not affect quality:
+
+```
+Model                                      Mean KLD   Median KLD    P95 KLD    P99 KLD    Max KLD
+------------------------------------------------------------------------------------------------
+flashinfer_cutlass (fp4 + moe)             0.035637     0.006939   0.147900   0.534100     4.4300
+cutedsl + cudnn (moe cutedsl, fp4 cudnn)   0.036000     0.006900   0.148700   0.538100     4.4300
+cutlass MoE                                0.036000     0.006900   0.148800   0.538100     4.4300
+b12x (fp4 + moe)                           0.510000     0.167000   2.834000   5.884000    18.0200
+```
+
+> **b12x is 14x worse** than all other backends. The b12x backend has a fundamental quality issue unrelated to the quantization checkpoint.
 
 ### Ranking
 
 1. **QuantTrio/AWQ-INT4** — best quality across all metrics. Mean KLD 0.024 (near-lossless).
-2. **lukealonso/NVFP4** — 1.5x worse than AWQ but still good. Mean KLD 0.035.
+2. **lukealonso/NVFP4** — 1.5x worse than AWQ but still good. Mean KLD 0.036.
 3. **nvidia/NVFP4** — 4.5x worse than AWQ, 3x worse than lukealonso. Mean KLD 0.109, with a heavy tail (Max KLD 19.6).
 
 ### Why AWQ beats NVFP4 in quality
@@ -120,10 +135,10 @@ Phase 1: FP8 Reference (TP8)          Phase 2: Test Model (TP4)
 
 ### Storage requirements
 
-- Per window: 2048 x 152,064 x 2 bytes = **594 MB** (text-only models)
-- Per window: 2048 x 248,320 x 2 bytes = **970 MB** (VLM models like AWQ)
-- 100 windows = **~58-95 GB** per model
-- Runtime: ~60-80s per phase (100 windows), KLD compute takes seconds
+- Per window: 2048 x 152,064 x 4 bytes = **1,188 MB** (text-only models, float32)
+- Per window: 2048 x 248,320 x 4 bytes = **1,940 MB** (VLM models like AWQ, float32)
+- 100 windows = **~116-190 GB** per model
+- Runtime: ~130-250s per phase (100 windows), KLD compute takes seconds
 
 ### What the patch does
 
@@ -138,15 +153,17 @@ logprobs_result = self.process_input_logprobs(input_logits, logits_metadata)
 # AFTER:
 input_logits = logits[input_logprob_indices]
 del logits
-_kld_maybe_save(input_logits)  # saves full [N, vocab_size] log-softmax
+_kld_maybe_save(input_logits, logits_metadata)  # saves full [N, vocab_size] log-softmax
 logprobs_result = self.process_input_logprobs(input_logits, logits_metadata)
 ```
 
 The hook:
 - Is a no-op unless `SGLANG_KLD_SAVE_DIR` env var is set
+- **Skips MTP/NextN speculative-head calls** by inspecting the call stack for MTP model files (`*mtp*.py`, `*nextn*.py`) — without this, MTP models save 2x files per window, contaminating KLD by ~18%
+- **Skips `DRAFT_EXTEND` forward mode** (post-decode MTP speculative passes)
 - Only saves from TP rank 0 (avoids duplicate writes across tensor-parallel workers)
 - Trims TP padding columns to actual `vocab_size` (controlled by `SGLANG_KLD_VOCAB_SIZE`, default 152064)
-- Computes `log_softmax` in float32 for numerical stability, saves as float16 safetensors
+- Computes `log_softmax` in float32 on CPU (avoids GPU OOM), saves as float32 safetensors
 
 ---
 
@@ -388,20 +405,10 @@ Some checkpoints use VLM format (`Qwen3_5MoeForConditionalGeneration`) with `voc
 
 **Impact on KLD capture:**
 - Set `SGLANG_KLD_VOCAB_SIZE=248320` when running the server
-- VLM models may save **2 files per request** (the logits processor fires twice per forward pass). The compute phase handles this automatically, but if you see twice as many files as expected, only the even-numbered files (0, 2, 4, ...) correspond to the actual sliding windows.
 
 **Impact on KLD compute:**
 - The compute script automatically detects vocab size mismatch and truncates both distributions to the common 152,064 text tokens, then re-normalizes via `logsumexp`. This is mathematically equivalent to computing log-softmax over text tokens only.
 - Visual tokens (indices 152064-248319) are irrelevant for text-only benchmarks like WikiText.
-
-**If you get 2x files from a VLM model**, create aligned symlinks before computing:
-```bash
-mkdir -p /tmp/kld/test_awq_aligned
-for i in $(seq 0 99); do
-  ln -sf "/tmp/kld/test_awq/$((i*2)).safetensors" "/tmp/kld/test_awq_aligned/${i}.safetensors"
-done
-# Then use test_awq_aligned as the test dir
-```
 
 ### AWQ + FusedMoE modules_to_not_convert
 
@@ -425,9 +432,11 @@ With tensor parallelism, SGLang pads the vocabulary dimension to a multiple of T
 
 The patch only hooks the non-chunked logits path. Set `SGLANG_ENABLE_LOGITS_PROCESSER_CHUNK=0` to ensure this path is used. With 2048-token windows this is fine -- chunking is only needed for very large prefills.
 
-### Speculative decoding
+### Speculative decoding (MTP)
 
-Do not enable speculative decoding (`--speculative-*` flags) during KLD evaluation. Speculative decoding uses a different logit computation path and the capture hook may save incorrect or extra logits.
+MTP speculative decoding (`--speculative-algo NEXTN`) is now safe to use during KLD evaluation. The patch automatically detects and skips MTP head forward passes by inspecting the call stack for MTP model files (`*mtp*.py`, `*nextn*.py`) and checking for `DRAFT_EXTEND` forward mode.
+
+**Previous bug (fixed 2026-03-29):** Before this fix, MTP models saved 2 files per window (one from the main head, one from the MTP speculative head). The MTP head has higher entropy and a different distribution, which inflated mean KLD by ~18%. If you have old logit captures with 200 files for 100 windows, only the even-numbered files (0, 2, 4, ...) contain main-head logits.
 
 ### NaN logits in quantized models
 

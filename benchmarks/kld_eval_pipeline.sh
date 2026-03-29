@@ -119,7 +119,9 @@ generate_logits() {
     log "Generated ${file_count} logit files"
 }
 
-# Handle VLM models that save 2 files per request
+# Legacy: VLM 2x file alignment is no longer needed.
+# The KLD patch now auto-detects and skips MTP speculative-head calls.
+# Kept for backwards compatibility with old logit captures.
 align_vlm_files() {
     local src_dir="$1"
     local dst_dir="$2"
@@ -129,7 +131,7 @@ align_vlm_files() {
     actual_count=$(ls "${src_dir}"/*.safetensors 2>/dev/null | wc -l)
 
     if [ "$actual_count" -eq "$((expected_count * 2))" ]; then
-        log "VLM model detected (${actual_count} files for ${expected_count} windows) -- creating aligned symlinks"
+        log "Legacy 2x files detected (${actual_count} files for ${expected_count} windows) -- creating aligned symlinks"
         mkdir -p "$dst_dir"
         for i in $(seq 0 $((expected_count - 1))); do
             ln -sf "${src_dir}/$((i * 2)).safetensors" "${dst_dir}/${i}.safetensors"
