@@ -300,7 +300,7 @@ nvidia NVFP4 on vLLM (88.53%) scores comparably to lukealonso NVFP4 on SGLang (8
 
 ### 3. lukealonso outperforms nvidia on SGLang
 
-On SGLang, lukealonso/Qwen3.5-397B-A17B-NVFP4 consistently outperforms nvidia/Qwen3.5-397B-A17B-NVFP4 across all benchmarks (+0.8pp to +5.3pp). The advantage is especially pronounced without thinking mode. This aligns with KLD measurements (0.036 vs 0.109, see [KLD evaluation](kld-evaluation.md)) and community reports (vLLM Issue #36094).
+On SGLang, lukealonso/Qwen3.5-397B-A17B-NVFP4 consistently outperforms nvidia/Qwen3.5-397B-A17B-NVFP4 across all benchmarks (+0.8pp to +5.3pp). The advantage is especially pronounced without thinking mode. This aligns with KLD measurements (see [KLD evaluation](kld-evaluation.md)) and community reports (vLLM Issue #36094).
 
 ### 4. Recommended production config
 

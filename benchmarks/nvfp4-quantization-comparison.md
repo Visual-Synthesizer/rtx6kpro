@@ -93,7 +93,7 @@ All GPQA results are 8-repeat means with thinking mode enabled, 198 examples.
 | **GPQA MTP OFF** | — | 87.53% ±1.09 | 86.58% ±1.15 | 86.90% ±1.13 |
 | **GSM8K** (thinking) | **99.0%** | **99.0%** | 97.5% | 98.5% |
 | **Hard Math** (no thinking) | **89.5%** | **89.5%** | 84.2% | 84.2% |
-| **KL Divergence** (vs FP8) | **0.024** | 0.036 | 0.109 | — |
+| **KL Divergence** (vs FP8) | **0.024** | 0.036 | 0.035 | — |
 
 Throughput benchmarks were all run on **vLLM 0.17.0rc1 (TP4)**, not SGLang:
 
@@ -107,7 +107,7 @@ Throughput benchmarks were all run on **vLLM 0.17.0rc1 (TP4)**, not SGLang:
 - **GPQA with MTP ON:** all four configurations are statistically indistinguishable (Welch t-test p>0.05 for all pairs)
 - **GPQA MTP OFF:** both engines converge to ~86.6-86.9% for nvidia, confirming MTP ON does not hurt accuracy
 - **GSM8K/Hard Math:** AWQ and lukealonso tie; nvidia is weaker (97.5% / 84.2%), same results on both engines
-- **KLD:** AWQ clearly best (0.024), lukealonso good (0.036), nvidia poor (0.109)
+- **KLD:** AWQ best (0.024), nvidia and lukealonso equivalent (~0.035)
 - **Throughput (vLLM):** AWQ fastest at short context (3519 tok/s ctx=0), but NVFP4 is 9% faster at long context (1912 vs 1747 at ctx=64k/C=64 MTP ON). AWQ collapses at 128k/C=128 MTP ON (646 tok/s vs NVFP4's 2157)
 - **AWQ MTP long-context trap:** At C=1, AWQ MTP drops to 40 tok/s at 128k — 3.1x slower than NVFP4 MTP (122). MTP becomes *harmful* for AWQ at ctx=32k+ (slower than AWQ without MTP)
 
@@ -127,15 +127,14 @@ KLD Evaluation Results (ref: Qwen3.5-397B-A17B-FP8, float32 log-probs, MTP heads
 Model                                      Mean KLD   Median KLD    P95 KLD    P99 KLD    Max KLD
 ------------------------------------------------------------------------------------------------
 QuantTrio/Qwen3.5-397B-A17B-AWQ (INT4)    0.024057     0.004778   0.097600   0.349900     4.3300
+nvidia/Qwen3.5-397B-A17B-NVFP4            0.035313     0.006843   0.146500   0.531800     5.1100
 lukealonso/Qwen3.5-397B-A17B-NVFP4        0.035637     0.006939   0.147900   0.534100     4.4300
-nvidia/Qwen3.5-397B-A17B-NVFP4            0.108526     0.027302   0.467703   1.411015    19.6018
 ```
 
 ### KLD Ranking
 
 1. **QuantTrio/AWQ** — best quality. Mean KLD 0.024 (near-lossless).
-2. **lukealonso/NVFP4** — 1.5x worse than AWQ but still good. Mean KLD 0.036.
-3. **nvidia/NVFP4** — 4.5x worse than AWQ, 3x worse than lukealonso. Mean KLD 0.109, with heavy tail (Max KLD 19.6).
+2. **nvidia/NVFP4** and **lukealonso/NVFP4** — equivalent quality. Mean KLD ~0.035, 1.5x worse than AWQ.
 
 | Mean KLD | Quantization quality |
 |----------|---------------------|
@@ -144,7 +143,7 @@ nvidia/Qwen3.5-397B-A17B-NVFP4            0.108526     0.027302   0.467703   1.4
 | 0.05 - 0.1 | Noticeable quality loss |
 | > 0.1 | Significant quality loss |
 
-nvidia NVFP4 falls into "significant quality loss" territory (0.109), while both AWQ and lukealonso are in the "good" range.
+Both NVFP4 checkpoints fall into the "good" range (~0.035), comparable to each other. AWQ is the best (0.024).
 
 For full KLD methodology, reproduction steps, and automation script, see [kld-evaluation.md](kld-evaluation.md).
 
@@ -324,7 +323,7 @@ For full results across all context lengths, see [inference-throughput/](inferen
 | GPQA MTP OFF | — | 87.53% ±1.09 | 86.58% ±1.15 | 86.90% ±1.13 |
 | GSM8K | **99.0%** | **99.0%** | 97.5% | 98.5% |
 | Hard Math | **89.5%** | **89.5%** | 84.2% | 84.2% |
-| KL Divergence | **0.024** | 0.035 | 0.109 | — |
+| KL Divergence | **0.024** | 0.036 | 0.035 | — |
 
 | Throughput (vLLM TP4) | AWQ | lukealonso NVFP4 | nvidia NVFP4 |
 |-----------------------|-----|-----------------|--------------|
@@ -336,15 +335,17 @@ On GPQA, no pair of configurations is statistically distinguishable (p>0.05 for 
 
 ### 2. AWQ wins on KLD and short-context throughput, NVFP4 wins long-context
 
-AWQ has the lowest KL divergence from FP8 (0.024 vs 0.036 vs 0.109) and is fastest at short context (3519 vs 3220 tok/s at ctx=0/C=128). But at long context (64k+) with MTP, NVFP4 dominates — at C=1, NVFP4 MTP delivers 122 tok/s at 128k vs AWQ MTP's 40 tok/s (3.1x faster). AWQ collapses at 128k/C=128 MTP (646 tok/s).
+AWQ has the lowest KL divergence from FP8 (0.024 vs ~0.035 for both NVFP4 checkpoints) and is fastest at short context (3519 vs 3220 tok/s at ctx=0/C=128). But at long context (64k+) with MTP, NVFP4 dominates — at C=1, NVFP4 MTP delivers 122 tok/s at 128k vs AWQ MTP's 40 tok/s (3.1x faster). AWQ collapses at 128k/C=128 MTP (646 tok/s).
 
 ### 3. AWQ MTP is unsuitable for long-context agentic workloads
 
 MTP becomes actively harmful for AWQ at ctx=32k+ (slower than AWQ without MTP). For agentic workloads — tool-calling, RAG, multi-turn with growing context — AWQ MTP will degrade to 40 tok/s at 128k, making it unsuitable. Use NVFP4 (lukealonso) + MTP for these workloads (stable 122 tok/s at 128k). If AWQ is required for quality, disable MTP for long-context requests.
 
-### 4. If NVFP4 is required, use lukealonso over nvidia
+### 4. Both NVFP4 checkpoints have equivalent KLD quality
 
-lukealonso NVFP4 ties AWQ on GSM8K (99.0%) and Hard Math (89.5%). nvidia is consistently weaker: GSM8K 97.5-98.5%, Hard Math 84.2% (same failures on both engines). nvidia has 3x worse KLD (0.109 vs 0.035), consistent with community reports (vLLM Issue #36094).
+nvidia and lukealonso NVFP4 now produce equivalent KLD (~0.035) on the current stack. lukealonso ties AWQ on GSM8K (99.0%) and Hard Math (89.5%). nvidia scores slightly lower on GSM8K (97.5-98.5%) and Hard Math (84.2%), but these differences may be engine-dependent rather than checkpoint-dependent.
+
+> **Note:** nvidia KLD was previously reported as 0.109 — this was measured on an older SGLang/torch setup. Remeasured on torch 2.12 + CUDA 13.2, nvidia and lukealonso are equivalent.
 
 ### 5. Use vLLM over SGLang for throughput; accuracy is equivalent on both
 

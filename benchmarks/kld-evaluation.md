@@ -33,8 +33,8 @@ KLD Evaluation Results (ref: Qwen3.5-397B-A17B-FP8, dataset: wikitext-2, 204,800
 Model                                      Mean KLD   Median KLD    P95 KLD    P99 KLD    Max KLD
 ------------------------------------------------------------------------------------------------
 QuantTrio/Qwen3.5-397B-A17B-AWQ (INT4)    0.024057     0.004778   0.097600   0.349900     4.3300
+nvidia/Qwen3.5-397B-A17B-NVFP4            0.035313     0.006843   0.146500   0.531800     5.1100
 lukealonso/Qwen3.5-397B-A17B-NVFP4        0.035637     0.006939   0.147900   0.534100     4.4300
-nvidia/Qwen3.5-397B-A17B-NVFP4            0.108526     0.027302   0.467703   1.411015    19.6018
 ```
 
 ### MoE Backend Comparison (lukealonso/NVFP4)
@@ -51,9 +51,11 @@ cutlass MoE                                0.036000     0.006900   0.148800   0.
 
 ### Ranking
 
-1. **QuantTrio/AWQ-INT4** — best quality across all metrics. Mean KLD 0.024 (near-lossless).
-2. **lukealonso/NVFP4** — 1.5x worse than AWQ but still good. Mean KLD 0.036.
-3. **nvidia/NVFP4** — 4.5x worse than AWQ, 3x worse than lukealonso. Mean KLD 0.109, with a heavy tail (Max KLD 19.6).
+1. **QuantTrio/AWQ-INT4** — best quality. Mean KLD 0.024 (near-lossless).
+2. **nvidia/NVFP4** — 1.5x worse than AWQ, very close to lukealonso. Mean KLD 0.035.
+3. **lukealonso/NVFP4** — practically identical to nvidia. Mean KLD 0.036.
+
+> **Note (2026-03-29):** nvidia/NVFP4 KLD was previously reported as 0.109. This was measured on an older SGLang/torch setup with a different FP8 reference. Remeasured on the current stack (torch 2.12, CUDA 13.2, SGLang main), nvidia and lukealonso NVFP4 are now equivalent.
 
 ### Why AWQ beats NVFP4 in quality
 
