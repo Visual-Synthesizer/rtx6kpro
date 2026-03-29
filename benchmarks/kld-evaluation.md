@@ -55,7 +55,7 @@ cutlass MoE                                0.036000     0.006900   0.148800   0.
 2. **nvidia/NVFP4** — 1.5x worse than AWQ, very close to lukealonso. Mean KLD 0.035.
 3. **lukealonso/NVFP4** — practically identical to nvidia. Mean KLD 0.036.
 
-> **Note (2026-03-29):** nvidia/NVFP4 KLD was previously reported as 0.109. This was measured on an older SGLang/torch setup with a different FP8 reference. Remeasured on the current stack (torch 2.12, CUDA 13.2, SGLang main), nvidia and lukealonso NVFP4 are now equivalent.
+> **Note (2026-03-29):** nvidia/NVFP4 KLD was previously reported as 0.109. nvidia fixed the checkpoint by keeping the shared expert layer in BF16 instead of quantizing it to NVFP4. Remeasured on the current stack (torch 2.12, CUDA 13.2, SGLang main), nvidia and lukealonso NVFP4 are now equivalent.
 
 ### Why AWQ beats NVFP4 in quality
 
@@ -170,7 +170,7 @@ The hook:
 
 ### Prerequisites
 
-- Docker image: `voipmonitor/llm-pytorch-blackwell:nightly` or `voipmonitor/llm-pytorch-blackwell:nightly-cuda132`
+- Docker image: `voipmonitor/sglang:test-cu132`
 - 8x GPUs for FP8 reference (TP8), 4x GPUs for quantized test models (TP4)
 - ~120 GB free disk space per model pair
 - Files from this repo:
@@ -185,9 +185,9 @@ docker run --rm -it \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -p 5000:5000 \
   -v /root/.cache/huggingface:/root/.cache/huggingface \
-  -v vllm-nightly-jit:/cache/jit \
+  -v jit-cache:/cache/jit \
   -v /tmp/kld:/tmp/kld \
-  voipmonitor/llm-pytorch-blackwell:nightly \
+  voipmonitor/sglang:test-cu132 \
   bash
 ```
 
@@ -200,7 +200,7 @@ pip install datasets  # needed for wikitext loading
 python /workspace/sglang-kld-logit-capture.py
 ```
 
-> If the image already has the patch baked in (nightly images do), this step is a no-op.
+> If the image already has the patch baked in (`voipmonitor/sglang:test-cu132` does), this step is a no-op.
 
 ### Step 3: Run FP8 reference server
 

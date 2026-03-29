@@ -6,7 +6,7 @@
 
 - **GPUs:** 8x NVIDIA RTX PRO 6000 Blackwell Server Edition (98GB each)
 - **Engines:** SGLang 0.5.9 (TP8), vLLM (TP4)
-- **Container:** voipmonitor/llm-pytorch-blackwell:nightly-cuda132
+- **Container:** voipmonitor/sglang:test-cu132
 - **Date:** 2026-03-11 to 2026-03-14
 
 ### Models Tested
@@ -345,7 +345,7 @@ MTP becomes actively harmful for AWQ at ctx=32k+ (slower than AWQ without MTP). 
 
 nvidia and lukealonso NVFP4 now produce equivalent KLD (~0.035) on the current stack. lukealonso ties AWQ on GSM8K (99.0%) and Hard Math (89.5%). nvidia scores slightly lower on GSM8K (97.5-98.5%) and Hard Math (84.2%), but these differences may be engine-dependent rather than checkpoint-dependent.
 
-> **Note:** nvidia KLD was previously reported as 0.109 — this was measured on an older SGLang/torch setup. Remeasured on torch 2.12 + CUDA 13.2, nvidia and lukealonso are equivalent.
+> **Note:** nvidia KLD was previously reported as 0.109. nvidia fixed the checkpoint by keeping the shared expert layer in BF16 instead of quantizing it to NVFP4. Remeasured on torch 2.12 + CUDA 13.2, nvidia and lukealonso are equivalent.
 
 ### 5. Use vLLM over SGLang for throughput; accuracy is equivalent on both
 
