@@ -104,7 +104,7 @@ docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_test_luke \
   --model lukealonso/Qwen3.5-397B-A17B-NVFP4 --served-model-name Qwen3.5 \
   --tensor-parallel-size 4 --trust-remote-code \
   --quantization modelopt_fp4 \
-  --kv-cache-dtype fp8_e4m3 \
+  --kv-cache-dtype bfloat16 \
   --moe-runner-backend flashinfer_cutlass \
   --fp4-gemm-backend flashinfer_cutlass \
   --attention-backend triton \
@@ -128,7 +128,7 @@ docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_test_awq \
   NCCL_P2P_LEVEL=SYS python3 -m sglang.launch_server \
   --model QuantTrio/Qwen3.5-397B-A17B-AWQ --served-model-name Qwen3.5 \
   --tensor-parallel-size 4 --trust-remote-code \
-  --kv-cache-dtype fp8_e4m3 \
+  --kv-cache-dtype bfloat16 \
   --attention-backend triton \
   --mem-fraction-static 0.90 \
   --disable-custom-all-reduce \
