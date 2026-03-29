@@ -76,6 +76,7 @@ docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_ref \
   --mem-fraction-static 0.85 \
   --disable-custom-all-reduce \
   --attention-backend triton \
+  --mamba-scheduler-strategy extra_buffer \
   --host 0.0.0.0 --port 5000 \
   2>&1 | tee /tmp/kld_server.log'
 
@@ -99,7 +100,7 @@ docker exec <container> mkdir -p /mnt/kld_test_luke
 docker exec <container> rm -f /mnt/kld_test_luke/*.safetensors
 
 docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_test_luke \
-  NCCL_P2P_LEVEL=SYS SGLANG_ENABLE_SPEC_V2=True python3 -m sglang.launch_server \
+  NCCL_P2P_LEVEL=SYS python3 -m sglang.launch_server \
   --model lukealonso/Qwen3.5-397B-A17B-NVFP4 --served-model-name Qwen3.5 \
   --tensor-parallel-size 4 --trust-remote-code \
   --quantization modelopt_fp4 \
@@ -110,7 +111,6 @@ docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_test_luke \
   --mem-fraction-static 0.90 \
   --disable-custom-all-reduce \
   --chunked-prefill-size 4096 \
-  --speculative-algo NEXTN --speculative-num-steps 5 --speculative-eagle-topk 1 --speculative-num-draft-tokens 6 \
   --mamba-scheduler-strategy extra_buffer \
   --cuda-graph-max-bs 64 --max-running-requests 64 \
   --host 0.0.0.0 --port 5000 \
@@ -125,7 +125,7 @@ Same as above but `--model nvidia/Qwen3.5-397B-A17B-NVFP4`.
 
 ```bash
 docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_test_awq \
-  NCCL_P2P_LEVEL=SYS SGLANG_ENABLE_SPEC_V2=True python3 -m sglang.launch_server \
+  NCCL_P2P_LEVEL=SYS python3 -m sglang.launch_server \
   --model QuantTrio/Qwen3.5-397B-A17B-AWQ --served-model-name Qwen3.5 \
   --tensor-parallel-size 4 --trust-remote-code \
   --kv-cache-dtype fp8_e4m3 \
@@ -133,7 +133,6 @@ docker exec -d <container> bash -c 'SGLANG_KLD_SAVE_DIR=/mnt/kld_test_awq \
   --mem-fraction-static 0.90 \
   --disable-custom-all-reduce \
   --chunked-prefill-size 4096 \
-  --speculative-algo NEXTN --speculative-num-steps 5 --speculative-eagle-topk 1 --speculative-num-draft-tokens 6 \
   --mamba-scheduler-strategy extra_buffer \
   --cuda-graph-max-bs 64 --max-running-requests 64 \
   --host 0.0.0.0 --port 5000 \
@@ -180,7 +179,8 @@ docker exec <container> bash -c 'CUDA_VISIBLE_DEVICES=4 python3 /workspace/sglan
 - Or use `nvidia-smi --query-compute-apps=pid --format=csv,noheader` to find GPU processes.
 
 ### MTP and KLD
-- MTP speculative decoding is safe during KLD — the patch auto-filters MTP head logits.
+- Do NOT enable MTP speculative decoding (`--speculative-algo NEXTN`) during KLD evaluation — it is unnecessary for logit capture and adds complexity.
+- If MTP is accidentally enabled, the patch auto-filters MTP head logits, but file numbering may be off by 1.
 - Verify correct file count: should be exactly `num-windows` (default 100), NOT 200.
 
 ### Reference Compatibility
