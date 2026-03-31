@@ -265,10 +265,8 @@ For high-concurrency serving (4+ users), switch MoE backend:
 ```
 --fp4-gemm-backend cutlass --moe-runner-backend cutlass
 ```
-Or for best high-concurrency throughput:
-```
---fp4-gemm-backend flashinfer_cutedsl --moe-runner-backend flashinfer_cutedsl
-```
+
+> **Note:** In TP-only mode (no expert parallel), `flashinfer_cutedsl` and `cutlass` both dispatch to the same `cutlass_moe_fp4()` code path. The cutedsl-specific kernel (`grouped_gemm_nt_masked`) is only used in EP/masked mode. Use `cutlass` for clarity.
 
 ### Launch parameter reference
 
@@ -327,9 +325,11 @@ MTP roughly **doubles throughput** over the non-MTP baseline:
 | Backend | Best for | Notes |
 |---|---|---|
 | `b12x` | conc 1-2 (single user) | Fused kernel, lowest latency. 95 tok/s at conc=1 with MTP. |
-| `cutlass` | conc 4-32 | Better batching efficiency. 962 tok/s at conc=32 with MTP. |
-| `flashinfer_cutedsl` | conc 32-64 | Best high-concurrency. **1425 tok/s** at conc=64 with MTP. |
+| `cutlass` | conc 4+ | Better batching efficiency. 962 tok/s at conc=32 with MTP. |
+| `flashinfer_cutlass` | conc 4+ | FlashInfer's fused C++ kernel. Single call, auto tile tuning. |
 | `deep_gemm` | -- | Falls back to cutlass (not supported on SM120) |
+
+> **Note:** `flashinfer_cutedsl` and `cutlass` use the same `cutlass_moe_fp4()` code path in TP-only mode. The cutedsl masked kernel is only used with expert parallel.
 
 ---
 
@@ -405,7 +405,7 @@ ctx\conc     1      2      4      8     16     32    64   128
  128k     67.6   skip   skip   skip   skip   skip     -    -
 ```
 
-**flashinfer_cutedsl** (`--moe-runner-backend flashinfer_cutedsl`):
+**cutlass run 2** (`--moe-runner-backend flashinfer_cutedsl` — same `cutlass_moe_fp4()` code path in TP-only):
 
 ```
 ctx\conc     1      2      4      8     16     32      64   128
@@ -415,6 +415,8 @@ ctx\conc     1      2      4      8     16     32      64   128
   64k     66.3  112.6   skip   skip   skip   skip    skip    -
  128k     54.8   skip   skip   skip   skip   skip    skip    -
 ```
+
+> Both "cutlass" and "cutedsl" benchmarks above execute the same kernel (`cutlass_moe_fp4`). Minor differences are from different input scale computation and run-to-run variance.
 
 ### Decode throughput — MTP OFF, 8x RTX PRO 6000, TP=8
 
@@ -445,9 +447,9 @@ ctx\conc     1      2      4      8     16     32      64   128
 | Concurrency | MTP OFF | MTP ON |
 |-------------|---------|--------|
 | 1-2 users | b12x (52-100 tok/s) | **b12x (95-173 tok/s)** |
-| 4-8 users | b12x (180-302) | cutedsl (244-392) |
-| 16-32 users | cutlass (427-660) | cutedsl (590-995) |
-| 64 users | cutlass (1011) | **cutedsl (1425)** |
+| 4-8 users | b12x (180-302) | cutlass (244-392) |
+| 16-32 users | cutlass (427-660) | cutlass (590-995) |
+| 64 users | cutlass (1011) | cutlass (1425) |
 
 MTP doubles single-user throughput: 51→95 tok/s (+84%).
 
