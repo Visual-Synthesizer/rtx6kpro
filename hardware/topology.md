@@ -285,6 +285,20 @@ ACS must be disabled on **both** root ports and switch downstream ports. See the
 
 > **Note:** The kernel parameter `pcie_acs_override=downstream,multifunction` requires a patched kernel and does NOT work on stock Ubuntu kernels. Use `setpci` at runtime instead.
 
+### nvidia ForceP2P — Critical for Direct-Attach (Non-Switch) Topologies
+
+On direct-attach topologies (NODE — GPUs connected through CPU root ports without a PCIe switch), the nvidia driver defaults to **SysMem staging** for GPU-to-GPU memory accesses from CUDA kernels. This makes the [PCIe oneshot allreduce](../optimization/pcie-oneshot-allreduce.md) ~15× slower than expected.
+
+This only affects custom CUDA kernels that do direct SM loads from remote GPU memory via IPC handles. NCCL is not affected (it uses its own SHM transport).
+
+**Fix:** Create `/etc/modprobe.d/nvidia-p2p-override.conf`:
+
+```
+options nvidia NVreg_RegistryDwords="ForceP2P=0x11;RMForceP2PType=1;RMPcieP2PType=2;GrdmaPciTopoCheckOverride=1;EnableResizableBar=1"
+```
+
+Then reload the nvidia module or reboot. See [PCIe Oneshot AllReduce — Critical Prerequisite](../optimization/pcie-oneshot-allreduce.md#critical-prerequisite-nvidia-p2p-driver-config) for details.
+
 ### Key Takeaway
 
 For pure inference (no KV cache offload, no training), **PCIe switches on a single CPU** provide the lowest latency. For workloads that need system RAM bandwidth (KV cache offload, training), **dual Turin direct-attach** is superior. Genoa dual-CPU setups should strongly consider adding switches to compensate for slower xGMI.

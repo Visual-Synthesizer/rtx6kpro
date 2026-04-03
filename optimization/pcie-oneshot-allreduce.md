@@ -146,6 +146,78 @@ The auto-crossover benchmark runs at server startup and determines the message s
 
 ---
 
+## Critical Prerequisite: nvidia P2P Driver Config
+
+On **direct-attach topologies** (NODE — GPUs connected through CPU root ports, no PCIe switch), the nvidia driver defaults to **SysMem staging** for GPU-to-GPU memory accesses from CUDA kernels. This makes the PCIe oneshot allreduce **~15× slower** than NCCL, completely negating its benefit.
+
+**This affects the majority of users** — PCIe switches are uncommon. Without this fix, `--enable-pcie-oneshot-allreduce` will silently do nothing (the auto-crossover benchmark detects custom AR is slower and disables it).
+
+### Symptoms
+
+- `bench_crossover.py` shows custom AR latency scaling linearly with message size (e.g. 242 µs for 114 KB instead of ~16 µs)
+- NCCL wins at ALL sizes in the crossover benchmark
+- `nvidia-smi topo -m` shows **NODE** (not PIX/PXB) between GPUs
+
+### Fix
+
+Create `/etc/modprobe.d/nvidia-p2p-override.conf`:
+
+```
+options nvidia NVreg_RegistryDwords="ForceP2P=0x11;RMForceP2PType=1;RMPcieP2PType=2;GrdmaPciTopoCheckOverride=1;EnableResizableBar=1"
+```
+
+Then reload the nvidia driver:
+
+```bash
+# Stop everything using GPUs
+systemctl stop nvidia-persistenced
+# stop any sglang/vllm services, docker containers using GPUs, etc.
+pkill -9 -f sglang
+
+# Reload
+rmmod nvidia_uvm && rmmod nvidia_modeset && rmmod nvidia
+modprobe nvidia && modprobe nvidia_uvm && modprobe nvidia_modeset
+
+# Verify
+cat /proc/driver/nvidia/params | grep RegistryDwords
+# Should show: RegistryDwords: "ForceP2P=0x11;RMForceP2PType=1;..."
+
+# Restart services
+systemctl start nvidia-persistenced
+```
+
+If `rmmod` fails ("Module in use"), you must stop ALL GPU processes first. Check with `fuser /dev/nvidia*`. As a last resort, reboot.
+
+### What these parameters do
+
+| Parameter | Effect |
+|---|---|
+| `ForceP2P=0x11` | Forces direct P2P BAR1 mapping even without PCIe switch |
+| `RMForceP2PType=1` | Selects direct BAR1 P2P type |
+| `RMPcieP2PType=2` | PCIe P2P via BAR mapping (not SysMem staging) |
+| `GrdmaPciTopoCheckOverride=1` | Overrides topology check that disables P2P on NODE |
+| `EnableResizableBar=1` | Enables Resizable BAR for larger mappings |
+
+### Why only the custom allreduce is affected
+
+- **NCCL** uses its own SHM transport for small messages — doesn't rely on SM P2P loads, unaffected
+- **`cudaMemcpy` D2D** uses the DMA copy engine — separate path, unaffected
+- **PCIe oneshot allreduce** issues direct `load` instructions from CUDA kernels reading remote GPU memory via IPC handles — this goes through the driver's P2P BAR1 mapping, which requires `ForceP2P`
+- **PCIe switch topologies (PIX/PXB)** — driver enables BAR1 P2P by default, no config needed
+
+### Verification
+
+After applying, run the standalone benchmark:
+
+```bash
+docker exec <container> bash -c \
+  "CUDA_VISIBLE_DEVICES=0,1,2,3 python /opt/sglang/python/sglang/srt/distributed/device_communicators/pcie_allreduce/bench_crossover.py 4"
+```
+
+Expected: custom AR wins up to ~512 KB (e.g. 16 µs for 114 KB). If custom AR is still slower than NCCL at all sizes, the fix didn't take effect.
+
+---
+
 ## Setup Guide
 
 ### Docker Image
@@ -286,6 +358,8 @@ rm -rf /root/.cache/torch_extensions/
 
 ### Performance is same as NCCL
 
+- **Most likely cause: missing nvidia P2P driver config.** See [Critical Prerequisite](#critical-prerequisite-nvidia-p2p-driver-config) above.
+- Run `cat /proc/driver/nvidia/params | grep RegistryDwords` — if empty, the driver is using SysMem staging for P2P.
 - Verify patch applied correctly: check for `allreduce_rmsnorm` in `__init__.py`
 - Look for crossover benchmark output in server startup logs
 - Ensure `--enable-pcie-oneshot-allreduce` is in the command line
