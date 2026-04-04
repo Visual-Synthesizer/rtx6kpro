@@ -14,6 +14,8 @@
 - [Quality Comparisons](#quality-comparisons)
 - [Known Issues](#known-issues)
 - [Engine Compatibility Matrix](#engine-compatibility-matrix)
+- [PCIe / P2P Hardware Benchmarks](#pcie--p2p-hardware-benchmarks)
+- [Understanding Allreduce in TP Inference](#understanding-allreduce-in-tp-inference)
 
 ---
 
@@ -465,3 +467,106 @@ When MTP + thinking mode are both enabled, tool calls may output XML instead of 
 | Prefix caching | Yes | Yes | Yes (radix) | Yes (prompt cache) |
 | Tool calling | Yes | Yes | Yes | Yes |
 | Multimodal | Yes | Yes | **Broken** | Yes (mmproj) |
+
+---
+
+## PCIe / P2P Hardware Benchmarks
+
+All benchmarks on 2x RTX PRO 6000 Blackwell Workstation Edition, TRX40 platform (CPU root, no PLX switch), PCIe Gen4 x16.
+
+### P2P Bandwidth (p2pBandwidthLatencyTest)
+
+| Metric | Result |
+| --- | --- |
+| On-device bandwidth | ~1500 GB/s |
+| P2P unidirectional (write) | 26.7 GB/s |
+| P2P bidirectional | 46.6 GB/s |
+| P2P latency (GPU, enabled) | 0.37 us |
+| P2P latency (GPU, disabled) | 1.03 us |
+
+### p2pmark Results
+
+```
+PCIe LINK SCORE:           0.42
+(26.68 GB/s avg  /  63.0 GB/s PCIe 5.0 x16 theoretical)
+
+DENSE INTERCONNECT SCORE:  0.87
+(46.69 GB/s measured  /  53.37 GB/s ideal)
+```
+
+- **Link Score 0.42**: Running Gen4 at 26.7 GB/s out of 63 GB/s Gen5 theoretical. The PM50100 Gen5 PCIe switch would roughly double this.
+- **Dense Interconnect Score 0.87**: 87% of ideal bidirectional throughput for the link speed. Very efficient utilization.
+
+### Custom Allreduce vs NCCL (p2pmark)
+
+Critical finding for TP inference. Custom allreduce (direct PCIe P2P) significantly outperforms NCCL at small transfer sizes, which is the regime used during decode (per-token allreduce):
+
+| Size | Custom (us) | NCCL (us) | Speedup |
+| --- | --- | --- | --- |
+| 256 B | 5.1 | 12.1 | 2.3x |
+| 1 KB | 5.3 | 11.9 | 2.2x |
+| 4 KB | 5.2 | 11.5 | 2.2x |
+| 64 KB | 8.2 | 12.0 | 1.5x |
+| 512 KB | 32.9 | 43.1 | 1.3x |
+| 4 MB | 231.6 | 241.0 | 1.0x |
+| 64 MB | 3624.8 | 3735.6 | 1.0x |
+
+**Impact on vLLM:** Using `--disable-custom-all-reduce` forces the slower NCCL path on every decode step. This flag was required for MTP on the nightly due to a CUDA graph capture crash, but costs measurable performance. The 0.19.0 release without this flag uses the faster custom path.
+
+### NCCL AllReduce Bandwidth
+
+```
+NCCL_P2P_LEVEL=SYS NCCL_IB_DISABLE=1 NCCL_MIN_NCHANNELS=8
+Avg bus bandwidth: 18.19 GB/s (NCCL 2.29.7, driver 595.58.03)
+```
+
+| Size | Bus BW (GB/s) |
+| --- | --- |
+| 8 MB | 17.74 |
+| 64 MB | 17.97 |
+| 256 MB | 18.38 |
+| 1 GB | 18.62 |
+| 2 GB | 18.70 |
+
+Consistent across NVIDIA driver versions (590.48 and 595.58) and NCCL versions (2.28.9 and 2.29.7).
+
+### NCCL Tuning Flags
+
+Required for TRX40 PCIe topology (no NVLink, no InfiniBand):
+
+```bash
+export NCCL_P2P_LEVEL=SYS      # System-level P2P (through CPU root complex)
+export NCCL_IB_DISABLE=1        # No InfiniBand
+export NCCL_MIN_NCHANNELS=8     # Minimum parallel channels for bandwidth
+export NCCL_ALLOC_P2P_NET_LL_BUFFERS=1  # Allocate low-latency P2P buffers
+```
+
+### PM50100 Gen5 PCIe Switch (Planned)
+
+The c-payne PM50100 Gen5 PCIe switch would provide:
+
+- Direct GPU-to-GPU P2P without traversing the CPU root complex
+- Gen5 bandwidth (~53 GB/s unidirectional vs current 26.7 GB/s)
+- Expected to roughly double NCCL allreduce bandwidth
+- Should enable custom allreduce on the vLLM nightly (the CUDA graph crash may be related to CPU root complex P2P path)
+
+---
+
+## Understanding Allreduce in TP Inference
+
+### What is Allreduce?
+
+When a model runs in Tensor Parallel (TP=2), each GPU computes half the model's output for every layer. After each computation step, the GPUs need to combine their partial results so both GPUs have the complete answer. This operation is called **allreduce** -- it sums the partial tensors across all GPUs and distributes the result back.
+
+For the Qwen3.5-122B on TP=2, allreduce happens **twice per transformer layer** (once after attention, once after the MLP/MoE block). With 60 layers, that's **120 allreduce operations per token generated**.
+
+### Why It Matters for Decode Speed
+
+During prefill (processing the prompt), the allreduce transfers are large (proportional to sequence length) and the compute-to-communication ratio is favorable. During decode (generating tokens one at a time), each allreduce is small (just one token's hidden state) but happens every single step. This makes decode speed extremely sensitive to allreduce latency.
+
+On PCIe Gen4 with ~18 GB/s effective allreduce bandwidth and ~0.37 us P2P latency, each decode step adds communication overhead that directly limits tokens-per-second. This is why:
+
+- **The 122B MoE at TP=2** (115 tok/s) is not proportionally faster than with MTP despite 91%+ acceptance -- the allreduce overhead per speculative step negates the MTP gain.
+- **The 27B dense at TP=2** (70 tok/s) barely beats TP=1 (63 tok/s) -- the full 27B allreduce per step almost entirely eats the benefit of splitting.
+- **Custom allreduce** (direct PCIe writes) beats NCCL by 2.3x at decode-step sizes, making `--disable-custom-all-reduce` particularly costly.
+- **NVLink or Gen5 PCIe** would significantly improve TP=2 decode by reducing per-step communication time.
