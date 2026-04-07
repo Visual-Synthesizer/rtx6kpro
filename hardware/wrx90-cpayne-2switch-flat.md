@@ -277,6 +277,91 @@ The 2-switch flat topology is essentially the same as having Broadcom-style "two
 
 ---
 
+## GLM-5 Inference Benchmark (TP=8, b12x, MTP)
+
+End-to-end inference benchmark on GLM-5 (744B MoE) using all 8 GPUs with b12x MoE backend and speculative decoding (MTP).
+
+### Launch Configuration
+
+```bash
+# Docker
+docker run -it --rm \
+    --entrypoint /bin/bash \
+    --gpus all \
+    --ipc=host --shm-size=8g \
+    --ulimit memlock=-1 --ulimit stack=67108864 \
+    --network host \
+    -v /root/.cache/huggingface:/root/.cache/huggingface \
+    -v /mnt:/mnt \
+    -v sglang-nightly-jit130:/cache/jit \
+    voipmonitor/sglang:cu130
+
+# Server
+SGLANG_ENABLE_SPEC_V2=True SGLANG_ENABLE_JIT_DEEPGEMM=0 SGLANG_ENABLE_DEEP_GEMM=0 \
+NCCL_GRAPH_FILE=/mnt/nccl_graph_opt.xml NCCL_IB_DISABLE=1 NCCL_P2P_LEVEL=SYS \
+NCCL_ALLOC_P2P_NET_LL_BUFFERS=1 NCCL_MIN_NCHANNELS=8 OMP_NUM_THREADS=8 SAFETENSORS_FAST_GPU=1 \
+python3 -m sglang.launch_server \
+  --model-path festr2/GLM-5-NVFP4-MTP \
+  --tp 8 \
+  --trust-remote-code \
+  --kv-cache-dtype bf16 \
+  --tool-call-parser glm47 \
+  --reasoning-parser glm45 \
+  --quantization modelopt_fp4 \
+  --enable-pcie-oneshot-allreduce --enable-pcie-oneshot-allreduce-fusion \
+  --mem-fraction-static 0.85 \
+  --cuda-graph-max-bs 32 \
+  --host 0.0.0.0 --port 5000 \
+  --served-model-name glm-5 \
+  --max-running-requests 64 \
+  --model-loader-extra-config '{"enable_multithread_load": true, "num_threads": 16}' \
+  --enable-metrics --chunked-prefill-size 16384 --attention-backend flashinfer \
+  --fp4-gemm-backend b12x --moe-runner-backend b12x \
+  --json-model-override-args '{"index_topk_pattern": "FFSFSSSFSSFFFSSSFFFSFSSSSSSFFSFFSFFSSFFFFFFSFFFFFSFFSSSSSSFSFFFSFSSSFSFFSFFSSS"}'
+```
+
+### Prefill Speed (C=1)
+
+Baseline TTFT=0.108s subtracted.
+
+| Context | Tokens | Prefill (s) | Prefill tok/s |
+|---|---|---|---|
+| 8k | 8,199 | 1.26 | **6,490** |
+| 16k | 16,235 | 2.61 | **6,220** |
+| 32k | 32,349 | 7.12 | **4,542** |
+| 64k | 64,569 | 14.46 | **4,465** |
+| 128k | 125,212 | 35.75 | **3,502** |
+
+### Aggregate Decode Throughput (tok/s)
+
+```mermaid
+xychart-beta
+    title "GLM-5 Aggregate Throughput — 2-Switch, TP=8, b12x+MTP"
+    x-axis ["c=1", "c=2", "c=4", "c=8", "c=16", "c=32", "c=64"]
+    y-axis "Tokens/sec" 0 --> 800
+    bar [57.5, 102.1, 177.3, 305.0, 473.6, 692.4, 744.3]
+```
+
+| ctx \ conc | 1 | 2 | 4 | 8 | 16 | 32 | 64 |
+|---|---|---|---|---|---|---|---|
+| **0** | 57.5 | 102.1 | 177.3 | 305.0 | 473.6 | 692.4 | 744.3 |
+| **16k** | 47.8 | 86.4 | 140.7 | 229.3 | — | — | — |
+| **32k** | 44.5 | 75.1 | 125.0 | — | — | — | — |
+| **64k** | 37.9 | 65.5 | — | — | — | — | — |
+| **128k** | 32.4 | — | — | — | — | — | — |
+
+### Per-Request Avg Throughput (tok/s)
+
+| ctx \ conc | 1 | 2 | 4 | 8 | 16 | 32 | 64 |
+|---|---|---|---|---|---|---|---|
+| **0** | 57.5 | 51.0 | 44.3 | 38.1 | 29.6 | 21.6 | 11.6 |
+| **16k** | 47.8 | 43.2 | 35.2 | 28.7 | — | — | — |
+| **32k** | 44.5 | 37.6 | 31.2 | — | — | — | — |
+| **64k** | 37.9 | 32.7 | — | — | — | — | — |
+| **128k** | 32.4 | — | — | — | — | — | — |
+
+---
+
 ## Hardware Configuration Notes
 
 ### ACS
