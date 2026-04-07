@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [2-GPU Platform Comparison (B650D4U+PLX vs TRX40)](#2-gpu-platform-comparison)
 - [Qwen3.5-397B Benchmarks](#qwen35-397b-benchmarks)
   - [Single-Batch Decode Speed](#qwen35-single-batch-decode-speed)
   - [MTP Scaling](#qwen35-mtp-scaling)
@@ -20,6 +21,74 @@
 - [NCCL AllReduce Benchmarks](#nccl-allreduce-benchmarks)
 - [P2P Interconnect Benchmarks](#p2p-interconnect-benchmarks)
 - [Benchmark Tools](#benchmark-tools)
+
+---
+
+## 2-GPU Platform Comparison
+
+Comparing 2x RTX PRO 6000 Blackwell on two different platforms. All models are NVFP4/FP8 quantized, served via vLLM with TRITON_ATTN, fp8 KV cache, prefix caching enabled.
+
+### Test Systems
+
+| | B650D4U + PLX | TRX40 |
+|---|---|---|
+| **Motherboard** | AsRock Rack B650D4U-2L2T/BCM | TRX40 (direct attach) |
+| **CPU** | AMD EPYC 4564P (16c Zen4c) | AMD Threadripper |
+| **PCIe Topology** | PIX (through c-payne PM50100 Gen5 PLX) | NODE (ForceP2P) |
+| **P2P Bandwidth** | 48.7 GB/s | 27.9 GB/s |
+| **P2P Latency** | 0.37 us | 0.37 us |
+| **NCCL AllReduce** | 25 GB/s | 24 GB/s |
+| **Kernel Tuning** | pci=noacs, uvm_disable_hmm=1, no ForceP2P | ForceP2P required |
+
+### Qwen3.5-122B-A10B (NVFP4, TP=2)
+
+| Config | Platform | Power | vLLM | C=1 tok/s | Peak (C=128) | MTP Accept |
+|---|---|---|---|---|---|---|
+| **MTP=1** | B650D4U+PLX | 600W | nightly | **125.1** | **3,676** | 84% |
+| **MTP=1** | B650D4U+PLX | 400W | nightly | 120.6 | 1,771 | 84% |
+| no MTP | B650D4U+PLX | 600W | nightly | 113.5 | 3,242 | — |
+| no MTP | B650D4U+PLX | 400W | 0.19.0 | — | — | — |
+| MTP Docker | TRX40 | 600W | nightly | 100.4 | — | — |
+| no MTP | TRX40 | 600W | 0.19.0 | 117.9 | — | — |
+
+### MiniMax M2.5 (NVFP4, TP=2)
+
+| Platform | Power | vLLM | C=1 tok/s | Peak (C=128) |
+|---|---|---|---|---|
+| B650D4U+PLX | 600W | nightly | 100.7 | 3,433 |
+| TRX40 | 600W | 0.19.0 | 117.1 | — |
+
+Note: M2.5 shows high run-to-run variance (92-151 tok/s observed on TRX40).
+
+### Qwen3.5-27B (TP=2 NVFP4, or 1-GPU FP8)
+
+| Config | Platform | Power | vLLM | C=1 tok/s | Peak (C=128) | MTP Accept |
+|---|---|---|---|---|---|---|
+| NVFP4 2GPU | B650D4U+PLX | 600W | nightly | 80.5 | 3,465 | — |
+| NVFP4 2GPU | TRX40 | 600W | 0.19.0 | 78.2 | — | — |
+| FP8 1GPU MTP=2 | B650D4U+PLX | 400W | nightly | 86.6 | 2,039 | 72% |
+| FP8 1GPU MTP Docker | TRX40 | 600W | nightly | 64.3 | — | — |
+| FP8 1GPU no MTP | B650D4U+PLX | 600W | nightly | 52.6 | 2,655 | — |
+| FP8 1GPU no MTP | TRX40 | 600W | nightly | 52.3 | — | — |
+
+### Gemma-4-31B-IT (NVFP4)
+
+| Config | Platform | Power | vLLM | C=1 tok/s | Peak (C=128) |
+|---|---|---|---|---|---|
+| 2GPU | B650D4U+PLX | 600W | nightly | 67.0 | 3,574 |
+| 2GPU | TRX40 | 600W | 0.19.0 | 63.7 | — |
+| 1GPU | B650D4U+PLX | 600W | nightly | 38.9 | 2,989 |
+| 1GPU | TRX40 | 600W | 0.19.0 | 39.2 | — |
+
+### Key Findings (2-GPU)
+
+- **PLX P2P is 1.7x faster** than TRX40 NODE+ForceP2P (48.7 vs 27.9 GB/s), but NCCL allreduce is identical (~25 GB/s) due to 2-GPU bidirectional limitation
+- **MTP=1 is the biggest win on PLX** — 125.1 tok/s vs TRX40's best of 117.9 (no MTP). MTP didn't work on TRX40 bare metal
+- **Custom allreduce works on PIX topology** — no need for `--disable-custom-all-reduce` (required on TRX40 NODE)
+- **TRITON_ATTN required for MTP** on SM120 (Blackwell). FlashInfer crashes during cudagraph capture
+- **`--language-model-only` crashes 122B MTP** during cudagraph capture. Required for 27B to avoid VL profiling OOM, but must not be used with 122B MTP
+- **Bare metal ~5 tok/s faster than Docker** for 122B (125 vs 120)
+- **600W vs 400W**: minimal difference at C=1, 600W helps at high concurrency
 
 ---
 

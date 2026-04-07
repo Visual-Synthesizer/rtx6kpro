@@ -1,0 +1,2 @@
+# Local benchmark run data (contains system info, paths, GPU serial numbers)
+benchmarks/inference-throughput/runs/

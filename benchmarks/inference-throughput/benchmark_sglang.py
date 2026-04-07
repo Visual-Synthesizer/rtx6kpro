@@ -70,7 +70,7 @@ GENERATION_PROMPT = (
     "Do not summarize - provide maximum detail on every topic."
 )
 
-METRIC_RE = re.compile(r'^(sglang:\w+)(?:\{([^}]*)\})?\s+([\d.eE+-]+)')
+METRIC_RE = re.compile(r'^(\w[\w:]*\w)(?:\{([^}]*)\})?\s+([\d.eE+-]+)')
 
 
 # ---------------------------------------------------------------------------
@@ -404,18 +404,36 @@ async def run_one_cell(
         if now - last_metrics_time > metrics_interval:
             metrics = await scrape_metrics(client, base_url)
             state.srv_gen_throughput = extract_metric(metrics, "sglang:gen_throughput")
-            state.srv_running_reqs = int(extract_metric(metrics, "sglang:num_running_reqs"))
-            state.srv_queue_reqs = int(extract_metric(metrics, "sglang:num_queue_reqs"))
-            state.srv_utilization = extract_metric(metrics, "sglang:utilization")
-            state.srv_spec_accept_rate = extract_metric(metrics, "sglang:spec_accept_rate")
-            state.srv_spec_accept_length = extract_metric(metrics, "sglang:spec_accept_length")
+            state.srv_running_reqs = int(
+                extract_metric(metrics, "sglang:num_running_reqs")
+                or extract_metric(metrics, "vllm:num_requests_running")
+            )
+            state.srv_queue_reqs = int(
+                extract_metric(metrics, "sglang:num_queue_reqs")
+                or extract_metric(metrics, "vllm:num_requests_waiting")
+            )
+            state.srv_utilization = (
+                extract_metric(metrics, "sglang:utilization")
+                or extract_metric(metrics, "vllm:gpu_cache_usage_perc")
+            )
+            state.srv_spec_accept_rate = (
+                extract_metric(metrics, "sglang:spec_accept_rate")
+                or extract_metric(metrics, "vllm:spec_decode_draft_acceptance_rate")
+            )
+            state.srv_spec_accept_length = (
+                extract_metric(metrics, "sglang:spec_accept_length")
+                or extract_metric(metrics, "vllm:spec_decode_efficiency")
+            )
             # Collect gen_throughput samples after warmup (skip ramp-up period)
             if state.srv_gen_throughput > 0 and elapsed > warmup_seconds:
                 gen_throughput_samples.append(state.srv_gen_throughput)
             last_metrics_time = now
 
-        # Use server gen_throughput for live display
-        state.cell_live_tps = state.srv_gen_throughput
+        # Use server gen_throughput for live display; fallback to client-side
+        if state.srv_gen_throughput > 0:
+            state.cell_live_tps = state.srv_gen_throughput
+        elif elapsed > 0 and shared_token_count[0] > 0:
+            state.cell_live_tps = shared_token_count[0] / elapsed
 
         # Update TUI
         live.update(build_display(state))
@@ -457,6 +475,19 @@ async def run_one_cell(
     # Client-side stats
     successful = [r for r in stream_results if r.error is None]
     total_tokens = sum(r.total_tokens for r in stream_results)
+
+    # Fallback: if no server-side gen_throughput (e.g. vLLM), compute client-side TPS
+    if avg_gen_throughput == 0.0 and total_tokens > 0 and wall_time > 0:
+        avg_gen_throughput = total_tokens / wall_time
+
+    # Compute spec decode acceptance rate from vLLM counters if available
+    vllm_draft = extract_metric(metrics, "vllm:spec_decode_num_draft_tokens_total")
+    vllm_accepted = extract_metric(metrics, "vllm:spec_decode_num_accepted_tokens_total")
+    if vllm_draft > 0:
+        vllm_spec_rate = vllm_accepted / vllm_draft
+    else:
+        vllm_spec_rate = 0.0
+
     # Derive per-request from server metric for consistency (aggregate / concurrency)
     per_req_tps = avg_gen_throughput / concurrency if concurrency > 0 else 0.0
     ttfts = [r.ttft for r in successful if r.ttft > 0]
@@ -474,8 +505,14 @@ async def run_one_cell(
         num_completed=len(successful),
         num_errors=len(stream_results) - len(successful),
         server_gen_throughput=avg_gen_throughput,
-        server_utilization=extract_metric(metrics, "sglang:utilization"),
-        server_spec_accept_rate=extract_metric(metrics, "sglang:spec_accept_rate"),
+        server_utilization=(
+            extract_metric(metrics, "sglang:utilization")
+            or extract_metric(metrics, "vllm:gpu_cache_usage_perc")
+        ),
+        server_spec_accept_rate=(
+            extract_metric(metrics, "sglang:spec_accept_rate")
+            or vllm_spec_rate
+        ),
     )
 
     state.cell_running = False
