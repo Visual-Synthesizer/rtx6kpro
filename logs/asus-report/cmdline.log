@@ -1,0 +1,1 @@
+BOOT_IMAGE=/vmlinuz-6.17.0-20-generic root=UUID=78c30682-53e7-4e5e-abe9-5668fac78f99 ro rd.auto=1 rd.md=1 rd.md.conf=1 mitigations=off spectre_v2=off spec_store_bypass_disable=off l1tf=off mds=off tsx_async_abort=off srbds=off mmio_stale_data=off retbleed=off amd_iommu=off iommu=off
