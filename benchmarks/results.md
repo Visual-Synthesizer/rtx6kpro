@@ -26,7 +26,7 @@
 
 ## 2-GPU Platform Comparison
 
-Comparing 2x RTX PRO 6000 Blackwell on two different platforms. All models are NVFP4/FP8 quantized, served via vLLM with TRITON_ATTN, fp8 KV cache, prefix caching enabled.
+Comparing 2x RTX PRO 6000 Blackwell on two platforms across vLLM, SGLang, and llama.cpp. Performance governor, 600W, no memory OC unless noted.
 
 ### Test Systems
 
@@ -40,54 +40,64 @@ Comparing 2x RTX PRO 6000 Blackwell on two different platforms. All models are N
 | **NCCL AllReduce** | 25 GB/s | 24 GB/s |
 | **Kernel Tuning** | pci=noacs, uvm_disable_hmm=1, no ForceP2P | ForceP2P required |
 
-### Qwen3.5-122B-A10B (NVFP4, TP=2)
+### Best Results (B650D4U + PLX, C=1 decode tok/s)
 
-| Config | Platform | Power | vLLM | C=1 tok/s | Peak (C=128) | MTP Accept |
-|---|---|---|---|---|---|---|
-| **MTP=1** | B650D4U+PLX | 600W | nightly | **125.1** | **3,676** | 84% |
-| **MTP=1** | B650D4U+PLX | 400W | nightly | 120.6 | 1,771 | 84% |
-| no MTP | B650D4U+PLX | 600W | nightly | 113.5 | 3,242 | — |
-| no MTP | B650D4U+PLX | 400W | 0.19.0 | — | — | — |
-| MTP Docker | TRX40 | 600W | nightly | 100.4 | — | — |
-| no MTP | TRX40 | 600W | 0.19.0 | 117.9 | — | — |
-
-### MiniMax M2.5 (NVFP4, TP=2)
-
-| Platform | Power | vLLM | C=1 tok/s | Peak (C=128) |
+| Model | Engine | C=1 tok/s | Peak | Notes |
 |---|---|---|---|---|
-| B650D4U+PLX | 600W | nightly | 100.7 | 3,433 |
-| TRX40 | 600W | 0.19.0 | 117.1 | — |
+| **122B NVFP4 (modelopt_fp4)** | SGLang b12x+NEXTN | **198** | 1,523 (C=32) | 3-run verified, txn545 checkpoint |
+| **27B FP8 DFlash 2GPU** | vLLM nightly | **170** | 1,539 (C=64) | 2B drafter |
+| **M2.5 NVFP4** | vLLM b12x Docker | **148** | 2,674 (C=128) | modelopt_fp4, torch.compile |
+| **122B NVFP4 MTP=1** | vLLM nightly | **133** | 3,851 (C=128) | compressed-tensors, 84% accept |
+| M2.5 NVFP4 | SGLang b12x | 129 | — | --disable-piecewise-cuda-graph |
+| 122B NVFP4 MTP=1 | vLLM test (dev86) | 127 | — | — |
+| 27B FP8 DFlash 1GPU | vLLM test (dev86) | 123 | — | single GPU |
+| 122B NVFP4 no-MTP | vLLM test (dev86) | 120 | — | — |
+| M2.5 NVFP4 | vLLM nightly 3-run avg | 117 | — | FlashInfer variance |
+| 27B NVFP4 2GPU | vLLM test (dev86) | 82 | — | — |
+| **397B UD-Q3_K_XL** | llama.cpp | **79** | 151 (C=4) | GGUF, fully in VRAM |
+| Gemma4 31B 2GPU | vLLM nightly | 67 | 3,574 (C=128) | — |
+| 27B FP8 1GPU | vLLM nightly | 55 | 2,655 (C=128) | no speculation |
+| Gemma4 31B 1GPU | vLLM test (dev86) | 40 | 2,989 (C=128) | — |
 
-Note: M2.5 shows high run-to-run variance (92-151 tok/s observed on TRX40).
+### vLLM Version Comparison (B650D4U + PLX, 600W)
 
-### Qwen3.5-27B (TP=2 NVFP4, or 1-GPU FP8)
+| Model | Stable (0.19.0) | Nightly (dev42) | Test (dev86) |
+|---|---|---|---|
+| 122B MTP | FAIL | 125 | **127** |
+| 122B no-MTP | 117 | 114 | **120** |
+| 27B DFlash 2GPU | FAIL | **170** | 163 |
+| 27B DFlash 1GPU | FAIL | 107 | **123** |
+| M2.5 3-run avg | 118 | **132** | 99 |
+| 27B NVFP4 2GPU | 81 | 80 | **82** |
+| Gemma4 2GPU | FAIL | **67** | 66 |
+| 27B FP8 1GPU | 44 | 55 | **55** |
+| Gemma4 1GPU | FAIL | 39 | **40** |
 
-| Config | Platform | Power | vLLM | C=1 tok/s | Peak (C=128) | MTP Accept |
-|---|---|---|---|---|---|---|
-| NVFP4 2GPU | B650D4U+PLX | 600W | nightly | 80.5 | 3,465 | — |
-| NVFP4 2GPU | TRX40 | 600W | 0.19.0 | 78.2 | — | — |
-| FP8 1GPU MTP=2 | B650D4U+PLX | 400W | nightly | 86.6 | 2,039 | 72% |
-| FP8 1GPU MTP Docker | TRX40 | 600W | nightly | 64.3 | — | — |
-| FP8 1GPU no MTP | B650D4U+PLX | 600W | nightly | 52.6 | 2,655 | — |
-| FP8 1GPU no MTP | TRX40 | 600W | nightly | 52.3 | — | — |
+Test venv (dev86) wins on 6/9 models. Nightly wins on DFlash 2GPU, M2.5, Gemma4 2GPU.
 
-### Gemma-4-31B-IT (NVFP4)
+### TRX40 Comparison
 
-| Config | Platform | Power | vLLM | C=1 tok/s | Peak (C=128) |
-|---|---|---|---|---|---|
-| 2GPU | B650D4U+PLX | 600W | nightly | 67.0 | 3,574 |
-| 2GPU | TRX40 | 600W | 0.19.0 | 63.7 | — |
-| 1GPU | B650D4U+PLX | 600W | nightly | 38.9 | 2,989 |
-| 1GPU | TRX40 | 600W | 0.19.0 | 39.2 | — |
+| Model | B650D4U+PLX | TRX40 | Delta |
+|---|---|---|---|
+| 122B (best config) | 198 (SGLang) | 118 (vLLM) | +68% |
+| M2.5 | 148 (b12x) | 117 (vLLM) | +26% |
+| 27B NVFP4 2GPU | 82 | 78 | +5% |
+| Gemma4 2GPU | 67 | 64 | +5% |
+| 27B FP8 1GPU | 55 | 52 | +6% |
+| Gemma4 1GPU | 40 | 39 | +3% |
 
 ### Key Findings (2-GPU)
 
-- **PLX P2P is 1.7x faster** than TRX40 NODE+ForceP2P (48.7 vs 27.9 GB/s), but NCCL allreduce is identical (~25 GB/s) due to 2-GPU bidirectional limitation
-- **MTP=1 is the biggest win on PLX** — 125.1 tok/s vs TRX40's best of 117.9 (no MTP). MTP didn't work on TRX40 bare metal
-- **Custom allreduce works on PIX topology** — no need for `--disable-custom-all-reduce` (required on TRX40 NODE)
-- **TRITON_ATTN required for MTP** on SM120 (Blackwell). FlashInfer crashes during cudagraph capture
-- **`--language-model-only` crashes 122B MTP** during cudagraph capture. Required for 27B to avoid VL profiling OOM, but must not be used with 122B MTP
-- **Bare metal ~5 tok/s faster than Docker** for 122B (125 vs 120)
+- **SGLang b12x+NEXTN is the fastest config** — 198 tok/s on 122B, +56% over vLLM MTP=1
+- **Checkpoint format matters** — modelopt_fp4 (txn545) enables b12x kernels + SGLang NEXTN. compressed-tensors (Sehyo) is limited to vLLM MTP at 127 tok/s
+- **DFlash speculative decoding** — 170 tok/s on 27B 2GPU, 123 on 1GPU. 3x faster than no-spec
+- **397B runs at 79 tok/s** on llama.cpp fully in VRAM (167GB GGUF Q3)
+- **PLX P2P is 1.7x faster** than TRX40 NODE+ForceP2P (48.7 vs 27.9 GB/s)
+- **Custom allreduce works on PIX topology** — no `--disable-custom-all-reduce` needed
+- **TRITON_ATTN required for MTP** on SM120 (FlashInfer crashes during cudagraph capture)
+- **`--language-model-only` crashes 122B MTP** during cudagraph capture
+- **Performance governor gives +5%** at C=1 (125 → 131 on 122B MTP)
+- **HBM memory OC (+4000) is unstable** — hurts SGLang (181 vs 198), GPU crashes. Don't use.
 - **600W vs 400W**: minimal difference at C=1, 600W helps at high concurrency
 
 ---

@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "model": "Qwen3.5-122B",
+    "server": "localhost:8000",
+    "timestamp": "2026-04-07T23:39:49.381020",
+    "duration_per_test": 30.0,
+    "max_tokens": 8192,
+    "max_total_tokens": 4240062,
+    "concurrency_levels": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "context_lengths": [
+      0
+    ]
+  },
+  "prefill": {
+    "8192": {
+      "ttft_seconds": 0.382,
+      "tok_per_sec": 24986.0
+    },
+    "16384": {
+      "ttft_seconds": 0.733,
+      "tok_per_sec": 24107.0
+    },
+    "32768": {
+      "ttft_seconds": 1.553,
+      "tok_per_sec": 21855.0
+    },
+    "65536": {
+      "ttft_seconds": 3.278,
+      "tok_per_sec": 20324.0
+    },
+    "131072": {
+      "ttft_seconds": 7.843,
+      "tok_per_sec": 16828.0
+    }
+  },
+  "results": [
+    {
+      "concurrency": 1,
+      "context_tokens": 0,
+      "aggregate_tps": 34.04047826816173,
+      "per_request_avg_tps": 34.04047826816173,
+      "ttft_avg": 0.11175176499818917,
+      "ttft_p50": 0.11175176499818917,
+      "ttft_p99": 0.11175176499818917,
+      "total_tokens": 1024,
+      "wall_time": 30.081833514006576,
+      "num_completed": 1,
+      "num_errors": 0,
+      "server_gen_throughput": 34.04047826816173,
+      "server_utilization": 0.0,
+      "server_spec_accept_rate": 0.0
+    },
+    {
+      "concurrency": 2,
+      "context_tokens": 0,
+      "aggregate_tps": 61.58470082362482,
+      "per_request_avg_tps": 30.79235041181241,
+      "ttft_avg": 0.11956028699933086,
+      "ttft_p50": 0.11956028699933086,
+      "ttft_p99": 0.11973743964830647,
+      "total_tokens": 1852,
+      "wall_time": 30.072403944999678,
+      "num_completed": 2,
+      "num_errors": 0,
+      "server_gen_throughput": 61.58470082362482,
+      "server_utilization": 0.0,
+      "server_spec_accept_rate": 0.0
+    },
+    {
+      "concurrency": 4,
+      "context_tokens": 0,
+      "aggregate_tps": 128.30172304315263,
+      "per_request_avg_tps": 32.07543076078816,
+      "ttft_avg": 0.12083403849828755,
+      "ttft_p50": 0.12078696299431613,
+      "ttft_p99": 0.1212276223495428,
+      "total_tokens": 3860,
+      "wall_time": 30.08533251499466,
+      "num_completed": 4,
+      "num_errors": 0,
+      "server_gen_throughput": 128.30172304315263,
+      "server_utilization": 0.0,
+      "server_spec_accept_rate": 0.0
+    },
+    {
+      "concurrency": 8,
+      "context_tokens": 0,
+      "aggregate_tps": 244.72543746765342,
+      "per_request_avg_tps": 30.590679683456678,
+      "ttft_avg": 0.15676621187958517,
+      "ttft_p50": 0.17028404150914866,
+      "ttft_p99": 0.17050925902658493,
+      "total_tokens": 7360,
+      "wall_time": 30.074519739995594,
+      "num_completed": 8,
+      "num_errors": 0,
+      "server_gen_throughput": 244.72543746765342,
+      "server_utilization": 0.0,
+      "server_spec_accept_rate": 0.0
+    },
+    {
+      "concurrency": 16,
+      "context_tokens": 0,
+      "aggregate_tps": 443.54470937744316,
+      "per_request_avg_tps": 27.721544336090197,
+      "ttft_avg": 0.1813606451241867,
+      "ttft_p50": 0.19727119150047656,
+      "ttft_p99": 0.19834564179036535,
+      "total_tokens": 13344,
+      "wall_time": 30.084903997005313,
+      "num_completed": 16,
+      "num_errors": 0,
+      "server_gen_throughput": 443.54470937744316,
+      "server_utilization": 0.0,
+      "server_spec_accept_rate": 0.0
+    },
+    {
+      "concurrency": 32,
+      "context_tokens": 0,
+      "aggregate_tps": 709.173799529265,
+      "per_request_avg_tps": 22.16168123528953,
+      "ttft_avg": 0.25896327743703296,
+      "ttft_p50": 0.262826768506784,
+      "ttft_p99": 0.3389823501308274,
+      "total_tokens": 21344,
+      "wall_time": 30.09699457899842,
+      "num_completed": 32,
+      "num_errors": 0,
+      "server_gen_throughput": 709.173799529265,
+      "server_utilization": 0.0,
+      "server_spec_accept_rate": 0.0
+    }
+  ],
+  "summary_table": {
+    "0": {
+      "1": 34.04047826816173,
+      "2": 61.58470082362482,
+      "4": 128.30172304315263,
+      "8": 244.72543746765342,
+      "16": 443.54470937744316,
+      "32": 709.173799529265
+    }
+  }
+}
