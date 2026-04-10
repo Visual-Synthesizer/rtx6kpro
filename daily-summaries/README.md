@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-04-10](2026-04/2026-04-10.md) | GLM-5.1 NVFP4 quant live on 8x RTX Pro 6000: 131 tok/s with MTP, 95 tok/s via flashinfer cutlass. Bu |
 | [2026-04-09](2026-04/2026-04-09.md) | GLM-5.1 NVFP4 upload by luke — 52 tok/s single request on 8x RTX 6000 PRO (NVFP4, b12x, sglang), t |
 | [2026-04-08](2026-04/2026-04-08.md) | b12x hits 220 t/s single-user decode on 2x RTX PRO 6000; 198 t/s on Qwen3.5-122B vs 131 t/s baseline |
 | [2026-04-07](2026-04/2026-04-07.md) | GLM-5 NVFP4 on 8×RTX PRO 6000: SGLang+MTP leads at 99 tok/s single-user (0 ctx), 249.8 tok/s at C=4 |
@@ -55,6 +56,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-04-10](2026-04/2026-04-10.md) | GLM-5.1 NVFP4 quant live on 8x RTX Pro 6000: 131 tok/s with MTP, 95 tok/s via flashinfer cutlass. Bu |
 | [2026-04-09](2026-04/2026-04-09.md) | GLM-5.1 NVFP4 upload by luke — 52 tok/s single request on 8x RTX 6000 PRO (NVFP4, b12x, sglang), t |
 | [2026-04-08](2026-04/2026-04-08.md) | b12x hits 220 t/s single-user decode on 2x RTX PRO 6000; 198 t/s on Qwen3.5-122B vs 131 t/s baseline |
 | [2026-04-07](2026-04/2026-04-07.md) | GLM-5 NVFP4 on 8×RTX PRO 6000: SGLang+MTP leads at 99 tok/s single-user (0 ctx), 249.8 tok/s at C=4 |
