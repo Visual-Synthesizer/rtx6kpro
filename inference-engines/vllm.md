@@ -123,7 +123,7 @@ This builds vLLM with `ENABLE_SM120=1`, flash_attn 2.8.3 for SM120, and FlashMLA
 | `--enable-prefix-caching` | Cache common prompt prefixes to reduce TTFT on repeated prompts. |
 | `--enable-chunked-prefill` | Process long prompts in chunks rather than all at once. |
 | `--load-format fastsafetensors` | Faster weight loading. Requires `pip install fastsafetensors`. |
-| `--async-scheduling` | Async request scheduling for higher throughput. |
+| `--scheduler-config '{"async_scheduling": false}'` | Disable async scheduling. **Async scheduling is ON by default** in vLLM nightly (auto-enabled when the executor and speculative method support it -- including Eagle, MTP, DFlash, and ngram_gpu). The older top-level `--async-scheduling` CLI flag is obsolete. Only pass this field to explicitly *disable* the feature for debugging. Verified via bench logs: `Asynchronous scheduling is enabled.` appears in every recent vLLM nightly startup. |
 | `--language-model-only` | Disables vision encoder. Reduces TTFT from ~12s to <1s on first request. |
 | `--attention-backend TRITON_MLA` | Required for MLA models (Kimi K2.5) with FP8 KV cache on SM120. |
 | `--kv-cache-dtype fp8` | FP8 KV cache -- doubles context capacity vs BF16. |
@@ -270,7 +270,6 @@ vllm serve moonshotai/Kimi-K2.5 \
   --tool-call-parser kimi_k2 \
   --enable-auto-tool-choice \
   --reasoning-parser kimi_k2 \
-  --async-scheduling \
   --gpu-memory-utilization 0.95 \
   --max-num-batched-tokens 4096 \
   --attention-backend TRITON_MLA \

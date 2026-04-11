@@ -132,6 +132,8 @@ VLLM_SLEEP_WHEN_IDLE=30               # Sleep consumer threads when idle
 
 ## Launch Commands -- vLLM
 
+> **Note on async scheduling:** Earlier versions of these commands included `--async-scheduling`. That top-level flag is obsolete in recent vLLM nightly -- async scheduling is now **auto-enabled by default** via `SchedulerConfig.async_scheduling` whenever the executor and speculative method support it (Eagle, MTP, DFlash, ngram_gpu all qualify). The commands below have been updated to remove the stale flag. To explicitly disable for debugging, pass `--scheduler-config '{"async_scheduling": false}'`.
+
 ### Recommended: INT4 with FP8 KV Cache + DCP (Festr's production command)
 
 ```bash
@@ -154,7 +156,6 @@ vllm serve moonshotai/Kimi-K2.5 \
   --tool-call-parser kimi_k2 \
   --enable-auto-tool-choice \
   --reasoning-parser kimi_k2 \
-  --async-scheduling \
   --gpu-memory-utilization 0.95 \
   --max-num-batched-tokens 4096 \
   --attention-backend TRITON_MLA \
@@ -188,7 +189,6 @@ vllm serve moonshotai/Kimi-K2.5 \
   --tool-call-parser kimi_k2 \
   --enable-auto-tool-choice \
   --reasoning-parser kimi_k2 \
-  --async-scheduling \
   --gpu-memory-utilization 0.93 \
   --max-num-batched-tokens 4096 \
   --attention-backend TRITON_MLA \
