@@ -1,6 +1,6 @@
 # MiniMax M2.5 — Setup & Benchmarks
 
-MiniMax M2.5 is a 456B-parameter MoE model with native FP8 weights, strong coding/reasoning capabilities, and 196K context. It runs well on 2× or 4× RTX PRO 6000 GPUs.
+MiniMax M2.5 is a 229B-parameter MoE model with native FP8 weights, strong coding/reasoning capabilities, and 196K context. It runs well on 2× or 4× RTX PRO 6000 GPUs.
 
 ## Table of Contents
 
@@ -23,7 +23,7 @@ MiniMax M2.5 is a 456B-parameter MoE model with native FP8 weights, strong codin
 | Property | Value |
 |----------|-------|
 | **Full name** | MiniMaxAI/MiniMax-M2.5 |
-| **Parameters** | 456B total (MoE) |
+| **Parameters** | 229B total (MoE) |
 | **Native precision** | FP8 |
 | **Context length** | 196,608 tokens |
 | **Architecture** | MoE with custom reasoning |
