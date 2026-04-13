@@ -1,0 +1,159 @@
+{
+  "metadata": {
+    "model": "Qwen3.5-122B",
+    "server": "localhost:8000",
+    "timestamp": "2026-04-12T21:58:37.251322",
+    "duration_per_test": 30.0,
+    "max_tokens": 8192,
+    "max_total_tokens": 2424862,
+    "concurrency_levels": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "context_lengths": [
+      0,
+      16384
+    ],
+    "iterations": 3,
+    "b12x_version": "0.8.3",
+    "oneshot": false
+  },
+  "prefill": {
+    "8192": {
+      "ttft_seconds": 0.453,
+      "tok_per_sec": 22073.0
+    },
+    "16384": {
+      "ttft_seconds": 0.843,
+      "tok_per_sec": 21523.0
+    },
+    "32768": {
+      "ttft_seconds": 1.769,
+      "tok_per_sec": 19415.0
+    },
+    "65536": {
+      "ttft_seconds": 3.831,
+      "tok_per_sec": 17480.0
+    },
+    "131072": {
+      "ttft_seconds": 9.293,
+      "tok_per_sec": 14230.0
+    }
+  },
+  "results": [
+    {
+      "context_tokens": 0,
+      "concurrency": 1,
+      "aggregate_tps_mean": 194.03786621703625,
+      "aggregate_tps_stdev": 2.760915479816988,
+      "per_request_avg_tps_mean": 194.03786621703625,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 2,
+      "aggregate_tps_mean": 327.60036019214544,
+      "aggregate_tps_stdev": 1.4050962982798245,
+      "per_request_avg_tps_mean": 163.80018009607272,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 4,
+      "aggregate_tps_mean": 522.2231496715032,
+      "aggregate_tps_stdev": 0.8902459134888635,
+      "per_request_avg_tps_mean": 130.5557874178758,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 8,
+      "aggregate_tps_mean": 813.3993427687609,
+      "aggregate_tps_stdev": 1.4596061674414842,
+      "per_request_avg_tps_mean": 101.67491784609511,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 16,
+      "aggregate_tps_mean": 994.8786468184676,
+      "aggregate_tps_stdev": 56.6451787511801,
+      "per_request_avg_tps_mean": 62.179915426154224,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 32,
+      "aggregate_tps_mean": 1411.512590998744,
+      "aggregate_tps_stdev": 2.656809848578605,
+      "per_request_avg_tps_mean": 44.10976846871075,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 1,
+      "aggregate_tps_mean": 215.69469870973066,
+      "aggregate_tps_stdev": 33.07570126523271,
+      "per_request_avg_tps_mean": 215.69469870973066,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 2,
+      "aggregate_tps_mean": 348.34362043934203,
+      "aggregate_tps_stdev": 21.60208886104012,
+      "per_request_avg_tps_mean": 174.17181021967102,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 4,
+      "aggregate_tps_mean": 584.8366838880997,
+      "aggregate_tps_stdev": 41.14037974026874,
+      "per_request_avg_tps_mean": 146.20917097202494,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 8,
+      "aggregate_tps_mean": 935.3452614145028,
+      "aggregate_tps_stdev": 12.455925253526214,
+      "per_request_avg_tps_mean": 116.91815767681285,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 16,
+      "aggregate_tps_mean": 1175.127774911231,
+      "aggregate_tps_stdev": 24.20582481474598,
+      "per_request_avg_tps_mean": 73.44548593195194,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 32,
+      "aggregate_tps_mean": 1544.4262473005952,
+      "aggregate_tps_stdev": 67.56750663050039,
+      "per_request_avg_tps_mean": 48.2633202281436,
+      "spec_accept_rate_mean": 0.0,
+      "iterations_run": 3
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "metadata": {
+    "model": "MiniMax-M2.7",
+    "server": "localhost:8000",
+    "timestamp": "2026-04-12T20:45:27.430640",
+    "duration_per_test": 30.0,
+    "max_tokens": 512,
+    "max_total_tokens": 83787,
+    "concurrency_levels": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "context_lengths": [
+      0,
+      16384,
+      32768,
+      65536,
+      131072
+    ],
+    "iterations": 3
+  },
+  "prefill": {
+    "8192": {
+      "ttft_seconds": 0.495,
+      "tok_per_sec": 17209.0
+    },
+    "16384": {
+      "ttft_seconds": 0.987,
+      "tok_per_sec": 16929.0
+    },
+    "32768": {
+      "ttft_seconds": 2.081,
+      "tok_per_sec": 15892.0
+    },
+    "65536": {
+      "ttft_seconds": 4.935,
+      "tok_per_sec": 13331.0
+    },
+    "131072": {
+      "ttft_seconds": 13.247,
+      "tok_per_sec": 9909.0
+    }
+  },
+  "results": [
+    {
+      "context_tokens": 0,
+      "concurrency": 1,
+      "aggregate_tps_mean": 127.66026841396612,
+      "aggregate_tps_stdev": 0.01850345136094583,
+      "per_request_avg_tps_mean": 127.66026841396612,
+      "ttft_avg_mean": 0.043618040668661706,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 2,
+      "aggregate_tps_mean": 175.33981616657843,
+      "aggregate_tps_stdev": 17.767893823468075,
+      "per_request_avg_tps_mean": 87.66990808328922,
+      "ttft_avg_mean": 0.024830233667065233,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 4,
+      "aggregate_tps_mean": 340.343396913085,
+      "aggregate_tps_stdev": 0.09597078080735152,
+      "per_request_avg_tps_mean": 85.08584922827124,
+      "ttft_avg_mean": 0.025672927165942383,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 8,
+      "aggregate_tps_mean": 471.6098576650742,
+      "aggregate_tps_stdev": 15.434009397571206,
+      "per_request_avg_tps_mean": 58.95123220813427,
+      "ttft_avg_mean": 0.02872836737454539,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 16,
+      "aggregate_tps_mean": 742.6898460787988,
+      "aggregate_tps_stdev": 0.047555072125421705,
+      "per_request_avg_tps_mean": 46.41811537992493,
+      "ttft_avg_mean": 0.038560363041900324,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 32,
+      "aggregate_tps_mean": 1078.9077992632651,
+      "aggregate_tps_stdev": 15.435820345059348,
+      "per_request_avg_tps_mean": 33.715868726977035,
+      "ttft_avg_mean": 0.04589183080179282,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 64,
+      "aggregate_tps_mean": 1695.4455955135531,
+      "aggregate_tps_stdev": 20.257407648778674,
+      "per_request_avg_tps_mean": 26.491337429899268,
+      "ttft_avg_mean": 0.06782855259355831,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 0,
+      "concurrency": 128,
+      "aggregate_tps_mean": 2800.2319276524645,
+      "aggregate_tps_stdev": 20.179994794235196,
+      "per_request_avg_tps_mean": 21.87681193478488,
+      "ttft_avg_mean": 0.08518892739584771,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 1,
+      "aggregate_tps_mean": 92.81898200403334,
+      "aggregate_tps_stdev": 0.005359496513285435,
+      "per_request_avg_tps_mean": 92.81898200403334,
+      "ttft_avg_mean": 1.0145905050012516,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 2,
+      "aggregate_tps_mean": 163.6243146541375,
+      "aggregate_tps_stdev": 5.832240706222582,
+      "per_request_avg_tps_mean": 81.81215732706875,
+      "ttft_avg_mean": 0.040623656001116615,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 16384,
+      "concurrency": 4,
+      "aggregate_tps_mean": 311.5620918724841,
+      "aggregate_tps_stdev": 4.509096790316547,
+      "per_request_avg_tps_mean": 77.89052296812102,
+      "ttft_avg_mean": 0.0637548360840204,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 32768,
+      "concurrency": 1,
+      "aggregate_tps_mean": 72.91464861166445,
+      "aggregate_tps_stdev": 0.010867177595901167,
+      "per_request_avg_tps_mean": 72.91464861166445,
+      "ttft_avg_mean": 2.1093436570008635,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 32768,
+      "concurrency": 2,
+      "aggregate_tps_mean": 157.05747379374677,
+      "aggregate_tps_stdev": 0.023479588852859577,
+      "per_request_avg_tps_mean": 78.52873689687338,
+      "ttft_avg_mean": 0.05931701466518765,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    },
+    {
+      "context_tokens": 65536,
+      "concurrency": 1,
+      "aggregate_tps_mean": 46.410969316568384,
+      "aggregate_tps_stdev": 0.010244333225478762,
+      "per_request_avg_tps_mean": 46.410969316568384,
+      "ttft_avg_mean": 5.011845832663918,
+      "iterations_run": 3,
+      "iterations_skipped": 0
+    }
+  ]
+}
