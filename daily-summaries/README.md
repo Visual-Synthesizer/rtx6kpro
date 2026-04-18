@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-04-18](2026-04/2026-04-18.md) | EXL3 benchmark breakthrough: mratsim's Qwen3.5-397B-A17B EXL3 quant achieves **1500 pp/s and 50+ tg/ |
 | [2026-04-17](2026-04/2026-04-17.md) | Qwen3.6-35B-A3B released (MoE); community upset the poll-winner 27B wasn't chosen first — speculat |
 | [2026-04-16](2026-04/2026-04-16.md) | b12x FP4 GEMM kernel merged into FlashInfer ([jump](https://discord.com/channels/1466898002793857221 |
 | [2026-04-15](2026-04/2026-04-15.md) | Introspective Diffusion (I-DLM-8B) matches AR model quality, beats LLaDA-2.1-mini (16B) by +26 AIME- |
@@ -63,6 +64,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-04-18](2026-04/2026-04-18.md) | EXL3 benchmark breakthrough: mratsim's Qwen3.5-397B-A17B EXL3 quant achieves **1500 pp/s and 50+ tg/ |
 | [2026-04-17](2026-04/2026-04-17.md) | Qwen3.6-35B-A3B released (MoE); community upset the poll-winner 27B wasn't chosen first — speculat |
 | [2026-04-16](2026-04/2026-04-16.md) | b12x FP4 GEMM kernel merged into FlashInfer ([jump](https://discord.com/channels/1466898002793857221 |
 | [2026-04-15](2026-04/2026-04-15.md) | Introspective Diffusion (I-DLM-8B) matches AR model quality, beats LLaDA-2.1-mini (16B) by +26 AIME- |
