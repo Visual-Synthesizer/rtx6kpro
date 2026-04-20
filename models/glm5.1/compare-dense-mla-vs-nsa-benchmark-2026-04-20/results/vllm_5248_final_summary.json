@@ -1,0 +1,20 @@
+{
+  "attempted_runs": 30,
+  "completed_runs": 30,
+  "correct_runs": 26,
+  "correct_rate": 0.8666666666666667,
+  "mean_completion_tokens": 11179.333333333334,
+  "median_completion_tokens": 10502.0,
+  "min_completion_tokens": 4336.0,
+  "max_completion_tokens": 21555.0,
+  "mean_elapsed_s": 173.83579304218293,
+  "median_elapsed_s": 162.09377944469452,
+  "min_elapsed_s": 70.2363350391388,
+  "max_elapsed_s": 332.1134994029999,
+  "mean_gen_tok_s": 64.46628521318469,
+  "median_gen_tok_s": 64.37286705086802,
+  "min_gen_tok_s": 62.216897848280155,
+  "max_gen_tok_s": 66.56050060884597,
+  "mean_ttft_s": 0.974405042330424,
+  "mean_e2e_tok_s": 64.04732750065436
+}

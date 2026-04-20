@@ -7,6 +7,10 @@ This report summarizes the benchmark failure modes observed while comparing two 
 - `dense_mla`: dense MLA path (`flashinfer`, BF16 KV cache)
 - `nsa`: NSA path (`b12x`, FP8 KV cache)
 
+For the three-engine comparison that also includes vLLM, see:
+
+- `engine_comparison.md`
+
 The benchmark executed 30 end-to-end runs per variant against the same prompt file (`/mnt/testLuke5.txt`) using `/mnt/test.py --max-tokens 40000` and judged correctness from the **final answer**, not from intermediate reasoning mentions.
 
 ## Launch Configurations

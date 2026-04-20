@@ -59,4 +59,6 @@ The raw all-run statistics should answer question 2.
 - For **quality comparison**, use the filtered statistics above.
 - For **stability / tail-risk discussion**, keep the raw outlier runs in the appendix and full-output files.
 
+In the later vLLM 30-run batch that was added to this bundle, no comparable repetition-collapse outlier was observed. The vLLM wrong runs in that batch were all coherent wrong answers rather than runaway degeneration failures.
+
 That is the cleanest way to present the result to Luke without hiding the bug, while also not letting the bug corrupt the main comparison.
