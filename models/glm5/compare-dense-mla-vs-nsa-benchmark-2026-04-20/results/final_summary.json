@@ -1,0 +1,26 @@
+[
+  {
+    "variant": "dense_mla",
+    "completed_runs": 30,
+    "correct_runs": 22,
+    "correct_rate": 73.33,
+    "mean_completion_tokens": 8852.77,
+    "mean_ttft_s": 3.477,
+    "mean_elapsed_s": 106.872,
+    "mean_gen_tok_s": 85.702,
+    "mean_e2e_tok_s": 83.221,
+    "server_restarts": 1
+  },
+  {
+    "variant": "nsa",
+    "completed_runs": 30,
+    "correct_runs": 25,
+    "correct_rate": 83.33,
+    "mean_completion_tokens": 7910.57,
+    "mean_ttft_s": 5.971,
+    "mean_elapsed_s": 164.002,
+    "mean_gen_tok_s": 65.284,
+    "mean_e2e_tok_s": 61.967,
+    "server_restarts": 1
+  }
+]

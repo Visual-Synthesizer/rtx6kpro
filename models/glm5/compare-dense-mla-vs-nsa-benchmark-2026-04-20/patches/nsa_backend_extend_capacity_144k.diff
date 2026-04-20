@@ -1,0 +1,13 @@
+diff --git a/python/sglang/srt/layers/attention/nsa_backend.py b/python/sglang/srt/layers/attention/nsa_backend.py
+index 9f1000935..980fdc0aa 100644
+--- a/python/sglang/srt/layers/attention/nsa_backend.py
++++ b/python/sglang/srt/layers/attention/nsa_backend.py
+@@ -585,7 +585,7 @@ class NativeSparseAttnBackend(
+         return max(1, min(int(configured_batch), int(total_q_capacity)))
+ 
+     def _b12x_extend_kv_rows_capacity(self) -> int:
+-        return 128 * 1024
++        return 144 * 1024
+ 
+     def _build_b12x_attention_arena_caps(self):
+         from b12x.integration.mla import B12XAttentionArenaCaps

@@ -1,0 +1,119 @@
+[
+  {
+    "variant": "dense_mla",
+    "run": 8,
+    "classification": "breakdown_or_degeneration",
+    "completion_tokens": 17343,
+    "elapsed_s": 204.99528241157532,
+    "finish_reason": null,
+    "final_answer": "*   The \"reagent vendor ledger says stock code AR-12 is booked under procurement"
+  },
+  {
+    "variant": "dense_mla",
+    "run": 15,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 11398,
+    "elapsed_s": 132.36856150627136,
+    "finish_reason": "stop",
+    "final_answer": "Therefore, the manufacturer of the material used by the Glass Current salinity bench is **Mirel Industrial**, headquartered in **Latvia**."
+  },
+  {
+    "variant": "dense_mla",
+    "run": 19,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 8844,
+    "elapsed_s": 100.6476743221283,
+    "finish_reason": "stop",
+    "final_answer": "Latvia"
+  },
+  {
+    "variant": "dense_mla",
+    "run": 21,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 3615,
+    "elapsed_s": 44.170568227767944,
+    "finish_reason": "stop",
+    "final_answer": "Based on the instrument maintenance appendix and the adjacent vendor master update in the packet, the **Glass Current** salinity bench currently uses calibration cassette **MX-88** (previously MX-86). The vendor master update linked to these components (specifically found adjacent to the cartridge fitment cross-reference for the MX-88 and MX-86 cassettes) identifies the vendor/manufacturer as **Mirel Industrial**, which is headquartered in **Latvia**."
+  },
+  {
+    "variant": "dense_mla",
+    "run": 22,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 11503,
+    "elapsed_s": 131.81006264686584,
+    "finish_reason": "stop",
+    "final_answer": "**Latvia**"
+  },
+  {
+    "variant": "dense_mla",
+    "run": 24,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 10117,
+    "elapsed_s": 117.004629611969,
+    "finish_reason": "stop",
+    "final_answer": "Therefore, the manufacturer of the material (reagent AR-12) used by the Glass Current salinity bench is headquartered in **Latvia**."
+  },
+  {
+    "variant": "dense_mla",
+    "run": 27,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 16875,
+    "elapsed_s": 189.57471632957458,
+    "finish_reason": "stop",
+    "final_answer": "The manufacturer of the material (stock code AR-12) used by the Glass Current salinity bench is Mirel Industrial, which is headquartered in **Latvia**."
+  },
+  {
+    "variant": "dense_mla",
+    "run": 28,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 7500,
+    "elapsed_s": 89.99005174636841,
+    "finish_reason": "stop",
+    "final_answer": "Therefore, the manufacturer of the material used by the Glass Current salinity bench is Mirel Industrial, which is headquartered in **Latvia**."
+  },
+  {
+    "variant": "nsa",
+    "run": 6,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 5323,
+    "elapsed_s": 77.30628323554993,
+    "finish_reason": "stop",
+    "final_answer": "Therefore, the manufacturer of the material used by the Glass Current salinity bench is headquartered in **Latvia**."
+  },
+  {
+    "variant": "nsa",
+    "run": 21,
+    "classification": "breakdown_or_degeneration",
+    "completion_tokens": 40000,
+    "elapsed_s": 764.9861445426941,
+    "finish_reason": "length",
+    "final_answer": "* within information about small driver seat:**   */           *   Within information about small driver seat**:   */           *               * Within information about small driver seat:**   */           *   *Within information about small driver seat:**"
+  },
+  {
+    "variant": "nsa",
+    "run": 26,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 5814,
+    "elapsed_s": 86.13676738739014,
+    "finish_reason": "stop",
+    "final_answer": "**Latvia**"
+  },
+  {
+    "variant": "nsa",
+    "run": 27,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 4698,
+    "elapsed_s": 67.37088894844055,
+    "finish_reason": "stop",
+    "final_answer": "Therefore, the manufacturer of the material (adapter collar N-4 / stock code AR-12) used by the Glass Current salinity bench is headquartered in **Latvia**."
+  },
+  {
+    "variant": "nsa",
+    "run": 29,
+    "classification": "breakdown_or_degeneration",
+    "completion_tokens": 40000,
+    "elapsed_s": 1438.703489780426,
+    "finish_reason": "length",
+    "final_answer": "establish   *   * the $< text.   *   *Issue for     for`    Multiple but the *   *   *   * The logic       something not descriptive,     *   *   *   *       *< - but *   **     *If   * others words don't worry a *   *   *                 You *   *   *   *lor logic between"
+  }
+]

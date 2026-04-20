@@ -1,0 +1,90 @@
+diff --git a/python/sglang/srt/managers/tokenizer_manager.py b/python/sglang/srt/managers/tokenizer_manager.py
+index 8a49717c5..48b68ec79 100644
+--- a/python/sglang/srt/managers/tokenizer_manager.py
++++ b/python/sglang/srt/managers/tokenizer_manager.py
+@@ -617,6 +617,58 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+         # For true batches, return as-is
+         return input_ids, token_type_ids
+ 
++    def _should_apply_glm_chat_template(self, text: str) -> bool:
++        if not text or self.tokenizer is None:
++            return False
++
++        architectures = getattr(self.model_config.hf_config, "architectures", []) or []
++        if "GlmMoeDsaForCausalLM" not in architectures:
++            return False
++
++        if getattr(self.tokenizer, "chat_template", None) is None:
++            return False
++
++        if not hasattr(self.tokenizer, "apply_chat_template"):
++            return False
++
++        # Avoid double-wrapping prompts that are already serialized with the GLM
++        # chat template or include explicit role markers.
++        template_markers = ("<|user|>", "<|assistant|>", "[gMASK]", "<sop>")
++        return not any(marker in text for marker in template_markers)
++
++    def _maybe_apply_glm_chat_template(
++        self, texts: Union[str, List[str]]
++    ) -> Union[str, List[str]]:
++        if isinstance(texts, str):
++            if not self._should_apply_glm_chat_template(texts):
++                return texts
++            logger.info("Applying GLM chat template to raw text generate request.")
++            return self.tokenizer.apply_chat_template(
++                [{"role": "user", "content": texts}],
++                tokenize=False,
++                add_generation_prompt=True,
++                enable_thinking=False,
++            )
++
++        updated_texts = []
++        applied = False
++        for text in texts:
++            if self._should_apply_glm_chat_template(text):
++                updated_texts.append(
++                    self.tokenizer.apply_chat_template(
++                        [{"role": "user", "content": text}],
++                        tokenize=False,
++                        add_generation_prompt=True,
++                        enable_thinking=False,
++                    )
++                )
++                applied = True
++            else:
++                updated_texts.append(text)
++        if applied:
++            logger.info("Applying GLM chat template to raw text batch generate request.")
++        return updated_texts
++
+     async def _tokenize_texts(
+         self, texts: Union[str, List[str]], is_cross_encoder: bool = False
+     ) -> Union[
+@@ -734,6 +786,8 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+                 # Use empty placeholder - multimodal processor will override
+                 input_ids = []
+             else:
++                if isinstance(obj, GenerateReqInput) and not is_cross_encoder_request:
++                    input_text = self._maybe_apply_glm_chat_template(input_text)
+                 input_ids, token_type_ids = await self._tokenize_texts(
+                     input_text, is_cross_encoder_request
+                 )
+@@ -1077,6 +1131,8 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+         # Collect requests and texts
+         requests = [obj[i] for i in range(batch_size)]
+         texts = [req.text for req in requests]
++        if batch_size > 0 and isinstance(requests[0], GenerateReqInput):
++            texts = self._maybe_apply_glm_chat_template(texts)
+ 
+         # Check if any request is a cross-encoder request
+         is_cross_encoder_request = any(
+@@ -1098,7 +1154,7 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+             )
+             tokenized_objs.append(
+                 self._create_tokenized_object(
+-                    req, req.text, input_ids_list[i], None, None, token_type_ids
++                    req, texts[i], input_ids_list[i], None, None, token_type_ids
+                 )
+             )
+         logger.debug(f"Completed batch processing for {batch_size} requests")
