@@ -199,7 +199,7 @@ If the reported cache size is far lower than these numbers, the launch configura
 
 ## NCCL XML vs no-XML Validation
 
-`NCCL_GRAPH_FILE=/mnt/nccl_graph_opt.xml` is still recommended for the fastest known configuration.
+`NCCL_GRAPH_FILE=/mnt/nccl_graph_opt.xml` is still the shipped public recipe for the fastest known configuration.
 
 Patched NCCL without XML was functional, but prefill was still slower than the XML-based path. The cleanest validation was a prefill-only test on the same Kimi MLA stack with `DCP=8`, `TRITON_MLA`, `fp8 KV`, `max_tokens=1`, and no prefix cache.
 
@@ -231,6 +231,26 @@ Without XML:
 - 2 total channels
 
 That is why the XML path is still the best known public recipe for Kimi MLA.
+
+### Upstream no-XML NCCL status
+
+There is now an upstream NCCL draft PR that specifically targets the Turin no-XML pathological ring selection:
+
+- [`NVIDIA/nccl#2127`](https://github.com/NVIDIA/nccl/pull/2127) — Improve AMD Turin no-XML ring graph selection
+
+That fix was validated on the real Kimi MLA community serving path using a single cold `8k` prefill request:
+
+| Mode | TTFT | Prompt tokens | Prompt tok/s |
+|---|---:|---:|---:|
+| broken no-XML (before fix) | `9.138s` | `8005` | `875.98` |
+| no-XML with PR `#2127` | `1.074s` | `8005` | `7455.28` |
+| XML baseline | `1.071s` | `8005` | `7477.64` |
+
+So the no-XML path is now effectively at parity with XML on that targeted reproducer.
+
+Practical interpretation:
+- today: keep using `NCCL_GRAPH_FILE` in the public recipe
+- medium term: if NCCL PR `#2127` lands and ships, the XML file should no longer be required on this Turin setup
 
 ## Minimal Discord Summary
 

@@ -49,7 +49,7 @@ Community-sourced knowledge base for running large language models (Qwen3.5-397B
 ## Key Findings
 
 1. **MTP=2 is the sweet spot** — +51-72% throughput across all models, MTP>3 unstable
-2. **NCCL graph XML fix is critical on AMD Turin** — 1.5-1.9× speedup by correcting hardcoded 16 GB/s bandwidth
+2. **NCCL graph XML fix is still the public Turin recipe** — current upstream NCCL draft fix is [`NVIDIA/nccl#2127`](https://github.com/NVIDIA/nccl/pull/2127), which aims to remove the no-XML pathological ring regression
 3. **PCIe switches dramatically help single-batch latency** — 101 vs 60 tok/s for Kimi K2.5
 4. **BF16 KV cache mandatory on SM120 for GLM-5** — FP8 produces garbled output
 5. **SGLang is the only option for GLM-5** — vLLM lacks SM120-compatible MLA+sparse attention backend
