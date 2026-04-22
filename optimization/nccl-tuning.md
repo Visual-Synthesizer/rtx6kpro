@@ -230,6 +230,48 @@ This forces LL protocol for all message sizes. Festr achieved matching inference
 | NCCL_PROTO=LL | Simple, no files needed | May be suboptimal for large messages |
 | Neither | No configuration | 1.5-1.9x slower for inference |
 
+### Kimi MLA Validation: XML vs no-XML on Patched NCCL 2.29.7
+
+A clean validation was run on the Kimi MLA serving stack with:
+- target-only `moonshotai/Kimi-K2.5`
+- `TRITON_MLA`
+- `fp8 KV`
+- `DCP=8`
+- `max_tokens=1`
+- no prefix cache
+
+This isolates **prefill** rather than decode.
+
+| Mode | Concurrency | Avg TTFT | Aggregate Prompt tok/s |
+|---|---:|---:|---:|
+| XML | 1 | 0.310s | 20.7k tok/s |
+| no-XML | 1 | 1.329s | 6.75k tok/s |
+| XML | 16 | 0.903s | 115.3k tok/s |
+| no-XML | 16 | 0.999s | 108.1k tok/s |
+
+Takeaways:
+- patched NCCL without XML was functional
+- no-XML was still about `3.07x` slower on the single-request prefill test
+- no-XML was still about `6.7%` slower at concurrency 16
+
+### What NCCL Debug Showed in That Test
+
+The transport did not change: both XML and no-XML used `P2P/CUMEM`.
+
+The difference came from graph/search outcome:
+
+With XML:
+- `Pattern 4 ... bw 38/32, type PHB/PIX`
+- `Pattern 1 ... bw 38/32, type PHB/PIX`
+- 4 total channels
+
+Without XML:
+- `Pattern 4 ... bw 15/15, type SYS/PIX`
+- `Pattern 1 ... bw 0.1/0.1, type SYS/SYS`
+- 2 total channels
+
+So the current no-XML path is functionally usable, but still does not match the XML graph for Kimi MLA prefill.
+
 ---
 
 ## nvidia_uvm Fix
