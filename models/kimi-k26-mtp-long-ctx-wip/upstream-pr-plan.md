@@ -1,6 +1,8 @@
 # vLLM upstream issue / PR plan
 
-Status: plan only. No GitHub issue or PR was changed from this file.
+Status: executed as a draft upstream reconstruction. The GitHub issue and
+draft PR were updated from this plan; this file now tracks the current
+state and remaining review/split work.
 
 ## Goal
 
@@ -13,6 +15,14 @@ voipmonitor/vllm:cu130-mtp-tuned-v3-20260423
 
 The reconstruction must include the previously validated local Kimi patches and
 the newer Kimi-K2.6 MTP long-context changes documented in this directory.
+
+Current upstream coordination:
+
+```text
+tracking issue:        vllm-project/vllm#40608
+draft consolidation PR: vllm-project/vllm#40750
+GLM/PCIe prerequisite:  vllm-project/vllm#39633 via tracker #37113
+```
 
 ## Reference state
 
@@ -68,6 +78,19 @@ if self.use_async_spec_decode:
 Do not open a new upstream PR for this; document it as a local snapshot drift
 that must be dropped/reverted when moving from the snapshot to upstream `main`.
 
+Clean upstream reconstruction branch:
+
+```text
+repo:   https://github.com/voipmonitor/vllm
+branch: upstream/pr-kimi-k26-mtp-triton-mla-stack
+base:   vllm-project/vllm main
+head:   4f2fc3463367653577a07beca485db4a7422c714
+image:  voipmonitor/vllm:kimi-k26-mtp-upstream-stack-pcie-env-test-20260424
+```
+
+That branch is intentionally built from upstream `main` plus the documented PR
+stack. It is not the mutable shipping container.
+
 ## Issue update plan
 
 Existing tracking issue:
@@ -104,6 +127,7 @@ The revised issue should include:
 - Link to `patches/final_diff.patch`.
 - Final benchmark matrix from the README.
 - KV-cache capacity table from the README.
+- `VLLM_ENABLE_PCIE_ALLREDUCE=1` requirement and link to `#39633`.
 - Short-context speed recipe using `--max-model-len 150000`.
 - Long-context flexibility recipe using `--max-model-len 262144`.
 - Note that `VLLM_SPECULATIVE_DISABLE_ABOVE_SEQ_LEN` is no longer required for
@@ -134,6 +158,7 @@ Existing PRs from the previous work:
 #40612 [SpecDecode] Add local argmax helper for Llama Eagle3 drafts
 #40613 [SpecDecode] Add seq-length gate for speculative decode
 #40614 [Attention] Tune TRITON_MLA for SM120 + FP8 decode
+#39633 [Distributed] Fix PCIe custom-allreduce eligibility on >2 GPU topologies
 ```
 
 Recommended handling:
@@ -149,6 +174,12 @@ Recommended handling:
   The final MTP image no longer requires `VLLM_SPECULATIVE_DISABLE_ABOVE_SEQ_LEN`.
 - Close/supersede `#40614`. The old narrow SM120 fp8 split/BLOCK_H patch is
   replaced by the newer FULL-CG + batch-aware split + tuning-table implementation.
+- Include / rebase `#39633`. It is the GLM-5.1 tracker prerequisite that makes
+  `VLLM_ENABLE_PCIE_ALLREDUCE=1` enable custom allreduce on >2 PCIe-only GPUs
+  when the driver reports P2P support. In the reconstruction branch it was
+  cleaned up further by registering `VLLM_ENABLE_PCIE_ALLREDUCE` in
+  `vllm/envs.py`, avoiding the API-server unknown-env warning while preserving
+  the same runtime behavior.
 
 ## New PRs to prepare
 
@@ -161,6 +192,33 @@ https://github.com/vllm-project/vllm/pull/40750
 This is the runnable upstream-main reconstruction branch used for end-to-end
 container validation. It includes the prerequisite local Kimi PRs plus the new
 TRITON_MLA MTP work. It can be split after performance is validated.
+
+Included commit classes:
+
+- `#40609`: MLA + DCP + fp8 KV enablement.
+- `#40610`: async proposer synchronization.
+- `#40611`: draft-specific attention backend and KV dtype.
+- `#39633`: explicit PCIe custom-allreduce opt-in.
+- new TRITON_MLA FULL-CG / DCP correctness / batch-aware split / sm120 fp8
+  tuning table work from this directory.
+
+Validated reconstruction image:
+
+```text
+voipmonitor/vllm:kimi-k26-mtp-upstream-stack-pcie-env-test-20260424
+```
+
+Observed startup validation with DCP=8 + MTP + XML:
+
+```text
+port:                         5002
+VLLM_ENABLE_PCIE_ALLREDUCE:   enabled on all 8 workers
+NCCL_GRAPH_FILE:              /mnt/nccl_graph_opt.xml
+TRITON_MLA:                   target and draft
+GPU KV cache size:            1,753,088 tokens
+Maximum concurrency @262144:  6.69x
+startup:                      Application startup complete
+```
 
 ### PR A: TRITON_MLA FULL CUDA graph support + DCP correctness
 

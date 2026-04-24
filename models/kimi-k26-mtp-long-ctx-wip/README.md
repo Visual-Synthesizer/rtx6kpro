@@ -28,6 +28,15 @@ Ending point (this image):
 - `VLLM_SPECULATIVE_DISABLE_ABOVE_SEQ_LEN` kill-switch no longer needed (MTP wins at any ctx on single-stream)
 - Clean A/B against the hand-tuned baseline shows the residual delta is **max-model-len**, not kernel config
 
+Current upstream reconstruction is tracked in
+[`vllm-project/vllm#40608`](https://github.com/vllm-project/vllm/issues/40608)
+and draft PR
+[`vllm-project/vllm#40750`](https://github.com/vllm-project/vllm/pull/40750).
+The PCIe custom-allreduce prerequisite is
+[`vllm-project/vllm#39633`](https://github.com/vllm-project/vllm/pull/39633),
+originally part of the GLM-5.1 tracker. The clean reconstruction test image is
+`voipmonitor/vllm:kimi-k26-mtp-upstream-stack-pcie-env-test-20260424`.
+
 ## Hardware & stack
 
 | item | value |
@@ -797,6 +806,11 @@ VLLM_TEST_FORCE_FP8_MARLIN=1 VLLM_MARLIN_USE_ATOMIC_ADD=1 VLLM_MARLIN_INPUT_DTYP
   --tool-call-parser kimi_k2 --enable-auto-tool-choice --reasoning-parser kimi_k2 \
   --speculative-config '\''{"model":"lightseekorg/kimi-k2.5-eagle3-mla","method":"eagle3","num_speculative_tokens":3,"draft_attention_backend":"TRITON_MLA","draft_kv_cache_dtype":"fp8","rejection_sample_method":"probabilistic"}'\'''
 ```
+
+`VLLM_ENABLE_PCIE_ALLREDUCE=1` is required on this 8-GPU PCIe topology so vLLM
+uses the small-tensor custom allreduce path. `NCCL_GRAPH_FILE` is still the
+best-known runtime path for NCCL collectives on this machine; it is not part of
+the vLLM source patch stack.
 
 ### Long-ctx flex config (≥ 150 k ctx workload)
 
