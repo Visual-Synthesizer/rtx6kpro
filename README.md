@@ -24,6 +24,7 @@ Community-sourced knowledge base for running large language models (Qwen3.5-397B
 - [ASUS ESC8000A-E13P + Broadcom Switches](hardware/asus-esc8000a-e13p-broadcom-switches.md) — Topology, ACS disable, P2P proof, benchmarks
 - [ASRock WRX90 + 3× c-payne Switches (hierarchy)](hardware/wrx90-cpayne-microchip-switches.md) — Root switch, uniform BW, no collapse bug
 - [ASRock WRX90 + 2× c-payne Switches (flat)](hardware/wrx90-cpayne-2switch-flat.md) — Flat topology, CPU-routed cross-switch, comparison
+- [ASRock WRX90 + 4× c-payne Switches (16 GPU)](hardware/wrx90-cpayne-16gpu-4switch.md) — 16 GPUs across 4 switches, posted-write collapse on 3+ root complexes
 
 ### Inference Engines
 - [vLLM](inference-engines/vllm.md) — Config, MTP, model-specific commands
