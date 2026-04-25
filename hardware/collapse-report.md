@@ -1,17 +1,26 @@
 # AMD CPU Posted-Write Collapse — Reproducible Report
 
-**A focused, self-contained report on a PCIe peer-to-peer write bandwidth collapse observed on AMD Threadripper Pro 7955WX (Storm Peak / Genoa-derived sIOD) when the traffic pattern is *one source PCIe switch dispatching to multiple destination CPU root complexes*.**
+**A focused, self-contained report on a PCIe peer-to-peer write bandwidth collapse observed on AMD server-class CPUs (both Genoa-family Threadripper Pro 7000 / EPYC 9004 *and* Turin-family EPYC 9005) when the traffic pattern is *one source PCIe switch dispatching to multiple destination CPU root complexes*.**
 
 This document is intended to be readable on its own, without context from the rest of the [rtx6kpro wiki](https://github.com/voipmonitor/rtx6kpro). All measurements are reproducible with the scripts below.
+
+The collapse has been independently observed on **two completely different platforms with two different PCIe switch vendors**, which strongly indicates the bug is in the AMD CPU I/O die rather than in any one switch silicon:
+
+| Platform | CPU | PCIe switch vendor | Result |
+|----------|-----|--------------------|--------|
+| ASRock WRX90 WS EVO (this report's primary system) | TR Pro 7955WX (Genoa-family sIOD, Zen 4) | **Microchip Switchtec PM50100** (c-payne) | **collapse confirmed** |
+| ASUS ESC8000A-E13P (separate test rig — see [`asus-esc8000a-e13p-broadcom-switches.md`](asus-esc8000a-e13p-broadcom-switches.md)) | 2× EPYC 9575F (Turin sIOD, Zen 5) | **Broadcom PEX890xx** | **collapse confirmed** |
+
+Same trigger, same write/read asymmetry, same magnitude on both. **The Turin IOD revision did not fix it.** The bug travels with the AMD CPU, not the switch.
 
 ---
 
 ## TL;DR
 
-On AMD Threadripper Pro 7000 (and likely all Genoa-derived AMD Server I/O Dies), GPU-to-GPU peer-to-peer **WRITE** bandwidth between PCIe switches collapses by ~75% when **the same source PCIe switch is concurrently writing to GPUs sitting behind two or more different CPU root complexes**.
+On AMD Genoa- and Turin-family server I/O dies, GPU-to-GPU peer-to-peer **WRITE** bandwidth between PCIe switches collapses by ~75–85 % when **the same source PCIe switch is concurrently writing to GPUs sitting behind two or more different CPU root complexes**.
 
-* **WRITE** drops from ~52 GB/s per pair to ~6–7 GB/s per pair (~85% loss).
-* **READ** is unaffected (stays at full ~53 GB/s).
+* **WRITE** drops from ~52 GB/s per pair to ~6–7 GB/s per pair (Microchip / TR Pro), or from ~37 GB/s to ~2.7 GB/s (Broadcom / dual EPYC Turin).
+* **READ** is unaffected (stays at full link rate).
 * Single-pair, same-destination-root, and independent-source-uplink patterns are unaffected — full bandwidth.
 
 The collapse is at the **CPU silicon arbitration layer** (AMD I/O Die scalable-data-fabric arbitration of posted writes). It is **not fixed** by:
@@ -19,8 +28,10 @@ The collapse is at the **CPU silicon arbitration layer** (AMD I/O Die scalable-d
 * newer NVIDIA driver (tested 575 → 580 → 595.58.03)
 * `iommu=off` or `iommu=pt`
 * swapping motherboard slots so each PCIe switch has its own root port
+* moving from Genoa-family (TR Pro 7000 / EPYC 9004) to Turin-family (EPYC 9005)
+* changing PCIe switch vendor (Microchip Switchtec ↔ Broadcom PEX890xx)
 
-It **is masked** by `iommu=on` (full translation), but that comes with a separate ~15% single-flow bandwidth penalty and reproducible NCCL all-reduce hangs at 8+ GPUs.
+It **is masked** by `iommu=on` (full translation), but that comes with a separate ~15 % single-flow bandwidth penalty and reproducible NCCL all-reduce hangs at 8+ GPUs.
 
 ---
 
@@ -226,6 +237,8 @@ These were tested and **do not fix the collapse**:
 * Disabling ACS Request-Redirect on every PCIe bridge — required for P2P at all, but does not affect collapse magnitude
 * NCCL env tuning (`NCCL_P2P_LEVEL=SYS`, custom XML graph) — does not avoid the collapse, only reroutes around it
 * **Moving each PCIe switch to its own dedicated CPU root port** (the topology used in this report). The previous test layout had two of the four c-payne switches sharing a single root (Q3); moving them to four independent root ports did not change the collapse magnitude or trigger pattern. This rules out "two switches sharing one root complex" as the cause.
+* **Moving from Genoa-family to Turin-family AMD CPU.** EPYC 9575F (Turin, Zen 5, latest IOD revision) on the ASUS ESC8000A-E13P with Broadcom PEX890xx switches exhibits the identical trigger pattern with the same write/read asymmetry. The Turin IOD did not fix this.
+* **Changing PCIe switch vendor.** Microchip Switchtec PM50100 (c-payne, on TR Pro) and Broadcom PEX890xx (on dual EPYC Turin) both expose the same collapse with the same trigger rule. Two unrelated switch silicons exhibiting an identical bug at the same trigger is strong evidence the root cause is upstream — in the AMD CPU's IOD posted-write arbitration — and not in either switch.
 
 These were tested and **do mask the collapse**, with caveats:
 
@@ -247,13 +260,17 @@ The single source PCIe root port on the source switch's quadrant has to forward 
 
 Reads are unaffected because the read response path uses non-posted completion TLPs, which take a different arbitration path inside the IOD.
 
-This matches public AMD documentation only loosely — there is no public errata describing this specifically. We have not been able to find a Genoa/Storm Peak PPR section that admits the issue. If anyone with AMD-internal access reads this, an errata pointer or a workaround flag would be greatly appreciated.
+This matches public AMD documentation only loosely — there is no public errata describing this specifically. We have not been able to find a Genoa, Storm Peak, or Turin PPR section that admits the issue. If anyone with AMD-internal access reads this, an errata pointer or a workaround flag would be greatly appreciated.
+
+The fact that the bug survives the Genoa → Turin IOD revision (and shows up identically on Microchip and Broadcom switches) makes the AMD CPU's posted-write arbitration the only common factor. Until AMD ships an IOD revision that fixes it, every Genoa- and Turin-family server CPU paired with cross-switch GPU traffic is exposed.
 
 ---
 
-## Why this matters for c-payne users
+## Why this matters for PCIe switch users (c-payne, Broadcom-based servers, etc.)
 
-c-payne sells PCIe Gen5 switches that the community uses to build 4×, 8×, and 16× GPU rigs without NVLink. The intended use case is precisely the pattern that triggers this collapse: many GPUs behind one switch, talking peer-to-peer to GPUs behind another switch. With Threadripper Pro / EPYC Genoa as the host CPU, the AMD IOD's SDF arbitration silently caps cross-switch GPU-GPU **write** throughput at roughly ⅛ of the link rate as soon as more than one destination root complex is touched concurrently.
+c-payne sells Microchip-based PCIe Gen5 switches that the community uses to build 4×, 8×, and 16× GPU rigs without NVLink. ASUS / Supermicro / Gigabyte sell Broadcom-PEX890xx-based 8-GPU servers (ESC8000A-E13P and similar). The intended use case for both is precisely the pattern that triggers this collapse: many GPUs behind one switch, talking peer-to-peer to GPUs behind another switch.
+
+With **any** AMD Genoa- or Turin-family CPU as the host, the IOD's SDF arbitration silently caps cross-switch GPU-GPU **write** throughput at a small fraction of the link rate as soon as more than one destination root complex is touched concurrently — regardless of which PCIe switch silicon you bought.
 
 In practical workloads:
 
@@ -262,7 +279,7 @@ In practical workloads:
 * **NCCL tree all-reduce, all-gather, all-to-all, one-to-many broadcast across switches:** **collapse-bound**.
 * **Context parallelism / DCP across switches:** likely collapse-bound during cross-switch chunks.
 
-For the c-payne *3-stage hierarchical* configuration (root switch + leaf switches), this collapse does not occur because cross-switch traffic never crosses a CPU root complex. That observation is consistent with everything in this report.
+For the c-payne *3-stage hierarchical* configuration (root switch + leaf switches), this collapse does not occur because cross-switch traffic never crosses a CPU root complex. That observation is consistent with everything in this report and is currently the only known *topology-level* fix.
 
 ---
 
@@ -278,10 +295,15 @@ For the c-payne *3-stage hierarchical* configuration (root switch + leaf switche
 
 ## Contact
 
-This report was assembled from work on the [voipmonitor/rtx6kpro](https://github.com/voipmonitor/rtx6kpro) wiki. If you have access to:
+This report was assembled from work on the [voipmonitor/rtx6kpro](https://github.com/voipmonitor/rtx6kpro) wiki. We have already confirmed the bug on:
 
-* Granite Rapids / Xeon 6 platforms with c-payne switches
-* EPYC Turin (9005-series) platforms with c-payne switches
-* AMD-internal documentation or errata covering IOD posted-write arbitration
+* AMD TR Pro 7955WX (Genoa-family sIOD, Zen 4) with **Microchip Switchtec** c-payne switches
+* AMD EPYC 9575F (Turin sIOD, Zen 5) with **Broadcom PEX890xx** switches
+
+If you have access to:
+
+* Intel Granite Rapids / Xeon 6 platforms (any PCIe switch) — to confirm whether this is AMD-only or also affects Intel I/O fabrics
+* AMD EPYC Bergamo / Siena (Zen 4c IOD revisions) — to narrow down which IOD revisions are affected
+* AMD-internal documentation or errata covering IOD posted-write arbitration / scalable data fabric credits
 
 …we'd very much like to hear whether the collapse trigger fires on those configurations or not. Open an issue on the repo or PR an additional results table.
