@@ -1,0 +1,1019 @@
+engine: vllm_5248
+run: 18
+completion_tokens: 10586
+elapsed_s: 167.25901556015015
+gen_tok_s: 63.653878847421936
+finish_reason: stop
+correct: False
+
+=== FINAL ANSWER ===
+Latvia
+
+=== COMBINED OUTPUT ===
+1.  **Analyze the Request:** The user wants to know the country where the manufacturer of the material used by the "Glass Current salinity bench" is headquartered. I need to find the reference to "Glass Current" and "salinity bench" in the provided text, identify the material or component mentioned in relation to it, find the manufacturer of that component, and then determine the country of that manufacturer.
+
+2.  **Scan the Text for Keywords:** I will search the text for "Glass Current" and "salinity bench".
+
+    *   *Search 1:* "Glass Current"
+    *   *Search 2:* "salinity bench"
+
+3.  **Locate the Relevant Section:**
+    *   Found: "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87, a change made after the old cassette housing developed a hairline crack near the lower latch. The note matters only because staff kept conflating the two benches during a cleanup of retired service sheets." (Wait, this says "Brackish Current", not "Glass Current". Let me re-read the prompt carefully. Ah, the prompt asks about the "Glass Current salinity bench". Let me search for "Glass Current".)
+
+    *   *Correction:* I missed "Glass Current" in my first scan. Let me look closer.
+    *   Ah, I found: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86 still visible on one retired service sheet. The appendix was preserved because a prior unexplained correction-factor drift turned out to be nothing more glamorous than a bench running the wrong cassette while everyone argued about chemistry."
+
+4.  **Identify the Material/Component:** The text mentions the "Glass Current salinity bench" uses "calibration cassette MX-88". It mentions replacing the older "MX-86". The question asks about the manufacturer of the *material* used by the bench. This phrasing is a bit ambiguous. Does it mean the manufacturer of the bench? The manufacturer of the cassette? Or is there a specific material mentioned?
+
+    Let's look for "Glass Current" again and see if there's a different section with more detail.
+    *   I see the "Brackish Current" section which mentions "MX-89".
+    *   I see the "Glass Current" section which mentions "MX-88".
+
+    The question asks for the manufacturer of the *material* used by the bench. This suggests I need to look for a vendor or manufacturer name associated with a specific component or material mentioned in the context of the Glass Current bench.
+
+    Let's look for other "vendor" or "manufacturer" names in the text.
+    *   "The adapter summary had a second page full of low-stakes component trivia that only purchasing would have reason to care about. Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    *   "The same ledger notes that stock code AR-13 is booked under procurement family K-27B..."
+    *   "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    Okay, I need to link "Glass Current" to one of these vendors or a specific material.
+    Let's re-read the Glass Current section carefully: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86 still visible on one retired service sheet."
+
+    Is there any other mention of "Glass Current"? No.
+    Is there a mention of the cassette manufacturer? No.
+    Is there a mention of a material used *in* the cassette or *on* the bench?
+    Let's check the "Brackish Current" section just in case I got the name wrong or there's a parallel. "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87..."
+
+    This seems like a specific "trivia" question where the answer might be in the "low-stakes component trivia" section or the vendor registration correction.
+
+    Let's look at the "low-stakes component trivia" section again:
+    "The adapter summary had a second page full of low-stakes component trivia... Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+
+    This lists FR-31, SC-8, BS-14, GP-2.
+
+    Let's look for another section listing vendors/codes.
+    "One end-of-week logistics recap included a bundled approval table... Sample rack SR-18 was assigned to Behr Coil, valve key VK-3 to Pell Arden, housing clip HC-9 to Lorin Gate, and hinge pin HP-2 to Voss Merrin..."
+
+    This lists SR-18, VK-3, HC-9, HP-2.
+
+    Let's look for "MX-88" or "MX-86" connections.
+    The text says: "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87... The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2. Someone drew a margin arrow after a prior mix-up to make clear that the couplings are not interchangeable..."
+
+    Wait, I need to find the manufacturer of the *material*.
+    Is there a mention of a specific chemical or material used by the Glass Current bench?
+    The text mentions "Brackish Current" and "Glass Current".
+    In the "Brackish Current" paragraph: "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87... The note says control cassette MX-88 seats against adapter collar N-4..."
+    Wait, "MX-88 seats against adapter collar N-4". This is under the "Brackish Current" paragraph? Or is it under a different heading?
+
+    Let's find the specific paragraph about MX-88 and adapter collars.
+    "The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2. Someone drew a margin arrow after a prior mix-up to make clear that the couplings are not interchangeable even though the outer housings are nearly the same size."
+    This text appears in the packet under the heading or context of "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89..." but then talks about MX-88.
+    Actually, looking closely at the text provided:
+    "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87... The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2. Someone drew a margin arrow..."
+    This seems to be a single block describing the bench configuration notes. The "note" refers to a document that covers multiple cassettes (MX-89, MX-87, MX-88, MX-86).
+
+    Now, the question asks about the "Glass Current salinity bench".
+    The specific text about "Glass Current" is: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86 still visible on one retired service sheet."
+
+    So, the Glass Current bench uses cassette MX-88.
+    Now, is there a mention of a "material" manufacturer?
+    Let's look for "adapter collar N-4".
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    Is there a manufacturer for N-4?
+    Let's check the "low-stakes component trivia" section again.
+    "Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    None of these are N-4.
+
+    Let's check the other section: "Sample rack SR-18 was assigned to Behr Coil, valve key VK-3 to Pell Arden, housing clip HC-9 to Lorin Gate, and hinge pin HP-2 to Voss Merrin..."
+    None of these are N-4.
+
+    Is there a section about adapter collars?
+    "The adapter summary had a second page full of low-stakes component trivia that only purchasing would have reason to care about."
+    Is there an N-4 there?
+    Let's check the text around the adapter summary.
+    "Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    No N-4.
+
+    Let's search for "N-4".
+    The text mentions "adapter collar N-4" in the context of "control cassette MX-88 seats against adapter collar N-4".
+    Is there a manufacturer for "adapter collar N-4"?
+    Let me search the text for "N-4" again.
+    There is a section: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin during end-of-shift cleanup, even though the sleeve labels differ by only a single printed character near the lower edge."
+    This mentions "insert collar N-4B" and "stock code AR-12A".
+    Is there a manufacturer for N-4B or AR-12A?
+    Let's check "procurement family K-27".
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B..."
+    "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    So, V-447 = Mirel Instrument (Estonia).
+    V-447 maps to procurement family K-27B.
+    Stock code AR-13 is K-27B.
+    Stock code AR-12 is K-27.
+    K-27 maps to V-441.
+    V-441 = Mirel Industrial (Latvia)? No, the correction says V-447 (Mirel Instrument) is Estonia. The previous text about V-447 says "Mirel Industrial... headquartered in Latvia... should not be merged with Mirel Instrument...". Wait, let me re-read the vendor correction carefully.
+
+    Text: "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it."
+
+    So, Vendor V-447 = Mirel Instrument. HQ = Estonia.
+    Vendor V-441 = ?
+    Text: "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    Text: "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer even though both cartons use the same pale gray stock and nearly identical blue corner stamps."
+    Text: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin..."
+
+    The question asks about the "manufacturer of the material used by the Glass Current salinity bench".
+    The Glass Current bench uses cassette MX-88.
+    MX-88 seats against adapter collar N-4.
+    Is N-4 related to N-4B? N-4B is an "insert collar". N-4 is an "adapter collar".
+    The text about N-4B says it ships with stock code AR-12A.
+    Is there a manufacturer for N-4 or N-4B or AR-12A?
+    Let's check the "low-stakes component trivia" section again.
+    "Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    These don't seem to be related to N-4.
+
+    Wait, I need to look for where N-4 is linked to a manufacturer.
+    Maybe I missed a connection. Let's look for "N-4" again.
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    Is there a list of adapter collar manufacturers?
+    Let's look at the "adapter summary" section more closely.
+    "The adapter summary had a second page full of low-stakes component trivia that only purchasing would have reason to care about. Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    This section *says* it is "The adapter summary", but the items listed are FR-31, SC-8, BS-14, GP-2. It doesn't list N-4.
+
+    Let's look for "Mirel". The vendor correction mentions Mirel Instrument (Estonia) and Mirel Industrial (Latvia). V-447 corresponds to Mirel Instrument.
+    Is there any link between the Glass Current bench, MX-88, N-4, and Mirel?
+    Let's look at the "small-parts card" again.
+    "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+    Is AR-12A related to K-27?
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B... and should remain segregated from the AR-12 drawer..."
+    K-27 maps to V-441. K-27B maps to V-447.
+    V-447 is Mirel Instrument (Estonia).
+    V-441 is not explicitly named, but there is a "vendor registration correction" mentioning "Mirel Industrial... headquartered in Latvia... should not be merged with Mirel Instrument...".
+    Is V-441 Mirel Industrial? The text says "vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia...". It implies the confusion was with Mirel Industrial (Latvia).
+    But does N-4 or N-4B relate to Mirel?
+
+    Let's go back to the Glass Current bench.
+    "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86... The appendix was preserved because a prior unexplained correction-factor drift turned out to be nothing more glamorous than a bench running the wrong cassette while everyone argued about chemistry."
+
+    Is there any other mention of "Glass Current"?
+    No.
+
+    Is there any mention of "calibration cassette" manufacturers?
+    No.
+
+    Is there a mention of a *material* used?
+    Maybe "salinity bench" implies a material.
+    Let's look for "Mirel Instrument" again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    Is there a connection between Mirel Instrument and the Glass Current bench?
+    Let's look for V-447 or K-27B or AR-13 or AR-12A in the context of the bench.
+    The bench uses MX-88. MX-88 seats against N-4.
+    Is N-4 the same as N-4B? N-4B is an insert collar. N-4 is an adapter collar.
+    The text about N-4B says it "ships with stock code AR-12A".
+    Is AR-12A associated with Mirel?
+    The ledger note says "stock code AR-13 is booked under procurement family K-27B".
+    K-27B maps to V-447.
+    V-447 is Mirel Instrument (Estonia).
+    Is AR-12A associated with K-27? (AR-12 drawer vs AR-13).
+    "AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This implies AR-12 is likely K-27 (or related).
+    K-27 maps to V-441.
+    V-441 is Mirel Industrial (Latvia).
+    So, if AR-12A is in the AR-12 family, it maps to V-441.
+    But the question asks about the "manufacturer of the material used by the Glass Current salinity bench".
+    Does the bench use N-4?
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    Does the bench use N-4B?
+    "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+
+    This seems complicated. Is there a simpler link?
+    Let's check if "Mirel Instrument" (Estonia) is the answer directly.
+    Why would it be?
+    Maybe "Glass Current" is a product of Mirel Instrument?
+    Or maybe the "material" used is manufactured by Mirel Instrument.
+    Let's check the text for "Mirel Instrument" again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    Let's check "Mirel Industrial".
+    "...should not be merged with Mirel Industrial despite the near-identical names on older export tables."
+
+    Let's look for "V-441".
+    "The procurement family crosswalk says K-27 maps to vendor account V-441..."
+    Is V-441 Mirel Industrial? The correction says "vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia...". This implies V-447 was confused with a Latvian company (Mirel Industrial).
+    Is it possible the Glass Current bench uses a part from Mirel Instrument?
+    Or maybe the "material" is the "adapter collar N-4" or the "insert collar N-4B"?
+    If N-4B ships with AR-12A, and AR-12 is K-27, and K-27 is V-441, and V-441 is Mirel Industrial (Latvia)? That would lead to Latvia.
+    But what if N-4 is different? What if N-4 relates to N-4B?
+    The text says "insert collar N-4B ships with stock code AR-12A".
+    The bench uses "adapter collar N-4".
+    Are N-4 and N-4B related? "N-4B" implies a variant of N-4.
+    If N-4B is AR-12A, and AR-12 is K-27, then it links to V-441.
+    If AR-13 is K-27B, it links to V-447 (Mirel Instrument, Estonia).
+    Does the Glass Current bench use N-4? Yes ("control cassette MX-88 seats against adapter collar N-4").
+    Does it use N-4B? The text mentions N-4B on the small-parts card. It doesn't explicitly say the bench uses N-4B.
+    However, the question asks for the "manufacturer of the material".
+    Maybe "Glass Current" isn't the bench name, but part of the name?
+    "The instrument maintenance appendix for the Glass Current salinity bench..."
+
+    Let's reconsider the "vendor registration correction".
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    This is a very specific piece of information. It's usually included to answer a question. The prompt asks "In which country is the manufacturer of the material used by the Glass Current salinity bench headquartered?"
+    The "material" might be the adapter collar.
+    If the adapter collar is N-4, and N-4 is related to N-4B, and N-4B ships with AR-12A...
+    This path seems fraught with assumption (that N-4 and N-4B are the same manufacturer).
+    Is there a more direct connection?
+    "The adapter summary had a second page full of low-stakes component trivia... Ferrule set FR-31... seal carrier SC-8... bracket shim BS-14... guide pin GP-2..."
+    None of these are N-4.
+
+    Let's look for "N-4" again.
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+
+    Let's look for "Mirel Instrument".
+    It is V-447.
+    V-447 corresponds to K-27B.
+    K-27B corresponds to AR-13.
+    Is there any mention of AR-13 on the Glass Current bench? No.
+
+    What if "Mirel Industrial" (Latvia) is the manufacturer?
+    V-441 corresponds to K-27.
+    K-27 corresponds to AR-12 (implied by separation from AR-13).
+    AR-12A ships with N-4B.
+    N-4B is likely related to N-4.
+    N-4 is used by the Glass Current bench (MX-88 seats against it).
+    Therefore, the adapter collar N-4 (or the material it represents) is likely manufactured by V-441, which is likely Mirel Industrial, headquartered in Latvia.
+    Wait, let's check if V-441 is explicitly Mirel Industrial.
+    Text: "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it. The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Wait! "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Earlier I read: "The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2."
+    This text appears in the paragraph about the "neighboring bench configuration note" (Brackish Current).
+    Let's re-read that paragraph carefully.
+    "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87, a change made after the old cassette housing developed a hairline crack near the lower latch. The note matters only because staff kept conflating the two benches during a cleanup of retired service sheets."
+    Then later: "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B, while the legacy MX-87 cassette seats against N-3. Someone drew a margin arrow..."
+    Wait, the text I saw earlier in my search for N-4 was: "The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2."
+    This refers to MX-88 and MX-86.
+    And the Glass Current bench uses MX-88 (and legacy MX-86).
+    So, the Glass Current bench uses adapter collar N-4.
+    Now, where is the manufacturer of N-4?
+    The paragraph about the vendor registration correction mentions: "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Wait, let's look at the text segment containing "N-4B".
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia... The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B, while the legacy MX-87 cassette seats against N-3. Someone drew a margin arrow..."
+    This text is *immediately following* the vendor registration correction.
+    So: The adjacent service bay (Brackish Current) uses N-4B.
+    The Glass Current bench uses N-4.
+    Are N-4 and N-4B the same manufacturer?
+    The text says: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+    If N-4 is an adapter collar and N-4B is an insert collar, they are likely related (same series).
+    Stock code AR-12A ships with N-4B.
+    AR-12 is in the AR-12 drawer.
+    AR-13 is booked under K-27B (Mirel Instrument, Estonia).
+    AR-12 is segregated from AR-13. This implies AR-12 is likely K-27.
+    K-27 maps to V-441.
+    The text says V-447 (Mirel Instrument) is Estonia, *not Latvia*.
+    It mentions "Mirel Industrial" in Latvia.
+    It's highly probable V-441 is Mirel Industrial.
+    So, the material (adapter collar N-4 / insert collar N-4B) is associated with AR-12 / K-27 / V-441 / Mirel Industrial (Latvia).
+
+    However, let's look at the "vendor registration correction" paragraph again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    Is it possible that the "material used by the Glass Current salinity bench" is *not* the adapter collar N-4, but something else?
+    Or is it possible that the "Glass Current" bench uses N-4B?
+    The text says: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86... The note says control cassette MX-88 seats against adapter collar N-4..."
+    It explicitly links Glass Current -> MX-88 -> N-4.
+    And the adjacent service bay (Brackish Current) uses MX-89 -> N-4B.
+    The small parts card says N-4B ships with AR-12A.
+    The ledger says AR-13 is K-27B.
+    The crosswalk says K-27B maps to V-447.
+    V-447 is Mirel Instrument (Estonia).
+    Wait, AR-13 is K-27B.
+    N-4B ships with AR-12A.
+    Is AR-12A related to K-27B? No, it's likely related to K-27 (AR-12 drawer).
+    If AR-12 is K-27, it maps to V-441.
+    Is there any indication that N-4 or N-4B maps to V-447 (Estonia)?
+    Let's look for "AR-12" in the text.
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This suggests AR-12 is *different* from AR-13.
+    If AR-12 is different, it's likely K-27 (since AR-13 is K-27B).
+    K-27 maps to V-441.
+    V-441 is likely the Latvian company (Mirel Industrial), given the correction about the Estonian company (V-447) not being Latvia.
+
+    So, if N-4 is related to N-4B, and N-4B is AR-12A, and AR-12 is V-441, then the manufacturer is in Latvia.
+
+    BUT, let's check the "vendor registration correction" again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    This sentence appears right before the mention of N-4B.
+    "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Is it possible the question implies that N-4B (and by extension N-4) is associated with V-447 (Estonia)?
+    Or is it associated with V-441 (Latvia)?
+    The text says "stock code AR-12A" ships with N-4B.
+    The text says "stock code AR-13 is booked under procurement family K-27B".
+    K-27B is V-447.
+    If AR-12A is *not* K-27B, then it's likely not V-447.
+    However, the text says "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin..."
+    If it ships with AR-12A, and must not be dropped in the AR-12 bin...
+    This is confusing. If it ships with AR-12A, it probably *belongs* in the AR-12 bin (or a bin for AR-12A).
+    Why would it not be dropped in the AR-12 bin? Maybe because the labels are different? "even though the sleeve labels differ by only a single printed character near the lower edge."
+    This implies AR-12A is similar to AR-12, but distinct.
+    If AR-13 is K-27B (V-447, Estonia), and AR-12 is K-27 (V-441, Latvia), then AR-12A is likely also K-27 (V-441, Latvia) or a variant.
+    This points to Latvia.
+
+    However, let's look at the "vendor registration correction" paragraph closely.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia... The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    The juxtaposition of "Estonia" and "N-4B" might imply a connection that I'm misinterpreting as "Latvia" via the other trail.
+    Or, maybe "Mirel Instrument" (Estonia) is the manufacturer of N-4B?
+    Why would the vendor registration correction be placed right next to the service bay note about N-4B?
+    Maybe N-4B is associated with V-447.
+    Let's check if there is any other connection.
+    Maybe "adapter collar N-4B" and "insert collar N-4B" are the same thing.
+    The small parts card says "insert collar N-4B ships with stock code AR-12A".
+    If N-4B ships with AR-12A, and AR-12 is K-27 (V-441), then the manufacturer is V-441.
+    If V-441 is "Mirel Industrial" (Latvia), the answer is Latvia.
+    If V-441 is "Mirel Instrument" (Estonia) - wait, the text says V-447 is Mirel Instrument (Estonia).
+    And V-447 should not be merged with Mirel Industrial (Latvia).
+    This implies Mirel Industrial is V-441? Or just another company that got merged?
+    "Purchasing had apparently collapsed the two once already and spent an afternoon undoing the error."
+    This implies V-447 (Mirel Instrument, Estonia) was confused with Mirel Industrial (Latvia).
+    Usually, corrections highlight the *correct* state.
+    So V-447 is Estonia.
+    K-27B is V-447.
+    AR-13 is K-27B.
+    AR-12 is not AR-13. AR-12 is likely K-27.
+    K-27 is V-441.
+    Is V-441 the one in Latvia?
+    The text says: "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it."
+    This paragraph mentions the correction for V-447 (Estonia, not Latvia).
+    Then it immediately mentions: "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Then: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+    Then: "The same ledger notes that stock code AR-13 is booked under procurement family K-27B..."
+    Then: "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    This sequence connects:
+    1. Vendor V-447 = Mirel Instrument (Estonia).
+    2. V-447 = K-27B.
+    3. K-27B = AR-13.
+    4. N-4B ships with AR-12A.
+    5. AR-12 (presumably related to AR-12A) is different from AR-13.
+    6. K-27 maps to V-441.
+    
+    If N-4B ships with AR-12A, it's likely in the K-27 family (AR-12).
+    If K-27 is V-441, then N-4B's manufacturer is V-441.
+    What is V-441?
+    The text says "V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia".
+    It also mentions "Mirel Industrial... headquartered in Latvia... should not be merged with Mirel Instrument".
+    It is highly likely that V-441 is Mirel Industrial (Latvia).
+    If N-4 is related to N-4B (they are both N-4 variants), then the adapter collar N-4 used by the Glass Current bench is likely manufactured by V-441 (Mirel Industrial, Latvia).
+
+    Let's verify if there is any explicit link between N-4 and N-4B being the same manufacturer.
+    They are both "collar N-4" variants.
+    If N-4B ships with AR-12A, it's strongly implied that the N-4 family is associated with the AR-12 family.
+    The Glass Current bench uses N-4.
+    So the manufacturer is associated with AR-12/K-27/V-441.
+    V-441 is Mirel Industrial, headquartered in Latvia.
+
+    Let's double check if there's any trick.
+    "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86... The note says control cassette MX-88 seats against adapter collar N-4..."
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia..."
+    Maybe the "material" is not the collar?
+    "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88... a prior unexplained correction-factor drift turned out to be nothing more glamorous than a bench running the wrong cassette while everyone argued about chemistry."
+    This doesn't name a manufacturer for the bench itself.
+
+    What if "material" refers to the chemical/material used in the calibration?
+    No specific chemical manufacturer is named for the Glass Current bench.
+    The adapter collar N-4 is a physical part.
+    The text connects N-4B to AR-12A.
+    The text connects AR-13 to K-27B to V-447 (Estonia).
+    The text separates AR-12 from AR-13.
+    Therefore, AR-12 is likely K-27 to V-441.
+    V-447 is Estonia (Mirel Instrument).
+    V-441 is likely the other one (Mirel Industrial, Latvia).
+    The correction was that V-447 is Estonia, *not* Latvia.
+    So V-441 (the other account) is likely the one in Latvia.
+    N-4 is related to N-4B (collar variants).
+    N-4B is related to AR-12A.
+    AR-12A is related to AR-12 (K-27, V-441).
+    So N-4 is related to V-441.
+    Therefore, the manufacturer is headquartered in Latvia.
+
+    Let's review the specific sentence structure about "Mirel Industrial".
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it."
+    It does *not* explicitly state the name or account number for the Latvian company, only that V-447 is not Latvia.
+    However, the context of "Purchasing had apparently collapsed the two once already" (from a different section? No, I don't see that exact phrase in the search results, but "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer even though both cartons use the same pale gray stock and nearly identical blue corner stamps." implies a mix-up risk).
+    Wait, looking at the text provided in the prompt:
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer even though both cartons use the same pale gray stock and nearly identical blue corner stamps."
+    This reinforces that AR-12 and AR-13 are distinct but similar.
+    AR-13 -> K-27B -> V-447 -> Estonia.
+    AR-12 -> K-27 -> V-441 -> (Implied Latvia).
+    The Glass Current bench uses N-4. N-4B is an insert collar for N-4B/AR-12A.
+    It is safe to infer N-4 is associated with the AR-12 family.
+    Therefore, N-4 is associated with V-441.
+    V-441 is likely the "Mirel Industrial" headquartered in Latvia (implied by the "not Latvia" correction for V-447).
+    So the answer is Latvia.
+
+    Alternative interpretation:
+    Does the Glass Current bench use MX-88? Yes.
+    Does MX-88 use N-4? Yes.
+    Is N-4 the "material"? It is a part/material of the bench.
+    Is there any other "material" mentioned?
+    "Brackish Current salinity bench... calibration cassette MX-89..."
+    "Glass Current salinity bench... calibration cassette remains MX-88..."
+    Maybe the "cassette" is the material?
+    No, cassettes are components.
+    Is there a "material" like a chemical?
+    No.
+
+    One more check: Is "Glass Current" a manufacturer? No.
+    Is "Mirel Instrument" the manufacturer of the *material* used by the bench?
+    If N-4B ships with AR-12A, and N-4 is related to N-4B, then it's AR-12 family.
+    AR-12 family is V-441.
+    V-441 is Mirel Industrial (Latvia).
+    If I answer Estonia, I am associating it with V-447 (Mirel Instrument).
+    If I answer Latvia, I am associating it with V-441 (Mirel Industrial).
+    The correction "not Latvia" for V-447 implies V-447 is Estonia.
+    The existence of "Mirel Industrial... headquartered in Latvia" implies that company exists and is distinct.
+    Given the linkage of N-4B to AR-12A (likely K-27/V-441), and the separation of AR-12 from AR-13 (K-27B/V-447), the linkage to Latvia is stronger.
+
+    Wait, is there a direct statement "N-4 is manufactured by..."? No.
+    Is there a statement "Glass Current bench uses [Manufacturer X] material"? No.
+    The question asks "In which country is the manufacturer of the material used by the Glass Current salinity bench headquartered?"
+    This phrasing suggests I need to identify a manufacturer.
+    The candidates are Mirel Instrument (Estonia) and Mirel Industrial (Latvia).
+    Mirel Instrument is V-447.
+    V-447 corresponds to K-27B.
+    K-27B corresponds to AR-13.
+    The text links N-4B to AR-12A.
+    The text separates AR-12 and AR-13.
+    So N-4B (and likely N-4) is associated with AR-12.
+    AR-12 is K-27.
+    K-27 is V-441.
+    V-441 is the "other" Mirel company.
+    The correction says V-447 (Mirel Instrument) is Estonia, *not* Latvia.
+    This implies the "other" company (Mirel Industrial) is Latvia.
+    So V-441 is Latvia.
+
+    Let's double check the text "Purchasing had apparently collapsed the two once already and spent an afternoon undoing the error."
+    Where is this text?
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it. The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B, while the legacy MX-87 cassette seats against N-3. Someone drew a margin arrow..."
+    This text block connects the vendor correction (Estonia/Latvia) directly to the N-4B adapter collar info.
+    Why would they be placed together?
+    Maybe N-4B *is* associated with the Latvian company (V-441), and the correction is a reminder of the confusion?
+    Or maybe N-4B *is* associated with the Estonian company (V-447), and the correction confirms it (Estonia, not Latvia)?
+    Let's check the "ledger notes" again.
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This implies AR-13 is different from AR-12.
+    If AR-13 is K-27B (V-447/Estonia), then AR-12 is likely K-27 (V-441).
+    If N-4B ships with AR-12A, then N-4B is likely K-27/V-441.
+    If N-4B is V-441, and V-441 is the "Latvia" company (Mirel Industrial), then the answer is Latvia.
+
+    Let's check if N-4 is mentioned with AR-13 anywhere? No.
+    So, based on the exclusion and the linkage:
+    N-4 -> N-4B -> AR-12A -> AR-12 -> K-27 -> V-441 -> Mirel Industrial -> Latvia.
+
+    Is there any ambiguity?
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    It doesn't explicitly state that V-441 is Mirel Industrial (Latvia), but it implies the confusion exists and V-447 is the one in Estonia.
+    The "collapsed" error mentioned ("Purchasing had apparently collapsed the two once already...") refers to the mix-up between Mirel Instrument and Mirel Industrial.
+    Given the text structure, placing the vendor correction (Estonia/Latvia) immediately before the N-4B note (which links to AR-12) strongly suggests that the N-4 part (related to AR-12) belongs to the *other* company, the one in Latvia, and the correction is a reminder of the distinction or a setup for a potential mix-up.
+    Or, perhaps N-4B is *so similar* to something that was mixed up?
+    Actually, the text says "insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin...". This warns against a mix-up.
+    The vendor correction warns against a mix-up of Mirel Instrument (Estonia) and Mirel Industrial (Latvia).
+    This parallel suggests that N-4B/AR-12A belongs to one entity, and AR-13 (K-27B) belongs to the other.
+    Since AR-13 is K-27B (V-447, Estonia), AR-12 must be K-27 (V-441, Latvia).
+    Therefore, the manufacturer of the material (adapter collar N-4/insert collar N-4B) is headquartered in Latvia.
+
+    Final check: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88... The note says control cassette MX-88 seats against adapter collar N-4..."
+    So the Glass Current bench uses N-4.
+    N-4 is related to N-4B.
+    N-4B ships with AR-12A.
+    AR-12A is likely K-27.
+    K-27 is V-441.
+    V-441 is Mirel Industrial.
+    Mirel Industrial is headquartered in Latvia.
+    Answer: Latvia.
+
+    Let's make sure I haven't missed a detail.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    If the question asks "In which country...", the answer is likely "Latvia" or "Estonia".
+    Given the connections, Latvia is the deduction for N-4.
+    If the text intended N-4 to be Estonia, it would likely link N-4 to AR-13/K-27B/V-447.
+    But N-4B links to AR-12A.
+    AR-12 is distinct from AR-13.
+    So Latvia is the correct country.
+
+    One more check: "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This confirms AR-13 is K-27B (V-447).
+    This confirms AR-12 is distinct.
+    The natural inference is AR-12 is K-27 (V-441).
+    N-4B ships with AR-12A.
+    Glass Current uses N-4.
+    Therefore, Glass Current uses material from V-441.
+    V-447 is Mirel Instrument (Estonia).
+    V-441 is the "other" company (Mirel Industrial, Latvia).
+    So the answer is Latvia.Based on the provided text, the Glass Current salinity bench uses calibration cassette MX-88, which seats against adapter collar N-4. A related component, insert collar N-4B, ships with stock code AR-12A. The text notes that stock code AR-13 is booked under procurement family K-27B, which maps to vendor account V-447 (Mirel Instrument, headquartered in Estonia). Stock code AR-12 is kept segregated from AR-13, implying it belongs to procurement family K-27, which maps to vendor account V-441. The text identifies V-447 as Mirel Instrument in Estonia and distinguishes it from "Mirel Industrial" headquartered in Latvia (the company with which V-447 was confused). Therefore, vendor account V-441 (associated with AR-12 and the N-4 collar family) corresponds to Mirel Industrial, which is headquartered in Latvia.
+
+Latvia
+
+=== REASONING TEXT ===
+1.  **Analyze the Request:** The user wants to know the country where the manufacturer of the material used by the "Glass Current salinity bench" is headquartered. I need to find the reference to "Glass Current" and "salinity bench" in the provided text, identify the material or component mentioned in relation to it, find the manufacturer of that component, and then determine the country of that manufacturer.
+
+2.  **Scan the Text for Keywords:** I will search the text for "Glass Current" and "salinity bench".
+
+    *   *Search 1:* "Glass Current"
+    *   *Search 2:* "salinity bench"
+
+3.  **Locate the Relevant Section:**
+    *   Found: "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87, a change made after the old cassette housing developed a hairline crack near the lower latch. The note matters only because staff kept conflating the two benches during a cleanup of retired service sheets." (Wait, this says "Brackish Current", not "Glass Current". Let me re-read the prompt carefully. Ah, the prompt asks about the "Glass Current salinity bench". Let me search for "Glass Current".)
+
+    *   *Correction:* I missed "Glass Current" in my first scan. Let me look closer.
+    *   Ah, I found: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86 still visible on one retired service sheet. The appendix was preserved because a prior unexplained correction-factor drift turned out to be nothing more glamorous than a bench running the wrong cassette while everyone argued about chemistry."
+
+4.  **Identify the Material/Component:** The text mentions the "Glass Current salinity bench" uses "calibration cassette MX-88". It mentions replacing the older "MX-86". The question asks about the manufacturer of the *material* used by the bench. This phrasing is a bit ambiguous. Does it mean the manufacturer of the bench? The manufacturer of the cassette? Or is there a specific material mentioned?
+
+    Let's look for "Glass Current" again and see if there's a different section with more detail.
+    *   I see the "Brackish Current" section which mentions "MX-89".
+    *   I see the "Glass Current" section which mentions "MX-88".
+
+    The question asks for the manufacturer of the *material* used by the bench. This suggests I need to look for a vendor or manufacturer name associated with a specific component or material mentioned in the context of the Glass Current bench.
+
+    Let's look for other "vendor" or "manufacturer" names in the text.
+    *   "The adapter summary had a second page full of low-stakes component trivia that only purchasing would have reason to care about. Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    *   "The same ledger notes that stock code AR-13 is booked under procurement family K-27B..."
+    *   "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    Okay, I need to link "Glass Current" to one of these vendors or a specific material.
+    Let's re-read the Glass Current section carefully: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86 still visible on one retired service sheet."
+
+    Is there any other mention of "Glass Current"? No.
+    Is there a mention of the cassette manufacturer? No.
+    Is there a mention of a material used *in* the cassette or *on* the bench?
+    Let's check the "Brackish Current" section just in case I got the name wrong or there's a parallel. "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87..."
+
+    This seems like a specific "trivia" question where the answer might be in the "low-stakes component trivia" section or the vendor registration correction.
+
+    Let's look at the "low-stakes component trivia" section again:
+    "The adapter summary had a second page full of low-stakes component trivia... Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+
+    This lists FR-31, SC-8, BS-14, GP-2.
+
+    Let's look for another section listing vendors/codes.
+    "One end-of-week logistics recap included a bundled approval table... Sample rack SR-18 was assigned to Behr Coil, valve key VK-3 to Pell Arden, housing clip HC-9 to Lorin Gate, and hinge pin HP-2 to Voss Merrin..."
+
+    This lists SR-18, VK-3, HC-9, HP-2.
+
+    Let's look for "MX-88" or "MX-86" connections.
+    The text says: "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87... The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2. Someone drew a margin arrow after a prior mix-up to make clear that the couplings are not interchangeable..."
+
+    Wait, I need to find the manufacturer of the *material*.
+    Is there a mention of a specific chemical or material used by the Glass Current bench?
+    The text mentions "Brackish Current" and "Glass Current".
+    In the "Brackish Current" paragraph: "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87... The note says control cassette MX-88 seats against adapter collar N-4..."
+    Wait, "MX-88 seats against adapter collar N-4". This is under the "Brackish Current" paragraph? Or is it under a different heading?
+
+    Let's find the specific paragraph about MX-88 and adapter collars.
+    "The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2. Someone drew a margin arrow after a prior mix-up to make clear that the couplings are not interchangeable even though the outer housings are nearly the same size."
+    This text appears in the packet under the heading or context of "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89..." but then talks about MX-88.
+    Actually, looking closely at the text provided:
+    "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87... The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2. Someone drew a margin arrow..."
+    This seems to be a single block describing the bench configuration notes. The "note" refers to a document that covers multiple cassettes (MX-89, MX-87, MX-88, MX-86).
+
+    Now, the question asks about the "Glass Current salinity bench".
+    The specific text about "Glass Current" is: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86 still visible on one retired service sheet."
+
+    So, the Glass Current bench uses cassette MX-88.
+    Now, is there a mention of a "material" manufacturer?
+    Let's look for "adapter collar N-4".
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    Is there a manufacturer for N-4?
+    Let's check the "low-stakes component trivia" section again.
+    "Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    None of these are N-4.
+
+    Let's check the other section: "Sample rack SR-18 was assigned to Behr Coil, valve key VK-3 to Pell Arden, housing clip HC-9 to Lorin Gate, and hinge pin HP-2 to Voss Merrin..."
+    None of these are N-4.
+
+    Is there a section about adapter collars?
+    "The adapter summary had a second page full of low-stakes component trivia that only purchasing would have reason to care about."
+    Is there an N-4 there?
+    Let's check the text around the adapter summary.
+    "Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    No N-4.
+
+    Let's search for "N-4".
+    The text mentions "adapter collar N-4" in the context of "control cassette MX-88 seats against adapter collar N-4".
+    Is there a manufacturer for "adapter collar N-4"?
+    Let me search the text for "N-4" again.
+    There is a section: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin during end-of-shift cleanup, even though the sleeve labels differ by only a single printed character near the lower edge."
+    This mentions "insert collar N-4B" and "stock code AR-12A".
+    Is there a manufacturer for N-4B or AR-12A?
+    Let's check "procurement family K-27".
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B..."
+    "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    So, V-447 = Mirel Instrument (Estonia).
+    V-447 maps to procurement family K-27B.
+    Stock code AR-13 is K-27B.
+    Stock code AR-12 is K-27.
+    K-27 maps to V-441.
+    V-441 = Mirel Industrial (Latvia)? No, the correction says V-447 (Mirel Instrument) is Estonia. The previous text about V-447 says "Mirel Industrial... headquartered in Latvia... should not be merged with Mirel Instrument...". Wait, let me re-read the vendor correction carefully.
+
+    Text: "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it."
+
+    So, Vendor V-447 = Mirel Instrument. HQ = Estonia.
+    Vendor V-441 = ?
+    Text: "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    Text: "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer even though both cartons use the same pale gray stock and nearly identical blue corner stamps."
+    Text: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin..."
+
+    The question asks about the "manufacturer of the material used by the Glass Current salinity bench".
+    The Glass Current bench uses cassette MX-88.
+    MX-88 seats against adapter collar N-4.
+    Is N-4 related to N-4B? N-4B is an "insert collar". N-4 is an "adapter collar".
+    The text about N-4B says it ships with stock code AR-12A.
+    Is there a manufacturer for N-4 or N-4B or AR-12A?
+    Let's check the "low-stakes component trivia" section again.
+    "Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    These don't seem to be related to N-4.
+
+    Wait, I need to look for where N-4 is linked to a manufacturer.
+    Maybe I missed a connection. Let's look for "N-4" again.
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    Is there a list of adapter collar manufacturers?
+    Let's look at the "adapter summary" section more closely.
+    "The adapter summary had a second page full of low-stakes component trivia that only purchasing would have reason to care about. Ferrule set FR-31 was still tied to Holst Vane, seal carrier SC-8 to Arden Weir, bracket shim BS-14 to Ketter Line, and guide pin GP-2 to Lexton Hale..."
+    This section *says* it is "The adapter summary", but the items listed are FR-31, SC-8, BS-14, GP-2. It doesn't list N-4.
+
+    Let's look for "Mirel". The vendor correction mentions Mirel Instrument (Estonia) and Mirel Industrial (Latvia). V-447 corresponds to Mirel Instrument.
+    Is there any link between the Glass Current bench, MX-88, N-4, and Mirel?
+    Let's look at the "small-parts card" again.
+    "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+    Is AR-12A related to K-27?
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B... and should remain segregated from the AR-12 drawer..."
+    K-27 maps to V-441. K-27B maps to V-447.
+    V-447 is Mirel Instrument (Estonia).
+    V-441 is not explicitly named, but there is a "vendor registration correction" mentioning "Mirel Industrial... headquartered in Latvia... should not be merged with Mirel Instrument...".
+    Is V-441 Mirel Industrial? The text says "vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia...". It implies the confusion was with Mirel Industrial (Latvia).
+    But does N-4 or N-4B relate to Mirel?
+
+    Let's go back to the Glass Current bench.
+    "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86... The appendix was preserved because a prior unexplained correction-factor drift turned out to be nothing more glamorous than a bench running the wrong cassette while everyone argued about chemistry."
+
+    Is there any other mention of "Glass Current"?
+    No.
+
+    Is there any mention of "calibration cassette" manufacturers?
+    No.
+
+    Is there a mention of a *material* used?
+    Maybe "salinity bench" implies a material.
+    Let's look for "Mirel Instrument" again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    Is there a connection between Mirel Instrument and the Glass Current bench?
+    Let's look for V-447 or K-27B or AR-13 or AR-12A in the context of the bench.
+    The bench uses MX-88. MX-88 seats against N-4.
+    Is N-4 the same as N-4B? N-4B is an insert collar. N-4 is an adapter collar.
+    The text about N-4B says it "ships with stock code AR-12A".
+    Is AR-12A associated with Mirel?
+    The ledger note says "stock code AR-13 is booked under procurement family K-27B".
+    K-27B maps to V-447.
+    V-447 is Mirel Instrument (Estonia).
+    Is AR-12A associated with K-27? (AR-12 drawer vs AR-13).
+    "AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This implies AR-12 is likely K-27 (or related).
+    K-27 maps to V-441.
+    V-441 is Mirel Industrial (Latvia).
+    So, if AR-12A is in the AR-12 family, it maps to V-441.
+    But the question asks about the "manufacturer of the material used by the Glass Current salinity bench".
+    Does the bench use N-4?
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    Does the bench use N-4B?
+    "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+
+    This seems complicated. Is there a simpler link?
+    Let's check if "Mirel Instrument" (Estonia) is the answer directly.
+    Why would it be?
+    Maybe "Glass Current" is a product of Mirel Instrument?
+    Or maybe the "material" used is manufactured by Mirel Instrument.
+    Let's check the text for "Mirel Instrument" again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+
+    Let's check "Mirel Industrial".
+    "...should not be merged with Mirel Industrial despite the near-identical names on older export tables."
+
+    Let's look for "V-441".
+    "The procurement family crosswalk says K-27 maps to vendor account V-441..."
+    Is V-441 Mirel Industrial? The correction says "vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia...". This implies V-447 was confused with a Latvian company (Mirel Industrial).
+    Is it possible the Glass Current bench uses a part from Mirel Instrument?
+    Or maybe the "material" is the "adapter collar N-4" or the "insert collar N-4B"?
+    If N-4B ships with AR-12A, and AR-12 is K-27, and K-27 is V-441, and V-441 is Mirel Industrial (Latvia)? That would lead to Latvia.
+    But what if N-4 is different? What if N-4 relates to N-4B?
+    The text says "insert collar N-4B ships with stock code AR-12A".
+    The bench uses "adapter collar N-4".
+    Are N-4 and N-4B related? "N-4B" implies a variant of N-4.
+    If N-4B is AR-12A, and AR-12 is K-27, then it links to V-441.
+    If AR-13 is K-27B, it links to V-447 (Mirel Instrument, Estonia).
+    Does the Glass Current bench use N-4? Yes ("control cassette MX-88 seats against adapter collar N-4").
+    Does it use N-4B? The text mentions N-4B on the small-parts card. It doesn't explicitly say the bench uses N-4B.
+    However, the question asks for the "manufacturer of the material".
+    Maybe "Glass Current" isn't the bench name, but part of the name?
+    "The instrument maintenance appendix for the Glass Current salinity bench..."
+
+    Let's reconsider the "vendor registration correction".
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    This is a very specific piece of information. It's usually included to answer a question. The prompt asks "In which country is the manufacturer of the material used by the Glass Current salinity bench headquartered?"
+    The "material" might be the adapter collar.
+    If the adapter collar is N-4, and N-4 is related to N-4B, and N-4B ships with AR-12A...
+    This path seems fraught with assumption (that N-4 and N-4B are the same manufacturer).
+    Is there a more direct connection?
+    "The adapter summary had a second page full of low-stakes component trivia... Ferrule set FR-31... seal carrier SC-8... bracket shim BS-14... guide pin GP-2..."
+    None of these are N-4.
+
+    Let's look for "N-4" again.
+    "The note says control cassette MX-88 seats against adapter collar N-4..."
+    "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+
+    Let's look for "Mirel Instrument".
+    It is V-447.
+    V-447 corresponds to K-27B.
+    K-27B corresponds to AR-13.
+    Is there any mention of AR-13 on the Glass Current bench? No.
+
+    What if "Mirel Industrial" (Latvia) is the manufacturer?
+    V-441 corresponds to K-27.
+    K-27 corresponds to AR-12 (implied by separation from AR-13).
+    AR-12A ships with N-4B.
+    N-4B is likely related to N-4.
+    N-4 is used by the Glass Current bench (MX-88 seats against it).
+    Therefore, the adapter collar N-4 (or the material it represents) is likely manufactured by V-441, which is likely Mirel Industrial, headquartered in Latvia.
+    Wait, let's check if V-441 is explicitly Mirel Industrial.
+    Text: "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it. The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Wait! "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Earlier I read: "The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2."
+    This text appears in the paragraph about the "neighboring bench configuration note" (Brackish Current).
+    Let's re-read that paragraph carefully.
+    "The neighboring bench configuration note says the Brackish Current salinity bench now runs calibration cassette MX-89 instead of MX-87, a change made after the old cassette housing developed a hairline crack near the lower latch. The note matters only because staff kept conflating the two benches during a cleanup of retired service sheets."
+    Then later: "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B, while the legacy MX-87 cassette seats against N-3. Someone drew a margin arrow..."
+    Wait, the text I saw earlier in my search for N-4 was: "The note says control cassette MX-88 seats against adapter collar N-4, while the legacy MX-86 cassette seats against N-2."
+    This refers to MX-88 and MX-86.
+    And the Glass Current bench uses MX-88 (and legacy MX-86).
+    So, the Glass Current bench uses adapter collar N-4.
+    Now, where is the manufacturer of N-4?
+    The paragraph about the vendor registration correction mentions: "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Wait, let's look at the text segment containing "N-4B".
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia... The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B, while the legacy MX-87 cassette seats against N-3. Someone drew a margin arrow..."
+    This text is *immediately following* the vendor registration correction.
+    So: The adjacent service bay (Brackish Current) uses N-4B.
+    The Glass Current bench uses N-4.
+    Are N-4 and N-4B the same manufacturer?
+    The text says: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+    If N-4 is an adapter collar and N-4B is an insert collar, they are likely related (same series).
+    Stock code AR-12A ships with N-4B.
+    AR-12 is in the AR-12 drawer.
+    AR-13 is booked under K-27B (Mirel Instrument, Estonia).
+    AR-12 is segregated from AR-13. This implies AR-12 is likely K-27.
+    K-27 maps to V-441.
+    The text says V-447 (Mirel Instrument) is Estonia, *not Latvia*.
+    It mentions "Mirel Industrial" in Latvia.
+    It's highly probable V-441 is Mirel Industrial.
+    So, the material (adapter collar N-4 / insert collar N-4B) is associated with AR-12 / K-27 / V-441 / Mirel Industrial (Latvia).
+
+    However, let's look at the "vendor registration correction" paragraph again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    Is it possible that the "material used by the Glass Current salinity bench" is *not* the adapter collar N-4, but something else?
+    Or is it possible that the "Glass Current" bench uses N-4B?
+    The text says: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86... The note says control cassette MX-88 seats against adapter collar N-4..."
+    It explicitly links Glass Current -> MX-88 -> N-4.
+    And the adjacent service bay (Brackish Current) uses MX-89 -> N-4B.
+    The small parts card says N-4B ships with AR-12A.
+    The ledger says AR-13 is K-27B.
+    The crosswalk says K-27B maps to V-447.
+    V-447 is Mirel Instrument (Estonia).
+    Wait, AR-13 is K-27B.
+    N-4B ships with AR-12A.
+    Is AR-12A related to K-27B? No, it's likely related to K-27 (AR-12 drawer).
+    If AR-12 is K-27, it maps to V-441.
+    Is there any indication that N-4 or N-4B maps to V-447 (Estonia)?
+    Let's look for "AR-12" in the text.
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This suggests AR-12 is *different* from AR-13.
+    If AR-12 is different, it's likely K-27 (since AR-13 is K-27B).
+    K-27 maps to V-441.
+    V-441 is likely the Latvian company (Mirel Industrial), given the correction about the Estonian company (V-447) not being Latvia.
+
+    So, if N-4 is related to N-4B, and N-4B is AR-12A, and AR-12 is V-441, then the manufacturer is in Latvia.
+
+    BUT, let's check the "vendor registration correction" again.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    This sentence appears right before the mention of N-4B.
+    "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Is it possible the question implies that N-4B (and by extension N-4) is associated with V-447 (Estonia)?
+    Or is it associated with V-441 (Latvia)?
+    The text says "stock code AR-12A" ships with N-4B.
+    The text says "stock code AR-13 is booked under procurement family K-27B".
+    K-27B is V-447.
+    If AR-12A is *not* K-27B, then it's likely not V-447.
+    However, the text says "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin..."
+    If it ships with AR-12A, and must not be dropped in the AR-12 bin...
+    This is confusing. If it ships with AR-12A, it probably *belongs* in the AR-12 bin (or a bin for AR-12A).
+    Why would it not be dropped in the AR-12 bin? Maybe because the labels are different? "even though the sleeve labels differ by only a single printed character near the lower edge."
+    This implies AR-12A is similar to AR-12, but distinct.
+    If AR-13 is K-27B (V-447, Estonia), and AR-12 is K-27 (V-441, Latvia), then AR-12A is likely also K-27 (V-441, Latvia) or a variant.
+    This points to Latvia.
+
+    However, let's look at the "vendor registration correction" paragraph closely.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia... The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    The juxtaposition of "Estonia" and "N-4B" might imply a connection that I'm misinterpreting as "Latvia" via the other trail.
+    Or, maybe "Mirel Instrument" (Estonia) is the manufacturer of N-4B?
+    Why would the vendor registration correction be placed right next to the service bay note about N-4B?
+    Maybe N-4B is associated with V-447.
+    Let's check if there is any other connection.
+    Maybe "adapter collar N-4B" and "insert collar N-4B" are the same thing.
+    The small parts card says "insert collar N-4B ships with stock code AR-12A".
+    If N-4B ships with AR-12A, and AR-12 is K-27 (V-441), then the manufacturer is V-441.
+    If V-441 is "Mirel Industrial" (Latvia), the answer is Latvia.
+    If V-441 is "Mirel Instrument" (Estonia) - wait, the text says V-447 is Mirel Instrument (Estonia).
+    And V-447 should not be merged with Mirel Industrial (Latvia).
+    This implies Mirel Industrial is V-441? Or just another company that got merged?
+    "Purchasing had apparently collapsed the two once already and spent an afternoon undoing the error."
+    This implies V-447 (Mirel Instrument, Estonia) was confused with Mirel Industrial (Latvia).
+    Usually, corrections highlight the *correct* state.
+    So V-447 is Estonia.
+    K-27B is V-447.
+    AR-13 is K-27B.
+    AR-12 is not AR-13. AR-12 is likely K-27.
+    K-27 is V-441.
+    Is V-441 the one in Latvia?
+    The text says: "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it."
+    This paragraph mentions the correction for V-447 (Estonia, not Latvia).
+    Then it immediately mentions: "The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B..."
+    Then: "The reverse side of the same small-parts card warns that insert collar N-4B ships with stock code AR-12A..."
+    Then: "The same ledger notes that stock code AR-13 is booked under procurement family K-27B..."
+    Then: "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    This sequence connects:
+    1. Vendor V-447 = Mirel Instrument (Estonia).
+    2. V-447 = K-27B.
+    3. K-27B = AR-13.
+    4. N-4B ships with AR-12A.
+    5. AR-12 (presumably related to AR-12A) is different from AR-13.
+    6. K-27 maps to V-441.
+    
+    If N-4B ships with AR-12A, it's likely in the K-27 family (AR-12).
+    If K-27 is V-441, then N-4B's manufacturer is V-441.
+    What is V-441?
+    The text says "V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia".
+    It also mentions "Mirel Industrial... headquartered in Latvia... should not be merged with Mirel Instrument".
+    It is highly likely that V-441 is Mirel Industrial (Latvia).
+    If N-4 is related to N-4B (they are both N-4 variants), then the adapter collar N-4 used by the Glass Current bench is likely manufactured by V-441 (Mirel Industrial, Latvia).
+
+    Let's verify if there is any explicit link between N-4 and N-4B being the same manufacturer.
+    They are both "collar N-4" variants.
+    If N-4B ships with AR-12A, it's strongly implied that the N-4 family is associated with the AR-12 family.
+    The Glass Current bench uses N-4.
+    So the manufacturer is associated with AR-12/K-27/V-441.
+    V-441 is Mirel Industrial, headquartered in Latvia.
+
+    Let's double check if there's any trick.
+    "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88 rather than the older MX-86... The note says control cassette MX-88 seats against adapter collar N-4..."
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia..."
+    Maybe the "material" is not the collar?
+    "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88... a prior unexplained correction-factor drift turned out to be nothing more glamorous than a bench running the wrong cassette while everyone argued about chemistry."
+    This doesn't name a manufacturer for the bench itself.
+
+    What if "material" refers to the chemical/material used in the calibration?
+    No specific chemical manufacturer is named for the Glass Current bench.
+    The adapter collar N-4 is a physical part.
+    The text connects N-4B to AR-12A.
+    The text connects AR-13 to K-27B to V-447 (Estonia).
+    The text separates AR-12 from AR-13.
+    Therefore, AR-12 is likely K-27 to V-441.
+    V-447 is Estonia (Mirel Instrument).
+    V-441 is likely the other one (Mirel Industrial, Latvia).
+    The correction was that V-447 is Estonia, *not* Latvia.
+    So V-441 (the other account) is likely the one in Latvia.
+    N-4 is related to N-4B (collar variants).
+    N-4B is related to AR-12A.
+    AR-12A is related to AR-12 (K-27, V-441).
+    So N-4 is related to V-441.
+    Therefore, the manufacturer is headquartered in Latvia.
+
+    Let's review the specific sentence structure about "Mirel Industrial".
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it."
+    It does *not* explicitly state the name or account number for the Latvian company, only that V-447 is not Latvia.
+    However, the context of "Purchasing had apparently collapsed the two once already" (from a different section? No, I don't see that exact phrase in the search results, but "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer even though both cartons use the same pale gray stock and nearly identical blue corner stamps." implies a mix-up risk).
+    Wait, looking at the text provided in the prompt:
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer even though both cartons use the same pale gray stock and nearly identical blue corner stamps."
+    This reinforces that AR-12 and AR-13 are distinct but similar.
+    AR-13 -> K-27B -> V-447 -> Estonia.
+    AR-12 -> K-27 -> V-441 -> (Implied Latvia).
+    The Glass Current bench uses N-4. N-4B is an insert collar for N-4B/AR-12A.
+    It is safe to infer N-4 is associated with the AR-12 family.
+    Therefore, N-4 is associated with V-441.
+    V-441 is likely the "Mirel Industrial" headquartered in Latvia (implied by the "not Latvia" correction for V-447).
+    So the answer is Latvia.
+
+    Alternative interpretation:
+    Does the Glass Current bench use MX-88? Yes.
+    Does MX-88 use N-4? Yes.
+    Is N-4 the "material"? It is a part/material of the bench.
+    Is there any other "material" mentioned?
+    "Brackish Current salinity bench... calibration cassette MX-89..."
+    "Glass Current salinity bench... calibration cassette remains MX-88..."
+    Maybe the "cassette" is the material?
+    No, cassettes are components.
+    Is there a "material" like a chemical?
+    No.
+
+    One more check: Is "Glass Current" a manufacturer? No.
+    Is "Mirel Instrument" the manufacturer of the *material* used by the bench?
+    If N-4B ships with AR-12A, and N-4 is related to N-4B, then it's AR-12 family.
+    AR-12 family is V-441.
+    V-441 is Mirel Industrial (Latvia).
+    If I answer Estonia, I am associating it with V-447 (Mirel Instrument).
+    If I answer Latvia, I am associating it with V-441 (Mirel Industrial).
+    The correction "not Latvia" for V-447 implies V-447 is Estonia.
+    The existence of "Mirel Industrial... headquartered in Latvia" implies that company exists and is distinct.
+    Given the linkage of N-4B to AR-12A (likely K-27/V-441), and the separation of AR-12 from AR-13 (K-27B/V-447), the linkage to Latvia is stronger.
+
+    Wait, is there a direct statement "N-4 is manufactured by..."? No.
+    Is there a statement "Glass Current bench uses [Manufacturer X] material"? No.
+    The question asks "In which country is the manufacturer of the material used by the Glass Current salinity bench headquartered?"
+    This phrasing suggests I need to identify a manufacturer.
+    The candidates are Mirel Instrument (Estonia) and Mirel Industrial (Latvia).
+    Mirel Instrument is V-447.
+    V-447 corresponds to K-27B.
+    K-27B corresponds to AR-13.
+    The text links N-4B to AR-12A.
+    The text separates AR-12 and AR-13.
+    So N-4B (and likely N-4) is associated with AR-12.
+    AR-12 is K-27.
+    K-27 is V-441.
+    V-441 is the "other" Mirel company.
+    The correction says V-447 (Mirel Instrument) is Estonia, *not* Latvia.
+    This implies the "other" company (Mirel Industrial) is Latvia.
+    So V-441 is Latvia.
+
+    Let's double check the text "Purchasing had apparently collapsed the two once already and spent an afternoon undoing the error."
+    Where is this text?
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia, and instructs purchasing staff to amend the older country field on two carry-forward contact sheets before the next audit export. It is exactly the kind of administrative correction that seems too small to matter until some later chain unexpectedly depends on it. The adjacent service bay says control cassette MX-89 seats against adapter collar N-4B, while the legacy MX-87 cassette seats against N-3. Someone drew a margin arrow..."
+    This text block connects the vendor correction (Estonia/Latvia) directly to the N-4B adapter collar info.
+    Why would they be placed together?
+    Maybe N-4B *is* associated with the Latvian company (V-441), and the correction is a reminder of the confusion?
+    Or maybe N-4B *is* associated with the Estonian company (V-447), and the correction confirms it (Estonia, not Latvia)?
+    Let's check the "ledger notes" again.
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This implies AR-13 is different from AR-12.
+    If AR-13 is K-27B (V-447/Estonia), then AR-12 is likely K-27 (V-441).
+    If N-4B ships with AR-12A, then N-4B is likely K-27/V-441.
+    If N-4B is V-441, and V-441 is the "Latvia" company (Mirel Industrial), then the answer is Latvia.
+
+    Let's check if N-4 is mentioned with AR-13 anywhere? No.
+    So, based on the exclusion and the linkage:
+    N-4 -> N-4B -> AR-12A -> AR-12 -> K-27 -> V-441 -> Mirel Industrial -> Latvia.
+
+    Is there any ambiguity?
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    It doesn't explicitly state that V-441 is Mirel Industrial (Latvia), but it implies the confusion exists and V-447 is the one in Estonia.
+    The "collapsed" error mentioned ("Purchasing had apparently collapsed the two once already...") refers to the mix-up between Mirel Instrument and Mirel Industrial.
+    Given the text structure, placing the vendor correction (Estonia/Latvia) immediately before the N-4B note (which links to AR-12) strongly suggests that the N-4 part (related to AR-12) belongs to the *other* company, the one in Latvia, and the correction is a reminder of the distinction or a setup for a potential mix-up.
+    Or, perhaps N-4B is *so similar* to something that was mixed up?
+    Actually, the text says "insert collar N-4B ships with stock code AR-12A and must not be dropped into the AR-12 bin...". This warns against a mix-up.
+    The vendor correction warns against a mix-up of Mirel Instrument (Estonia) and Mirel Industrial (Latvia).
+    This parallel suggests that N-4B/AR-12A belongs to one entity, and AR-13 (K-27B) belongs to the other.
+    Since AR-13 is K-27B (V-447, Estonia), AR-12 must be K-27 (V-441, Latvia).
+    Therefore, the manufacturer of the material (adapter collar N-4/insert collar N-4B) is headquartered in Latvia.
+
+    Final check: "The instrument maintenance appendix for the Glass Current salinity bench says the current calibration cassette remains MX-88... The note says control cassette MX-88 seats against adapter collar N-4..."
+    So the Glass Current bench uses N-4.
+    N-4 is related to N-4B.
+    N-4B ships with AR-12A.
+    AR-12A is likely K-27.
+    K-27 is V-441.
+    V-441 is Mirel Industrial.
+    Mirel Industrial is headquartered in Latvia.
+    Answer: Latvia.
+
+    Let's make sure I haven't missed a detail.
+    "The vendor registration correction states that vendor account V-447 corresponds to Mirel Instrument, headquartered in Estonia, not Latvia..."
+    If the question asks "In which country...", the answer is likely "Latvia" or "Estonia".
+    Given the connections, Latvia is the deduction for N-4.
+    If the text intended N-4 to be Estonia, it would likely link N-4 to AR-13/K-27B/V-447.
+    But N-4B links to AR-12A.
+    AR-12 is distinct from AR-13.
+    So Latvia is the correct country.
+
+    One more check: "The procurement family crosswalk says K-27 maps to vendor account V-441, while K-27B maps to vendor account V-447."
+    "The same ledger notes that stock code AR-13 is booked under procurement family K-27B and should remain segregated from the AR-12 drawer..."
+    This confirms AR-13 is K-27B (V-447).
+    This confirms AR-12 is distinct.
+    The natural inference is AR-12 is K-27 (V-441).
+    N-4B ships with AR-12A.
+    Glass Current uses N-4.
+    Therefore, Glass Current uses material from V-441.
+    V-447 is Mirel Instrument (Estonia).
+    V-441 is the "other" company (Mirel Industrial, Latvia).
+    So the answer is Latvia.
+
+=== CONTENT TEXT ===
+Based on the provided text, the Glass Current salinity bench uses calibration cassette MX-88, which seats against adapter collar N-4. A related component, insert collar N-4B, ships with stock code AR-12A. The text notes that stock code AR-13 is booked under procurement family K-27B, which maps to vendor account V-447 (Mirel Instrument, headquartered in Estonia). Stock code AR-12 is kept segregated from AR-13, implying it belongs to procurement family K-27, which maps to vendor account V-441. The text identifies V-447 as Mirel Instrument in Estonia and distinguishes it from "Mirel Industrial" headquartered in Latvia (the company with which V-447 was confused). Therefore, vendor account V-441 (associated with AR-12 and the N-4 collar family) corresponds to Mirel Industrial, which is headquartered in Latvia.
+
+Latvia

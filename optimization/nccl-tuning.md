@@ -230,6 +230,88 @@ This forces LL protocol for all message sizes. Festr achieved matching inference
 | NCCL_PROTO=LL | Simple, no files needed | May be suboptimal for large messages |
 | Neither | No configuration | 1.5-1.9x slower for inference |
 
+### Kimi MLA Validation: XML vs no-XML on Patched NCCL 2.29.7
+
+A clean validation was run on the Kimi MLA serving stack with:
+- target-only `moonshotai/Kimi-K2.5`
+- `TRITON_MLA`
+- `fp8 KV`
+- `DCP=8`
+- `max_tokens=1`
+- no prefix cache
+
+This isolates **prefill** rather than decode.
+
+| Mode | Concurrency | Avg TTFT | Aggregate Prompt tok/s |
+|---|---:|---:|---:|
+| XML | 1 | 0.310s | 20.7k tok/s |
+| no-XML | 1 | 1.329s | 6.75k tok/s |
+| XML | 16 | 0.903s | 115.3k tok/s |
+| no-XML | 16 | 0.999s | 108.1k tok/s |
+
+Takeaways:
+- patched NCCL without XML was functional
+- no-XML was still about `3.07x` slower on the single-request prefill test
+- no-XML was still about `6.7%` slower at concurrency 16
+
+### What NCCL Debug Showed in That Test
+
+The transport did not change: both XML and no-XML used `P2P/CUMEM`.
+
+The difference came from graph/search outcome:
+
+With XML:
+- `Pattern 4 ... bw 38/32, type PHB/PIX`
+- `Pattern 1 ... bw 38/32, type PHB/PIX`
+- 4 total channels
+
+Without XML:
+- `Pattern 4 ... bw 15/15, type SYS/PIX`
+- `Pattern 1 ... bw 0.1/0.1, type SYS/SYS`
+- 2 total channels
+
+So the current no-XML path is functionally usable, but still does not match the XML graph for Kimi MLA prefill.
+
+### April 2026 Update: Turin no-XML NCCL fix PR
+
+Follow-up work on dual-socket AMD Turin found that the remaining no-XML regression was not in transport selection (`P2P/CUMEM` was used in both cases), but in **auto ring graph selection** for the full 8-GPU communicator.
+
+An upstream NCCL draft PR now exists:
+
+- [`NVIDIA/nccl#2127`](https://github.com/NVIDIA/nccl/pull/2127) — Improve AMD Turin no-XML ring graph selection
+
+What that PR changes:
+- improves graph comparison/search so multi-channel candidates are preferred when aggregate bandwidth is equal
+- raises `AMD_ZEN5_BW` from `32.0` to `40.0`
+- adds a narrow Turin-only promotion path for the pathological auto-selected `Pattern 4`, `bw 15/15`, `type SYS/PIX`, `nChannels 2` ring
+
+That PR was validated on the same Kimi MLA serving stack using a single **cold 8k prefill TTFT** reproducer:
+- target: `moonshotai/Kimi-K2.5`
+- draft: `lightseekorg/kimi-k2.5-eagle3-mla`
+- backend: `TRITON_MLA`
+- KV cache: `fp8`
+- `DCP=4`
+- `NCCL_P2P_LEVEL=SYS`
+- `VLLM_ENABLE_PCIE_ALLREDUCE=1`
+- GPU P2P force-enabled via the nvidia driver modprobe fix
+
+Results from the fair rerun:
+
+| Mode | TTFT | Prompt tokens | Prompt tok/s |
+|---|---:|---:|---:|
+| broken no-XML (before fix) | `9.138s` | `8005` | `875.98` |
+| no-XML with PR `#2127` | `1.074s` | `8005` | `7455.28` |
+| XML baseline | `1.071s` | `8005` | `7477.64` |
+
+Takeaways:
+- the pathological no-XML Turin regression is now essentially gone on that reproducer
+- current public recipes still use `NCCL_GRAPH_FILE`, because that is what is already shipped and documented
+- if `#2127` lands upstream and the same behavior holds after integration, the XML file should become unnecessary on this Turin class of machine
+
+One thing that did **not** help:
+- forcing `NCCL_MIN_NCHANNELS=8 NCCL_MAX_NCHANNELS=8`
+- on the real reproducer it was only noise-level difference, and on synthetic collectives it could be much worse
+
 ---
 
 ## nvidia_uvm Fix
@@ -546,7 +628,6 @@ Instead of the NCCL tuner plugin, use lukealonso's **PCIe oneshot allreduce** wi
 
 ```
 --enable-pcie-oneshot-allreduce            # PCIe oneshot for small messages
---enable-pcie-oneshot-allreduce-fusion      # fused allreduce + RMSNorm kernel
 ```
 
 > **Important:** On direct-attach topologies (no PCIe switch), you **must** configure the nvidia driver for direct P2P BAR1 mapping, otherwise PCIe oneshot allreduce will be ~15× slower than NCCL and the auto-crossover will silently disable it. See [Critical Prerequisite](pcie-oneshot-allreduce.md#critical-prerequisite-nvidia-p2p-driver-config). `NCCL_P2P_LEVEL=SYS` does NOT help — it only affects NCCL, not the custom allreduce kernel.

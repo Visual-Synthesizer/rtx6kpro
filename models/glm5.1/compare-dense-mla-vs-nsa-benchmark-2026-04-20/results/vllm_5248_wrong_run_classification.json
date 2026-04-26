@@ -1,0 +1,34 @@
+[
+  {
+    "run": 10,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 13410,
+    "elapsed_s": 210.7189633846283,
+    "finish_reason": "stop",
+    "final_answer": "Latvia"
+  },
+  {
+    "run": 18,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 10586,
+    "elapsed_s": 167.25901556015015,
+    "finish_reason": "stop",
+    "final_answer": "Latvia"
+  },
+  {
+    "run": 24,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 12812,
+    "elapsed_s": 202.26037764549255,
+    "finish_reason": "stop",
+    "final_answer": "Therefore, the manufacturer of the material used by the Glass Current salinity bench is headquartered in **Latvia**."
+  },
+  {
+    "run": 25,
+    "classification": "coherent_wrong_answer",
+    "completion_tokens": 10902,
+    "elapsed_s": 165.1240735054016,
+    "finish_reason": "stop",
+    "final_answer": "Answer: Latvia"
+  }
+]

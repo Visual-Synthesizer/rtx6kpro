@@ -1,0 +1,40 @@
+diff --git a/python/sglang/srt/compilation/cuda_piecewise_backend.py b/python/sglang/srt/compilation/cuda_piecewise_backend.py
+index 8ca1e6a43..e429d0eb2 100644
+--- a/python/sglang/srt/compilation/cuda_piecewise_backend.py
++++ b/python/sglang/srt/compilation/cuda_piecewise_backend.py
+@@ -31,6 +31,7 @@ class ConcreteSizeEntry:
+     num_finished_warmup: int = 0
+     cudagraph: Optional[torch.cuda.CUDAGraph] = None
+     output: Optional[Any] = None
++    skip_cudagraph_capture: bool = False
+ 
+     # for cudagraph debugging, track the input addresses
+     # during capture, and check if they are the same during replay
+@@ -120,6 +121,9 @@ class CUDAPiecewiseBackend:
+ 
+         entry = self.concrete_size_entries[runtime_shape]
+ 
++        if entry.skip_cudagraph_capture:
++            return entry.runnable(*args)
++
+         if entry.runnable is None:
+             entry.runnable = self.compiled_graph_for_general_shape
+ 
+@@ -167,9 +171,14 @@ class CUDAPiecewiseBackend:
+                     stack.enter_context(patch("torch.cuda.empty_cache", lambda: None))
+                 # mind-exploding: carefully manage the reference and memory.
+                 stream = get_pcg_capture_stream()
+-                assert (
+-                    stream is not None
+-                ), "PCG capture stream is not set, please check if runtime recompilation happened"
++                if stream is None:
++                    logger.warning(
++                        "Skipping piecewise CUDA graph capture for runtime-recompiled "
++                        "shape %s because no PCG capture stream is active.",
++                        runtime_shape,
++                    )
++                    entry.skip_cudagraph_capture = True
++                    return entry.runnable(*args)
+                 with torch.cuda.graph(cudagraph, pool=self.graph_pool, stream=stream):
+                     # `output` is managed by pytorch's cudagraph pool
+                     output = entry.runnable(*args)

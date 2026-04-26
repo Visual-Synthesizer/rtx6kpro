@@ -1,6 +1,6 @@
 # RTX 6000 Pro Wiki — Running Large LLMs on PCIe GPUs
 
-Community-sourced knowledge base for running large language models (Qwen3.5-397B, MiniMax M2.5, Kimi-K2.5, GLM-5) on NVIDIA RTX 6000 Pro (Blackwell, SM120) GPUs in 2×, 4×, and 8× PCIe configurations **without NVLink**.
+Community-sourced knowledge base for running large language models (Qwen3.5-397B, MiniMax M2.5, Kimi-K2.5, Kimi-K2.6, GLM-5) on NVIDIA RTX 6000 Pro (Blackwell, SM120) GPUs in 2×, 4×, and 8× PCIe configurations **without NVLink**.
 
 > Synthesized from ~5,000 [Discord](https://discord.gg/pYCvaQTf) messages, 300+ screenshots, and months of community experimentation.
 
@@ -12,8 +12,9 @@ Community-sourced knowledge base for running large language models (Qwen3.5-397B
 |-------|--------|--------|----------|-------------|------|
 | [Qwen3.5-397B](models/qwen35-397b.md) | 397B MoE | 17B | 4× | 350 tok/s (8×, SGLang) | [→](models/qwen35-397b.md) |
 | [Qwen3.5-27B/122B](models/qwen35-27b.md) | 27B–122B | — | 1× | — | [→](models/qwen35-27b.md) |
-| [MiniMax M2.5](models/minimax-m25.md) | 456B MoE | — | 2× | 85-89 tok/s (NVFP4) | [→](models/minimax-m25.md) |
+| [MiniMax M2.5](models/minimax-m25.md) | 229B MoE | — | 2× | 85-89 tok/s (NVFP4) | [→](models/minimax-m25.md) |
 | [Kimi-K2.5](models/kimi-k25.md) | 530B MoE | — | 8× | 101 tok/s (PCIe switch) | [→](models/kimi-k25.md) |
+| [Kimi-K2.6](models/kimi-k26.md) | MoE | — | 8× | Community image + MLA Eagle | [→](models/kimi-k26.md) |
 | [GLM-5](models/glm5.md) | 744B MoE | 40B | 8× | 105 tok/s (MTP) | [→](models/glm5.md) |
 
 ### Hardware & Topology
@@ -23,6 +24,8 @@ Community-sourced knowledge base for running large language models (Qwen3.5-397B
 - [ASUS ESC8000A-E13P + Broadcom Switches](hardware/asus-esc8000a-e13p-broadcom-switches.md) — Topology, ACS disable, P2P proof, benchmarks
 - [ASRock WRX90 + 3× c-payne Switches (hierarchy)](hardware/wrx90-cpayne-microchip-switches.md) — Root switch, uniform BW, no collapse bug
 - [ASRock WRX90 + 2× c-payne Switches (flat)](hardware/wrx90-cpayne-2switch-flat.md) — Flat topology, CPU-routed cross-switch, comparison
+- [ASRock WRX90 + 4× c-payne Switches (16 GPU)](hardware/wrx90-cpayne-16gpu-4switch.md) — 16 GPUs across 4 switches, posted-write collapse on 3+ root complexes
+- [PCIe Posted-Write Collapse (AMD CPU bug)](hardware/pcie-posted-write-collapse.md) — Cross-root-complex write bandwidth collapse, reproduction, workarounds
 
 ### Inference Engines
 - [vLLM](inference-engines/vllm.md) — Config, MTP, model-specific commands
@@ -48,7 +51,7 @@ Community-sourced knowledge base for running large language models (Qwen3.5-397B
 ## Key Findings
 
 1. **MTP=2 is the sweet spot** — +51-72% throughput across all models, MTP>3 unstable
-2. **NCCL graph XML fix is critical on AMD Turin** — 1.5-1.9× speedup by correcting hardcoded 16 GB/s bandwidth
+2. **NCCL graph XML fix is still the public Turin recipe** — current upstream NCCL draft fix is [`NVIDIA/nccl#2127`](https://github.com/NVIDIA/nccl/pull/2127), which aims to remove the no-XML pathological ring regression
 3. **PCIe switches dramatically help single-batch latency** — 101 vs 60 tok/s for Kimi K2.5
 4. **BF16 KV cache mandatory on SM120 for GLM-5** — FP8 produces garbled output
 5. **SGLang is the only option for GLM-5** — vLLM lacks SM120-compatible MLA+sparse attention backend

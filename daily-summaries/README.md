@@ -10,6 +10,26 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-04-25](2026-04/2026-04-25.md) | DS V4/Flash blocked on SM120: DeepGEMM explicitly confirmed no SM120 support planned. Both DS V4 Pro |
+| [2026-04-24](2026-04/2026-04-24.md) | DeepSeek V4 dropped (MIT): V4-Pro 1.6T params/49B active, Flash 284B. Flash fits 2× RTX 6000 Pro (~ |
+| [2026-04-23](2026-04/2026-04-23.md) | Qwen 3.6 27B + FP8 released — 40–130 tok/s on single RTX 6k with MTP3, 70–90% acceptance rate; |
+| [2026-04-22](2026-04/2026-04-22.md) | Kimi K2.6 hits 120–130 tok/s on 8×RTX 6000 Pro with DCP8 + Eagle3 speculative decoding + 3.6M fp8 |
+| [2026-04-21](2026-04/2026-04-21.md) | Kimi K2.6 released (1.1T params, same arch as K2.5, vision included): SWE-Bench Pro 58.6%, HLE beati |
+| [2026-04-20](2026-04/2026-04-20.md) | GLM-5.1 vLLM OOM bug fixed — new Docker `voipmonitor/vllm:glm51-tp8-nodcp-mtp3-tritondraft-b12x095 |
+| [2026-04-19](2026-04/2026-04-19.md) | PCIe P2P allreduce config for ~10% throughput gain: Force-enable P2P via modprobe `options nvidia NV |
+| [2026-04-18](2026-04/2026-04-18.md) | EXL3 benchmark breakthrough: mratsim's Qwen3.5-397B-A17B EXL3 quant achieves **1500 pp/s and 50+ tg/ |
+| [2026-04-17](2026-04/2026-04-17.md) | Qwen3.6-35B-A3B released (MoE); community upset the poll-winner 27B wasn't chosen first — speculat |
+| [2026-04-16](2026-04/2026-04-16.md) | b12x FP4 GEMM kernel merged into FlashInfer ([jump](https://discord.com/channels/1466898002793857221 |
+| [2026-04-15](2026-04/2026-04-15.md) | Introspective Diffusion (I-DLM-8B) matches AR model quality, beats LLaDA-2.1-mini (16B) by +26 AIME- |
+| [2026-04-14](2026-04/2026-04-14.md) | GLM 5.1 with native NSA/DSA attention now working on TP=8 with NVFP4 weights + FP8 KV cache via cust |
+| [2026-04-13](2026-04/2026-04-13.md) | MiniMax M2.7 NVFP4 quant released by luke, then updated mid-day incorporating Jon's calibration data |
+| [2026-04-12](2026-04/2026-04-12.md) | MiniMax M2.7 dropped (~1am) with same architecture as M2.5 — just a weight update. luke confirmed  |
+| [2026-04-11](2026-04/2026-04-11.md) | vLLM MTP reaches sglang parity after a week of work by Festr; key insight was using sglang's eager-m |
+| [2026-04-10](2026-04/2026-04-10.md) | GLM-5.1 NVFP4 quant live on 8x RTX Pro 6000: 131 tok/s with MTP, 95 tok/s via flashinfer cutlass. Bu |
+| [2026-04-09](2026-04/2026-04-09.md) | GLM-5.1 NVFP4 upload by luke — 52 tok/s single request on 8x RTX 6000 PRO (NVFP4, b12x, sglang), t |
+| [2026-04-08](2026-04/2026-04-08.md) | b12x hits 220 t/s single-user decode on 2x RTX PRO 6000; 198 t/s on Qwen3.5-122B vs 131 t/s baseline |
+| [2026-04-07](2026-04/2026-04-07.md) | GLM-5 NVFP4 on 8×RTX PRO 6000: SGLang+MTP leads at 99 tok/s single-user (0 ctx), 249.8 tok/s at C=4 |
+| [2026-04-06](2026-04/2026-04-06.md) | Qwen3.5 397B on 4×RTX PRO 6000: sglang record 108 tok/s (no MTP) / 180 tok/s (with MTP); vLLM now 9 |
 | [2026-04-05](2026-04/2026-04-05.md) | vLLM 0.19 MoE TP regression identified and fixed — PR vllm-project/vllm#38990 awaiting merge; bran |
 | [2026-04-04](2026-04/2026-04-04.md) | Qwen3.5-397B NVFP4 benchmarks on 4× RTX PRO 6000 (sglang b12x 0.7.2): MTP on = 180 tok/s single-use |
 | [2026-04-03](2026-04/2026-04-03.md) | b12x 0.7.1 fixes OOM and >8 concurrency crashes on SM120; attention backend now launches for all bat |
@@ -51,6 +71,26 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-04-25](2026-04/2026-04-25.md) | DS V4/Flash blocked on SM120: DeepGEMM explicitly confirmed no SM120 support planned. Both DS V4 Pro |
+| [2026-04-24](2026-04/2026-04-24.md) | DeepSeek V4 dropped (MIT): V4-Pro 1.6T params/49B active, Flash 284B. Flash fits 2× RTX 6000 Pro (~ |
+| [2026-04-23](2026-04/2026-04-23.md) | Qwen 3.6 27B + FP8 released — 40–130 tok/s on single RTX 6k with MTP3, 70–90% acceptance rate; |
+| [2026-04-22](2026-04/2026-04-22.md) | Kimi K2.6 hits 120–130 tok/s on 8×RTX 6000 Pro with DCP8 + Eagle3 speculative decoding + 3.6M fp8 |
+| [2026-04-21](2026-04/2026-04-21.md) | Kimi K2.6 released (1.1T params, same arch as K2.5, vision included): SWE-Bench Pro 58.6%, HLE beati |
+| [2026-04-20](2026-04/2026-04-20.md) | GLM-5.1 vLLM OOM bug fixed — new Docker `voipmonitor/vllm:glm51-tp8-nodcp-mtp3-tritondraft-b12x095 |
+| [2026-04-19](2026-04/2026-04-19.md) | PCIe P2P allreduce config for ~10% throughput gain: Force-enable P2P via modprobe `options nvidia NV |
+| [2026-04-18](2026-04/2026-04-18.md) | EXL3 benchmark breakthrough: mratsim's Qwen3.5-397B-A17B EXL3 quant achieves **1500 pp/s and 50+ tg/ |
+| [2026-04-17](2026-04/2026-04-17.md) | Qwen3.6-35B-A3B released (MoE); community upset the poll-winner 27B wasn't chosen first — speculat |
+| [2026-04-16](2026-04/2026-04-16.md) | b12x FP4 GEMM kernel merged into FlashInfer ([jump](https://discord.com/channels/1466898002793857221 |
+| [2026-04-15](2026-04/2026-04-15.md) | Introspective Diffusion (I-DLM-8B) matches AR model quality, beats LLaDA-2.1-mini (16B) by +26 AIME- |
+| [2026-04-14](2026-04/2026-04-14.md) | GLM 5.1 with native NSA/DSA attention now working on TP=8 with NVFP4 weights + FP8 KV cache via cust |
+| [2026-04-13](2026-04/2026-04-13.md) | MiniMax M2.7 NVFP4 quant released by luke, then updated mid-day incorporating Jon's calibration data |
+| [2026-04-12](2026-04/2026-04-12.md) | MiniMax M2.7 dropped (~1am) with same architecture as M2.5 — just a weight update. luke confirmed  |
+| [2026-04-11](2026-04/2026-04-11.md) | vLLM MTP reaches sglang parity after a week of work by Festr; key insight was using sglang's eager-m |
+| [2026-04-10](2026-04/2026-04-10.md) | GLM-5.1 NVFP4 quant live on 8x RTX Pro 6000: 131 tok/s with MTP, 95 tok/s via flashinfer cutlass. Bu |
+| [2026-04-09](2026-04/2026-04-09.md) | GLM-5.1 NVFP4 upload by luke — 52 tok/s single request on 8x RTX 6000 PRO (NVFP4, b12x, sglang), t |
+| [2026-04-08](2026-04/2026-04-08.md) | b12x hits 220 t/s single-user decode on 2x RTX PRO 6000; 198 t/s on Qwen3.5-122B vs 131 t/s baseline |
+| [2026-04-07](2026-04/2026-04-07.md) | GLM-5 NVFP4 on 8×RTX PRO 6000: SGLang+MTP leads at 99 tok/s single-user (0 ctx), 249.8 tok/s at C=4 |
+| [2026-04-06](2026-04/2026-04-06.md) | Qwen3.5 397B on 4×RTX PRO 6000: sglang record 108 tok/s (no MTP) / 180 tok/s (with MTP); vLLM now 9 |
 | [2026-04-05](2026-04/2026-04-05.md) | vLLM 0.19 MoE TP regression identified and fixed — PR vllm-project/vllm#38990 awaiting merge; bran |
 | [2026-04-04](2026-04/2026-04-04.md) | Qwen3.5-397B NVFP4 benchmarks on 4× RTX PRO 6000 (sglang b12x 0.7.2): MTP on = 180 tok/s single-use |
 | [2026-04-03](2026-04/2026-04-03.md) | b12x 0.7.1 fixes OOM and >8 concurrency crashes on SM120; attention backend now launches for all bat |
