@@ -324,7 +324,7 @@ Earlier measurements on this same 16-GPU 4-switch rig — on the **3-root cablin
 | SW1 → SW3 + SW2 (variant src) | 12.5 | 57.0 | 0.22× | ~78 % W drop |
 | SW1 → SW2 + SW4 (variant src) | 12.8 | 53.6 | 0.24× | |
 
-This was the same qualitative signature as the [Broadcom PEX890xx posted-write arbitration bug](asus-esc8000a-e13p-broadcom-switches.md#pex890xx-posted-write-arbitration-bug) and was attributed at the time to one source switch dispatching to ≥ 2 destination CPU root complexes simultaneously. See [`pcie-posted-write-collapse.md`](pcie-posted-write-collapse.md) and [`collapse-report.md`](collapse-report.md) for the broader cross-platform writeup.
+This was the same qualitative signature as the [Broadcom PEX890xx posted-write arbitration bug](asus-esc8000a-e13p-broadcom-switches.md#pex890xx-posted-write-arbitration-bug) and was attributed at the time to one source switch dispatching to ≥ 2 destination CPU root complexes simultaneously. See [`collapse-report.md`](collapse-report.md) for the broader writeup.
 
 **On the current platform stack (BIOS 12.09 / kernel 6.18 / driver 595.58.03), the catastrophic collapse no longer reproduces on the same 3-root cabling.** Identical patterns now give:
 

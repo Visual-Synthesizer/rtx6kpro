@@ -541,5 +541,4 @@ The benchmark is GPU-resident: there is **no** CUDA stream/launch overhead betwe
 ## Cross-references
 
 * [`collapse-report.md`](collapse-report.md) — the standalone reproducible report on the AMD CPU posted-write collapse, which explains *why* the topology under a 2-switch group does not matter for in-group workloads.
-* [`pcie-posted-write-collapse.md`](pcie-posted-write-collapse.md) — the long-form history of the collapse investigation.
-* [`wrx90-cpayne-16gpu-4switch.md`](wrx90-cpayne-16gpu-4switch.md) — the 16-GPU full-system run on this same rig, where the collapse *is* visible because the traffic spans more than two switches.
+* [`wrx90-cpayne-16gpu-4switch.md`](wrx90-cpayne-16gpu-4switch.md) — the 16-GPU full-system run on this same rig.

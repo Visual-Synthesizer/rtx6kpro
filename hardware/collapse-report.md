@@ -399,7 +399,6 @@ For the c-payne *3-stage hierarchical* configuration (root switch + leaf switche
 
 ## Files in this repo for further context
 
-* [`pcie-posted-write-collapse.md`](pcie-posted-write-collapse.md) — extended history, alternative reproductions, and per-platform results across multiple test rigs.
 * [`wrx90-cpayne-microchip-switches.md`](wrx90-cpayne-microchip-switches.md) — 3-switch hierarchical setup that does NOT exhibit the collapse.
 * [`wrx90-cpayne-2switch-flat.md`](wrx90-cpayne-2switch-flat.md) — 2-switch flat setup (no collapse, only 2 root complexes involved).
 * [`wrx90-cpayne-16gpu-4switch.md`](wrx90-cpayne-16gpu-4switch.md) — 16-GPU 4-switch setup where collapse was originally discovered (Microchip + TR Pro, 4 GPU/switch).

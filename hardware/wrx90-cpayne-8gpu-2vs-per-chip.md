@@ -373,6 +373,5 @@ Walking the sysfs tree gives the root bus for each GPU. Counting unique root bus
 ## Cross-references
 
 * [`collapse-report.md`](collapse-report.md) — standalone report on the AMD IOD posted-write collapse, the bug this layout sidesteps.
-* [`pcie-posted-write-collapse.md`](pcie-posted-write-collapse.md) — long-form history of the collapse investigation across multiple platforms.
 * [`wrx90-cpayne-16gpu-4switch.md`](wrx90-cpayne-16gpu-4switch.md) — the 16-GPU 4-switch (4 GPU/switch) layout where the collapse fired hard on this same rig — i.e., **collapse appears once you have ≥4 GPUs on one upstream port**, not at the 2-GPU-per-VS scale of this page.
 * [`asus-esc8000a-e13p-broadcom-switches.md`](asus-esc8000a-e13p-broadcom-switches.md) — same architectural topology (2 chips × 2 VS × 2 GPUs) but with **Broadcom PEX890xx** silicon and EPYC Turin host: collapses catastrophically at 2-GPU-per-VS where Microchip + TR Pro does not.
