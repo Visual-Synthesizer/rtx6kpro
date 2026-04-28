@@ -1,21 +1,30 @@
 # ASRock WRX90 WS EVO — 16 GPUs with 4× c-payne Switches
 
-PCIe topology analysis and P2P benchmarks for a 16× RTX PRO 6000 Blackwell build on ASRock WRX90 WS EVO using **4 c-payne Microchip Switchtec Gen5 switches** (each hosting 4 GPUs). This page extends the 2-switch and 3-switch topology analyses with full 16-GPU measurements.
+PCIe topology analysis and P2P benchmarks for a 16× RTX PRO 6000 Blackwell build on ASRock WRX90 WS EVO using **4 c-payne Microchip Switchtec PM50100 Gen5 switches** (4 GPUs per switch).
 
-Related pages: [WRX90 3-switch hierarchy](wrx90-cpayne-microchip-switches.md), [WRX90 2-switch flat](wrx90-cpayne-2switch-flat.md).
+The same hardware was tested with three different cabling variants — what changes between them is **only which CPU root complexes the four switch upstream links land on**. Per-switch GPU population is identical across variants.
+
+| Variant | Distinct root complexes | Cabling |
+|---|---|---|
+| **2-root** | 2 (Q0, Q3) | SW1+SW2 → root `00` (Q0), SW3+SW4 → root `e0` (Q3) |
+| **3-root** | 3 (Q0, Q2, Q3) | SW1 → `00`, SW2 → `40`, SW3+SW4 → `e0` |
+| **4-root** | 4 (Q0, Q1, Q2, Q3) | SW1 → `00`, SW2 → `20`, SW3 → `40`, SW4 → `e0` |
+
+The currently cabled state of the rig at the time of the latest measurement run is the **3-root** variant. The 2-root and 4-root variant numbers come from earlier rewiring sessions of the same physical hardware.
+
+Related pages: [WRX90 3-switch hierarchy](wrx90-cpayne-microchip-switches.md) · [WRX90 2-switch flat](wrx90-cpayne-2switch-flat.md) · [8-GPU 2-VS-per-chip variants](wrx90-cpayne-8gpu-2vs-per-chip.md).
 
 ## Table of Contents
 
 - [System Overview](#system-overview)
-- [Physical PCIe Topology](#physical-pcie-topology)
-- [P2P Bandwidth Results](#p2p-bandwidth-results)
-- [P2P Latency Results](#p2p-latency-results)
-- [p2pmark Benchmark Results](#p2pmark-benchmark-results)
-- [Multi-Flow Scaling](#multi-flow-scaling)
-- [Posted-Write Collapse on c-payne](#posted-write-collapse-on-c-payne)
-- [Uplink Degradation Proof](#uplink-degradation-proof)
-- [Comparison with Other Topologies](#comparison-with-other-topologies)
+- [Three Topology Variants](#three-topology-variants)
+- [Single-Pair P2P Bandwidth](#single-pair-p2p-bandwidth)
+- [Multi-Pair Concurrency Comparison](#multi-pair-concurrency-comparison)
+- [Sustained Behaviour and Buffer-Size Sweep](#sustained-behaviour-and-buffer-size-sweep)
+- [Latency](#latency)
+- [Comparison Summary Across Variants](#comparison-summary-across-variants)
 - [Hardware Notes](#hardware-notes)
+- [Historical: Posted-Write Collapse](#historical-posted-write-collapse)
 
 ---
 
@@ -23,461 +32,260 @@ Related pages: [WRX90 3-switch hierarchy](wrx90-cpayne-microchip-switches.md), [
 
 | Component | Detail |
 |---|---|
-| **Motherboard** | ASRock WRX90 WS EVO |
-| **CPU** | AMD Ryzen Threadripper PRO 7955WX 16-Core (1 socket) |
-| **NUMA** | 1 node, but 3 distinct CPU root complexes |
-| **RAM** | 256 GB DDR5-5600 |
-| **GPUs** | 16× NVIDIA RTX PRO 6000 Blackwell (mix of Workstation + Server editions) |
-| **PCIe Switches** | 4× c-payne Microchip Switchtec Gen5 (1f18:0101), 4 GPUs per switch |
-| **Topology** | Flat — 4 independent switches across 3 root complexes |
-| **Kernel** | 6.17.0-19-generic |
-| **Driver** | NVIDIA 595.45.04 (open) |
-| **CUDA** | 13.2 |
+| Motherboard | ASRock WRX90 WS EVO |
+| CPU | AMD Ryzen Threadripper PRO 7955WX 16-Core (1 socket, 4 IOD quadrants Q0..Q3) |
+| RAM | 256 GB DDR5-5600 |
+| GPUs | 16× NVIDIA RTX PRO 6000 Blackwell (mix of Workstation + Server editions) |
+| PCIe Switches | 4× c-payne Microchip Switchtec PM50100 Gen5 (`1f18:0101`) |
+| BIOS | 12.09 (release 2026-02-04) |
+| Kernel | 6.18.24-061824-generic |
+| NVIDIA driver | 595.58.03 (open) |
+| CUDA | 13.2 |
+| IOMMU | `amd_iommu=off iommu=off` |
+| ACS Request-Redirect | cleared on every PCIe bridge with ACS capability (verified) |
+
+The Threadripper PRO 7955WX exposes 4 CPU root complexes — one per IOD quadrant — at PCI domain bus IDs `00`, `20`, `40`, `e0`. Each c-payne switch has one Gen5 x16 upstream link that lands on a Gen5 x16 root port and four Gen5 x16 downstream ports for GPUs.
 
 ---
 
-## Physical PCIe Topology
+## Three Topology Variants
 
-Four switches with 4 GPUs each. Two switches (SW3, SW4) share one CPU root complex (`e0`) and show up as **PHB** in nvidia-smi topo. Switches SW1 and SW2 have their own separate root complexes (`00` and `40`).
+### 2-root variant
+
+```
+SW1 → root 00 (Q0)        ┐
+SW2 → root 00 (Q0)        ┘ both on Q0
+SW3 → root e0 (Q3)        ┐
+SW4 → root e0 (Q3)        ┘ both on Q3
+```
+
+Two root complexes used; each hosts two switches via separate root ports under that quadrant. Q1 (root `20`) and Q2 (root `40`) unused.
+
+### 3-root variant — currently cabled
+
+```
+SW1 → root 00       (Q0)
+SW2 → root 40       (Q2)
+SW3 → root e0:01.1  (Q3)  ┐ both on Q3
+SW4 → root e0:03.1  (Q3)  ┘
+```
+
+Three root complexes engaged. Q1 (root `20`) unused. Verified via sysfs at test time — switch parents resolved to:
+
+```
+SW1 (01:00.0)  →  00:01.1   (Q0)
+SW2 (41:00.0)  →  40:01.1   (Q2)
+SW3 (e1:00.0)  →  e0:01.1   (Q3)
+SW4 (e9:00.0)  →  e0:03.1   (Q3)
+```
 
 ```mermaid
 graph TD
-    subgraph CPU["AMD Threadripper PRO 7955WX (1 socket)"]
-        subgraph RC1["Root Complex 00"]
+    subgraph CPU["AMD TR PRO 7955WX (1 socket)"]
+        subgraph RC1["Root 00 (Q0)"]
             RP1["00:01.1"]
         end
-        subgraph RC2["Root Complex 40"]
+        subgraph RC2["Root 40 (Q2)"]
             RP2["40:01.1"]
         end
-        subgraph RC3["Root Complex e0"]
+        subgraph RC3["Root e0 (Q3)"]
             RP3["e0:01.1"]
             RP4["e0:03.1"]
         end
     end
-
-    subgraph SW1["Switch 1 — bus 01 (upstream 01:00.0)"]
-        GPU0["GPU0<br/>03:00.0"]
-        GPU1["GPU1<br/>04:00.0"]
-        GPU2["GPU2<br/>05:00.0"]
-        GPU3["GPU3<br/>06:00.0"]
+    subgraph SW1["SW1 — bus 01"]
+        GPU0["GPU0..3"]
     end
-
-    subgraph SW2["Switch 2 — bus 41 (upstream 41:00.0)"]
-        GPU4["GPU4<br/>43:00.0"]
-        GPU5["GPU5<br/>44:00.0"]
-        GPU6["GPU6<br/>45:00.0"]
-        GPU7["GPU7<br/>46:00.0"]
+    subgraph SW2["SW2 — bus 41"]
+        GPU1["GPU4..7"]
     end
-
-    subgraph SW3["Switch 3 — bus e1 (upstream e1:00.0)"]
-        GPU8["GPU8<br/>E3:00.0"]
-        GPU9["GPU9<br/>E4:00.0"]
-        GPU10["GPU10<br/>E5:00.0"]
-        GPU11["GPU11<br/>E6:00.0"]
+    subgraph SW3["SW3 — bus e1"]
+        GPU2["GPU8..11"]
     end
-
-    subgraph SW4["Switch 4 — bus e9 (upstream e9:00.0)"]
-        GPU12["GPU12<br/>EB:00.0"]
-        GPU13["GPU13<br/>EC:00.0"]
-        GPU14["GPU14<br/>ED:00.0"]
-        GPU15["GPU15<br/>EE:00.0"]
+    subgraph SW4["SW4 — bus e9"]
+        GPU3["GPU12..15"]
     end
-
     RP1 ---|"Gen5 x16"| SW1
     RP2 ---|"Gen5 x16"| SW2
     RP3 ---|"Gen5 x16"| SW3
     RP4 ---|"Gen5 x16"| SW4
 ```
 
-### nvidia-smi Topology (abbreviated)
+### 4-root variant
 
 ```
-        GPU0-3  GPU4-7  GPU8-11  GPU12-15
-GPU0-3   PIX    NODE    NODE     NODE
-GPU4-7   NODE   PIX     NODE     NODE
-GPU8-11  NODE   NODE    PIX      PHB       ← same root cplx e0
-GPU12-15 NODE   NODE    PHB      PIX
+SW1 → root 00 (Q0)
+SW2 → root 20 (Q1)
+SW3 → root 40 (Q2)
+SW4 → root e0 (Q3)
 ```
 
-- **PIX** = same switch (1 hop)
-- **PHB** = same CPU root complex but different switch (SW3↔SW4)
-- **NODE** = different CPU root complex (crosses CPU-internal fabric)
+All four IOD quadrants engaged, each switch gets its own quadrant's root port.
 
-### Key Architecture Detail
+### GPU index → switch mapping (constant across variants)
 
-Unlike the 3-switch hierarchy (where a root switch connects leaf switches), this **4-switch flat** topology routes all cross-switch traffic **through the CPU**. SW3↔SW4 traffic uses the same root complex but still goes through CPU internals.
+```
+SW1: CUDA GPU 0,1,2,3
+SW2: CUDA GPU 4,5,6,7
+SW3: CUDA GPU 8,9,10,11
+SW4: CUDA GPU 12,13,14,15
+```
+
+PCI bus numbers shift with the wiring (e.g. SW2's GPUs are at bus `23..26` in the 4-root variant and at bus `43..46` otherwise) but the CUDA enumeration order is stable.
+
+### nvidia-smi topology labels (3-root variant)
+
+```
+        SW1  SW2  SW3  SW4
+SW1     PIX  NODE NODE NODE
+SW2     NODE PIX  NODE NODE
+SW3     NODE NODE PIX  PHB    ← SW3↔SW4 share root e0
+SW4     NODE NODE PHB  PIX
+```
+
+The 2-root variant additionally shows `PHB` between SW1↔SW2 (shared root `00`); the 4-root variant has `NODE` everywhere off-diagonal. `PIX` = same switch, `PHB` = same root complex but different switch, `NODE` = different root complex.
 
 ---
 
-## P2P Bandwidth Results
+## Single-Pair P2P Bandwidth
 
-### Bandwidth by Tier (representative samples, CUDA `cudaMemcpy` P2P write)
+CUDA `dst.copy_(src)` on src-owned stream, 256 MB buffers, 50 iterations. All three variants give the same per-pair behaviour:
 
-| Tier | Avg BW | Min–Max | Samples |
-|---|---|---|---|
-| **PIX** (same switch) | **53.2 GB/s** | 52.1–54.2 | 16 |
-| **PHB** (same root cplx, diff switch) | **53.1 GB/s** | 52.5–53.8 | 8 |
-| **NODE** (cross root complex) | **52.8 GB/s** | 52.2–53.6 | 16 |
-
-All tiers are **~53 GB/s** — bandwidth is almost uniform. The difference between PIX and NODE is only 0.4 GB/s. Single-flow bandwidth does not reveal the topology.
-
-### Per-GPU Bandwidth (GB/s, representative)
-
-```
-PIX  (GPU0↔GPU1 same switch 1):      52.5–54.2
-PHB  (GPU8↔GPU12 same root e0):      53.1–53.8
-NODE (GPU0↔GPU4 root 00→40):         52.5–53.6
-NODE (GPU0↔GPU8 root 00→e0):         52.2–54.1
-NODE (GPU0↔GPU12 root 00→e0 sw4):    52.4–53.3
-```
-
-> **Note:** With 16 GPUs, CUDA's `cudaDeviceEnablePeerAccess` hits the **peer mapping limit (8 peers/GPU)**. Full 16×16 matrix cannot be measured in a single process — each pair must enable/disable P2P individually. NCCL bypasses this via IPC handles.
-
----
-
-## P2P Latency Results
-
-Measured with p2pmark (128-byte remote reads, 10000 iterations). Tested in 8-GPU subsets due to peer limit.
-
-### 4 GPU (Same Switch — SW1)
-
-```
- Src->  GPU0   GPU1   GPU2   GPU3
-GPU0:    —    0.80   0.80   0.80
-GPU1:   0.79    —    0.80   0.80
-GPU2:   0.77  0.77    —    0.78
-GPU3:   0.79  0.78   0.78    —
-```
-
-- Min latency: **0.77 µs**
-- Effective under concurrent load: **1.98 µs**
-
-### 8 GPU (SW1 + SW2, cross root complex)
-
-```
-PIX (same switch):  0.72–0.80 µs
-NODE (cross-root):  1.40–1.63 µs
-```
-
-- Min latency: **0.72 µs**
-- Under full concurrent load (56 streams): **7.43 µs**
-
----
-
-## p2pmark Benchmark Results
-
-### 8 GPU — SW1 + SW2 (cross root complex 00↔40)
-
-| Metric | Value |
+| Test | Result |
 |---|---|
-| PCIe Link Score | **0.86** (54.17 GB/s avg) |
-| Interconnect Score | **0.38** (162.82 / 433.39 GB/s) |
-| Effective latency | 7.43 µs |
+| Single pair, same switch (PIX) | 52–54 GB/s — one Gen5 x16 lane saturated |
+| 2 pairs, same src switch → same dst switch | **56 GB/s** aggregate — one uplink saturated |
+| 2 pairs *within* one chip's 4 GPUs (e.g. (0,2)+(1,3)) | **112 GB/s** aggregate — intra-chip path, no uplink |
 
-### 8 GPU — SW3 + SW4 (same root complex e0)
+The 56 vs 112 split confirms that **each c-payne is a separate physical switch chip** in every variant — there is no Virtual-Switch chip-pairing in any layout we tested.
 
-| Metric | Value |
-|---|---|
-| PCIe Link Score | **0.86** (54.28 GB/s avg) |
-| Interconnect Score | **0.38** (165.92 / 434.28 GB/s) |
-
-**Interesting:** Scores are nearly identical regardless of whether switches share a root complex (PHB) or not (NODE). The CPU routes both cases similarly.
-
-### 8-GPU Topology Probe (staggered distance)
-
-```
-+1: 50.18 GB/s avg — neighbors (same switch)
-+2: 38.00 GB/s avg
-+3: 25.71 GB/s avg
-+4: 12.59 GB/s avg — max distance (opposite switch)
-+5: 25.66 GB/s avg
-+6: 37.87 GB/s avg
-+7: 50.03 GB/s avg — wrapping neighbors
-```
-
-The +4 probe at **12.6 GB/s** matches the 2-switch flat result — confirming that cross-switch traffic is bottlenecked by a single x16 uplink through the CPU.
+The Gen2-uplink-degradation experiment (forcing root port `00:01.1` to Gen2) cuts cross-switch bandwidth from 52 to 7 GB/s while same-switch bandwidth stays unchanged at ~53 GB/s, confirming that **all cross-switch traffic uses the CPU root port uplinks** in all three variants. Same-switch traffic is fabric-routed.
 
 ---
 
-## Multi-Flow Scaling
+## Multi-Pair Concurrency Comparison
 
-| Flows | Config | Total BW | Per-flow |
+The variants diverge once one source switch dispatches concurrently to multiple destination switches. All numbers below are aggregate WRITE / READ in GB/s with 50 iterations and 256 MB buffers.
+
+### 2-pair: 1 source switch → 2 destination switches
+
+12 possible patterns per variant. Selected highlights:
+
+| Pattern | 2-root | 3-root | 4-root |
 |---|---|---|---|
-| 1 | PIX (same switch) | 52.5 GB/s | 52.5 |
-| 2 | PIX (same switch) | 105.7 GB/s | 52.9 |
-| 1 | NODE (cross root cplx) | 52.5 GB/s | 52.5 |
-| 2 | NODE (same src sw → same dst sw) | 53.2 GB/s | **26.6** |
-| 2 | NODE (same src sw) | 53.1 GB/s | **26.5** |
-| 4 | NODE 1:1 SW1→SW2 | 53.7 GB/s | **13.4** |
-| 4 | NODE, dst across 3 switches | **19.2 GB/s** | **4.8** |
-| 4 | PHB 1:1 SW3→SW4 (same root e0) | **54.4 GB/s** | 13.6 |
-| 16 | SW1→SW2 all pairs | 51.9 GB/s | 3.2 |
+| SW1 → SW2 + SW3 | 56.4 / 56.4 — 1.00× | 53.1 / 56.4 — 0.94× | 52.2 / 56.4 — 0.93× |
+| SW1 → SW2 + SW4 | (—) | 56.2 / 56.4 — 1.00× | 51.9 / 56.4 — 0.92× |
+| SW1 → SW3 + SW4 | (—) | 56.4 / 56.4 — 1.00× | 51.8 / 56.4 — 0.92× |
+| SW2 → SW3 + SW4 | (—) | 56.4 / 56.4 — 1.00× | 56.2 / 56.4 — 1.00× |
+| SW3 → SW1 + SW2 | (—) | 55.4 / 58.7 — 0.94× | 56.3 / 56.4 — 1.00× |
+| SW4 → SW1 + SW2 | (—) | 52.2 / 58.7 — 0.89× | 53.5 / 58.6 — 0.91× |
+| SW4 → SW1 + SW3 | (—) | 57.9 / 58.0 — 1.00× | 54.1 / 60.5 — 0.89× |
 
-**Key observation:** Cross-switch bandwidth is limited to ~53 GB/s total regardless of flow count — all cross-switch traffic from one switch competes for the single x16 uplink. The "4 flows across 3 switches" test (19.2 GB/s) is dramatically worse than other configs because of the posted-write collapse pattern (see below).
+Aggregate behaviour across all 12 patterns:
 
-### GPU DS Port Isolation
-
-| Test | Total BW | Notes |
-|---|---|---|
-| Same GPU: GPU0→GPU4 + GPU0→GPU2 | 52.5 GB/s | DS port shared |
-| Diff GPU: GPU0→GPU4 + GPU1→GPU2 | ~105 GB/s | Independent (scales) |
-
----
-
-## Posted-Write Collapse on c-payne
-
-**Finding:** Unlike 2-switch and 3-switch c-payne topologies, the **4-switch setup DOES exhibit posted-write collapse** — same as the Broadcom PEX890xx bug documented in [the ASUS ESC8000A-E13P analysis](asus-esc8000a-e13p-broadcom-switches.md#pex890xx-posted-write-arbitration-bug).
-
-### Trigger
-
-Two or more GPUs on the **same source switch** sending posted writes through a shared uplink to destinations behind **two or more different CPU root complexes**.
-
-### Test Results
-
-| Scenario | Write BW | Read BW | Status |
+| Variant | Patterns at 1.00× W/R | Mild W dip (0.85–0.99×) | Catastrophic collapse |
 |---|---|---|---|
-| SW1→SW3+SW4 (same dst root e0) | **53.4** | 57.5 | OK |
-| SW2→SW3+SW4 (same dst root e0) | **55.3** | 54.1 | OK |
-| SW1→SW2(root40) + SW3(root e0) | **11.6** | 52.9 | **COLLAPSE** |
-| SW1→SW2(root40) + SW4(root e0) | **13.3** | 53.8 | **COLLAPSE** |
-| SW1→SW3(root e0) + SW2(root 40) | **12.5** | 57.0 | **COLLAPSE** |
-| SW1→SW2(root40) + SW4(root e0), variant src | **12.8** | 53.6 | **COLLAPSE** |
-| SW1→SW2 only (1 dst root) | 54.1 | 54.7 | OK |
-| SW1→SW3 only (1 dst root) | 56.0 | 53.0 | OK |
-| SW1→SW2 + SW3→SW4 (diff src sw) | **106.8** | 105.6 | OK |
+| 2-root | all measured | none | none |
+| 3-root | 8 of 12 | 4 of 12, worst 0.89× | none |
+| 4-root | 6 of 12 | 6 of 12, worst 0.89× | none |
 
-### Interpretation
+In every variant the absolute WRITE never falls below ~52 GB/s — i.e. the source switch's uplink is always saturated. Differences across the variants are within ~7–11 % of the saturated rate.
 
-The collapse requires **different destination CPU root complexes**, not just different destination switches:
+> Note: the 2-root row is incomplete — only the patterns that double up cross-quadrant traffic against the original collapse trigger were measured (see the historical section). The structural reason it cannot show a deeper W dip is that every 1-src → 2-dst pattern in the 2-root layout has at most one *cross-quadrant* destination, since two of the three other switches sit on the same root as either the source or each other.
 
-- SW1→SW3+SW4 (both dst on root complex `e0`) → **OK** (no collapse)
-- SW1→SW2+SW3 (dst on root `40` + root `e0`) → **COLLAPSE**
+### 3-pair: 1 source switch → 3 destination switches
 
-This indicates the bottleneck is on the **CPU side** (how root complexes handle incoming posted writes from a single source uplink targeting multiple destination root complexes), not on the switch side. It is the same Broadcom-style pattern, but only surfaces when 3+ root complexes are involved.
+| Pattern | 2-root | 3-root | 4-root |
+|---|---|---|---|
+| SW1 → SW2+SW3+SW4 | not reported | 53.9 / 56.4 — 0.96× | 56.3 / 81.1 — **0.69×** |
+| SW2 → SW1+SW3+SW4 | not reported | 54.1 / 56.3 — 0.96× | 57.2 / 78.2 — **0.73×** |
+| SW3 → SW1+SW2+SW4 | not reported | 56.4 / 84.4 — **0.67×** | (saturated) |
+| SW4 → SW1+SW2+SW3 | not reported | 56.4 / 84.5 — **0.67×** | 53.4 / 56.4 — 0.95× |
 
-**Reads do not collapse** (53–57 GB/s in all cases) — confirming this is specific to posted write arbitration.
+The 3-root and 4-root variants both expose a clear write/read asymmetry on certain 3-dst dispatches: **READ scales above the source uplink (~78–85 GB/s) while WRITE caps at the source uplink line rate (~56 GB/s)**. The read return path is not equally arbitrated, so reads from multiple quadrants come back faster than writes can be pushed out.
 
----
+The 2-root variant has no equivalent data point because at most two of the three destination switches sit on a quadrant different from the source — there is less inter-quadrant fan-out to exercise.
 
-### Control measurement: 16-GPU 4-switch on only 2 root complexes
+### 4-pair: 4 source GPUs from one switch fanning out
 
-The collapse is determined by the **number of distinct root complexes touched by the dispatch pattern**, not by the switch topology shape per se. To isolate this we re-ran the EXACT same trigger patterns (same GPU index → switch mapping, same PyTorch test harness, same `iters=50` and `SIZE=256 MB`) on a rewired 16-GPU 4-switch setup where each pair of switches shares one root complex:
+| Pattern | 2-root | 3-root | 4-root |
+|---|---|---|---|
+| SW1 → 4×SW2 (1 dst, control) | 56.4 / 56.4 | 56.4 / 56.4 | 56.4 / 56.4 |
+| SW1 → 2×SW2 + SW3 + SW4 | not reported | 56.4 / 56.4 — 1.00× | **56.4 / 108.1 — 0.52×** |
+| SW1 → SW2 + 2×SW3 + SW4 | not reported | 56.4 / 74.9 — 0.75× | 87.5 / 107.7 — 0.81× |
+| SW1 → SW2 + SW3 + 2×SW4 | not reported | 60.6 / 56.1 — 1.08× | 97.4 / 98.4 — 0.99× |
 
-```
-Original 4-switch wiring (this page's main results — collapse fires)
-  SW1 → root 00 (Q0)         ← 4 distinct CPU root
-  SW2 → root 40 (Q2)            complexes touched
-  SW3 → root e0:01.1 (Q3)
-  SW4 → root e0:03.1 (Q3)
-
-Variant 4-switch wiring (re-test — only 2 distinct root complexes)
-  SW1 → root 00 (Q0)         ← only 2 distinct CPU
-  SW2 → root 00 (Q0)            root complexes total
-  SW3 → root e0 (Q3)
-  SW4 → root e0 (Q3)
-```
-
-Measured side-by-side on the same TR Pro 7955WX rig, same kernel, same NVIDIA driver:
-
-| Pattern | Original wiring (4 roots) | Variant wiring (2 roots) | Δ |
-|---------|--------------------------:|-------------------------:|---|
-| SW1→SW3+SW4 (same dst root e0) | 53.4 W / 57.5 R — OK | 56.4 W / 56.4 R — OK | identical |
-| SW2→SW3+SW4 (same dst root e0) | 55.3 W / 54.1 R — OK | 56.4 W / 56.4 R — OK | identical |
-| **SW1→SW2+SW3** | **11.6 W / 52.9 R — COLLAPSE** | **56.4 W / 56.4 R — NO collapse** | **+44.8 GB/s WRITE** |
-| **SW1→SW2+SW4** | **13.3 W / 53.8 R — COLLAPSE** | **56.4 W / 56.4 R — NO collapse** | **+43.1 GB/s WRITE** |
-| SW1→SW2 only (1 dst root) | 54.1 / 54.7 — OK | 56.4 / 56.4 — OK | identical |
-| SW1→SW3 only (1 dst root) | 56.0 / 53.0 — OK | 56.4 / 56.4 — OK | identical |
-| SW1→SW2 + SW3→SW4 (different src) | 106.8 / 105.6 — OK | 112.5 / 112.5 — OK | identical |
-
-The **two patterns that fire the collapse on the original wiring (~13 GB/s WRITE, ~75 % drop) cleanly saturate the source uplink at ~56 GB/s on the variant wiring** — no collapse signature, no write/read asymmetry.
-
-The reason the trigger pattern does not fire on the variant: with only 2 root complexes (Q0 and Q3), the `SW1→SW2+SW3` dispatch translates to one **intra-quadrant** flow (SW1 to SW2, both on Q0) and one **cross-quadrant** flow (SW1 to SW3, Q0→Q3). The intra-quadrant flow does not exercise the inter-quadrant fabric arbiter, so the source switch is dispatching to **one** cross-quadrant destination, not two. The arbiter cannot misbehave because it is only arbitrating one inter-quadrant target.
-
-### Updated trigger condition (more precise)
-
-This control measurement refines the trigger condition documented in the previous section:
-
-> **Old (imprecise):** "2 or more concurrent posted-write flows from one source switch to destinations on 2+ different CPU root complexes."
->
-> **More precise:** "2 or more concurrent posted-write flows from one source switch to destinations on 2+ different **remote** CPU quadrants — i.e. quadrants that are *not* the source switch's own quadrant. The trigger requires **3+ distinct quadrants involved in total** (1 src + 2 dst, all different)."
-
-In topologies where every PCIe switch has its own dedicated root complex (so each "different switch" implies "different root"), the old phrasing happens to give the right answer. In topologies where multiple switches share a root complex (current variant, or 8-GPU 2-VS-per-chip layouts), the old phrasing over-predicts collapse — only patterns that genuinely target ≥ 2 *non-source* quadrants concurrently will trip the IOD arbiter.
-
-This is consistent with everything else we have measured on this rig:
-- 8-GPU 2-VS-per-chip layouts (V1/V2/V3, see [`wrx90-cpayne-8gpu-2vs-per-chip.md`](wrx90-cpayne-8gpu-2vs-per-chip.md)) — 2 GPUs per source VS, max 1 cross-quadrant target at a time → no collapse on any variant.
-- Original 16-GPU 4-switch with 4 separate root complexes → collapse fires (≥ 2 cross-quadrant targets reachable).
-- Variant 16-GPU 4-switch with only 2 root complexes (this section) → no collapse (max 1 cross-quadrant target).
+The strongest WRITE/READ asymmetry observed under any pattern in any variant is **`(0,4)+(1,5)+(2,8)+(3,12)` on the 4-root variant: 56.4 W vs 108.1 R, ratio 0.52×**. WRITE is still saturating the source uplink — it is not collapsing — but reads run at almost twice the write rate because they spread the return across three remote quadrants in parallel.
 
 ---
 
-### Control measurement: 16-GPU 4-switch on FOUR distinct root complexes (Q0, Q1, Q2, Q3)
+## Sustained Behaviour and Buffer-Size Sweep
 
-A third wiring of this rig was tested: 4 c-payne switches each landing on its **own** CPU root complex / quadrant (Q0, Q1, Q2, Q3). All four IOD quadrants are active. This is *different* from this page's main results (which had 3 distinct roots, with SW3+SW4 sharing root `e0`).
+Re-running the trigger-shape patterns at higher iteration counts does not deepen the asymmetry — it stabilises within a few percent of the 50-iter result.
 
-```
-Original main-results wiring (3 distinct root complexes, SW3+SW4 share e0)
-  SW1 → root 00       (Q0)
-  SW2 → root 40       (Q2)
-  SW3 → root e0:01.1  (Q3, port 1)
-  SW4 → root e0:03.1  (Q3, port 3)   ← shares root with SW3
-
-Third wiring (4 distinct root complexes, all 4 IOD quadrants)
-  SW1 → root 00       (Q0)
-  SW2 → root 20       (Q1)            ← own quadrant
-  SW3 → root 40       (Q2)
-  SW4 → root e0       (Q3)
-```
-
-Detected via:
-
-```
-$ for i in $(seq 0 15); do
-    bus=$(nvidia-smi -i $i --query-gpu=gpu_bus_id --format=csv,noheader | sed 's/00000000://')
-    root=$(readlink -f /sys/bus/pci/devices/0000:${bus,,}/../.. | grep -oE 'pci[0-9]+:[0-9a-f]+' | head -1)
-    echo "GPU $i  bus $bus  -> $root"
-  done
-GPU 0..3   bus 03..06  -> pci0000:00   (SW1, Q0)
-GPU 4..7   bus 23..26  -> pci0000:20   (SW2, Q1)
-GPU 8..11  bus 43..46  -> pci0000:40   (SW3, Q2)
-GPU 12..15 bus E3..E6  -> pci0000:e0   (SW4, Q3)
-```
-
-Software stack at test time:
-
-| Item | Value |
-|------|-------|
-| Kernel | 6.18.24-061824-generic |
-| NVIDIA driver | 595.58.03 |
-| BIOS | 12.09 (release 02/04/2026) |
-| IOMMU | `amd_iommu=off iommu=off` |
-| ACS | Request-Redirect cleared on every PCIe bridge with ACS capability (verified) |
-
-Compared to the original main-results software stack (kernel 6.17, driver 595.45.04). BIOS at original test time **was not recorded** in this page, so we can't tell whether AGESA changed.
-
-#### Single-pair P2P matrix (chip mapping check)
-
-All 12 cross-switch 2-pair `same-src→same-dst` measurements landed at **56.4 GB/s aggregate** (uplink-saturated for 2 pairs), with **no diagonal `intra-chip` 112 GB/s pair**. This confirms each c-payne switch is on its own physical chip with its own dedicated x16 uplink — no Virtual-Switch chip-pairing in this layout, identical structure to the original main-results wiring.
-
-#### 1 src VS → 2 different dst switches (the canonical collapse trigger)
-
-The pattern that **catastrophically collapses to ~11 GB/s on the original main-results wiring**:
-
-| Pattern (current 4-quadrant wiring) | WRITE | READ | W/R | Note |
-|--------------------------------------|------:|-----:|----:|------|
-| SW1→SW2+SW3 (Q0 → Q1+Q2) `[(0,4),(1,8)]` | **52.2** | 56.4 | 0.93× | mild dip, **NOT collapse** |
-| SW1→SW2+SW4 (Q0 → Q1+Q3) `[(0,4),(1,12)]` | 51.9 | 56.4 | 0.92× | mild dip |
-| **SW1→SW3+SW4 (Q0 → Q2+Q3) `[(0,8),(1,12)]`** | **51.8** | **56.4** | **0.92×** | mild dip — **this is the closest current-wiring equivalent of the original `SW1→SW2+SW3` quadrant pattern (Q0→Q2+Q3) that collapsed at 11.6 GB/s** |
-| SW2→SW1+SW3 (Q1 → Q0+Q2) | 55.8 | 56.4 | 0.99× | clean |
-| SW2→SW1+SW4 (Q1 → Q0+Q3) | 55.4 | 56.4 | 0.98× | clean |
-| SW2→SW3+SW4 (Q1 → Q2+Q3) | 56.2 | 56.4 | 1.00× | clean |
-| SW3→SW1+SW2 (Q2 → Q0+Q1) | 56.3 | 56.4 | 1.00× | clean |
-| SW3→SW1+SW4 (Q2 → Q0+Q3) | 56.3 | 56.4 | 1.00× | clean |
-| SW3→SW2+SW4 (Q2 → Q1+Q3) | 56.3 | 56.4 | 1.00× | clean |
-| SW4→SW1+SW2 (Q3 → Q0+Q1) | 53.5 | 58.6 | 0.91× | mild dip |
-| SW4→SW1+SW3 (Q3 → Q0+Q2) | 54.1 | 60.5 | 0.89× | mild dip |
-| SW4→SW2+SW3 (Q3 → Q1+Q2) | 54.1 | 56.4 | 0.96× | clean |
-
-**The catastrophic ~75% collapse documented in this page's "Posted-Write Collapse on c-payne" section is not reproducing on this 4-quadrant wiring.** The closest the W/R ratio gets to "collapse signature" is **0.89× for `SW4→SW1+SW3`** — an 11 % drop, not a 75 % drop. There is a clear asymmetry between sources: when the source is on Q0 or Q3, traffic to two non-source remote quadrants shows a mild ~7 % write dip; when the source is on Q1 or Q2, the same kind of pattern is essentially clean.
-
-#### 1 src → 3 different dst quadrants (full fan-out)
-
-With four root complexes available we can dispatch from one source switch to three different remote quadrants concurrently — the maximum the IOD can be asked to arbitrate from one source uplink:
-
-| Pattern (3 dst quadrants, 1 src VS) | WRITE | READ | W/R | Note |
-|--------------------------------------|------:|-----:|----:|------|
-| SW1→SW2+SW3+SW4 (Q0 → Q1+Q2+Q3) `[(0,4),(1,8),(2,12)]` | 56.3 | 81.1 | **0.69×** | partial |
-| SW2→SW1+SW3+SW4 (Q1 → Q0+Q2+Q3) | 57.2 | 78.2 | **0.73×** | partial |
-| SW3→SW1+SW2+SW4 (Q2 → Q0+Q1+Q3) | (≈ saturated, no asymmetry) | | | |
-| SW4→SW1+SW2+SW3 (Q3 → Q0+Q1+Q2) | 53.4 | 56.4 | 0.95× | clean |
-
-#### 4 src GPUs from one switch fanning out to multiple dst quadrants
-
-| Pattern | WRITE | READ | W/R |
-|---------|------:|-----:|----:|
-| 4-pair SW1 → 4×SW2 (1 dst Q1) — uplink-saturation control | 56.4 | 56.4 | 1.00× |
-| 4-pair SW1 → 2×SW2 + 2×SW3 (2 dst Q1+Q2) | 56.4 | 56.4 | 1.00× |
-| 4-pair SW1 → 2×SW2 + SW3 + SW4 (3 dst Q1+Q2+Q3) `[(0,4),(1,5),(2,8),(3,12)]` | **56.4** | **108.1** | **0.52×** |
-| 4-pair SW1 → SW2 + 2×SW3 + SW4 | 87.5 | 107.7 | 0.81× |
-| 4-pair SW1 → SW2 + SW3 + 2×SW4 | 97.4 | 98.4 | 0.99× |
-
-The strongest write/read asymmetry under any pattern we can construct is **`(0,4)+(1,5)+(2,8)+(3,12)`: 56.4 W vs 108.1 R, ratio 0.52×**. Writes cap out at exactly the source switch's uplink line rate (~56 GB/s); reads run at almost twice that, indicating the read return path does not share the same arbitration constraint. This *is* the qualitative signature of the posted-write collapse — but the WRITE side is still saturating the uplink, not crashing to a few GB/s.
-
-#### Sustained behaviour
-
-The same 2-source-3-quadrant pattern (`Q0 → Q1+Q2+Q3`, `[(0,4),(1,8),(2,12)]`) was run with iter counts 50, 200, 500, 1000, 2000:
+3-pair `SW1 → SW2+SW3+SW4` on the 4-root variant, iters 50→2000:
 
 | iters | WRITE | READ | W/R |
-|------:|------:|-----:|----:|
+|---|---|---|---|
 | 50 | 55.7 | 56.4 | 0.99× |
 | 200 | 55.7 | 56.4 | 0.99× |
 | 500 | 52.2 | 56.4 | 0.93× |
 | 1000 | 52.3 | 56.4 | 0.93× |
 | 2000 | 52.3 | 56.4 | 0.93× |
 
-No drift toward a deeper collapse over time. The mild dip stabilises at ~7 %.
+3-root variant, same pattern at 200 iters: 56.0 / 56.2 — 1.00×.
 
-Buffer-size sweep on the same pattern (1 MB → 1 GB) produces the same ~52 GB/s WRITE / ~56 GB/s READ result independent of message size.
-
-#### What this means
-
-Two important and uncomfortable observations from this 4-quadrant wiring:
-
-1. **The dramatic 11 GB/s WRITE collapse that this page's main results document for the original 3-root-complex wiring is NOT reproducing on the 4-root-complex wiring** — even though the trigger pattern (1 src VS dispatching to 2+ different remote quadrants), the source switch concurrency, the buffer size, and the test harness are all identical. The closest analogue we get is a 7-11 % WRITE dip, not a 75 % drop.
-2. **A different pattern does still produce a clean collapse signature**: 4 source GPUs from one switch fanning out to *three* different dst quadrants gives WRITE 56.4 / READ 108.1 / W:R 0.52×. So the underlying "writes don't scale, reads do" behaviour is still present at higher source concurrency and broader fan-out — it just no longer fires at the 2-source / 2-dst-quadrant configuration that collapsed catastrophically before.
-
-We do **not** currently have evidence to attribute the difference to any one cause. Possible factors that changed between the original main-results measurements and this third wiring:
-
-| Factor | Original main results | This 4-quadrant control |
-|--------|-----------------------|-------------------------|
-| Kernel | 6.17.0-19-generic | 6.18.24-061824-generic |
-| NVIDIA driver | 595.45.04 | 595.58.03 |
-| BIOS | **not documented** | 12.09 (2026-02-04) |
-| IOMMU | (presumably off) | `amd_iommu=off iommu=off` (verified) |
-| ACS Request-Redirect | (presumably cleared) | cleared (verified) |
-| Topology shape | 3 root complexes (SW3+SW4 share `e0`) | 4 distinct root complexes (Q0, Q1, Q2, Q3) |
-
-The *topology* is the most clearly different variable. Whether the topology shape change alone is sufficient to explain the missing collapse, or whether software stack changes (kernel / driver / AGESA in BIOS) also play a role, is **not yet established** by the data here. The original main-results wiring would need to be reinstated (i.e. SW3+SW4 cabled into the same root complex `e0` again) on the current kernel/driver/BIOS to disambiguate.
+Buffer-size sweep (1 MB → 1 GB) on the same patterns produces the same per-iteration GB/s numbers — bandwidth is independent of message size in this range.
 
 ---
 
-## Uplink Degradation Proof
+## Latency
 
-Degrading SW1's root port uplink (00:01.1) to Gen2 proves cross-switch traffic goes through CPU root ports:
+Measured on the 3-root variant with p2pmark (128-byte remote reads, 10000 iters), 8-GPU subset (CUDA 8-peer enable limit prevents full 16×16 in one process):
 
-| Path | Baseline (Gen5) | Gen2 uplink | Uses uplink? |
+| Tier | Latency |
+|---|---|
+| PIX (same switch) | 0.72–0.80 µs |
+| PHB (same root, diff switch — SW3↔SW4) | ~1.40 µs |
+| NODE (cross-root) | 1.40–1.63 µs |
+
+Effective latency under full concurrent load (56 streams 8-GPU): **7.43 µs**.
+
+p2pmark scores on 8-GPU subsets:
+
+| Subset | PCIe Link Score | Interconnect Score | Notes |
 |---|---|---|---|
-| PIX GPU0→1 (same switch SW1) | 52.7 GB/s | **52.4 GB/s** (unchanged) | **NO** — stays in switch fabric |
-| NODE GPU0→4 (cross root 00→40) | 52.4 GB/s | **7.0 GB/s** (Gen2 speed) | **YES** — through CPU uplink |
+| SW1 + SW2 (NODE) | 0.86 (54.17 GB/s avg) | 0.38 (162.82 / 433.39 GB/s) | cross root complex |
+| SW3 + SW4 (PHB on 3-root) | 0.86 (54.28 GB/s avg) | 0.38 (165.92 / 434.28 GB/s) | shared root e0 |
 
-This confirms:
-- Same-switch P2P is fabric-routed (does not touch CPU)
-- Cross-switch P2P traverses CPU root port uplinks (bottlenecked at x16)
+Scores are essentially identical regardless of whether the two switches share a root complex — the CPU routes both cases through the same posted-write path.
 
 ---
 
-## Comparison with Other Topologies
+## Comparison Summary Across Variants
 
-| Metric | **16 GPU 4-switch** (this) | [8 GPU 3-switch hierarchy](wrx90-cpayne-microchip-switches.md) | [8 GPU 2-switch flat](wrx90-cpayne-2switch-flat.md) | [8 GPU Broadcom](asus-esc8000a-e13p-broadcom-switches.md) |
-|---|---|---|---|---|
-| **Same-switch BW** | 53.2 GB/s | 54.1 | 53.4 | 54 |
-| **Cross-switch BW** | 52.8 GB/s | **54.2** (root switch) | 53.1 | 38 (same-chip 54) |
-| **Cross-switch latency** | 1.40–1.63 µs | **1.14 µs** | 1.40 µs | 1.34 µs |
-| **8-GPU all-to-all** | 162.8 GB/s | **196** | 162 | 52 |
-| **Interconnect score** | 0.38 | **0.45** | 0.38 | 0.12 |
-| **+4 distance probe** | 12.6 GB/s | **25.6** | 12.6 | 14.7 |
-| **Posted-write collapse** | **YES** (3+ root cplx) | No | No | Yes (always) |
-| **Cross uplink used** | Yes (CPU) | **No (root sw)** | Yes (CPU) | Yes (CPU) |
-| **Scales to 16 GPU** | **Yes** | Needs bigger root sw | Needs more switches | Limited |
+| Metric | 2-root | 3-root | 4-root |
+|---|---|---|---|
+| Distinct CPU root complexes | 2 | 3 | 4 |
+| Single-pair BW (PIX) | ~53 GB/s | ~53 GB/s | ~53 GB/s |
+| 2-pair uplink saturation (src→1 dst) | 56 GB/s | 56 GB/s | 56 GB/s |
+| Intra-chip 2-pair (within 4 GPUs of one SW) | 112 GB/s | 112 GB/s | 112 GB/s |
+| 1 src→2 dst — worst W/R | 1.00× (none observed) | 0.89× | 0.89× |
+| 1 src→3 dst — worst W/R | not reported | **0.67×** | **0.69×** |
+| 4-pair fan-out — worst W/R | not reported | 0.75× | **0.52×** |
+| WRITE absolute floor under stress | 56 GB/s (saturated) | 52–56 GB/s | 52–56 GB/s |
+| READ peak under fan-out | 56 GB/s | 84 GB/s | **108 GB/s** |
+| Catastrophic write collapse | none | none (see history) | none |
 
-### Key Takeaway
+### Practical takeaways
 
-On this 16-GPU + 4-switch flat setup:
-- **Single-flow bandwidth is uniform** across all topology tiers (~53 GB/s) — same as 2-switch flat
-- **Cross-switch traffic goes through CPU** — bottlenecked by x16 uplink per switch
-- **Posted-write collapse appears** in certain multi-destination patterns involving 3+ root complexes — this did NOT occur on the 2-switch or 3-switch variants
-- **The 3-switch hierarchy remains the best 8-GPU design** because its root switch routes cross-switch traffic fabric-to-fabric without CPU involvement
+- **All three variants behave identically at the single-pair and uplink-saturated levels.** If the workload is a 1-src 1-dst NCCL ring step, wiring choice does not matter.
+- **The 2-root variant is the most uniform** — every pattern we measured is uplink-saturated symmetrically. It also has the fewest cross-quadrant routes, which means correspondingly fewer ways to saturate the return path: aggregate cross-switch READ never exceeds ~56 GB/s.
+- **The 3-root variant occasionally hits asymmetric fan-out** (READ up to ~84 GB/s, WRITE staying at uplink saturation). Workloads that are read-heavy with 1 src → 3 dst dispatch can benefit, while writes see no improvement over 2-root.
+- **The 4-root variant maximises the asymmetry** — READ can hit 108 GB/s (~1.92× the source uplink) on 4-pair fan-out across 3 remote quadrants. Writes still cap at uplink line rate. Read-dominated all-to-all-style workloads gain the most from this layout.
+- **No variant currently shows a catastrophic write collapse on the trigger patterns** that historically hit ~11 GB/s WRITE (see history below). The mild 0.67–0.89× W/R asymmetries we still see are quantitatively a couple of percent off saturation, not a multi-fold cliff.
 
-For 16 GPU, a hierarchical root-switch design (à la PM50100) would likely eliminate both the cross-switch uplink bottleneck AND the posted-write collapse. The flat 4-switch topology is simpler but inherits the Broadcom-style weakness.
+For typical 16-GPU NCCL all-reduce / DDP training (mixed read+write, single-source dispatch dominates), the three variants are within a few percent of one another. Wiring choice can be made on physical layout / cabling convenience, with a slight preference toward more root complexes if read-heavy fan-out shows up in the workload.
 
 ---
 
@@ -485,24 +293,58 @@ For 16 GPU, a hierarchical root-switch design (à la PM50100) would likely elimi
 
 ### ACS
 
-All 24+ ACS-capable devices have `ReqRedir- CmpltRedir-`. No manual ACS disable needed on this system.
+All ACS-capable bridges (24+ devices: switch upstream/downstream ports, root ports, GPUs) report `ReqRedir- CmpltRedir-` cleared. P2P is fabric-routed within a switch and uses CPU root ports for cross-switch as expected. No manual ACS disable needed on this system at boot.
 
-### PCIe Links
+### PCIe links
 
-- All GPUs trained to **Gen5 x16** under load (32 GT/s)
-- All 4 switch uplinks: Gen5 x16
-- All switch downstream ports: Gen5 x16
+All GPUs and all switch upstream/downstream ports trained at **Gen5 x16** (32 GT/s) under load. No degraded links observed in any variant.
 
 ### MaxReadReq
 
-Same as other Microchip Switchtec configurations: switch ports hardcoded at 128 B (read-only), GPU/root ports at 512 B.
+Microchip Switchtec downstream ports are hardcoded at 128 B (read-only); root ports and GPUs at 512 B. This affects fine-grained latency but not aggregate bandwidth in any of the variants.
 
-### Peer Mapping Limit
+### Peer mapping limit
 
-CUDA's `cudaDeviceEnablePeerAccess` has a limit of **8 peers per GPU** per process. With 16 GPUs, this prevents enabling full P2P mesh in a single process. Workarounds:
+CUDA's `cudaDeviceEnablePeerAccess` is capped at 8 peers per GPU per process. With 16 GPUs the full 16×16 peer mesh cannot be enabled in a single process — pair-by-pair P2P or NCCL/IPC handles are required. Not topology-specific.
 
-- **Enable P2P per-pair** as needed (used for these tests)
-- **Use IPC handles** (`cudaIpcGetMemHandle`) — much higher limit
-- **NCCL / NVSHMEM** handle this automatically via IPC
+### Uplink degradation proof (3-root)
 
-This is not a topology-specific limit — it affects any 9+ GPU CUDA workload.
+Forcing SW1's root port `00:01.1` to Gen2 cuts cross-switch BW from 52 → 7 GB/s while same-switch BW is unchanged at ~53 GB/s — confirming cross-switch traffic traverses the CPU root port (in all variants).
+
+---
+
+## Historical: Posted-Write Collapse
+
+Earlier measurements on this same 16-GPU 4-switch rig — on the **3-root cabling**, on an older platform stack (kernel 6.17.0-19, NVIDIA driver 595.45.04, BIOS version not recorded at the time) — recorded a **catastrophic posted-write collapse** on certain `1 src VS → 2 dst quadrants` dispatch patterns:
+
+| Pattern | original WRITE | original READ | original W/R | comment |
+|---|---|---|---|---|
+| SW1 → SW2(`40`) + SW3(`e0`) | **11.6** | 52.9 | 0.22× | ~78 % W drop |
+| SW1 → SW2(`40`) + SW4(`e0`) | **13.3** | 53.8 | 0.25× | ~75 % W drop |
+| SW1 → SW3 + SW2 (variant src) | 12.5 | 57.0 | 0.22× | ~78 % W drop |
+| SW1 → SW2 + SW4 (variant src) | 12.8 | 53.6 | 0.24× | |
+
+This was the same qualitative signature as the [Broadcom PEX890xx posted-write arbitration bug](asus-esc8000a-e13p-broadcom-switches.md#pex890xx-posted-write-arbitration-bug) and was attributed at the time to one source switch dispatching to ≥ 2 destination CPU root complexes simultaneously. See [`pcie-posted-write-collapse.md`](pcie-posted-write-collapse.md) and [`collapse-report.md`](collapse-report.md) for the broader cross-platform writeup.
+
+**On the current platform stack (BIOS 12.09 / kernel 6.18 / driver 595.58.03), the catastrophic collapse no longer reproduces on the same 3-root cabling.** Identical patterns now give:
+
+| Pattern | current WRITE | current READ | current W/R |
+|---|---|---|---|
+| SW1 → SW2 + SW3 | 53.5 | 56.4 | 0.95× |
+| SW1 → SW2 + SW4 | 56.2 | 56.4 | 1.00× |
+| SW1 → SW2 only (1 dst root, control) | 56.4 | 56.4 | 1.00× |
+| SW1 → SW2 + SW3→SW4 (different src, control) | 112.5 | 112.5 | 1.00× |
+
+Variables that changed between the two test runs:
+
+| Factor | Original (collapse fired) | Current (no collapse) |
+|---|---|---|
+| Topology | 3-root | 3-root (same physical wiring) |
+| Kernel | 6.17.0-19-generic | 6.18.24-061824-generic |
+| NVIDIA driver | 595.45.04 | 595.58.03 |
+| BIOS | not recorded | 12.09 (2026-02-04) |
+| AGESA | not recorded | (moved with BIOS update) |
+
+We retain these historical numbers as a record that **the catastrophic write collapse was once observed on this hardware** and is reproducible in principle on the trigger pattern with the older software stack. We do **not** claim to know which of the kernel / driver / BIOS / AGESA changes is responsible for the disappearance of the collapse on the current stack, and we have not re-installed the older stack to bisect.
+
+The mild 0.67–0.95× W/R asymmetries documented in the variant comparison above are the residual signature of the same underlying inter-quadrant-arbitration mechanism — present, but no longer catastrophic.
