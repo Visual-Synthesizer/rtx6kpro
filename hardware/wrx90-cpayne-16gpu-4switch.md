@@ -259,6 +259,57 @@ This indicates the bottleneck is on the **CPU side** (how root complexes handle 
 
 ---
 
+### Control measurement: 16-GPU 4-switch on only 2 root complexes
+
+The collapse is determined by the **number of distinct root complexes touched by the dispatch pattern**, not by the switch topology shape per se. To isolate this we re-ran the EXACT same trigger patterns (same GPU index → switch mapping, same PyTorch test harness, same `iters=50` and `SIZE=256 MB`) on a rewired 16-GPU 4-switch setup where each pair of switches shares one root complex:
+
+```
+Original 4-switch wiring (this page's main results — collapse fires)
+  SW1 → root 00 (Q0)         ← 4 distinct CPU root
+  SW2 → root 40 (Q2)            complexes touched
+  SW3 → root e0:01.1 (Q3)
+  SW4 → root e0:03.1 (Q3)
+
+Variant 4-switch wiring (re-test — only 2 distinct root complexes)
+  SW1 → root 00 (Q0)         ← only 2 distinct CPU
+  SW2 → root 00 (Q0)            root complexes total
+  SW3 → root e0 (Q3)
+  SW4 → root e0 (Q3)
+```
+
+Measured side-by-side on the same TR Pro 7955WX rig, same kernel, same NVIDIA driver:
+
+| Pattern | Original wiring (4 roots) | Variant wiring (2 roots) | Δ |
+|---------|--------------------------:|-------------------------:|---|
+| SW1→SW3+SW4 (same dst root e0) | 53.4 W / 57.5 R — OK | 56.4 W / 56.4 R — OK | identical |
+| SW2→SW3+SW4 (same dst root e0) | 55.3 W / 54.1 R — OK | 56.4 W / 56.4 R — OK | identical |
+| **SW1→SW2+SW3** | **11.6 W / 52.9 R — COLLAPSE** | **56.4 W / 56.4 R — NO collapse** | **+44.8 GB/s WRITE** |
+| **SW1→SW2+SW4** | **13.3 W / 53.8 R — COLLAPSE** | **56.4 W / 56.4 R — NO collapse** | **+43.1 GB/s WRITE** |
+| SW1→SW2 only (1 dst root) | 54.1 / 54.7 — OK | 56.4 / 56.4 — OK | identical |
+| SW1→SW3 only (1 dst root) | 56.0 / 53.0 — OK | 56.4 / 56.4 — OK | identical |
+| SW1→SW2 + SW3→SW4 (different src) | 106.8 / 105.6 — OK | 112.5 / 112.5 — OK | identical |
+
+The **two patterns that fire the collapse on the original wiring (~13 GB/s WRITE, ~75 % drop) cleanly saturate the source uplink at ~56 GB/s on the variant wiring** — no collapse signature, no write/read asymmetry.
+
+The reason the trigger pattern does not fire on the variant: with only 2 root complexes (Q0 and Q3), the `SW1→SW2+SW3` dispatch translates to one **intra-quadrant** flow (SW1 to SW2, both on Q0) and one **cross-quadrant** flow (SW1 to SW3, Q0→Q3). The intra-quadrant flow does not exercise the inter-quadrant fabric arbiter, so the source switch is dispatching to **one** cross-quadrant destination, not two. The arbiter cannot misbehave because it is only arbitrating one inter-quadrant target.
+
+### Updated trigger condition (more precise)
+
+This control measurement refines the trigger condition documented in the previous section:
+
+> **Old (imprecise):** "2 or more concurrent posted-write flows from one source switch to destinations on 2+ different CPU root complexes."
+>
+> **More precise:** "2 or more concurrent posted-write flows from one source switch to destinations on 2+ different **remote** CPU quadrants — i.e. quadrants that are *not* the source switch's own quadrant. The trigger requires **3+ distinct quadrants involved in total** (1 src + 2 dst, all different)."
+
+In topologies where every PCIe switch has its own dedicated root complex (so each "different switch" implies "different root"), the old phrasing happens to give the right answer. In topologies where multiple switches share a root complex (current variant, or 8-GPU 2-VS-per-chip layouts), the old phrasing over-predicts collapse — only patterns that genuinely target ≥ 2 *non-source* quadrants concurrently will trip the IOD arbiter.
+
+This is consistent with everything else we have measured on this rig:
+- 8-GPU 2-VS-per-chip layouts (V1/V2/V3, see [`wrx90-cpayne-8gpu-2vs-per-chip.md`](wrx90-cpayne-8gpu-2vs-per-chip.md)) — 2 GPUs per source VS, max 1 cross-quadrant target at a time → no collapse on any variant.
+- Original 16-GPU 4-switch with 4 separate root complexes → collapse fires (≥ 2 cross-quadrant targets reachable).
+- Variant 16-GPU 4-switch with only 2 root complexes (this section) → no collapse (max 1 cross-quadrant target).
+
+---
+
 ## Uplink Degradation Proof
 
 Degrading SW1's root port uplink (00:01.1) to Gen2 proves cross-switch traffic goes through CPU root ports:
