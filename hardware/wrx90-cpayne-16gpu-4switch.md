@@ -310,6 +310,136 @@ This is consistent with everything else we have measured on this rig:
 
 ---
 
+### Control measurement: 16-GPU 4-switch on FOUR distinct root complexes (Q0, Q1, Q2, Q3)
+
+A third wiring of this rig was tested: 4 c-payne switches each landing on its **own** CPU root complex / quadrant (Q0, Q1, Q2, Q3). All four IOD quadrants are active. This is *different* from this page's main results (which had 3 distinct roots, with SW3+SW4 sharing root `e0`).
+
+```
+Original main-results wiring (3 distinct root complexes, SW3+SW4 share e0)
+  SW1 → root 00       (Q0)
+  SW2 → root 40       (Q2)
+  SW3 → root e0:01.1  (Q3, port 1)
+  SW4 → root e0:03.1  (Q3, port 3)   ← shares root with SW3
+
+Third wiring (4 distinct root complexes, all 4 IOD quadrants)
+  SW1 → root 00       (Q0)
+  SW2 → root 20       (Q1)            ← own quadrant
+  SW3 → root 40       (Q2)
+  SW4 → root e0       (Q3)
+```
+
+Detected via:
+
+```
+$ for i in $(seq 0 15); do
+    bus=$(nvidia-smi -i $i --query-gpu=gpu_bus_id --format=csv,noheader | sed 's/00000000://')
+    root=$(readlink -f /sys/bus/pci/devices/0000:${bus,,}/../.. | grep -oE 'pci[0-9]+:[0-9a-f]+' | head -1)
+    echo "GPU $i  bus $bus  -> $root"
+  done
+GPU 0..3   bus 03..06  -> pci0000:00   (SW1, Q0)
+GPU 4..7   bus 23..26  -> pci0000:20   (SW2, Q1)
+GPU 8..11  bus 43..46  -> pci0000:40   (SW3, Q2)
+GPU 12..15 bus E3..E6  -> pci0000:e0   (SW4, Q3)
+```
+
+Software stack at test time:
+
+| Item | Value |
+|------|-------|
+| Kernel | 6.18.24-061824-generic |
+| NVIDIA driver | 595.58.03 |
+| BIOS | 12.09 (release 02/04/2026) |
+| IOMMU | `amd_iommu=off iommu=off` |
+| ACS | Request-Redirect cleared on every PCIe bridge with ACS capability (verified) |
+
+Compared to the original main-results software stack (kernel 6.17, driver 595.45.04). BIOS at original test time **was not recorded** in this page, so we can't tell whether AGESA changed.
+
+#### Single-pair P2P matrix (chip mapping check)
+
+All 12 cross-switch 2-pair `same-src→same-dst` measurements landed at **56.4 GB/s aggregate** (uplink-saturated for 2 pairs), with **no diagonal `intra-chip` 112 GB/s pair**. This confirms each c-payne switch is on its own physical chip with its own dedicated x16 uplink — no Virtual-Switch chip-pairing in this layout, identical structure to the original main-results wiring.
+
+#### 1 src VS → 2 different dst switches (the canonical collapse trigger)
+
+The pattern that **catastrophically collapses to ~11 GB/s on the original main-results wiring**:
+
+| Pattern (current 4-quadrant wiring) | WRITE | READ | W/R | Note |
+|--------------------------------------|------:|-----:|----:|------|
+| SW1→SW2+SW3 (Q0 → Q1+Q2) `[(0,4),(1,8)]` | **52.2** | 56.4 | 0.93× | mild dip, **NOT collapse** |
+| SW1→SW2+SW4 (Q0 → Q1+Q3) `[(0,4),(1,12)]` | 51.9 | 56.4 | 0.92× | mild dip |
+| **SW1→SW3+SW4 (Q0 → Q2+Q3) `[(0,8),(1,12)]`** | **51.8** | **56.4** | **0.92×** | mild dip — **this is the closest current-wiring equivalent of the original `SW1→SW2+SW3` quadrant pattern (Q0→Q2+Q3) that collapsed at 11.6 GB/s** |
+| SW2→SW1+SW3 (Q1 → Q0+Q2) | 55.8 | 56.4 | 0.99× | clean |
+| SW2→SW1+SW4 (Q1 → Q0+Q3) | 55.4 | 56.4 | 0.98× | clean |
+| SW2→SW3+SW4 (Q1 → Q2+Q3) | 56.2 | 56.4 | 1.00× | clean |
+| SW3→SW1+SW2 (Q2 → Q0+Q1) | 56.3 | 56.4 | 1.00× | clean |
+| SW3→SW1+SW4 (Q2 → Q0+Q3) | 56.3 | 56.4 | 1.00× | clean |
+| SW3→SW2+SW4 (Q2 → Q1+Q3) | 56.3 | 56.4 | 1.00× | clean |
+| SW4→SW1+SW2 (Q3 → Q0+Q1) | 53.5 | 58.6 | 0.91× | mild dip |
+| SW4→SW1+SW3 (Q3 → Q0+Q2) | 54.1 | 60.5 | 0.89× | mild dip |
+| SW4→SW2+SW3 (Q3 → Q1+Q2) | 54.1 | 56.4 | 0.96× | clean |
+
+**The catastrophic ~75% collapse documented in this page's "Posted-Write Collapse on c-payne" section is not reproducing on this 4-quadrant wiring.** The closest the W/R ratio gets to "collapse signature" is **0.89× for `SW4→SW1+SW3`** — an 11 % drop, not a 75 % drop. There is a clear asymmetry between sources: when the source is on Q0 or Q3, traffic to two non-source remote quadrants shows a mild ~7 % write dip; when the source is on Q1 or Q2, the same kind of pattern is essentially clean.
+
+#### 1 src → 3 different dst quadrants (full fan-out)
+
+With four root complexes available we can dispatch from one source switch to three different remote quadrants concurrently — the maximum the IOD can be asked to arbitrate from one source uplink:
+
+| Pattern (3 dst quadrants, 1 src VS) | WRITE | READ | W/R | Note |
+|--------------------------------------|------:|-----:|----:|------|
+| SW1→SW2+SW3+SW4 (Q0 → Q1+Q2+Q3) `[(0,4),(1,8),(2,12)]` | 56.3 | 81.1 | **0.69×** | partial |
+| SW2→SW1+SW3+SW4 (Q1 → Q0+Q2+Q3) | 57.2 | 78.2 | **0.73×** | partial |
+| SW3→SW1+SW2+SW4 (Q2 → Q0+Q1+Q3) | (≈ saturated, no asymmetry) | | | |
+| SW4→SW1+SW2+SW3 (Q3 → Q0+Q1+Q2) | 53.4 | 56.4 | 0.95× | clean |
+
+#### 4 src GPUs from one switch fanning out to multiple dst quadrants
+
+| Pattern | WRITE | READ | W/R |
+|---------|------:|-----:|----:|
+| 4-pair SW1 → 4×SW2 (1 dst Q1) — uplink-saturation control | 56.4 | 56.4 | 1.00× |
+| 4-pair SW1 → 2×SW2 + 2×SW3 (2 dst Q1+Q2) | 56.4 | 56.4 | 1.00× |
+| 4-pair SW1 → 2×SW2 + SW3 + SW4 (3 dst Q1+Q2+Q3) `[(0,4),(1,5),(2,8),(3,12)]` | **56.4** | **108.1** | **0.52×** |
+| 4-pair SW1 → SW2 + 2×SW3 + SW4 | 87.5 | 107.7 | 0.81× |
+| 4-pair SW1 → SW2 + SW3 + 2×SW4 | 97.4 | 98.4 | 0.99× |
+
+The strongest write/read asymmetry under any pattern we can construct is **`(0,4)+(1,5)+(2,8)+(3,12)`: 56.4 W vs 108.1 R, ratio 0.52×**. Writes cap out at exactly the source switch's uplink line rate (~56 GB/s); reads run at almost twice that, indicating the read return path does not share the same arbitration constraint. This *is* the qualitative signature of the posted-write collapse — but the WRITE side is still saturating the uplink, not crashing to a few GB/s.
+
+#### Sustained behaviour
+
+The same 2-source-3-quadrant pattern (`Q0 → Q1+Q2+Q3`, `[(0,4),(1,8),(2,12)]`) was run with iter counts 50, 200, 500, 1000, 2000:
+
+| iters | WRITE | READ | W/R |
+|------:|------:|-----:|----:|
+| 50 | 55.7 | 56.4 | 0.99× |
+| 200 | 55.7 | 56.4 | 0.99× |
+| 500 | 52.2 | 56.4 | 0.93× |
+| 1000 | 52.3 | 56.4 | 0.93× |
+| 2000 | 52.3 | 56.4 | 0.93× |
+
+No drift toward a deeper collapse over time. The mild dip stabilises at ~7 %.
+
+Buffer-size sweep on the same pattern (1 MB → 1 GB) produces the same ~52 GB/s WRITE / ~56 GB/s READ result independent of message size.
+
+#### What this means
+
+Two important and uncomfortable observations from this 4-quadrant wiring:
+
+1. **The dramatic 11 GB/s WRITE collapse that this page's main results document for the original 3-root-complex wiring is NOT reproducing on the 4-root-complex wiring** — even though the trigger pattern (1 src VS dispatching to 2+ different remote quadrants), the source switch concurrency, the buffer size, and the test harness are all identical. The closest analogue we get is a 7-11 % WRITE dip, not a 75 % drop.
+2. **A different pattern does still produce a clean collapse signature**: 4 source GPUs from one switch fanning out to *three* different dst quadrants gives WRITE 56.4 / READ 108.1 / W:R 0.52×. So the underlying "writes don't scale, reads do" behaviour is still present at higher source concurrency and broader fan-out — it just no longer fires at the 2-source / 2-dst-quadrant configuration that collapsed catastrophically before.
+
+We do **not** currently have evidence to attribute the difference to any one cause. Possible factors that changed between the original main-results measurements and this third wiring:
+
+| Factor | Original main results | This 4-quadrant control |
+|--------|-----------------------|-------------------------|
+| Kernel | 6.17.0-19-generic | 6.18.24-061824-generic |
+| NVIDIA driver | 595.45.04 | 595.58.03 |
+| BIOS | **not documented** | 12.09 (2026-02-04) |
+| IOMMU | (presumably off) | `amd_iommu=off iommu=off` (verified) |
+| ACS Request-Redirect | (presumably cleared) | cleared (verified) |
+| Topology shape | 3 root complexes (SW3+SW4 share `e0`) | 4 distinct root complexes (Q0, Q1, Q2, Q3) |
+
+The *topology* is the most clearly different variable. Whether the topology shape change alone is sufficient to explain the missing collapse, or whether software stack changes (kernel / driver / AGESA in BIOS) also play a role, is **not yet established** by the data here. The original main-results wiring would need to be reinstated (i.e. SW3+SW4 cabled into the same root complex `e0` again) on the current kernel/driver/BIOS to disambiguate.
+
+---
+
 ## Uplink Degradation Proof
 
 Degrading SW1's root port uplink (00:01.1) to Gen2 proves cross-switch traffic goes through CPU root ports:
