@@ -21,6 +21,7 @@ Related pages:
 - [Sustained Behaviour](#sustained-behaviour)
 - [Comparison Against TR Pro 7955WX](#comparison-against-tr-pro-7955wx)
 - [Posted-Write Collapse Status](#posted-write-collapse-status)
+- [Kimi-K2.6 vLLM Sanity Check](#kimi-k26-vllm-sanity-check)
 - [Hardware Notes](#hardware-notes)
 
 ---
@@ -270,6 +271,122 @@ The Turin IO Die appears to have a more capable inter-quadrant return path for r
 This matches the behaviour seen on the WRX90 + 4× Microchip rig on its current platform stack (kernel 6.18 / driver 595.58.03 / BIOS 12.09). The historical 11 GB/s catastrophic WRITE drop documented for the original 16-GPU collapse measurement does not reproduce on EPYC Turin either.
 
 The mild W/R asymmetries (0.43–0.97×) seen here are the residual signature of inter-quadrant arbitration — present, but driven by the *return* path scaling READ faster than the source uplink can WRITE. WRITE itself never falls below source uplink line rate.
+
+---
+
+## Kimi-K2.6 vLLM Sanity Check
+
+This is an inference-level smoke/regression check from 2026-04-30 on host
+`10.229.14.14` after the platform was moved to EPYC 9575F / Turin. It is not a
+full public Kimi tuning matrix; the goal was to verify that the new CPU and
+4-switch c-payne topology behave sanely for vLLM decode on 8 GPUs and 16 GPUs.
+
+### Runtime
+
+| Field | Value |
+|---|---|
+| Target model | `moonshotai/Kimi-K2.6` |
+| Draft model | `/mnt/kimi-k2.6-eagle3-mla-fp8-tensor` |
+| Draft source | `lightseekorg/kimi-k2.6-eagle3-mla`, tensor FP8 conversion |
+| Docker image | `voipmonitor/vllm:kimi-k26-mtp-upstream-stack-pcie-env-test-20260424` |
+| vLLM mode | `TRITON_MLA`, `kv-cache-dtype=fp8`, Eagle3/MTP `num_speculative_tokens=3` |
+| Benchmark | `/mnt/llm_decode_bench.py`, version `0.4.9` |
+| Decode timing | 10 seconds per measured cell, 20 seconds decode warmup per cell |
+| EOS | ignored (`ignore_eos=true`) |
+| Output source | OpenAI streaming usage counters (`openai_continuous_usage`) |
+
+The NVIDIA P2P override was active in the loaded driver:
+
+```text
+ForceP2P=0x11;RMForceP2PType=1;RMPcieP2PType=2;GrdmaPciTopoCheckOverride=1;EnableResizableBar=1
+EnableResizableBar: 1
+DmaRemapPeerMmio: 1
+GrdmaPciTopoCheckOverride: 1
+```
+
+### 8-GPU Run: GPUs 0..7
+
+This uses the first two c-payne switches: `GPU0..3` on one switch and `GPU4..7`
+on the second switch. The 8-rank NCCL graph file is valid for this run.
+
+```text
+TP / DCP:              8 / 1
+PCIe custom allreduce: off
+NCCL graph file:       /mnt/nccl_graph_opt.xml
+KV cache budget:       357,232 tokens
+Result JSON:           /mnt/kimi_k26_turin8_k26draft_fp8_tensor_decode_full_20260430.json
+```
+
+Aggregate decode throughput, tok/s:
+
+| ctx \ conc | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 125.0 | 215.6 | 353.3 | 528.3 | 805.3 | 1167.0 | 1887.8 | 2510.3 |
+| 16k | 108.3 | 182.9 | 286.4 | 383.9 | 484.3 | — | — | — |
+| 32k | 97.2 | 155.1 | 237.7 | 291.5 | — | — | — | — |
+| 64k | 81.0 | 130.7 | 173.0 | — | — | — | — | — |
+| 128k | 55.1 | 90.3 | — | — | — | — | — | — |
+
+Speculative accept rate from server metrics:
+
+| ctx \ conc | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.316 | 0.377 | 0.394 | 0.347 | 0.390 | 0.420 | 0.413 | 0.430 |
+| 16k | 0.471 | 0.447 | 0.446 | 0.413 | 0.492 | — | — | — |
+| 32k | 0.422 | 0.278 | 0.468 | 0.397 | — | — | — | — |
+| 64k | 0.435 | 0.471 | 0.343 | — | — | — | — | — |
+| 128k | 0.309 | 0.542 | — | — | — | — | — | — |
+
+### 16-GPU Run: GPUs 0..15
+
+This uses all four c-payne switches. The 8-rank `/mnt/nccl_graph_opt.xml` was
+intentionally not used because it only lists devices `0..7`.
+
+vLLM also disables its PCIe custom allreduce path at world size 16 in this
+build:
+
+```text
+Custom allreduce is disabled due to an unsupported world size: 16.
+Supported world sizes: [2, 4, 6, 8].
+```
+
+```text
+TP / DCP:              16 / 1
+PCIe custom allreduce: unavailable for world size 16
+NCCL graph file:       not used
+KV cache budget:       1,402,656 tokens
+Result JSON:           /mnt/kimi_k26_turin16_k26draft_fp8_tensor_decode_keypoints_20260430.json
+```
+
+Only key points were measured, not the full matrix:
+
+| ctx \ conc | 1 | 8 | 32 | 128 |
+|---|---:|---:|---:|---:|
+| 0 | 129.6 | 639.3 | 1399.5 | 2959.6 |
+| 16k | 119.9 | 448.0 | 659.6 | — |
+| 64k | 84.8 | 214.9 | — | — |
+| 128k | 61.8 | 120.3 | — | — |
+
+Speculative accept rate:
+
+| ctx \ conc | 1 | 8 | 32 | 128 |
+|---|---:|---:|---:|---:|
+| 0 | 0.463 | 0.394 | 0.399 | 0.470 |
+| 16k | 0.448 | 0.451 | 0.424 | — |
+| 64k | 0.351 | 0.458 | — | — |
+| 128k | 0.284 | 0.417 | — | — |
+
+### Interpretation
+
+The 16-GPU run increases KV capacity from `357k` to `1.40M` tokens and improves
+C=1 decode slightly (`125.0` → `129.6` tok/s at ctx0, `55.1` → `61.8` tok/s at
+128k). High-concurrency short-context aggregate throughput also improves
+(`2510` → `2960` tok/s at ctx0/C128), but not linearly, because TP=16 pays more
+communication cost and cannot use the current PCIe custom allreduce path.
+
+The skipped cells are capacity-limited, not failures. For example, `128k/C128`
+would require roughly `17.0M` KV tokens with `max_tokens=2048`, far above the
+available `1.40M` tokens in the TP16/DCP1 run.
 
 ---
 

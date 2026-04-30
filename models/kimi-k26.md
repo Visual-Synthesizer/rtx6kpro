@@ -413,6 +413,70 @@ The requested `128k / C=128` cell does not fit in the available KV cache. With
 `max_tokens=2048`, it would require roughly `17.0M` total KV tokens, while this
 TP16/DCP1 run has `1.51M` tokens available.
 
+### 10.229.14.14 Turin Retest: K2.6 FP8 Tensor Draft
+
+This 2026-04-30 retest used the same Turin host after the platform change, but
+with a newly converted K2.6 Eagle3 MLA draft instead of the older K2.5 draft.
+The purpose was a topology/runtime sanity check, not a full tuning sweep.
+
+Common settings:
+
+```text
+image:                  voipmonitor/vllm:kimi-k26-mtp-upstream-stack-pcie-env-test-20260424
+target model:           moonshotai/Kimi-K2.6
+draft model:            /mnt/kimi-k2.6-eagle3-mla-fp8-tensor
+draft source:           lightseekorg/kimi-k2.6-eagle3-mla
+MTP:                    Eagle3, num_speculative_tokens=3
+attention backend:      TRITON_MLA
+KV cache dtype:         fp8
+max_model_len:          262144
+max_num_batched_tokens: 8192
+max_num_seqs:           128
+gpu_memory_utilization: 0.94
+benchmark:              llm_decode_bench.py --skip-prefill --duration 10 --decode-warmup-seconds 20
+```
+
+The 8-GPU run used GPUs `0..7` and the existing 8-rank NCCL XML graph. The
+16-GPU run used GPUs `0..15` and intentionally did not use
+`/mnt/nccl_graph_opt.xml`, because that XML only contains `dev 0..7`. vLLM also
+disables PCIe custom allreduce at world size 16 in this build.
+
+| Run | TP/DCP | KV tokens | Result JSON |
+|---|---:|---:|---|
+| First 8 GPUs | 8 / 1 | 357,232 | `/mnt/kimi_k26_turin8_k26draft_fp8_tensor_decode_full_20260430.json` |
+| All 16 GPUs | 16 / 1 | 1,402,656 | `/mnt/kimi_k26_turin16_k26draft_fp8_tensor_decode_keypoints_20260430.json` |
+
+8-GPU full decode matrix, aggregate tok/s:
+
+| ctx \ conc | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 125.0 | 215.6 | 353.3 | 528.3 | 805.3 | 1167.0 | 1887.8 | 2510.3 |
+| 16k | 108.3 | 182.9 | 286.4 | 383.9 | 484.3 | — | — | — |
+| 32k | 97.2 | 155.1 | 237.7 | 291.5 | — | — | — | — |
+| 64k | 81.0 | 130.7 | 173.0 | — | — | — | — | — |
+| 128k | 55.1 | 90.3 | — | — | — | — | — | — |
+
+16-GPU key points, aggregate tok/s:
+
+| ctx \ conc | 1 | 8 | 32 | 128 |
+|---|---:|---:|---:|---:|
+| 0 | 129.6 | 639.3 | 1399.5 | 2959.6 |
+| 16k | 119.9 | 448.0 | 659.6 | — |
+| 64k | 84.8 | 214.9 | — | — |
+| 128k | 61.8 | 120.3 | — | — |
+
+Server-reported speculative accept rate:
+
+| Run | ctx/C1 | ctx0/C128 | 128k/C1 | 128k/C8 |
+|---|---:|---:|---:|---:|
+| 8 GPU | 0.316 | 0.430 | 0.309 | — |
+| 16 GPU | 0.463 | 0.470 | 0.284 | 0.417 |
+
+Interpretation: TP16 increases KV capacity and improves the long-context C=1
+cells, but it is not a linear throughput scale-up. The world-size-16 run cannot
+use the current PCIe custom allreduce path and was measured without the 8-rank
+NCCL XML graph.
+
 ## Historical Decode Throughput: Marlin FP8 Forcing
 
 Earlier matrix preserved for comparison. This used the old default recipe with
