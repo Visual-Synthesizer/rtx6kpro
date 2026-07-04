@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
 | [2026-07-03](2026-07/2026-07-03.md) | ACS redirect on c-payne PCIe switches nearly doubled token-gen throughput — clearing `ReqRedir/Cmp |
 | [2026-07-02](2026-07/2026-07-02.md) | DSpark v8 (lucifer+cutlass) hits >1M context on TP2: 500 tok/s aggregate gen, 9000 tok/s prefill, 20 |
 | [2026-07-01](2026-07/2026-07-01.md) | DS4-Flash v8 Docker released with b12x all-reduce enabled; real-world prefill on TP=2 lucifer-cutlas |
@@ -135,6 +136,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
 | [2026-07-03](2026-07/2026-07-03.md) | ACS redirect on c-payne PCIe switches nearly doubled token-gen throughput — clearing `ReqRedir/Cmp |
 | [2026-07-02](2026-07/2026-07-02.md) | DSpark v8 (lucifer+cutlass) hits >1M context on TP2: 500 tok/s aggregate gen, 9000 tok/s prefill, 20 |
 | [2026-07-01](2026-07/2026-07-01.md) | DS4-Flash v8 Docker released with b12x all-reduce enabled; real-world prefill on TP=2 lucifer-cutlas |
