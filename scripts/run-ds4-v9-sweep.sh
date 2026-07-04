@@ -2,15 +2,16 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+SWEEP_SCRIPT=${SWEEP_SCRIPT:-$SCRIPT_DIR/$(basename -- "${BASH_SOURCE[0]}")}
 LAUNCHER=${LAUNCHER:-$SCRIPT_DIR/run-ds4-v9-server.sh}
 BENCH=${BENCH:-/root/llm-inference-bench/llm_decode_bench.py}
 OUT=${OUT:-/root/bench-results/ds4-v9-$(date -u +%Y%m%d-%H%M%S)}
-IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-ds4dspark-v9-ve72ad00-b12x57422ad-cu132-20260703}
+IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v45c1582-b12xf3686b5-pc1441b5-cu132-20260704}
 PROGRESS_FILE=${PROGRESS_FILE:-/root/vllm/prubezne_vysledky}
 
 TPS=${TPS:-2,4}
 BACKENDS=${BACKENDS:-b12x-a16,b12x-a8,b12x-a8-dglin,lucifer-default,lucifer-cutlass}
-MODES=${MODES:-dspark}
+MODES=${MODES:-standard-mtp0,standard-mtp2,standard-mtp3,dspark}
 DECODE_CONCURRENCY=${DECODE_CONCURRENCY:-1,16,32,64}
 DECODE_CONTEXTS=${DECODE_CONTEXTS:-0}
 DECODE_DURATION=${DECODE_DURATION:-30}
@@ -20,9 +21,47 @@ PREFILL_CONTEXTS=${PREFILL_CONTEXTS:-8k,64k,128k}
 PREFILL_DURATION=${PREFILL_DURATION:-10}
 MAX_NUM_SEQS=${MAX_NUM_SEQS:-64}
 PORT_BASE=${PORT_BASE:-7100}
-STARTUP_TIMEOUT=${STARTUP_TIMEOUT:-1800}
+STARTUP_TIMEOUT=${STARTUP_TIMEOUT:-2400}
+SYNC_WAVE_READY=${SYNC_WAVE_READY:-1}
+ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-1}
+VLLM_PATCH_FILE=${VLLM_PATCH_FILE:-/root/vllm/blackwell-llm-docker/patches/vllm-b12x-indexer-warmup-fallback-20260704.patch}
 
 mkdir -p "$OUT"
+
+record_repro_artifacts() {
+  local -a script_hash_inputs
+  mkdir -p "$OUT/repro"
+  cp "$LAUNCHER" "$OUT/repro/run-ds4-v9-server.sh"
+  cp "$SWEEP_SCRIPT" "$OUT/repro/run-ds4-v9-sweep.sh"
+  script_hash_inputs=("$LAUNCHER" "$SWEEP_SCRIPT")
+  if [[ -f "$SCRIPT_DIR/render-ds4-v9-results.py" ]]; then
+    cp "$SCRIPT_DIR/render-ds4-v9-results.py" "$OUT/repro/render-ds4-v9-results.py"
+    script_hash_inputs+=("$SCRIPT_DIR/render-ds4-v9-results.py")
+  fi
+  if [[ -f "$VLLM_PATCH_FILE" ]]; then
+    cp "$VLLM_PATCH_FILE" "$OUT/repro/$(basename "$VLLM_PATCH_FILE")"
+    sha256sum "$VLLM_PATCH_FILE" > "$OUT/repro/vllm-patch.sha256" || true
+  fi
+  if [[ -f "$BENCH" ]]; then
+    sha256sum "$BENCH" > "$OUT/repro/bench.sha256" || true
+  fi
+  sha256sum "${script_hash_inputs[@]}" > "$OUT/repro/scripts.sha256" || true
+  if git -C "$SCRIPT_DIR/.." rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$SCRIPT_DIR/.." rev-parse HEAD > "$OUT/repro/rtx6kpro-head.txt" || true
+    git -C "$SCRIPT_DIR/.." status --short > "$OUT/repro/rtx6kpro-status.txt" || true
+  fi
+  docker image inspect "$IMAGE" > "$OUT/repro/image-inspect.json" 2>/dev/null || true
+  docker image inspect "$IMAGE" --format '{{json .Config.Labels}}' > "$OUT/repro/image-labels.json" 2>/dev/null || true
+  nvidia-smi topo -m > "$OUT/repro/nvidia-topo.txt" 2>/dev/null || true
+  nvidia-smi --query-gpu=index,name,pci.bus_id,memory.total,power.limit --format=csv > "$OUT/repro/nvidia-gpus.csv" 2>/dev/null || true
+}
+
+on_exit() {
+  local status=$?
+  printf '%s sweep_process_exit status=%s out=%s\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$status" "$OUT" >> "$PROGRESS_FILE"
+}
+trap on_exit EXIT
 
 split_csv() {
   local input=$1
@@ -185,7 +224,7 @@ if missing_prefill:
 PY
 }
 
-run_case() {
+launch_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
   local label name case_dir model_name
   label="tp${tp}-${backend}-${mode}"
@@ -203,13 +242,23 @@ run_case() {
     BACKEND="$backend" \
     MODE="$mode" \
     MAX_NUM_SEQS="$MAX_NUM_SEQS" \
+    ENABLE_TOPO_PIN="$ENABLE_TOPO_PIN" \
     CACHE="$case_dir/cache" \
     CONTAINER_TMP="$case_dir/tmp" \
     "$LAUNCHER" 2>&1 | tee "$case_dir/launch.log"; then
     return 1
   fi
+}
 
-  wait_for_server "$name" "$port" || return 1
+bench_case() {
+  local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
+  local label name case_dir model_name
+  label="tp${tp}-${backend}-${mode}"
+  name="ds4-v9-${label}"
+  case_dir="$OUT/$label"
+  model_name=$(model_name_for_mode "$mode")
+  mkdir -p "$case_dir"
+
   curl -fsS "http://127.0.0.1:${port}/version" > "$case_dir/version.json" || true
   curl -fsS "http://127.0.0.1:${port}/v1/models" > "$case_dir/models.json" || return 1
 
@@ -261,16 +310,34 @@ run_case() {
   append_case_summary DONE "$label" "$case_dir"
 }
 
+fail_case() {
+  local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
+  local label name case_dir
+  label="tp${tp}-${backend}-${mode}"
+  name="ds4-v9-${label}"
+  case_dir="$OUT/$label"
+  mkdir -p "$case_dir"
+  docker logs "$name" > "$case_dir/server.log" 2>&1 || true
+  docker rm -f "$name" >/dev/null 2>&1 || true
+  append_case_summary FAILED "$label" "$case_dir" || true
+}
+
+run_case() {
+  local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
+  local label name
+  label="tp${tp}-${backend}-${mode}"
+  name="ds4-v9-${label}"
+  launch_case "$tp" "$backend" "$mode" "$gpus" "$port" || return 1
+  wait_for_server "$name" "$port" || return 1
+  bench_case "$tp" "$backend" "$mode" "$gpus" "$port"
+}
+
 run_case_guarded() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
-  local label="tp${tp}-${backend}-${mode}"
   if run_case "$tp" "$backend" "$mode" "$gpus" "$port"; then
     return 0
   fi
-  mkdir -p "$OUT/$label"
-  docker logs "ds4-v9-${label}" > "$OUT/$label/server.log" 2>&1 || true
-  docker rm -f "ds4-v9-${label}" >/dev/null 2>&1 || true
-  append_case_summary FAILED "$label" "$OUT/$label" || true
+  fail_case "$tp" "$backend" "$mode" "$gpus" "$port"
   return 1
 }
 
@@ -288,20 +355,63 @@ run_tp_matrix() {
   local idx=0 wave=0 failures=0
   while (( idx < ${#cases[@]} )); do
     wave_pids=()
+    local -a wave_cases wait_pids ready_cases bench_pids
+    wave_cases=()
+    wait_pids=()
+    ready_cases=()
+    bench_pids=()
     local slot=0
     while (( slot < ${#groups[@]} && idx < ${#cases[@]} )); do
       IFS=: read -r c_tp c_backend c_mode <<<"${cases[$idx]}"
       local port=$((PORT_BASE + tp * 100 + wave * 20 + slot))
-      run_case_guarded "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port" &
-      wave_pids+=("$!")
+      if [[ "$SYNC_WAVE_READY" == "1" ]]; then
+        if launch_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port"; then
+          wave_cases+=("$c_tp:$c_backend:$c_mode:${groups[$slot]}:$port")
+        else
+          fail_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port"
+          failures=$((failures + 1))
+        fi
+      else
+        run_case_guarded "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port" &
+        wave_pids+=("$!")
+      fi
       idx=$((idx + 1))
       slot=$((slot + 1))
     done
-    for pid in "${wave_pids[@]}"; do
-      if ! wait "$pid"; then
-        failures=$((failures + 1))
-      fi
-    done
+    if [[ "$SYNC_WAVE_READY" == "1" ]]; then
+      for spec in "${wave_cases[@]}"; do
+        IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"$spec"
+        wait_for_server "ds4-v9-tp${c_tp}-${c_backend}-${c_mode}" "$c_port" &
+        wait_pids+=("$!")
+      done
+      for i in "${!wait_pids[@]}"; do
+        IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"${wave_cases[$i]}"
+        if wait "${wait_pids[$i]}"; then
+          ready_cases+=("${wave_cases[$i]}")
+        else
+          fail_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port"
+          failures=$((failures + 1))
+        fi
+      done
+      for spec in "${ready_cases[@]}"; do
+        IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"$spec"
+        bench_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port" &
+        bench_pids+=("$!")
+      done
+      for i in "${!bench_pids[@]}"; do
+        IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"${ready_cases[$i]}"
+        if ! wait "${bench_pids[$i]}"; then
+          fail_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port"
+          failures=$((failures + 1))
+        fi
+      done
+    else
+      for pid in "${wave_pids[@]}"; do
+        if ! wait "$pid"; then
+          failures=$((failures + 1))
+        fi
+      done
+    fi
     wave=$((wave + 1))
   done
 
@@ -312,13 +422,23 @@ run_tp_matrix() {
 }
 
 chmod +x "$LAUNCHER"
+record_repro_artifacts
 {
-  printf 'image=%s\nout=%s\nmax_num_seqs=%s\ndecode_concurrency=%s\n' \
-    "$IMAGE" "$OUT" "$MAX_NUM_SEQS" "$DECODE_CONCURRENCY"
-  printf 'backends=%s\nmodes=%s\ntps=%s\n' "$BACKENDS" "$MODES" "$TPS"
+  printf 'image=%s\nout=%s\nprogress_file=%s\nlauncher=%s\nbench=%s\n' \
+    "$IMAGE" "$OUT" "$PROGRESS_FILE" "$LAUNCHER" "$BENCH"
+  printf 'max_num_seqs=%s\nport_base=%s\nstartup_timeout=%s\n' \
+    "$MAX_NUM_SEQS" "$PORT_BASE" "$STARTUP_TIMEOUT"
+  printf 'decode_concurrency=%s\ndecode_contexts=%s\ndecode_duration=%s\n' \
+    "$DECODE_CONCURRENCY" "$DECODE_CONTEXTS" "$DECODE_DURATION"
+  printf 'decode_max_tokens=%s\ndecode_token_budget=%s\n' \
+    "$DECODE_MAX_TOKENS" "$DECODE_TOKEN_BUDGET"
+  printf 'prefill_contexts=%s\nprefill_duration=%s\n' \
+    "$PREFILL_CONTEXTS" "$PREFILL_DURATION"
+  printf 'backends=%s\nmodes=%s\ntps=%s\nsync_wave_ready=%s\nenable_topo_pin=%s\nvllm_patch_file=%s\n' \
+    "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" "$VLLM_PATCH_FILE"
 } | tee "$OUT/run-config.txt"
-printf '%s sweep_start image=%s out=%s backends=%s modes=%s tps=%s\n' \
-  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$IMAGE" "$OUT" "$BACKENDS" "$MODES" "$TPS" \
+printf '%s sweep_start image=%s out=%s backends=%s modes=%s tps=%s sync_wave_ready=%s enable_topo_pin=%s\n' \
+  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$IMAGE" "$OUT" "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" \
   >> "$PROGRESS_FILE"
 for tp in $(split_csv "$TPS"); do
   run_tp_matrix "$tp"

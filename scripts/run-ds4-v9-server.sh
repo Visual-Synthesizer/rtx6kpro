@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-ds4dspark-v9-ve72ad00-b12x57422ad-cu132-20260703}
+IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v45c1582-b12xf3686b5-pc1441b5-cu132-20260704}
 STANDARD_MODEL=${STANDARD_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash/snapshots/6976c7ff1b30a1b2cb7805021b8ba4684041f136}
 DSPARK_MODEL=${DSPARK_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-DSpark/snapshots/913f0657a874f76844e2e91cbe706dbcaceeb6d7}
 
@@ -30,6 +30,10 @@ MTP_TOKENS=${MTP_TOKENS:-2}
 SAMPLE=${SAMPLE:-probabilistic}
 CACHE=${CACHE:-/root/.cache/vllm-ds4-v9/$NAME}
 CONTAINER_TMP=${CONTAINER_TMP:-$CACHE/tmp}
+VLLM_INTERNAL_HOST_IP=${VLLM_INTERNAL_HOST_IP:-${VLLM_HOST_IP:-127.0.0.1}}
+GLOO_SOCKET_IFNAME=${GLOO_SOCKET_IFNAME:-lo}
+NCCL_SOCKET_IFNAME=${NCCL_SOCKET_IFNAME:-lo}
+ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-0}
 
 mkdir -p \
   "$CACHE/vllm" \
@@ -147,6 +151,36 @@ if [[ "$PREFIX_CACHE" != "1" ]]; then
   PREFIX_ARGS=(--no-enable-prefix-caching)
 fi
 
+PIN_ARGS=()
+PIN_ENV=()
+TOPO_CPUSET=${PIN_CPUSET_CPUS:-}
+TOPO_MEMSET=${PIN_CPUSET_MEMS:-0}
+if [[ "$ENABLE_TOPO_PIN" == "1" || -n "$TOPO_CPUSET" ]]; then
+  if [[ -z "$TOPO_CPUSET" ]]; then
+    case "$GPUS" in
+      0,1) TOPO_CPUSET=0-7,64-71 ;;
+      2,3) TOPO_CPUSET=8-15,72-79 ;;
+      4,5) TOPO_CPUSET=16-23,80-87 ;;
+      6,7) TOPO_CPUSET=24-31,88-95 ;;
+      8,9) TOPO_CPUSET=32-39,96-103 ;;
+      10,11) TOPO_CPUSET=40-47,104-111 ;;
+      12,13) TOPO_CPUSET=48-55,112-119 ;;
+      14,15) TOPO_CPUSET=56-63,120-127 ;;
+      0,1,2,3) TOPO_CPUSET=0-15,64-79 ;;
+      4,5,6,7) TOPO_CPUSET=16-31,80-95 ;;
+      8,9,10,11) TOPO_CPUSET=32-47,96-111 ;;
+      12,13,14,15) TOPO_CPUSET=48-63,112-127 ;;
+      *)
+        echo "ENABLE_TOPO_PIN=1 but no CPU mapping for GPUS=$GPUS; docker CPU pin disabled" >&2
+        ;;
+    esac
+  fi
+  if [[ -n "$TOPO_CPUSET" ]]; then
+    PIN_ARGS=(--cpuset-cpus "$TOPO_CPUSET" --cpuset-mems "$TOPO_MEMSET")
+    PIN_ENV=(-e DS4_CPUSET_CPUS="$TOPO_CPUSET" -e DS4_CPUSET_MEMS="$TOPO_MEMSET")
+  fi
+fi
+
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -d \
   --name "$NAME" \
@@ -156,6 +190,7 @@ docker run -d \
   --shm-size 32g \
   --network host \
   --init \
+  "${PIN_ARGS[@]}" \
   --ulimit memlock=-1 \
   --ulimit stack=67108864 \
   --ulimit nofile=1048576:1048576 \
@@ -164,6 +199,9 @@ docker run -d \
   -v "$CONTAINER_TMP:/container-tmp:rw" \
   -e CUDA_VISIBLE_DEVICES="$GPUS" \
   -e CUDA_DEVICE_ORDER=PCI_BUS_ID \
+  -e VLLM_HOST_IP="$VLLM_INTERNAL_HOST_IP" \
+  -e GLOO_SOCKET_IFNAME="$GLOO_SOCKET_IFNAME" \
+  -e NCCL_SOCKET_IFNAME="$NCCL_SOCKET_IFNAME" \
   -e CUTE_DSL_ARCH=sm_120a \
   -e NCCL_IB_DISABLE=1 \
   -e NCCL_P2P_LEVEL=SYS \
@@ -188,6 +226,7 @@ docker run -d \
   -e TORCHINDUCTOR_CACHE_DIR=/cache/torchinductor \
   -e TORCH_EXTENSIONS_DIR=/cache/torch_extensions \
   -e FLASHINFER_WORKSPACE_BASE=/cache/flashinfer \
+  "${PIN_ENV[@]}" \
   "${BACKEND_ENV[@]}" \
   "$IMAGE" \
   /bin/bash -lc 'unset NCCL_GRAPH_FILE NCCL_GRAPH_DUMP_FILE VLLM_B12X_MLA_EXTEND_MAX_CHUNKS; exec vllm serve "$@"' \
@@ -224,4 +263,4 @@ docker run -d \
   "${BACKEND_ARGS[@]}" \
   "${PREFIX_ARGS[@]}"
 
-echo "$NAME $SERVED_MODEL $BACKEND $MODE TP=$TP GPUS=$GPUS PORT=$PORT GRAPH=$GRAPH MAX_NUM_SEQS=$MAX_NUM_SEQS"
+echo "$NAME $SERVED_MODEL $BACKEND $MODE TP=$TP GPUS=$GPUS PORT=$PORT GRAPH=$GRAPH MAX_NUM_SEQS=$MAX_NUM_SEQS CPUSET=${TOPO_CPUSET:-none} MEMSET=${TOPO_MEMSET:-none}"
