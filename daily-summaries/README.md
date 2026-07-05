@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-05](2026-07/2026-07-05.md) | - jetha built a native NVFP4 attention kernel for sm120/121, speeding up Gemma 4 decode; wheels avai |
 | [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
 | [2026-07-03](2026-07/2026-07-03.md) | ACS redirect on c-payne PCIe switches nearly doubled token-gen throughput — clearing `ReqRedir/Cmp |
 | [2026-07-02](2026-07/2026-07-02.md) | DSpark v8 (lucifer+cutlass) hits >1M context on TP2: 500 tok/s aggregate gen, 9000 tok/s prefill, 20 |
@@ -136,6 +137,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-05](2026-07/2026-07-05.md) | - jetha built a native NVFP4 attention kernel for sm120/121, speeding up Gemma 4 decode; wheels avai |
 | [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
 | [2026-07-03](2026-07/2026-07-03.md) | ACS redirect on c-payne PCIe switches nearly doubled token-gen throughput — clearing `ReqRedir/Cmp |
 | [2026-07-02](2026-07/2026-07-02.md) | DSpark v8 (lucifer+cutlass) hits >1M context on TP2: 500 tok/s aggregate gen, 9000 tok/s prefill, 20 |
