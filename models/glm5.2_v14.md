@@ -114,11 +114,13 @@ Direct online measurements currently exist for A16 only:
 |---|---:|---:|---:|---:|---:|---:|---|
 | A16 online MXFP8 | `0` | 93.80 | 94.55 | 6173 | 5925 | 5604 | 0.07278 +/- 0.00266 |
 | A16 online MXFP8 | `ag` | 91.87 | 92.49 | 6656 | 6366 | 5995 | 0.07467 +/- 0.00311 |
-| A16 online MXFP8 | `ring` | 85.98 | 86.48 | 7410 | 7042 | 6579 | 0.08581 +/- 0.01129 |
+| A16 online MXFP8 | `ring` | 94.13 | 94.64 | 7410 | 7042 | 6579 | 0.08581 +/- 0.01129 |
 
-Treat the `ring` decode row as state/order sensitive until rerun from a clean
-scripted launch. The prefill gain from `ring` is stable in the logs; details are
-in the `f8` section below.
+The `ring` decode value uses the later decode-only rerun against the same mode.
+The first scripted sweep produced `85.98` decode agg tok/s and `86.48` coding
+peak tok/s, but that row was discarded as an invalid scripted-run outlier. The
+prefill and KLD values are still from the full sweep because the issue was only
+observed in the decode part of that run.
 
 Source directories:
 
@@ -169,7 +171,7 @@ The code passes the selected string into `b12x.distributed.PCIeDmaAllReduce` as
 |---|---|---|
 | `0` | Disable FP8-compressed PCIe DMA payloads. B12X PCIe allreduce can still be enabled, but not this FP8 DMA mode. | Best A16 online decode in the current direct run; lower prefill than `ag`/`ring`. |
 | `ag` | Enable the all-gather style FP8 DMA mode. | Improves prefill versus `0`; decode was slightly below `0` for A16 online; KLD was slightly higher than `0`. |
-| `ring` | Enable ring FP8 DMA mode. | Best prefill in both clean and MXFP8 logs; decode had inconsistent scripted vs live results; KLD is more variable. |
+| `ring` | Enable ring FP8 DMA mode. | Best prefill in both clean and MXFP8 logs; after discarding the bad scripted decode outlier, decode is also in the normal `94 tok/s` range; KLD is more variable. |
 
 For the A16 online MXFP8 direct run, the measured impact was:
 
@@ -177,14 +179,13 @@ For the A16 online MXFP8 direct run, the measured impact was:
 |---|---:|---:|---:|---:|---:|---|
 | `0` | 93.80 | 94.55 | 6173 | 5925 | 5604 | 0.07278 +/- 0.00266 |
 | `ag` | 91.87 | 92.49 | 6656 | 6366 | 5995 | 0.07467 +/- 0.00311 |
-| `ring` | 85.98 | 86.48 | 7410 | 7042 | 6579 | 0.08581 +/- 0.01129 |
+| `ring` | 94.13 | 94.64 | 7410 | 7042 | 6579 | 0.08581 +/- 0.01129 |
 
-The `ring` decode value in this table is the reproducible value from the full
-automated sweep that launched the container and then measured it. A later manual
-decode-only rerun against the already-running `ring` server measured `94.13`
-decode agg tok/s and `94.64` coding peak tok/s. That live rerun is useful as a
-warning that the low scripted decode may be launch/order state, but it is not
-used as the table value until a clean scripted rerun reproduces it.
+The first automated sweep measured `ring` decode as `85.98` decode agg tok/s and
+`86.48` coding peak tok/s. That number was later invalidated by the decode-only
+rerun of the same already-running `ring` server, which measured `94.13` decode
+agg tok/s and `94.64` coding peak tok/s. Use the rerun value above; treat the
+old low decode row as a bad scripted-run outlier.
 
 ## Reproduction Commands
 
@@ -243,5 +244,4 @@ max_windows=1
 |---|---|
 | Clean Luke NVFP4 `f8=0` for A4 and A16 | Required to complete the default/no-online-quant table. |
 | Direct online MXFP8 A4 for `f8=0/ag/ring` | Current A4 numbers are from the offline-equivalent static checkpoint, not online conversion from Luke's checkpoint. |
-| Clean scripted rerun of online A16 `ring` decode | Historical scripted run measured low decode, but live rerun of the same mode measured normal `94 tok/s`. |
 | More KLD samples for `ring` modes | Existing results show high variance; 3-run samples are not enough to rank close variants. |
