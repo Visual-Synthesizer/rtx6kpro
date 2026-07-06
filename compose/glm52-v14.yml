@@ -1,0 +1,32 @@
+name: glm52-v14
+
+services:
+  server:
+    image: ${IMAGE}
+    container_name: ${NAME}
+    network_mode: host
+    ipc: host
+    privileged: true
+    init: true
+    shm_size: 32g
+    gpus: all
+    ulimits:
+      memlock: -1
+      stack: 67108864
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      CUDA_VISIBLE_DEVICES: ${GPUS}
+    volumes:
+      - /root/models:/root/models:ro
+      - /root/.cache/huggingface:/root/.cache/huggingface:rw
+      - /cache:/cache-host:rw
+      - ${CACHE_DIR}:/cache:rw
+      - ${TMP_DIR}:/container-tmp:rw
+      - ${RUN_SCRIPT}:/usr/local/bin/glm52-run:ro
+    command:
+      - /bin/bash
+      - /usr/local/bin/glm52-run

@@ -13,6 +13,62 @@ loading.
 
 ## Image And Model
 
+Final reproducible image:
+
+```text
+voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706
+```
+
+Docker Hub manifest digest:
+
+```text
+sha256:e15f39468c8acd1e2493e7f9e1bfc5cc6274298f0a646fc6b11f6e924e24fc35
+```
+
+Build script:
+
+```text
+scripts/build-glm52-v14-final-image.sh
+```
+
+Pinned source stack:
+
+| Component | Ref |
+|---|---|
+| vLLM base | `local-inference-lab/vllm dev/eldritch-enlightenment @ c382f1d28d5be2f867c216609408bdb424d6049a` |
+| fp8.py bridge patch | `d00593416aeb3925553ccd589d91df7075d618f6` |
+| B12X | `local-inference-lab/b12x master @ e44cb77777a075790ebe9f7aa9f225d073aea109` |
+| InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
+| FlashInfer | `5a73a36a7169ec5533ba474bb9204bed765dd297` |
+| DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
+
+FlashInfer cubin wheels are intentionally not built by this image script
+(`FLASHINFER_BUILD_CUBIN=0`); the GLM 5.2 path here uses the B12X/DeepGEMM
+kernels, while `--enable-flashinfer-autotune` remains enabled for compatibility.
+
+Exact build and push:
+
+```bash
+cd /root/rtx6kpro
+PUSH_IMAGE=1 ./scripts/build-glm52-v14-final-image.sh
+```
+
+The final image defaults InstantTensor to buffered I/O:
+
+```bash
+--load-format instanttensor
+INSTANTTENSOR_BACKEND=BUFFERED
+```
+
+InstantTensor's upstream default for regular disk files is direct I/O
+(`URING,AIO`), which is good for cold one-time loads but bypasses the Linux page
+cache. `BUFFERED` expands to `URING_BUFFERED,AIO_BUFFERED,MMAP`, so repeated
+loads can reuse cached pages when the model is already hot in memory. See
+[`scitix/InstantTensor`](https://github.com/scitix/InstantTensor) and the
+[vLLM InstantTensor loader docs](https://docs.vllm.ai/en/latest/models/extensions/instanttensor/).
+
+Previous benchmark images, kept here only for historical comparison:
+
 Clean Luke NVFP4 image:
 
 ```text
@@ -37,6 +93,7 @@ Result roots:
 ```text
 /root/bench-results/glm52-v14-todo-and-sweep-20260706T0150Z
 /root/kld/glm52_v14_todo_20260706T0150Z
+/root/bench-results/glm52-v14-codingpeak-dcp1-mtp3-20260706T130151Z
 ```
 
 ## Runtime Contract
@@ -65,6 +122,53 @@ FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS
 ```
 
 The runner exits before launch if this is shortened.
+
+## Compose Server Helper
+
+For manual serving use:
+
+```text
+scripts/run-glm52-v14-compose.sh
+compose/glm52-v14.yml
+```
+
+Minimal launch examples:
+
+```bash
+cd /root/rtx6kpro
+
+# Luke NVFP4, checkpoint-native A4, MTP off.
+NAME=glm52-a4-mtp0 PORT=8000 GPUS=0,1,2,3,4,5,6,7 \
+MOE_MODE=a4 MTP=0 MAX_NUM_SEQS=64 \
+./scripts/run-glm52-v14-compose.sh up
+
+# Online MXFP8 conversion, A16 force, MTP3, graph auto = 4 * MAX_NUM_SEQS.
+NAME=glm52-online-a16-mtp3 PORT=8001 GPUS=8,9,10,11,12,13,14,15 \
+MOE_MODE=a16 ONLINE_MXFP8=1 MTP=3 MAX_NUM_SEQS=32 \
+./scripts/run-glm52-v14-compose.sh up
+```
+
+User-facing knobs:
+
+| Env | Default | Meaning |
+|---|---|---|
+| `MODEL` | Luke NVFP4 snapshot | HF checkpoint path or repo. |
+| `IMAGE` | final v14 image | Docker image to run. |
+| `GPUS` | `0,1,2,3,4,5,6,7` | GPU set for one 8-GPU instance. |
+| `PORT` | `8000` | OpenAI API port. |
+| `DCP` | `1` | Decode context parallel size. |
+| `MTP` | `0` | Native MTP speculative token count; `0` disables MTP. |
+| `MAX_NUM_SEQS` | `64` | vLLM concurrency cap. |
+| `GRAPH` | `4 * MAX_NUM_SEQS` | CUDA graph capture cap; normally leave unset. |
+| `MOE_MODE` | `a4` | `a4` = checkpoint-native NVFP4/A4, `a16` = force W4A16, `force-a8-experimental` = explicit A8 force for non-NVFP4 experiments. |
+| `ONLINE_MXFP8` | `0` | `1` adds `--quantization-config '{"linear":{"weight":"mxfp8"}}'`. |
+| `F8_DMA` | `0` | FP8 PCIe DMA allreduce mode: `0`, `ag`, or `ring`. |
+| `LOAD_FORMAT` | `instanttensor` | Set `fastsafetensors` to disable InstantTensor for comparison. |
+| `INSTANTTENSOR_BACKEND` | `BUFFERED` | Buffered mode uses Linux page cache on hot reloads. |
+
+The helper always validates the 78-character index-cache pattern before launch
+and writes the generated in-container command to
+`/root/.cache/vllm-glm52-v14/<NAME>/run-vllm.sh`.
 
 ## A4 And A16
 
@@ -120,8 +224,11 @@ export B12X_PCIE_DMA_FP8=0      # same value
 | `ag` | Enable all-gather style FP8 DMA mode. |
 | `ring` | Enable ring FP8 DMA mode. |
 
-The full sweep below is primarily `f8=0`. Per request, `ag` and `ring` were run
-only for `A4`, `MTP=3`, across DCP `1,2,4,8`.
+This mode affects large PCIe allreduce payloads, so it is a prefill knob. It is
+not expected to move decode throughput in a meaningful way; decode deltas with
+`ag`/`ring` are treated as measurement noise and are not shown in the main
+decode tables. `ag` and `ring` remain listed for prefill/KLD where the transport
+actually matters.
 
 ## Direct DCP1 Measurements
 
@@ -134,18 +241,46 @@ stride=512
 max_windows=1
 ```
 
-| Variant | Mode | f8 | Decode agg tok/s | Coding peak tok/s | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |
-|---|---|---:|---:|---:|---:|---:|---:|---|
-| base | A4 | `0` | 88.53 | 88.81 | 6,491 | 6,238 | 5,883 | 0.10680 +/- 0.00323 |
-| base | A16 | `0` | 85.73 | 86.21 | 5,975 | 5,752 | 5,448 | 0.06842 +/- 0.00197 |
-| online | A4 | `0` | 95.51 | 96.12 | 6,598 | 6,307 | 5,967 | 0.10761 +/- 0.00430 |
-| online | A4 | `ag` | 93.35 | 93.70 | 7,165 | 6,870 | 6,444 | 0.11171 +/- 0.00542 |
-| online | A4 | `ring` | 95.53 | 95.98 | 8,092 | 7,676 | 7,142 | 0.12100 +/- 0.00886 |
+Primary DCP1 rows (`f8=0`):
+
+| Variant | Mode | Decode agg tok/s | Coding peak tok/s | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |
+|---|---|---:|---:|---:|---:|---:|---|
+| base | A4 | 88.53 | 88.81 | 6,491 | 6,238 | 5,883 | 0.10680 +/- 0.00323 |
+| base | A16 | 85.73 | 86.21 | 5,975 | 5,752 | 5,448 | 0.06842 +/- 0.00197 |
+| online | A4 | 95.51 | 96.12 | 6,598 | 6,307 | 5,967 | 0.10761 +/- 0.00430 |
+
+Online A4 f8 DMA impact, keeping decode out of the comparison:
+
+| f8 | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |
+|---|---:|---:|---:|---|
+| `0` | 6,598 | 6,307 | 5,967 | 0.10761 +/- 0.00430 |
+| `ag` | 7,165 | 6,870 | 6,444 | 0.11171 +/- 0.00542 |
+| `ring` | 8,092 | 7,676 | 7,142 | 0.12100 +/- 0.00886 |
+
+## Coding Peak Rerun
+
+Result root:
+
+```text
+/root/bench-results/glm52-v14-codingpeak-dcp1-mtp3-20260706T130151Z
+```
+
+DCP1, MTP3, `f8=0`. `cc1` and `cc32` are decode aggregate tok/s from the
+same launch family; coding peak is the mean of the three coding task positions.
+
+| Variant | Mode | cc1 decode tok/s | cc32 decode tok/s | Coding peak mean | Median | Min | Max |
+|---|---|---:|---:|---:|---:|---:|---:|
+| base | A4 | 136.50 | 1,409.11 | 180.52 | 178.90 | 176.75 | 185.86 |
+| base | A16 | 126.60 | 1,319.22 | 166.55 | 169.51 | 160.15 | 171.27 |
+| online | A4 | 144.46 | 1,479.78 | 177.18 | 178.76 | 166.59 | 184.13 |
+| online | A16 | 130.07 | 1,386.32 | 166.26 | 166.44 | 158.90 | 172.76 |
 
 ## Full Sweep Decode
 
 Values are `llm_decode_bench` ctx0 aggregate tok/s for concurrency
-`1,2,4,8,16,32`.
+`1,2,4,8,16,32`. The published decode sweep is intentionally consolidated to
+`f8=0`; the raw `ag/ring` decode runs are omitted because FP8 DMA is not a
+decode path knob.
 
 ### base A4 f8=0
 
@@ -159,24 +294,6 @@ Values are `llm_decode_bench` ctx0 aggregate tok/s for concurrency
 | 3 | 2 | 100.78 | 177.56 | 301.14 | 475.80 | 756.94 | 1,186 |
 | 3 | 4 | 99.30 | 167.94 | 289.98 | 454.40 | 691.08 | 1,070 |
 | 3 | 8 | 95.84 | 159.88 | 265.06 | 410.45 | 600.76 | 827.86 |
-
-### base A4 f8=ag
-
-| MTP | DCP | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 1 | 123.05 | 202.95 | 349.42 | 549.26 | 870.61 | 1,417 |
-| 3 | 2 | 102.41 | 172.54 | 300.79 | 473.77 | 771.12 | 1,198 |
-| 3 | 4 | 97.81 | 172.98 | 287.66 | 444.56 | 690.21 | 1,065 |
-| 3 | 8 | 95.65 | 164.27 | 266.44 | 410.62 | 599.57 | 825.50 |
-
-### base A4 f8=ring
-
-| MTP | DCP | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 1 | 127.81 | 208.23 | 350.75 | 536.61 | 878.24 | 1,416 |
-| 3 | 2 | 99.60 | 173.83 | 304.48 | 481.51 | 757.91 | 1,190 |
-| 3 | 4 | 95.71 | 168.71 | 282.66 | 446.39 | 669.97 | 1,060 |
-| 3 | 8 | 96.34 | 162.96 | 260.09 | 412.51 | 605.10 | 807.98 |
 
 ### base A16 f8=0
 
@@ -203,24 +320,6 @@ Values are `llm_decode_bench` ctx0 aggregate tok/s for concurrency
 | 3 | 2 | 104.96 | 179.20 | 307.62 | 486.24 | 779.92 | 1,225 |
 | 3 | 4 | 100.28 | 172.18 | 286.85 | 452.26 | 715.04 | 1,085 |
 | 3 | 8 | 98.23 | 164.85 | 270.51 | 413.74 | 611.94 | 842.56 |
-
-### online A4 f8=ag
-
-| MTP | DCP | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 1 | 125.83 | 205.80 | 361.92 | 555.51 | 900.29 | 1,462 |
-| 3 | 2 | 100.14 | 175.88 | 310.02 | 478.47 | 775.04 | 1,219 |
-| 3 | 4 | 96.96 | 168.86 | 292.83 | 451.64 | 708.09 | 1,104 |
-| 3 | 8 | 96.68 | 161.71 | 264.55 | 417.83 | 609.98 | 827.00 |
-
-### online A4 f8=ring
-
-| MTP | DCP | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 1 | 134.38 | 204.07 | 358.16 | 552.98 | 910.19 | 1,462 |
-| 3 | 2 | 101.18 | 174.98 | 303.42 | 475.15 | 771.48 | 1,233 |
-| 3 | 4 | 102.35 | 166.37 | 293.61 | 453.12 | 695.10 | 1,095 |
-| 3 | 8 | 95.23 | 162.07 | 271.20 | 419.26 | 605.87 | 843.59 |
 
 ### online A16 f8=0
 
@@ -330,6 +429,22 @@ Values are tok/s for 8k and 64k contexts.
 | 3 | 8 | 2,081 | 2,114 |
 
 ## Reproduction
+
+Build the final serving image:
+
+```bash
+cd /root/rtx6kpro
+PUSH_IMAGE=1 ./scripts/build-glm52-v14-final-image.sh
+```
+
+Start a server through the compose helper:
+
+```bash
+cd /root/rtx6kpro
+NAME=glm52-v14-online-a16 PORT=8000 GPUS=0,1,2,3,4,5,6,7 \
+MOE_MODE=a16 ONLINE_MXFP8=1 MTP=3 MAX_NUM_SEQS=32 \
+./scripts/run-glm52-v14-compose.sh up
+```
 
 The reproducible runner is checked in at:
 

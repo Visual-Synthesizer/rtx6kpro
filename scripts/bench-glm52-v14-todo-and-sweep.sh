@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_IMAGE="${BASE_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v56a5c3e-b12x7bfc945-glm52-dcp-fp8nvfp4fix-cu132-20260705}"
-ONLINE_IMAGE="${ONLINE_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v56a5c3e-b12x7bfc945-pr74-mxfp8overlay-cu132-20260705}"
+GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706}"
+BASE_IMAGE="${BASE_IMAGE:-${GLM52_V14_IMAGE}}"
+ONLINE_IMAGE="${ONLINE_IMAGE:-${GLM52_V14_IMAGE}}"
 MODEL="${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}"
 QUANTIZATION="${QUANTIZATION:-modelopt_fp4}"
 if [[ -z "${QUANTIZATION_CONFIG_JSON+x}" ]]; then
@@ -415,26 +416,31 @@ run_table_bench() {
   local port="$1"
   local out="$2"
   local label="$3"
+  local dma="${label##*/f8}"
   local served
   served="$(<"${out}/served_model.name")"
 
-  capture_thermal "${out}" "before_decode"
-  progress "GLM52_V14_TABLE_DECODE_START ${label} port=${port}"
-  python3 /root/llm-inference-bench/llm_decode_bench.py \
-    --port "${port}" \
-    --model "${served}" \
-    --skip-prefill \
-    --contexts 0 \
-    --concurrency 1 \
-    --duration "${TABLE_DECODE_DURATION}" \
-    --max-tokens "${TABLE_DECODE_MAX_TOKENS}" \
-    --coding-peak \
-    --coding-peak-runs "${TABLE_CODING_PEAK_RUNS}" \
-    --display-mode plain \
-    --no-hw-monitor \
-    --output "${out}/decode_table.json" > "${out}/decode_table.txt" 2>&1
-  capture_thermal "${out}" "after_decode"
-  progress "GLM52_V14_TABLE_DECODE_DONE ${label} $(summarize_json_one_line "${out}/decode_table.json") out=${out}"
+  if [[ "${dma}" == "0" ]]; then
+    capture_thermal "${out}" "before_decode"
+    progress "GLM52_V14_TABLE_DECODE_START ${label} port=${port}"
+    python3 /root/llm-inference-bench/llm_decode_bench.py \
+      --port "${port}" \
+      --model "${served}" \
+      --skip-prefill \
+      --contexts 0 \
+      --concurrency 1 \
+      --duration "${TABLE_DECODE_DURATION}" \
+      --max-tokens "${TABLE_DECODE_MAX_TOKENS}" \
+      --coding-peak \
+      --coding-peak-runs "${TABLE_CODING_PEAK_RUNS}" \
+      --display-mode plain \
+      --no-hw-monitor \
+      --output "${out}/decode_table.json" > "${out}/decode_table.txt" 2>&1
+    capture_thermal "${out}" "after_decode"
+    progress "GLM52_V14_TABLE_DECODE_DONE ${label} $(summarize_json_one_line "${out}/decode_table.json") out=${out}"
+  else
+    progress "GLM52_V14_TABLE_DECODE_SKIP ${label} reason=f8_dma_prefill_only"
+  fi
 
   progress "GLM52_V14_TABLE_PREFILL_START ${label} port=${port}"
   python3 /root/llm-inference-bench/llm_decode_bench.py \
@@ -538,33 +544,42 @@ run_pair() {
 
   wait_pair_ready "${name_a}" "${PORT_A}" "${out_a}" "${label_a}" "${name_b}" "${PORT_B}" "${out_b}" "${label_b}"
 
+  local -a bench_pids=()
   if [[ "${bench_kind}" == "table" ]]; then
     run_table_bench "${PORT_A}" "${out_a}" "${label_a}" &
+    bench_pids+=("$!")
   else
-    run_full_decode_bench "${PORT_A}" "${out_a}" "${label_a}" "${dcp_a}" &
+    if [[ "${dma_a}" == "0" ]]; then
+      run_full_decode_bench "${PORT_A}" "${out_a}" "${label_a}" "${dcp_a}" &
+      bench_pids+=("$!")
+    else
+      progress "GLM52_V14_FULL_DECODE_SKIP ${label_a} reason=f8_dma_prefill_only"
+    fi
   fi
-  local pid_a=$!
 
-  local pid_b=""
   if [[ -n "${cfg_b}" ]]; then
     if [[ "${bench_kind}" == "table" ]]; then
       run_table_bench "${PORT_B}" "${out_b}" "${label_b}" &
+      bench_pids+=("$!")
     else
-      run_full_decode_bench "${PORT_B}" "${out_b}" "${label_b}" "${dcp_b}" &
+      if [[ "${dma_b}" == "0" ]]; then
+        run_full_decode_bench "${PORT_B}" "${out_b}" "${label_b}" "${dcp_b}" &
+        bench_pids+=("$!")
+      else
+        progress "GLM52_V14_FULL_DECODE_SKIP ${label_b} reason=f8_dma_prefill_only"
+      fi
     fi
-    pid_b=$!
   fi
 
-  if [[ -n "${pid_b}" ]]; then
-    wait "${pid_a}" "${pid_b}"
-  else
-    wait "${pid_a}"
-  fi
+  local pid
+  for pid in "${bench_pids[@]}"; do
+    wait "${pid}"
+  done
 
   if [[ "${bench_kind}" != "table" && "${RUN_STANDALONE_PREFILL}" == "1" ]]; then
     run_full_prefill_bench "${PORT_A}" "${out_a}" "${label_a}" &
-    pid_a=$!
-    pid_b=""
+    local pid_a=$!
+    local pid_b=""
     if [[ -n "${cfg_b}" ]]; then
       run_full_prefill_bench "${PORT_B}" "${out_b}" "${label_b}" &
       pid_b=$!
@@ -913,14 +928,13 @@ lines.append(f"Result root: `{result_root}`  ")
 lines.append(f"KLD root: `{kld_root}`\n")
 
 lines.append("## Table TODO Measurements\n")
-lines.append("| Variant | Mode | f8 | Decode agg tok/s | Coding peak tok/s | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |")
-lines.append("|---|---|---:|---:|---:|---:|---:|---:|---|")
+lines.append("Decode/coding peak rows are intentionally limited to `f8=0`; FP8 DMA does not change the decode path.\n")
+lines.append("| Variant | Mode | Decode agg tok/s | Coding peak tok/s | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |")
+lines.append("|---|---|---:|---:|---:|---:|---:|---|")
 for variant, force, dma in [
     ("base", "a4", "0"),
     ("base", "a16", "0"),
     ("online", "a4", "0"),
-    ("online", "a4", "ag"),
-    ("online", "a4", "ring"),
 ]:
     path = result_root / "table" / variant / force / "mtp0" / "dcp1" / f"f8-{dma}"
     dec = summary_value(path / "decode_table.json", "0", "1")
@@ -931,12 +945,29 @@ for variant, force, dma in [
         kld = f"{statistics.mean(kvals):.5f} +/- {(statistics.stdev(kvals) if len(kvals) > 1 else 0.0):.5f}"
     else:
         kld = "TODO"
-    lines.append(f"| {variant} | {force.upper()} | `{dma}` | {fmt(dec)} | {fmt(cp)} | {fmt(pref.get('30720') or pref.get('30000') or pref.get('30k'))} | {fmt(pref.get('65536') or pref.get('64000') or pref.get('64k'))} | {fmt(pref.get('122880') or pref.get('120000') or pref.get('120k'))} | {kld} |")
+    lines.append(f"| {variant} | {force.upper()} | {fmt(dec)} | {fmt(cp)} | {fmt(pref.get('30720') or pref.get('30000') or pref.get('30k'))} | {fmt(pref.get('65536') or pref.get('64000') or pref.get('64k'))} | {fmt(pref.get('122880') or pref.get('120000') or pref.get('120k'))} | {kld} |")
 
-def collect_full_keys():
+lines.append("\n## DCP1 FP8 DMA Prefill/KLD\n")
+lines.append("| Variant | Mode | f8 | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |")
+lines.append("|---|---|---:|---:|---:|---:|---|")
+for variant, force, dma in [
+    ("online", "a4", "0"),
+    ("online", "a4", "ag"),
+    ("online", "a4", "ring"),
+]:
+    path = result_root / "table" / variant / force / "mtp0" / "dcp1" / f"f8-{dma}"
+    pref = prefill_values(path / "prefill_table.json")
+    kvals = klds.get((variant, force, dma), [])
+    if kvals:
+        kld = f"{statistics.mean(kvals):.5f} +/- {(statistics.stdev(kvals) if len(kvals) > 1 else 0.0):.5f}"
+    else:
+        kld = "TODO"
+    lines.append(f"| {variant} | {force.upper()} | `{dma}` | {fmt(pref.get('30720') or pref.get('30000') or pref.get('30k'))} | {fmt(pref.get('65536') or pref.get('64000') or pref.get('64k'))} | {fmt(pref.get('122880') or pref.get('120000') or pref.get('120k'))} | {kld} |")
+
+def collect_full_keys(filename):
     keys = []
     base = result_root / "full"
-    for path in sorted(base.glob("*/*/mtp*/dcp*/f8-*/decode_full.json")):
+    for path in sorted(base.glob(f"*/*/mtp*/dcp*/f8-*/{filename}")):
         rel = path.relative_to(base).parts
         if len(rel) < 6:
             continue
@@ -944,11 +975,12 @@ def collect_full_keys():
         keys.append((variant, force, mtpdir.replace("mtp", ""), dcpdir.replace("dcp", ""), f8dir.replace("f8-", ""), path))
     return keys
 
-keys = collect_full_keys()
+decode_keys = collect_full_keys("decode_full.json")
+prefill_keys = collect_full_keys("prefill_full.json")
 for variant in ("base", "online"):
     for force in ("a4", "a16"):
-        for dma in ("0", "ag", "ring"):
-            subset = [k for k in keys if k[0] == variant and k[1] == force and k[4] == dma]
+        for dma in ("0",):
+            subset = [k for k in decode_keys if k[0] == variant and k[1] == force and k[4] == dma]
             if not subset:
                 continue
             lines.append(f"\n## Full Sweep ctx0 Aggregate tok/s: {variant} {force.upper()} f8={dma}\n")
@@ -963,6 +995,10 @@ for variant in ("base", "online"):
                     vals = [fmt(summary_value(path, "0", cc)) for cc in ("1", "2", "4", "8", "16", "32")]
                     lines.append(f"| {mtp} | {dcp} | " + " | ".join(vals) + " |")
 
+        for dma in ("0", "ag", "ring"):
+            subset = [k for k in prefill_keys if k[0] == variant and k[1] == force and k[4] == dma]
+            if not subset:
+                continue
             lines.append(f"\n## Standalone Prefill tok/s: {variant} {force.upper()} f8={dma}\n")
             lines.append("Standalone prefill stores the contexts that fit under the 131,072-token model length; the requested 128k row is skipped by `llm_decode_bench` for this model.\n")
             lines.append("| MTP | DCP | 8k | 64k |")
