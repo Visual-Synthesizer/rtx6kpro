@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3f65c52-b12x80eb49b-fi5a73a36-cu132-20260703}
+IMAGE=${IMAGE:-voipmonitor/vllm:glm52-v14-online-fp8-mxfp8-v2-vllm02f5b41-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
 MODEL=${MODEL:-/root/models/GLM-5.2-FP8-MXFP4experts}
-DRAFT_MODEL=${DRAFT_MODEL:-/root/.cache/huggingface/hub/models--RedHatAI--GLM-5.2-speculator.dspark/snapshots/7985f0391a3d4f309729eb6f79ea086c812f81fb}
+DRAFT_MODEL=${DRAFT_MODEL:-/root/.cache/huggingface/hub/models--RedHatAI--GLM-5.2-speculator.dspark/snapshots/7598747fe1f35995babeae5c730c8a8a4d9c8492}
 
 NAME=${NAME:-glm52-mxfp4}
 PORT=${PORT:-8000}
@@ -20,21 +20,63 @@ GRAPH=${GRAPH:-auto}
 ATTN_BACKEND=${ATTN_BACKEND:-B12X_MLA_SPARSE}
 SERVED_MODEL=${SERVED_MODEL:-GLM-5.2-FP8-MXFP4-Experts}
 SAMPLE=${SAMPLE:-probabilistic}
-CACHE=${CACHE:-/root/.cache/vllm-glm52-mxfp4/$NAME}
+FUSE_ALLREDUCE_RMS=${FUSE_ALLREDUCE_RMS:-1}
+LOAD_FORMAT=${LOAD_FORMAT:-instanttensor}
+INSTANTTENSOR_BACKEND=${INSTANTTENSOR_BACKEND:-BUFFERED}
+IMAGE_ID=$(docker image inspect -f '{{.Id}}' "$IMAGE" 2>/dev/null || true)
+if [[ -n "$IMAGE_ID" ]]; then
+  DEFAULT_IMAGE_CACHE_KEY=$(printf '%s' "$IMAGE_ID" | sed 's/^sha256://')
+else
+  DEFAULT_IMAGE_CACHE_KEY=$(printf '%s' "$IMAGE" | tr -c 'A-Za-z0-9_.-' '_' | cut -c1-120)
+fi
+IMAGE_CACHE_KEY=${IMAGE_CACHE_KEY:-$DEFAULT_IMAGE_CACHE_KEY}
+CACHE=${CACHE:-/root/.cache/vllm-glm52-mxfp4/$NAME/$IMAGE_CACHE_KEY}
 CONTAINER_TMP=${CONTAINER_TMP:-$CACHE/tmp}
 
-TOPK_PATTERN=${GLM52_INDEX_TOPK_PATTERN:-FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS}
+DEFAULT_TOPK_PATTERN=FFF
+for _ in {1..18}; do
+  DEFAULT_TOPK_PATTERN+=SSSF
+done
+DEFAULT_TOPK_PATTERN+=SSS
+TOPK_PATTERN=${GLM52_INDEX_TOPK_PATTERN:-$DEFAULT_TOPK_PATTERN}
+
+if (( ${#TOPK_PATTERN} != 78 )) || [[ "$TOPK_PATTERN" =~ [^FS] ]]; then
+  echo "Invalid GLM52_INDEX_TOPK_PATTERN: length=${#TOPK_PATTERN}, expected 78 F/S chars" >&2
+  exit 2
+fi
+
+case "$FUSE_ALLREDUCE_RMS" in
+  1|true|True|TRUE|yes|YES|on|ON)
+    FUSE_ALLREDUCE_RMS_ARG=True
+    ;;
+  0|false|False|FALSE|no|NO|off|OFF)
+    FUSE_ALLREDUCE_RMS_ARG=False
+    ;;
+  *)
+    echo "Invalid FUSE_ALLREDUCE_RMS=$FUSE_ALLREDUCE_RMS; use 0 or 1" >&2
+    exit 2
+    ;;
+esac
+
+next_pow2() {
+  local n=$1
+  local p=1
+  while (( p < n )); do
+    p=$(( p << 1 ))
+  done
+  echo "$p"
+}
 
 case "$MODE" in
   baseline)
     SPEC_ARGS=()
-    if [[ "$GRAPH" == "auto" ]]; then GRAPH="$MAX_NUM_SEQS"; fi
+    if [[ "$GRAPH" == "auto" ]]; then GRAPH="$(next_pow2 "$MAX_NUM_SEQS")"; fi
     ;;
   dspark)
     test -f "$DRAFT_MODEL/config.json"
     SPEC_JSON=$(printf '{"model":"%s","method":"dspark","num_speculative_tokens":%s,"draft_sample_method":"%s"}' "$DRAFT_MODEL" "$DSPARK_TOKENS" "$SAMPLE")
     SPEC_ARGS=(--speculative-config "$SPEC_JSON")
-    if [[ "$GRAPH" == "auto" ]]; then GRAPH=$(( MAX_NUM_SEQS * (DSPARK_TOKENS + 1) )); fi
+    if [[ "$GRAPH" == "auto" ]]; then GRAPH="$(next_pow2 $(( MAX_NUM_SEQS * (DSPARK_TOKENS + 1) )))"; fi
     ;;
   *)
     echo "Unknown MODE=$MODE" >&2
@@ -76,8 +118,11 @@ docker run -d \
   -e NCCL_IB_DISABLE=1 \
   -e NCCL_P2P_LEVEL=SYS \
   -e NCCL_PROTO=LL,LL128,Simple \
+  -e LD_PRELOAD=/opt/libnccl-local-inference.so.2.30.4 \
+  -e VLLM_NCCL_SO_PATH=/opt/libnccl-local-inference.so.2.30.4 \
   -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   -e SAFETENSORS_FAST_GPU=1 \
+  -e INSTANTTENSOR_BACKEND="$INSTANTTENSOR_BACKEND" \
   -e VLLM_USE_AOT_COMPILE=1 \
   -e VLLM_USE_MEGA_AOT_ARTIFACT=1 \
   -e VLLM_USE_BREAKABLE_CUDAGRAPH=0 \
@@ -89,6 +134,7 @@ docker run -d \
   -e VLLM_ENABLE_PCIE_ALLREDUCE=1 \
   -e VLLM_PCIE_ALLREDUCE_BACKEND=b12x \
   -e VLLM_PCIE_ONESHOT_ALLREDUCE_MAX_SIZE=64KB \
+  -e VLLM_B12X_MLA_SPEC_EXTEND_AS_DECODE=1 \
   -e B12X_DENSE_SPLITK_TURBO=1 \
   -e B12X_W4A16_TC_DECODE=1 \
   -e B12X_MOE_FORCE_A16=0 \
@@ -116,8 +162,8 @@ docker run -d \
   --kv-cache-dtype fp8 \
   --attention-backend "$ATTN_BACKEND" \
   --moe-backend b12x \
-  --load-format fastsafetensors \
-  -cc.pass_config.fuse_allreduce_rms=True \
+  --load-format "$LOAD_FORMAT" \
+  -cc.pass_config.fuse_allreduce_rms="$FUSE_ALLREDUCE_RMS_ARG" \
   --gpu-memory-utilization "$GPU_MEM" \
   --max-model-len "$MAX_MODEL_LEN" \
   --max-num-seqs "$MAX_NUM_SEQS" \
@@ -133,4 +179,4 @@ docker run -d \
   --hf-overrides "{\"use_index_cache\":true,\"index_topk_pattern\":\"$TOPK_PATTERN\"}" \
   "${SPEC_ARGS[@]}"
 
-echo "$NAME $SERVED_MODEL MODE=$MODE DSpark=$DSPARK_TOKENS TP=$TP DCP=$DCP GPUS=$GPUS PORT=$PORT GRAPH=$GRAPH MAX_NUM_SEQS=$MAX_NUM_SEQS ATTN=$ATTN_BACKEND"
+echo "$NAME $SERVED_MODEL MODE=$MODE DSpark=$DSPARK_TOKENS TP=$TP DCP=$DCP GPUS=$GPUS PORT=$PORT GRAPH=$GRAPH MAX_NUM_SEQS=$MAX_NUM_SEQS ATTN=$ATTN_BACKEND TOPK_LEN=${#TOPK_PATTERN} FUSE_ALLREDUCE_RMS=$FUSE_ALLREDUCE_RMS_ARG LOAD_FORMAT=$LOAD_FORMAT INSTANTTENSOR_BACKEND=$INSTANTTENSOR_BACKEND IMAGE=$IMAGE CACHE=$CACHE"

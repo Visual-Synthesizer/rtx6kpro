@@ -1,4 +1,4 @@
-# GLM-5.2 v14 NVFP4 / Online MXFP8 Overlay
+# GLM-5.2 v14 NVFP4 / Online FP8-MXFP8 Overlay
 
 This page documents the July 2026 GLM-5.2 serving recipe and benchmark sweep for
 RTX 6000 Pro Blackwell. The baseline checkpoint is Luke Alonso's NVFP4 model.
@@ -16,13 +16,13 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706
+voipmonitor/vllm:glm52-v14-online-fp8-mxfp8-v2-vllm02f5b41-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706
 ```
 
 Docker Hub manifest digest:
 
 ```text
-sha256:c591aaf6ff4384dae2f3494d72d5e5f840d5d5e40737a533a0991c6bad54e535
+sha256:2093689308a10464e2ce52ee265af04153c7a164c94bb6dacca14919cc9f322c
 ```
 
 Build script:
@@ -35,8 +35,10 @@ Pinned source stack:
 
 | Component | Ref |
 |---|---|
-| vLLM base | `local-inference-lab/vllm dev/eldritch-enlightenment @ c382f1d28d5be2f867c216609408bdb424d6049a` |
-| fp8.py bridge patch | `d00593416aeb3925553ccd589d91df7075d618f6` |
+| vLLM | `local-inference-lab/vllm codex/modelopt-online-fp8-overlay-20260706 @ 02f5b41befc6da0db8ad4d79aa02bab1156de7b2` |
+| vLLM upstream base | `dev/eldritch-enlightenment @ c382f1d28d5be2f867c216609408bdb424d6049a` |
+| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay` |
+| Docker build repo | `local-inference-lab/blackwell-llm-docker main @ d25e34953b76e201676c29590be1b4d1079f56b0` |
 | B12X | `local-inference-lab/b12x master @ e44cb77777a075790ebe9f7aa9f225d073aea109` |
 | InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | NCCL runtime | unified `/opt/libnccl.so.2.30.4` |
@@ -146,7 +148,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:glm52-v14-online-fp8-mxfp8-v2-vllm02f5b41-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -165,6 +167,7 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
       GPUS: ${GPUS:-0,1,2,3,4,5,6,7}
       MODEL: ${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}
+      SERVED_MODEL_NAME: ${SERVED_MODEL_NAME:-GLM-5.2-NVFP4}
       PORT: ${PORT:-8000}
       TP: ${TP:-8}
       DCP: ${DCP:-1}
@@ -172,11 +175,22 @@ services:
       MTP: ${MTP:-0}
       MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
       GRAPH: ${GRAPH:-}
+      MAX_MODEL_LEN: ${MAX_MODEL_LEN:-131072}
+      MAX_BATCHED_TOKENS: ${MAX_BATCHED_TOKENS:-8192}
+      GPU_MEMORY_UTILIZATION: ${GPU_MEMORY_UTILIZATION:-0.90}
       MOE_MODE: ${MOE_MODE:-a4}
+      MOE_BACKEND: ${MOE_BACKEND:-b12x}
+      LINEAR_BACKEND: ${LINEAR_BACKEND:-auto}
       ONLINE_MXFP8: ${ONLINE_MXFP8:-0}
+      ONLINE_FP8: ${ONLINE_FP8:-0}
+      ONLINE_FP8_MXFP4: ${ONLINE_FP8_MXFP4:-0}
+      ONLINE_QUANT: ${ONLINE_QUANT:-}
       F8_DMA: ${F8_DMA:-0}
       LOAD_FORMAT: ${LOAD_FORMAT:-instanttensor}
       INSTANTTENSOR_BACKEND: ${INSTANTTENSOR_BACKEND:-BUFFERED}
+      QUANTIZATION: ${QUANTIZATION:-modelopt_fp4}
+      QUANTIZATION_CONFIG_JSON: ${QUANTIZATION_CONFIG_JSON:-}
+      GLM52_INDEX_TOPK_PATTERN: ${GLM52_INDEX_TOPK_PATTERN:-FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS}
     volumes:
       - /root/models:/root/models:ro
       - /root/.cache/huggingface:/root/.cache/huggingface:rw
@@ -211,8 +225,16 @@ User-facing knobs:
 | `MTP` | `0` | Native MTP speculative token count; `0` disables MTP. |
 | `MAX_NUM_SEQS` | `64` | vLLM concurrency cap. |
 | `GRAPH` | `4 * MAX_NUM_SEQS` | CUDA graph capture cap; normally leave unset. |
+| `MAX_BATCHED_TOKENS` | `8192` | Chunked-prefill scheduler token cap; lower values can free some KV memory. |
+| `MAX_MODEL_LEN` | `131072` | Maximum model context length. |
+| `GPU_MEMORY_UTILIZATION` | `0.90` | vLLM memory budget fraction. |
 | `MOE_MODE` | `a4` | `a4` = checkpoint-native NVFP4/A4, `a16` = force W4A16, `force-a8-experimental` = explicit A8 force for non-NVFP4 experiments. |
-| `ONLINE_MXFP8` | `0` | `1` adds `--quantization-config '{"linear":{"weight":"mxfp8"}}'`. |
+| `ONLINE_QUANT` | `none` | `mxfp8` converts eligible BF16 dense linears to MXFP8; `fp8` converts eligible BF16 dense linears to FP8 block format while leaving checkpoint MXFP4 experts intact. |
+| `ONLINE_MXFP8` | `0` | Backward-compatible alias for `ONLINE_QUANT=mxfp8`. |
+| `ONLINE_FP8` | `0` | Backward-compatible alias for `ONLINE_QUANT=fp8`. |
+| `ONLINE_FP8_MXFP4` | `0` | Legacy alias for `ONLINE_QUANT=fp8`. |
+| `QUANTIZATION` | `modelopt_fp4` | Use `mxfp4` for the AMD MXFP4 experts checkpoint. |
+| `QUANTIZATION_CONFIG_JSON` | generated | Optional advanced override for the online quantization JSON. |
 | `F8_DMA` | `0` | FP8 PCIe DMA allreduce mode: `0`, `ag`, or `ring`. |
 | `LOAD_FORMAT` | `instanttensor` | Set `fastsafetensors` to disable InstantTensor for comparison. |
 | `INSTANTTENSOR_BACKEND` | `BUFFERED` | Buffered mode uses Linux page cache on hot reloads. |
@@ -247,24 +269,93 @@ export B12X_W4A16_TC_DECODE=1
 
 `A8` force is not the comparison axis for this NVFP4 checkpoint.
 
-## Online MXFP8 Conversion
+## Online FP8/MXFP8 Conversion
 
-The online variant uses the overlay image and passes this vLLM quantization
-config:
+The online variants use the overlay image and pass one of these vLLM
+quantization configs:
+
+```bash
+ONLINE_QUANT=mxfp8
+```
 
 ```bash
 --quantization modelopt_fp4 \
 --quantization-config '{"linear":{"weight":"mxfp8"}}'
 ```
 
-In this PR overlay, `linear.weight=mxfp8` means: when a module is treated as a
-linear layer and has a BF16 weight that is eligible for online requant, load that
-weight as MXFP8 instead of leaving it BF16. Layers that the overlay keeps BF16,
-including the sparse indexer projection path, are not forced to MXFP8 by the
-generic `linear` rule.
+```bash
+ONLINE_QUANT=fp8
+```
+
+```bash
+--quantization modelopt_fp4 \
+--quantization-config '{"linear":{"weight":"fp8_per_block_static"},"ignore":["lm_head","model.layers.78.eh_proj","re:.*\\.mlp\\.gate$","re:.*\\.self_attn\\.indexer\\.weights_proj$","re:.*\\.self_attn\\.indexers_proj$"]}'
+```
+
+In this overlay, `linear.weight=mxfp8` or `linear.weight=fp8_per_block_static`
+means: when a module is treated as a linear layer and has a BF16 weight that is
+eligible for online requant, load that weight in the selected online format
+instead of leaving it BF16. Existing checkpoint MXFP4 experts stay MXFP4.
+Layers that the overlay keeps BF16, including the sparse indexer projection path,
+are not forced by the generic `linear` rule.
 
 The baseline variant does not pass `--quantization-config`; it loads the Luke
 checkpoint as `--quantization modelopt_fp4`.
+
+## BF16 MXFP4 Experts Checkpoint
+
+The same final image can also serve the AMD MXFP4 experts checkpoint:
+
+```text
+festr2/GLM-5.2-BF16-AMDMXFP4experts
+/root/models/GLM-5.2-BF16-AMDMXFP4experts
+```
+
+This checkpoint keeps MXFP4 experts and can convert eligible BF16 dense linears
+online at load time:
+
+```bash
+MODEL=/root/models/GLM-5.2-BF16-AMDMXFP4experts \
+SERVED_MODEL_NAME=GLM-5.2-BF16-AMDMXFP4experts-online \
+QUANTIZATION=mxfp4 \
+MOE_MODE=force-a8-experimental \
+ONLINE_QUANT=mxfp8   # or fp8
+```
+
+The measured prefill speed is effectively the same for online MXFP8 and online
+FP8 dense conversion. `f8=ring` is what changes prefill throughput materially.
+
+| Online quant | f8 DMA | Prefill 30k | Prefill 64k | Prefill 120k |
+|---|---|---:|---:|---:|
+| `mxfp8` | `0` | 6,706 | 6,396 | 6,058 |
+| `fp8` | `0` | 6,638 | 6,350 | 5,984 |
+| `mxfp8` | `ring` | 8,303 | 7,841 | 7,284 |
+| `fp8` | `ring` | 8,304 | 7,837 | 7,271 |
+
+Decode cc1/coding probes show the FP8 dense format as the faster decode choice:
+the FP8-MXFP4 decode probe measured 101.9 aggregate tok/s and 102.5 coding
+peak, while the comparable MXFP8-MXFP4 probe measured 97.2 aggregate tok/s and
+97.6 coding peak. In other words, FP8 dense is about +5 tok/s on this A8 MXFP4
+experts path, while long prefill remains parity within noise.
+
+KV cache probe for the same MXFP4 checkpoint, online MXFP8 dense conversion,
+DCP1, MTP3, `MOE_MODE=force-a8-experimental`, `MAX_MODEL_LEN=262144`,
+`F8_DMA=0`, and `GPU_MEMORY_UTILIZATION=0.98`:
+
+| TP | Max seqs | Graph | Max batched tokens | Model load | Available KV memory | GPU KV cache size | Max concurrency at 262,144 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 8 | 64 | 256 | 8192 | 50.33 GiB | 40.63 GiB | 785,920 | 3.00x |
+| 8 | 32 | 128 | 4092 | 50.21 GiB | 41.60 GiB | 816,064 | 3.11x |
+
+Lowering `MAX_NUM_SEQS` from 64 to 32 and `MAX_BATCHED_TOKENS` from 8192 to
+4092 freed enough scheduler/cudagraph budget to add about 30k KV tokens on TP8.
+`GPU_MEMORY_UTILIZATION=0.99` failed the startup free-memory check on this node.
+
+The same A8/MXFP4 setup is not currently valid at `TP=6`: B12X W4A8-MX rejects
+the TP6 shard shape during weight preparation with
+`W4A8-MX QMMA layout requires hidden_size % 256 == 0 and intermediate_size % 128 == 0`.
+So there is no TP6 KV-cache number for this exact A8 MXFP4 configuration without
+changing the MoE mode or kernel constraints.
 
 ## f8 DMA Mode
 

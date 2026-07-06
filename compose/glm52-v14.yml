@@ -2,7 +2,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:glm52-v14-online-fp8-mxfp8-v2-vllm02f5b41-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -33,7 +33,12 @@ services:
       MAX_BATCHED_TOKENS: ${MAX_BATCHED_TOKENS:-8192}
       GPU_MEMORY_UTILIZATION: ${GPU_MEMORY_UTILIZATION:-0.90}
       MOE_MODE: ${MOE_MODE:-a4}
+      MOE_BACKEND: ${MOE_BACKEND:-b12x}
+      LINEAR_BACKEND: ${LINEAR_BACKEND:-auto}
       ONLINE_MXFP8: ${ONLINE_MXFP8:-0}
+      ONLINE_FP8: ${ONLINE_FP8:-0}
+      ONLINE_FP8_MXFP4: ${ONLINE_FP8_MXFP4:-0}
+      ONLINE_QUANT: ${ONLINE_QUANT:-}
       F8_DMA: ${F8_DMA:-0}
       LOAD_FORMAT: ${LOAD_FORMAT:-instanttensor}
       INSTANTTENSOR_BACKEND: ${INSTANTTENSOR_BACKEND:-BUFFERED}
