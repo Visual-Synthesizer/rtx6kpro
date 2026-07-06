@@ -977,6 +977,70 @@ def collect_full_keys(filename):
 
 decode_keys = collect_full_keys("decode_full.json")
 prefill_keys = collect_full_keys("prefill_full.json")
+
+def prefill_for(variant, force, mtp, dcp, dma):
+    item = next((x for x in prefill_keys
+                 if x[0] == variant and x[1] == force and x[2] == mtp
+                 and x[3] == dcp and x[4] == dma), None)
+    if not item:
+        return {}
+    return prefill_values(item[5])
+
+def prefill_8k_64k(variant, force, mtp, dcp, dma):
+    pref = prefill_for(variant, force, mtp, dcp, dma)
+    return (
+        pref.get("8192") or pref.get("8000") or pref.get("8k"),
+        pref.get("65536") or pref.get("64000") or pref.get("64k"),
+    )
+
+def fmt_pair(values):
+    a, b = values
+    return f"{fmt(a)} / {fmt(b)}"
+
+def pct_delta(new, old):
+    if not isinstance(new, (int, float)) or not isinstance(old, (int, float)) or old == 0:
+        return "TODO"
+    return f"{((new - old) / old * 100):+.1f}%"
+
+if prefill_keys:
+    lines.append("\n## Standalone Prefill Comparison\n")
+    lines.append("Cells are `8k / 64k` tok/s. Percent deltas use the 64k value because that is the more useful long-prefill comparison point. The per-variant raw tables are kept below for exact rows.\n")
+    lines.append("### f8=0 comparison\n")
+    lines.append("| MTP | DCP | base A4 | online A4 | online vs base | base A16 | online A16 | online vs base |")
+    lines.append("|---:|---:|---:|---:|---:|---:|---:|---:|")
+    for mtp in ("0", "3"):
+        for dcp in ("1", "2", "4", "8"):
+            base_a4 = prefill_8k_64k("base", "a4", mtp, dcp, "0")
+            online_a4 = prefill_8k_64k("online", "a4", mtp, dcp, "0")
+            base_a16 = prefill_8k_64k("base", "a16", mtp, dcp, "0")
+            online_a16 = prefill_8k_64k("online", "a16", mtp, dcp, "0")
+            if not any(isinstance(x[1], (int, float)) for x in (base_a4, online_a4, base_a16, online_a16)):
+                continue
+            lines.append(
+                f"| {mtp} | {dcp} | {fmt_pair(base_a4)} | {fmt_pair(online_a4)} | "
+                f"{pct_delta(online_a4[1], base_a4[1])} | {fmt_pair(base_a16)} | "
+                f"{fmt_pair(online_a16)} | {pct_delta(online_a16[1], base_a16[1])} |"
+            )
+
+    lines.append("\n### A4 MTP3 FP8 DMA comparison\n")
+    lines.append("This is the only full-sweep prefill slice where `ag` and `ring` were tested. The percentage in the online columns is the 64k gain versus the same online `f8=0` DCP row.\n")
+    lines.append("| DCP | base f8=0 | base ag | base ring | online f8=0 | online ag | online ring |")
+    lines.append("|---:|---:|---:|---:|---:|---:|---:|")
+    for dcp in ("1", "2", "4", "8"):
+        base_0 = prefill_8k_64k("base", "a4", "3", dcp, "0")
+        base_ag = prefill_8k_64k("base", "a4", "3", dcp, "ag")
+        base_ring = prefill_8k_64k("base", "a4", "3", dcp, "ring")
+        online_0 = prefill_8k_64k("online", "a4", "3", dcp, "0")
+        online_ag = prefill_8k_64k("online", "a4", "3", dcp, "ag")
+        online_ring = prefill_8k_64k("online", "a4", "3", dcp, "ring")
+        if not any(isinstance(x[1], (int, float)) for x in (base_0, base_ag, base_ring, online_0, online_ag, online_ring)):
+            continue
+        lines.append(
+            f"| {dcp} | {fmt_pair(base_0)} | {fmt_pair(base_ag)} | {fmt_pair(base_ring)} | "
+            f"{fmt_pair(online_0)} | {fmt_pair(online_ag)} ({pct_delta(online_ag[1], online_0[1])}) | "
+            f"{fmt_pair(online_ring)} ({pct_delta(online_ring[1], online_0[1])}) |"
+        )
+
 for variant in ("base", "online"):
     for force in ("a4", "a16"):
         for dma in ("0",):

@@ -390,6 +390,36 @@ Standalone prefill stores only contexts that fit under the 131,072-token model
 length; the requested 128k row is skipped by `llm_decode_bench` for this model.
 Values are tok/s for 8k and 64k contexts.
 
+The comparison tables below show cells as `8k / 64k` tok/s. Percent deltas use
+the 64k value because that is the more useful long-prefill comparison point.
+The smaller per-variant tables are kept below for exact raw rows.
+
+### f8=0 comparison
+
+| MTP | DCP | base A4 | online A4 | online vs base | base A16 | online A16 | online vs base |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 1 | 6,557 / 6,257 | 6,681 / 6,351 | +1.5% | 6,140 / 5,849 | 6,239 / 5,941 | +1.6% |
+| 0 | 2 | 4,597 / 4,675 | 4,599 / 4,724 | +1.0% | 4,369 / 4,439 | 4,360 / 4,477 | +0.9% |
+| 0 | 4 | 3,402 / 3,457 | 3,403 / 3,492 | +1.0% | 3,279 / 3,335 | 3,280 / 3,355 | +0.6% |
+| 0 | 8 | 2,175 / 2,195 | 2,173 / 2,209 | +0.6% | 2,121 / 2,140 | 2,121 / 2,156 | +0.7% |
+| 3 | 1 | 6,441 / 6,136 | 6,546 / 6,222 | +1.4% | 6,016 / 5,740 | 6,109 / 5,833 | +1.6% |
+| 3 | 2 | 4,487 / 4,570 | 4,492 / 4,618 | +1.1% | 4,262 / 4,335 | 4,261 / 4,392 | +1.3% |
+| 3 | 4 | 3,328 / 3,392 | 3,325 / 3,422 | +0.9% | 3,211 / 3,267 | 3,209 / 3,294 | +0.8% |
+| 3 | 8 | 2,133 / 2,156 | 2,132 / 2,166 | +0.5% | 2,079 / 2,100 | 2,081 / 2,114 | +0.7% |
+
+### A4 MTP3 FP8 DMA comparison
+
+This is the only full-sweep prefill slice where `ag` and `ring` were tested.
+The percentage in the online columns is the 64k gain versus the same online
+`f8=0` DCP row.
+
+| DCP | base f8=0 | base ag | base ring | online f8=0 | online ag | online ring |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 6,441 / 6,136 | 7,130 / 6,738 | 7,912 / 7,435 | 6,546 / 6,222 | 7,235 / 6,843 (+10.0%) | 8,035 / 7,564 (+21.6%) |
+| 2 | 4,487 / 4,570 | 4,804 / 4,894 | 5,147 / 5,272 | 4,492 / 4,618 | 4,806 / 4,963 (+7.5%) | 5,144 / 5,328 (+15.4%) |
+| 4 | 3,328 / 3,392 | 3,501 / 3,571 | 3,682 / 3,757 | 3,325 / 3,422 | 3,505 / 3,602 (+5.3%) | 3,689 / 3,791 (+10.8%) |
+| 8 | 2,133 / 2,156 | 2,203 / 2,226 | 2,272 / 2,300 | 2,132 / 2,166 | 2,206 / 2,240 (+3.4%) | 2,275 / 2,314 (+6.8%) |
+
 ### base A4 f8=0
 
 | MTP | DCP | 8k | 64k |
