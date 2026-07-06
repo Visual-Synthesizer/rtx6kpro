@@ -16,13 +16,13 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706
+voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706
 ```
 
 Docker Hub manifest digest:
 
 ```text
-sha256:2093689308a10464e2ce52ee265af04153c7a164c94bb6dacca14919cc9f322c
+sha256:0d073c44725fd9d9f9823af405d5f78fa2d2e8d6da7a1108fa7242361298ef56
 ```
 
 Build script:
@@ -35,9 +35,9 @@ Pinned source stack:
 
 | Component | Ref |
 |---|---|
-| vLLM | `local-inference-lab/vllm codex/modelopt-online-fp8-overlay-20260706 @ 02f5b41befc6da0db8ad4d79aa02bab1156de7b2` |
+| vLLM | `local-inference-lab/vllm fable/dcp-a2a-hybrid-20260707 @ 884fe48c429f093544372e8e68a4655a47011e58` |
 | vLLM upstream base | `dev/eldritch-enlightenment @ c382f1d28d5be2f867c216609408bdb424d6049a` |
-| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay` |
+| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay`, `#78 DCP A2A hybrid token cap` |
 | Docker build repo | `local-inference-lab/blackwell-llm-docker main @ d25e34953b76e201676c29590be1b4d1079f56b0` |
 | B12X | `local-inference-lab/b12x master @ e44cb77777a075790ebe9f7aa9f225d073aea109` |
 | InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
@@ -62,6 +62,18 @@ The final image defaults InstantTensor to buffered I/O:
 --load-format instanttensor
 INSTANTTENSOR_BACKEND=BUFFERED
 ```
+
+For `DCP>1`, the helper defaults to the hybrid DCP policy from
+[`local-inference-lab/vllm#78`](https://github.com/local-inference-lab/vllm/pull/78):
+
+```bash
+DCP_BACKEND=a2a
+DCP_A2A_MAX_TOKENS=64
+DCP_A2A_LARGE_BACKEND=ag_rs
+```
+
+This keeps the low-latency B12X A2A path for small decode steps and routes
+larger prefill/extend batches through AG+RS. `DCP=1` still has backend `n/a`.
 
 InstantTensor's upstream default for regular disk files is direct I/O
 (`URING,AIO`), which is good for cold one-time loads but bypasses the Linux page
@@ -113,6 +125,7 @@ Result roots:
 | GPUs per instance | `8` | `8` |
 | Paired instances | yes, `0-7` and `8-15` | yes, `0-7` and `8-15` |
 | DCP | `1` | `1,2,4,8` |
+| DCP backend | `n/a` for DCP1 | hybrid: `a2a` up to 64 tokens, `ag_rs` above |
 | MTP | `0` | `0,3` |
 | Max num seqs | `64` | `32` |
 | CUDA graph capture | `256` | `128` |
@@ -148,7 +161,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -172,6 +185,8 @@ services:
       TP: ${TP:-8}
       DCP: ${DCP:-1}
       DCP_BACKEND: ${DCP_BACKEND:-a2a}
+      DCP_A2A_MAX_TOKENS: ${DCP_A2A_MAX_TOKENS:-64}
+      DCP_A2A_LARGE_BACKEND: ${DCP_A2A_LARGE_BACKEND:-ag_rs}
       MTP: ${MTP:-0}
       MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
       GRAPH: ${GRAPH:-}
@@ -222,6 +237,9 @@ User-facing knobs:
 | `GPUS` | `0,1,2,3,4,5,6,7` | GPU set for one 8-GPU instance. |
 | `PORT` | `8000` | OpenAI API port. |
 | `DCP` | `1` | Decode context parallel size. |
+| `DCP_BACKEND` | `a2a` | DCP communication mode for `DCP>1`; paired with the token cap below for hybrid dispatch. |
+| `DCP_A2A_MAX_TOKENS` | `64` | Hybrid cutoff: B12X one-shot A2A for batches up to this many tokens, large-backend above it. `0` disables the cap and restores pure A2A. |
+| `DCP_A2A_LARGE_BACKEND` | `ag_rs` | Backend for batches above the cap; `ag_rs` is the prefill-preserving default. |
 | `MTP` | `0` | Native MTP speculative token count; `0` disables MTP. |
 | `MAX_NUM_SEQS` | `64` | vLLM concurrency cap. |
 | `GRAPH` | `4 * MAX_NUM_SEQS` | CUDA graph capture cap; normally leave unset. |

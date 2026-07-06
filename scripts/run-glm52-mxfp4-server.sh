@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}
+IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}
 MODEL=${MODEL:-/root/models/GLM-5.2-FP8-MXFP4experts}
 DRAFT_MODEL=${DRAFT_MODEL:-/root/.cache/huggingface/hub/models--RedHatAI--GLM-5.2-speculator.dspark/snapshots/7598747fe1f35995babeae5c730c8a8a4d9c8492}
 
@@ -10,6 +10,9 @@ PORT=${PORT:-8000}
 GPUS=${GPUS:-0,1,2,3,4,5,6,7}
 TP=${TP:-8}
 DCP=${DCP:-1}
+DCP_BACKEND=${DCP_BACKEND:-a2a}
+DCP_A2A_MAX_TOKENS=${DCP_A2A_MAX_TOKENS:-64}
+DCP_A2A_LARGE_BACKEND=${DCP_A2A_LARGE_BACKEND:-ag_rs}
 MODE=${MODE:-baseline} # baseline | dspark
 DSPARK_TOKENS=${DSPARK_TOKENS:-5}
 MAX_NUM_SEQS=${MAX_NUM_SEQS:-64}
@@ -42,6 +45,19 @@ TOPK_PATTERN=${GLM52_INDEX_TOPK_PATTERN:-$DEFAULT_TOPK_PATTERN}
 
 if (( ${#TOPK_PATTERN} != 78 )) || [[ "$TOPK_PATTERN" =~ [^FS] ]]; then
   echo "Invalid GLM52_INDEX_TOPK_PATTERN: length=${#TOPK_PATTERN}, expected 78 F/S chars" >&2
+  exit 2
+fi
+
+case "$DCP_A2A_LARGE_BACKEND" in
+  ag_rs|a2a) ;;
+  *)
+    echo "Invalid DCP_A2A_LARGE_BACKEND=$DCP_A2A_LARGE_BACKEND; use ag_rs or a2a" >&2
+    exit 2
+    ;;
+esac
+
+if [[ ! "$DCP_A2A_MAX_TOKENS" =~ ^[0-9]+$ ]]; then
+  echo "Invalid DCP_A2A_MAX_TOKENS=$DCP_A2A_MAX_TOKENS; use an integer" >&2
   exit 2
 fi
 
@@ -83,6 +99,11 @@ case "$MODE" in
     exit 2
     ;;
 esac
+
+DCP_ARGS=(--decode-context-parallel-size "$DCP")
+if [[ "$DCP" != "1" ]]; then
+  DCP_ARGS+=(--dcp-comm-backend "$DCP_BACKEND" --dcp-kv-cache-interleave-size 1)
+fi
 
 test -f "$MODEL/config.json"
 mkdir -p \
@@ -131,6 +152,9 @@ docker run -d \
   -e VLLM_USE_B12X_FP8_GEMM=1 \
   -e VLLM_USE_B12X_MOE=1 \
   -e VLLM_USE_B12X_SPARSE_INDEXER=1 \
+  -e VLLM_USE_B12X_DCP_A2A=1 \
+  -e VLLM_DCP_A2A_MAX_TOKENS="$DCP_A2A_MAX_TOKENS" \
+  -e VLLM_DCP_A2A_LARGE_BACKEND="$DCP_A2A_LARGE_BACKEND" \
   -e VLLM_ENABLE_PCIE_ALLREDUCE=1 \
   -e VLLM_PCIE_ALLREDUCE_BACKEND=b12x \
   -e VLLM_PCIE_ONESHOT_ALLREDUCE_MAX_SIZE=64KB \
@@ -158,7 +182,7 @@ docker run -d \
   --port "$PORT" \
   --trust-remote-code \
   --tensor-parallel-size "$TP" \
-  --decode-context-parallel-size "$DCP" \
+  "${DCP_ARGS[@]}" \
   --kv-cache-dtype fp8 \
   --attention-backend "$ATTN_BACKEND" \
   --moe-backend b12x \
@@ -179,4 +203,4 @@ docker run -d \
   --hf-overrides "{\"use_index_cache\":true,\"index_topk_pattern\":\"$TOPK_PATTERN\"}" \
   "${SPEC_ARGS[@]}"
 
-echo "$NAME $SERVED_MODEL MODE=$MODE DSpark=$DSPARK_TOKENS TP=$TP DCP=$DCP GPUS=$GPUS PORT=$PORT GRAPH=$GRAPH MAX_NUM_SEQS=$MAX_NUM_SEQS ATTN=$ATTN_BACKEND TOPK_LEN=${#TOPK_PATTERN} FUSE_ALLREDUCE_RMS=$FUSE_ALLREDUCE_RMS_ARG LOAD_FORMAT=$LOAD_FORMAT INSTANTTENSOR_BACKEND=$INSTANTTENSOR_BACKEND IMAGE=$IMAGE CACHE=$CACHE"
+echo "$NAME $SERVED_MODEL MODE=$MODE DSpark=$DSPARK_TOKENS TP=$TP DCP=$DCP DCP_BACKEND=$DCP_BACKEND DCP_A2A_MAX_TOKENS=$DCP_A2A_MAX_TOKENS DCP_A2A_LARGE_BACKEND=$DCP_A2A_LARGE_BACKEND GPUS=$GPUS PORT=$PORT GRAPH=$GRAPH MAX_NUM_SEQS=$MAX_NUM_SEQS ATTN=$ATTN_BACKEND TOPK_LEN=${#TOPK_PATTERN} FUSE_ALLREDUCE_RMS=$FUSE_ALLREDUCE_RMS_ARG LOAD_FORMAT=$LOAD_FORMAT INSTANTTENSOR_BACKEND=$INSTANTTENSOR_BACKEND IMAGE=$IMAGE CACHE=$CACHE"

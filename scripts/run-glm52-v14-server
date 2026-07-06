@@ -13,6 +13,8 @@ GPUS="${GPUS:-0,1,2,3,4,5,6,7}"
 TP="${TP:-8}"
 DCP="${DCP:-1}"
 DCP_BACKEND="${DCP_BACKEND:-a2a}"
+DCP_A2A_MAX_TOKENS="${DCP_A2A_MAX_TOKENS:-64}"
+DCP_A2A_LARGE_BACKEND="${DCP_A2A_LARGE_BACKEND:-ag_rs}"
 MTP="${MTP:-0}"
 MAX_NUM_SEQS="${MAX_NUM_SEQS:-64}"
 GRAPH="${GRAPH:-$((MAX_NUM_SEQS * 4))}"
@@ -56,6 +58,11 @@ case "${F8_DMA}" in
   *) die "F8_DMA must be 0, ag, or ring" ;;
 esac
 
+case "${DCP_A2A_LARGE_BACKEND}" in
+  ag_rs|a2a) ;;
+  *) die "DCP_A2A_LARGE_BACKEND must be ag_rs or a2a" ;;
+esac
+
 case "${MOE_BACKEND}" in
   auto|triton|deep_gemm|deep_gemm_mega_moe|b12x|cutlass|flashinfer_trtllm|flashinfer_cutlass|flashinfer_cutedsl|flashinfer_b12x|marlin|humming|triton_unfused|aiter|flydsl|emulation) ;;
   *) die "MOE_BACKEND is not a supported vLLM MoE backend: ${MOE_BACKEND}" ;;
@@ -70,6 +77,7 @@ esac
 [[ "${ONLINE_FP8}" =~ ^(0|1)$ ]] || die "ONLINE_FP8 must be 0 or 1"
 [[ "${ONLINE_FP8_MXFP4}" =~ ^(0|1)$ ]] || die "ONLINE_FP8_MXFP4 must be 0 or 1"
 [[ "${MTP}" =~ ^[0-9]+$ ]] || die "MTP must be an integer token count"
+[[ "${DCP_A2A_MAX_TOKENS}" =~ ^[0-9]+$ ]] || die "DCP_A2A_MAX_TOKENS must be an integer token count"
 [[ "${MAX_NUM_SEQS}" =~ ^[0-9]+$ ]] || die "MAX_NUM_SEQS must be an integer"
 [[ "${GRAPH}" =~ ^[0-9]+$ ]] || die "GRAPH must be an integer"
 [[ "${#GLM52_INDEX_TOPK_PATTERN}" -eq 78 ]] || die "GLM52_INDEX_TOPK_PATTERN must be exactly 78 characters, got ${#GLM52_INDEX_TOPK_PATTERN}"
@@ -145,6 +153,8 @@ else
 fi
 export VLLM_USE_B12X_SPARSE_INDEXER=1
 export VLLM_USE_B12X_DCP_A2A=1
+export VLLM_DCP_A2A_MAX_TOKENS="${DCP_A2A_MAX_TOKENS}"
+export VLLM_DCP_A2A_LARGE_BACKEND="${DCP_A2A_LARGE_BACKEND}"
 export VLLM_USE_V2_MODEL_RUNNER=1
 export VLLM_ENABLE_PCIE_ALLREDUCE=1
 export VLLM_PCIE_ALLREDUCE_BACKEND=b12x

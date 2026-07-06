@@ -1,14 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}"
+GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}"
 BASE_IMAGE="${BASE_IMAGE:-${GLM52_V14_IMAGE}}"
 ONLINE_IMAGE="${ONLINE_IMAGE:-${GLM52_V14_IMAGE}}"
+DCP_BACKEND="${DCP_BACKEND:-a2a}"
+DCP_A2A_MAX_TOKENS="${DCP_A2A_MAX_TOKENS:-64}"
+DCP_A2A_LARGE_BACKEND="${DCP_A2A_LARGE_BACKEND:-ag_rs}"
 MODEL="${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}"
 QUANTIZATION="${QUANTIZATION:-modelopt_fp4}"
 if [[ -z "${QUANTIZATION_CONFIG_JSON+x}" ]]; then
   QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}'
 fi
+case "${DCP_BACKEND}" in
+  ag_rs|a2a) ;;
+  *) echo "DCP_BACKEND must be ag_rs or a2a" >&2; exit 2 ;;
+esac
+case "${DCP_A2A_LARGE_BACKEND}" in
+  ag_rs|a2a) ;;
+  *) echo "DCP_A2A_LARGE_BACKEND must be ag_rs or a2a" >&2; exit 2 ;;
+esac
+[[ "${DCP_A2A_MAX_TOKENS}" =~ ^[0-9]+$ ]] || {
+  echo "DCP_A2A_MAX_TOKENS must be an integer" >&2
+  exit 2
+}
 
 PREFILL_REF="${PREFILL_REF:-/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618}"
 PATTERN="${PATTERN:-FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS}"
@@ -136,6 +151,12 @@ VLLM_USE_B12X_FP8_GEMM=1
 VLLM_USE_B12X_MOE=1
 -e
 VLLM_USE_B12X_SPARSE_INDEXER=1
+-e
+VLLM_USE_B12X_DCP_A2A=1
+-e
+VLLM_DCP_A2A_MAX_TOKENS=${DCP_A2A_MAX_TOKENS}
+-e
+VLLM_DCP_A2A_LARGE_BACKEND=${DCP_A2A_LARGE_BACKEND}
 -e
 VLLM_USE_V2_MODEL_RUNNER=1
 -e
@@ -298,7 +319,7 @@ start_server() {
       --trust-remote-code \
       --tensor-parallel-size 8 \
       --decode-context-parallel-size "${dcp}" \
-      --dcp-comm-backend ag_rs \
+      --dcp-comm-backend "${DCP_BACKEND}" \
       --dcp-kv-cache-interleave-size 1 \
       --kv-cache-dtype fp8 \
       --attention-backend B12X_MLA_SPARSE \

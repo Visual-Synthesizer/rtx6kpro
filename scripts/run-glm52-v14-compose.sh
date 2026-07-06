@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE_FILE="${COMPOSE_FILE:-${ROOT_DIR}/compose/glm52-v14.yml}"
 
-IMAGE="${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}"
+IMAGE="${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}"
 MODEL="${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}"
 NAME="${NAME:-glm52-v14}"
 SERVED_MODEL_NAME="${SERVED_MODEL_NAME:-GLM-5.2-NVFP4}"
@@ -13,6 +13,8 @@ GPUS="${GPUS:-0,1,2,3,4,5,6,7}"
 TP="${TP:-8}"
 DCP="${DCP:-1}"
 DCP_BACKEND="${DCP_BACKEND:-a2a}"
+DCP_A2A_MAX_TOKENS="${DCP_A2A_MAX_TOKENS:-64}"
+DCP_A2A_LARGE_BACKEND="${DCP_A2A_LARGE_BACKEND:-ag_rs}"
 MTP="${MTP:-0}"
 MAX_NUM_SEQS="${MAX_NUM_SEQS:-64}"
 GRAPH="${GRAPH:-$((MAX_NUM_SEQS * 4))}"
@@ -69,6 +71,11 @@ case "${F8_DMA}" in
   *) die "F8_DMA must be 0, ag, or ring" ;;
 esac
 
+case "${DCP_A2A_LARGE_BACKEND}" in
+  ag_rs|a2a) ;;
+  *) die "DCP_A2A_LARGE_BACKEND must be ag_rs or a2a" ;;
+esac
+
 case "${MOE_BACKEND}" in
   auto|triton|deep_gemm|deep_gemm_mega_moe|b12x|cutlass|flashinfer_trtllm|flashinfer_cutlass|flashinfer_cutedsl|flashinfer_b12x|marlin|humming|triton_unfused|aiter|flydsl|emulation) ;;
   *) die "MOE_BACKEND is not a supported vLLM MoE backend: ${MOE_BACKEND}" ;;
@@ -83,6 +90,7 @@ esac
 [[ "${ONLINE_FP8}" =~ ^(0|1)$ ]] || die "ONLINE_FP8 must be 0 or 1"
 [[ "${ONLINE_FP8_MXFP4}" =~ ^(0|1)$ ]] || die "ONLINE_FP8_MXFP4 must be 0 or 1"
 [[ "${MTP}" =~ ^[0-9]+$ ]] || die "MTP must be an integer token count"
+[[ "${DCP_A2A_MAX_TOKENS}" =~ ^[0-9]+$ ]] || die "DCP_A2A_MAX_TOKENS must be an integer token count"
 [[ "${MAX_NUM_SEQS}" =~ ^[0-9]+$ ]] || die "MAX_NUM_SEQS must be an integer"
 [[ "${GRAPH}" =~ ^[0-9]+$ ]] || die "GRAPH must be an integer"
 [[ "${#GLM52_INDEX_TOPK_PATTERN}" -eq 78 ]] || die "GLM52_INDEX_TOPK_PATTERN must be exactly 78 characters, got ${#GLM52_INDEX_TOPK_PATTERN}"
@@ -103,6 +111,8 @@ PORT=${PORT}
 TP=${TP}
 DCP=${DCP}
 DCP_BACKEND=${DCP_BACKEND}
+DCP_A2A_MAX_TOKENS=${DCP_A2A_MAX_TOKENS}
+DCP_A2A_LARGE_BACKEND=${DCP_A2A_LARGE_BACKEND}
 MTP=${MTP}
 MAX_NUM_SEQS=${MAX_NUM_SEQS}
 GRAPH=${GRAPH}
@@ -158,6 +168,9 @@ port=${PORT}
 gpus=${GPUS}
 tp=${TP}
 dcp=${DCP}
+dcp_backend=${DCP_BACKEND}
+dcp_a2a_max_tokens=${DCP_A2A_MAX_TOKENS}
+dcp_a2a_large_backend=${DCP_A2A_LARGE_BACKEND}
 mtp=${MTP}
 moe_mode=${MOE_MODE}
 moe_backend=${MOE_BACKEND}

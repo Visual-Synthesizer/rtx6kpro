@@ -2,7 +2,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -26,6 +26,8 @@ services:
       TP: ${TP:-8}
       DCP: ${DCP:-1}
       DCP_BACKEND: ${DCP_BACKEND:-a2a}
+      DCP_A2A_MAX_TOKENS: ${DCP_A2A_MAX_TOKENS:-64}
+      DCP_A2A_LARGE_BACKEND: ${DCP_A2A_LARGE_BACKEND:-ag_rs}
       MTP: ${MTP:-0}
       MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
       GRAPH: ${GRAPH:-}
