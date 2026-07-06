@@ -2,8 +2,8 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE}
-    container_name: ${NAME}
+    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706}
+    container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
     privileged: true
@@ -19,14 +19,31 @@ services:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
-      CUDA_VISIBLE_DEVICES: ${GPUS}
+      GPUS: ${GPUS:-0,1,2,3,4,5,6,7}
+      MODEL: ${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}
+      SERVED_MODEL_NAME: ${SERVED_MODEL_NAME:-GLM-5.2-NVFP4}
+      PORT: ${PORT:-8000}
+      TP: ${TP:-8}
+      DCP: ${DCP:-1}
+      DCP_BACKEND: ${DCP_BACKEND:-a2a}
+      MTP: ${MTP:-0}
+      MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
+      GRAPH: ${GRAPH:-}
+      MAX_MODEL_LEN: ${MAX_MODEL_LEN:-131072}
+      MAX_BATCHED_TOKENS: ${MAX_BATCHED_TOKENS:-8192}
+      GPU_MEMORY_UTILIZATION: ${GPU_MEMORY_UTILIZATION:-0.90}
+      MOE_MODE: ${MOE_MODE:-a4}
+      ONLINE_MXFP8: ${ONLINE_MXFP8:-0}
+      F8_DMA: ${F8_DMA:-0}
+      LOAD_FORMAT: ${LOAD_FORMAT:-instanttensor}
+      INSTANTTENSOR_BACKEND: ${INSTANTTENSOR_BACKEND:-BUFFERED}
+      QUANTIZATION: ${QUANTIZATION:-modelopt_fp4}
+      QUANTIZATION_CONFIG_JSON: ${QUANTIZATION_CONFIG_JSON:-}
+      GLM52_INDEX_TOPK_PATTERN: ${GLM52_INDEX_TOPK_PATTERN:-FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS}
     volumes:
       - /root/models:/root/models:ro
       - /root/.cache/huggingface:/root/.cache/huggingface:rw
-      - /cache:/cache-host:rw
-      - ${CACHE_DIR}:/cache:rw
-      - ${TMP_DIR}:/container-tmp:rw
-      - ${RUN_SCRIPT}:/usr/local/bin/glm52-run:ro
+      - ${CACHE_DIR:-/root/.cache/vllm-glm52-v14/glm52-v14}:/cache:rw
+      - ${TMP_DIR:-/root/vllm/tmp/glm52-v14}:/container-tmp:rw
     command:
-      - /bin/bash
-      - /usr/local/bin/glm52-run
+      - run-glm52-v14-server

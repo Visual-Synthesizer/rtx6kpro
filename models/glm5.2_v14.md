@@ -22,7 +22,7 @@ voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-i
 Docker Hub manifest digest:
 
 ```text
-sha256:e15f39468c8acd1e2493e7f9e1bfc5cc6274298f0a646fc6b11f6e924e24fc35
+sha256:2dfb16d1e890dbe637e13fc259dc596704974e2868f0d0679f734ad51eaa2934
 ```
 
 Build script:
@@ -123,29 +123,73 @@ FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS
 
 The runner exits before launch if this is shortened.
 
-## Compose Server Helper
+## Minimal Docker Compose
 
-For manual serving use:
+The final image contains the GLM 5.2 launcher:
 
 ```text
-scripts/run-glm52-v14-compose.sh
-compose/glm52-v14.yml
+/usr/local/bin/run-glm52-v14-server
 ```
 
-Minimal launch examples:
+So users do not need to download any helper script. A standalone compose file is
+enough:
+
+```yaml
+name: glm52-v14
+
+services:
+  server:
+    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706}
+    container_name: ${NAME:-glm52-v14}
+    network_mode: host
+    ipc: host
+    privileged: true
+    init: true
+    shm_size: 32g
+    gpus: all
+    ulimits:
+      memlock: -1
+      stack: 67108864
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      GPUS: ${GPUS:-0,1,2,3,4,5,6,7}
+      MODEL: ${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}
+      PORT: ${PORT:-8000}
+      TP: ${TP:-8}
+      DCP: ${DCP:-1}
+      DCP_BACKEND: ${DCP_BACKEND:-a2a}
+      MTP: ${MTP:-0}
+      MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
+      GRAPH: ${GRAPH:-}
+      MOE_MODE: ${MOE_MODE:-a4}
+      ONLINE_MXFP8: ${ONLINE_MXFP8:-0}
+      F8_DMA: ${F8_DMA:-0}
+      LOAD_FORMAT: ${LOAD_FORMAT:-instanttensor}
+      INSTANTTENSOR_BACKEND: ${INSTANTTENSOR_BACKEND:-BUFFERED}
+    volumes:
+      - /root/models:/root/models:ro
+      - /root/.cache/huggingface:/root/.cache/huggingface:rw
+      - ${CACHE_DIR:-/root/.cache/vllm-glm52-v14/glm52-v14}:/cache:rw
+      - ${TMP_DIR:-/root/vllm/tmp/glm52-v14}:/container-tmp:rw
+    command:
+      - run-glm52-v14-server
+```
+
+Example overrides:
 
 ```bash
-cd /root/rtx6kpro
-
-# Luke NVFP4, checkpoint-native A4, MTP off.
-NAME=glm52-a4-mtp0 PORT=8000 GPUS=0,1,2,3,4,5,6,7 \
-MOE_MODE=a4 MTP=0 MAX_NUM_SEQS=64 \
-./scripts/run-glm52-v14-compose.sh up
-
-# Online MXFP8 conversion, A16 force, MTP3, graph auto = 4 * MAX_NUM_SEQS.
-NAME=glm52-online-a16-mtp3 PORT=8001 GPUS=8,9,10,11,12,13,14,15 \
-MOE_MODE=a16 ONLINE_MXFP8=1 MTP=3 MAX_NUM_SEQS=32 \
-./scripts/run-glm52-v14-compose.sh up
+# Online MXFP8, A16 force, MTP3, graph auto = 4 * MAX_NUM_SEQS.
+GPUS=8,9,10,11,12,13,14,15 \
+PORT=8001 \
+MOE_MODE=a16 \
+ONLINE_MXFP8=1 \
+MTP=3 \
+MAX_NUM_SEQS=32 \
+docker compose up -d
 ```
 
 User-facing knobs:
@@ -166,9 +210,15 @@ User-facing knobs:
 | `LOAD_FORMAT` | `instanttensor` | Set `fastsafetensors` to disable InstantTensor for comparison. |
 | `INSTANTTENSOR_BACKEND` | `BUFFERED` | Buffered mode uses Linux page cache on hot reloads. |
 
-The helper always validates the 78-character index-cache pattern before launch
-and writes the generated in-container command to
-`/root/.cache/vllm-glm52-v14/<NAME>/run-vllm.sh`.
+`GRAPH` can be omitted; the launcher computes it as `4 * MAX_NUM_SEQS`. The
+launcher validates the 78-character index-cache pattern before starting vLLM.
+
+The repository also includes the same compose file and an optional host helper:
+
+```text
+compose/glm52-v14.yml
+scripts/run-glm52-v14-compose.sh
+```
 
 ## A4 And A16
 
@@ -437,7 +487,14 @@ cd /root/rtx6kpro
 PUSH_IMAGE=1 ./scripts/build-glm52-v14-final-image.sh
 ```
 
-Start a server through the compose helper:
+Start a server with the image-owned launcher:
+
+```bash
+docker compose -f compose/glm52-v14.yml up -d
+```
+
+With a repo checkout, the helper is only a convenience wrapper around the same
+compose file:
 
 ```bash
 cd /root/rtx6kpro

@@ -9,6 +9,8 @@ set -euo pipefail
 # InstantTensor loading the image default.
 
 BLACKWELL_DOCKER_DIR="${BLACKWELL_DOCKER_DIR:-/root/vllm/blackwell-llm-docker}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RUN_GLM52_V14_SERVER="${RUN_GLM52_V14_SERVER:-${SCRIPT_DIR}/run-glm52-v14-server}"
 
 DATE_TAG="${DATE_TAG:-20260706}"
 VLLM_BRANCH_TAG="dev-eldritch-enlightenment"
@@ -86,11 +88,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
+install -m 0755 "${RUN_GLM52_V14_SERVER}" "${overlay_dir}/run-glm52-v14-server"
+
 cat > "${overlay_dir}/Dockerfile" <<'DOCKERFILE'
 ARG BASE_IMAGE=voipmonitor/vllm:glm-kimi-cu132-system-base-20260626
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+
+COPY run-glm52-v14-server /usr/local/bin/run-glm52-v14-server
+RUN bash -n /usr/local/bin/run-glm52-v14-server
 
 ARG INSTANTTENSOR_REPO=https://github.com/scitix/InstantTensor.git
 ARG INSTANTTENSOR_REF=main
@@ -121,7 +128,8 @@ ENV INSTANTTENSOR_BACKEND=BUFFERED
 LABEL local-inference.instanttensor.repo="${INSTANTTENSOR_REPO}" \
       local-inference.instanttensor.branch="${INSTANTTENSOR_REF}" \
       local-inference.instanttensor.commit="${INSTANTTENSOR_COMMIT}" \
-      local-inference.instanttensor.backend_default="BUFFERED"
+      local-inference.instanttensor.backend_default="BUFFERED" \
+      local-inference.glm52.launcher="/usr/local/bin/run-glm52-v14-server"
 DOCKERFILE
 
 DOCKER_BUILDKIT=1 docker build \

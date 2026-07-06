@@ -31,7 +31,6 @@ CACHE_ROOT="${CACHE_ROOT:-/root/.cache/vllm-glm52-v14}"
 CACHE_DIR="${CACHE_DIR:-${CACHE_ROOT}/${NAME}}"
 TMP_DIR="${TMP_DIR:-/root/vllm/tmp/${NAME}}"
 ENV_FILE="${ENV_FILE:-${CACHE_DIR}/compose.env}"
-RUN_SCRIPT="${RUN_SCRIPT:-${CACHE_DIR}/run-vllm.sh}"
 ACTION="${1:-up}"
 
 die() {
@@ -72,134 +71,34 @@ if [[ "${MODEL}" == /* && ! -f "${MODEL}/config.json" ]]; then
   die "MODEL does not look like a local HF checkpoint: ${MODEL}"
 fi
 
-mkdir -p \
-  "${CACHE_DIR}/vllm" \
-  "${CACHE_DIR}/tilelang/tmp" \
-  "${CACHE_DIR}/tvm" \
-  "${CACHE_DIR}/triton" \
-  "${CACHE_DIR}/torchinductor" \
-  "${CACHE_DIR}/torch_extensions" \
-  "${CACHE_DIR}/flashinfer" \
-  "${TMP_DIR}"
-
-spec_arg=()
-if [[ "${MTP}" != "0" ]]; then
-  spec_json="$(printf '{"model":"%s","method":"mtp","num_speculative_tokens":%s,"moe_backend":"b12x","draft_sample_method":"probabilistic"}' "${MODEL}" "${MTP}")"
-  spec_arg=(--speculative-config "${spec_json}")
-fi
-
-quant_args=(--quantization "${QUANTIZATION}")
-if [[ "${ONLINE_MXFP8}" == "1" ]]; then
-  quant_args+=(--quantization-config "${QUANTIZATION_CONFIG_JSON}")
-fi
-
-dcp_args=(--decode-context-parallel-size "${DCP}")
-if [[ "${DCP}" != "1" ]]; then
-  dcp_args+=(--dcp-comm-backend "${DCP_BACKEND}" --dcp-kv-cache-interleave-size 1)
-fi
-
-hf_overrides="$(printf '{"use_index_cache":true,"index_topk_pattern":"%s"}' "${GLM52_INDEX_TOPK_PATTERN}")"
-
-cat > "${RUN_SCRIPT}" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-
-unset NCCL_GRAPH_FILE NCCL_GRAPH_DUMP_FILE VLLM_B12X_MLA_EXTEND_MAX_CHUNKS
-
-export CUDA_VISIBLE_DEVICES="${GPUS}"
-export CUDA_DEVICE_ORDER=PCI_BUS_ID
-export CUDA_DEVICE_MAX_CONNECTIONS=32
-export CUTE_DSL_ARCH=sm_120a
-export TORCH_CUDA_ARCH_LIST=12.0a
-export OMP_NUM_THREADS="${OMP_NUM_THREADS:-16}"
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-export VLLM_WORKER_MULTIPROC_METHOD=spawn
-export SAFETENSORS_FAST_GPU=1
-export INSTANTTENSOR_BACKEND="${INSTANTTENSOR_BACKEND}"
-export VLLM_USE_AOT_COMPILE=1
-export VLLM_USE_BREAKABLE_CUDAGRAPH=0
-export VLLM_USE_MEGA_AOT_ARTIFACT=1
-export VLLM_MEMORY_PROFILE_INCLUDE_ATTN=1
-export VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=1
-export VLLM_USE_FLASHINFER_SAMPLER=1
-export VLLM_USE_B12X_WO_PROJECTION=1
-export VLLM_USE_B12X_MHC=1
-export VLLM_USE_B12X_FP8_GEMM=1
-export VLLM_USE_B12X_MOE=1
-export VLLM_USE_B12X_SPARSE_INDEXER=1
-export VLLM_USE_B12X_DCP_A2A=1
-export VLLM_USE_V2_MODEL_RUNNER=1
-export VLLM_ENABLE_PCIE_ALLREDUCE=1
-export VLLM_PCIE_ALLREDUCE_BACKEND=b12x
-export VLLM_PCIE_ONESHOT_ALLREDUCE_MAX_SIZE=64KB
-export VLLM_PCIE_ONESHOT_FUSED_ADD_RMS_NORM_MAX_SIZE=84KB
-export VLLM_PCIE_DMA_FP8="${F8_DMA}"
-export B12X_PCIE_DMA_FP8="${F8_DMA}"
-export VLLM_DCP_GLOBAL_TOPK=1
-export VLLM_DCP_SHARD_DRAFT=1
-export B12X_MLA_SM120_UNIFIED=1
-export B12X_DENSE_SPLITK_TURBO=1
-export B12X_W4A16_TC_DECODE=1
-export B12X_W4A8_TINY_DECODE=1
-export B12X_MOE_FORCE_A8="${B12X_MOE_FORCE_A8}"
-export B12X_MOE_FORCE_A16="${B12X_MOE_FORCE_A16}"
-export NCCL_PROTO=LL,LL128,Simple
-export NCCL_P2P_LEVEL=SYS
-export NCCL_IB_DISABLE=1
-export LD_PRELOAD=/opt/libnccl-local-inference.so.2.30.4
-export VLLM_NCCL_SO_PATH=/opt/libnccl-local-inference.so.2.30.4
-export TMPDIR=/container-tmp
-export XDG_CACHE_HOME=/cache
-export VLLM_CACHE_DIR=/cache/vllm
-export TILELANG_CACHE_DIR=/cache/tilelang
-export TILELANG_TMP_DIR=/cache/tilelang/tmp
-export TVM_CACHE_DIR=/cache/tvm
-export TRITON_CACHE_DIR=/cache/triton
-export TORCHINDUCTOR_CACHE_DIR=/cache/torchinductor
-export TORCH_EXTENSIONS_DIR=/cache/torch_extensions
-export FLASHINFER_WORKSPACE_BASE=/cache/flashinfer
-
-exec vllm serve "${MODEL}" \\
-  --served-model-name "${SERVED_MODEL_NAME}" \\
-  --host 0.0.0.0 \\
-  --port "${PORT}" \\
-  --trust-remote-code \\
-  --tensor-parallel-size "${TP}" \\
-  ${dcp_args[@]@Q} \\
-  --kv-cache-dtype fp8 \\
-  --attention-backend B12X_MLA_SPARSE \\
-  --moe-backend b12x \\
-  ${quant_args[@]@Q} \\
-  --load-format "${LOAD_FORMAT}" \\
-  -cc.pass_config.fuse_allreduce_rms=True \\
-  --gpu-memory-utilization "${GPU_MEMORY_UTILIZATION}" \\
-  --max-model-len "${MAX_MODEL_LEN}" \\
-  --max-num-seqs "${MAX_NUM_SEQS}" \\
-  --max-num-batched-tokens "${MAX_BATCHED_TOKENS}" \\
-  --max-cudagraph-capture-size "${GRAPH}" \\
-  --async-scheduling \\
-  --enable-chunked-prefill \\
-  --enable-prefix-caching \\
-  --enable-flashinfer-autotune \\
-  --enable-auto-tool-choice \\
-  --tool-call-parser glm47 \\
-  --reasoning-parser glm45 \\
-  --default-chat-template-kwargs '{"reasoning_effort":"high"}' \\
-  --enable-prompt-tokens-details \\
-  --enable-force-include-usage \\
-  --enable-request-id-headers \\
-  --hf-overrides '${hf_overrides}' \\
-  ${spec_arg[@]@Q}
-EOF
-chmod 0755 "${RUN_SCRIPT}"
+mkdir -p "${CACHE_DIR}" "${TMP_DIR}"
 
 cat > "${ENV_FILE}" <<EOF
 IMAGE=${IMAGE}
 NAME=${NAME}
 GPUS=${GPUS}
+MODEL=${MODEL}
+SERVED_MODEL_NAME=${SERVED_MODEL_NAME}
+PORT=${PORT}
+TP=${TP}
+DCP=${DCP}
+DCP_BACKEND=${DCP_BACKEND}
+MTP=${MTP}
+MAX_NUM_SEQS=${MAX_NUM_SEQS}
+GRAPH=${GRAPH}
+MAX_MODEL_LEN=${MAX_MODEL_LEN}
+MAX_BATCHED_TOKENS=${MAX_BATCHED_TOKENS}
+GPU_MEMORY_UTILIZATION=${GPU_MEMORY_UTILIZATION}
+MOE_MODE=${MOE_MODE}
+ONLINE_MXFP8=${ONLINE_MXFP8}
+F8_DMA=${F8_DMA}
+LOAD_FORMAT=${LOAD_FORMAT}
+INSTANTTENSOR_BACKEND=${INSTANTTENSOR_BACKEND}
+QUANTIZATION=${QUANTIZATION}
+QUANTIZATION_CONFIG_JSON=${QUANTIZATION_CONFIG_JSON}
+GLM52_INDEX_TOPK_PATTERN=${GLM52_INDEX_TOPK_PATTERN}
 CACHE_DIR=${CACHE_DIR}
 TMP_DIR=${TMP_DIR}
-RUN_SCRIPT=${RUN_SCRIPT}
 EOF
 
 compose=(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}")
@@ -241,6 +140,6 @@ load_format=${LOAD_FORMAT}
 instanttensor_backend=${INSTANTTENSOR_BACKEND}
 max_num_seqs=${MAX_NUM_SEQS}
 graph=${GRAPH}
-run_script=${RUN_SCRIPT}
+container_launcher=/usr/local/bin/run-glm52-v14-server
 compose_env=${ENV_FILE}
 EOF
