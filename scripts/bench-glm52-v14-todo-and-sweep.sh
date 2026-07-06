@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:modelopt-online-fp8-overlay-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}"
+GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}"
 BASE_IMAGE="${BASE_IMAGE:-${GLM52_V14_IMAGE}}"
 ONLINE_IMAGE="${ONLINE_IMAGE:-${GLM52_V14_IMAGE}}"
 MODEL="${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}"

@@ -16,7 +16,7 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:modelopt-online-fp8-overlay-v2-vllm02f5b41-b12xe44cb77-cu132-20260706
+voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706
 ```
 
 Docker Hub manifest digest:
@@ -148,7 +148,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:modelopt-online-fp8-overlay-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
