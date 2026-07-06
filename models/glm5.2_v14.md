@@ -16,7 +16,7 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:glm52-v14-online-fp8-mxfp8-v2-vllm02f5b41-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706
+voipmonitor/vllm:modelopt-online-fp8-overlay-v2-vllm02f5b41-b12xe44cb77-cu132-20260706
 ```
 
 Docker Hub manifest digest:
@@ -148,7 +148,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:glm52-v14-online-fp8-mxfp8-v2-vllm02f5b41-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:modelopt-online-fp8-overlay-v2-vllm02f5b41-b12xe44cb77-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -345,10 +345,10 @@ DCP1, MTP3, `MOE_MODE=force-a8-experimental`, `MAX_MODEL_LEN=262144`,
 | TP | Max seqs | Graph | Max batched tokens | Model load | Available KV memory | GPU KV cache size | Max concurrency at 262,144 |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 8 | 64 | 256 | 8192 | 50.33 GiB | 40.63 GiB | 785,920 | 3.00x |
-| 8 | 32 | 128 | 4092 | 50.21 GiB | 41.60 GiB | 816,064 | 3.11x |
+| 8 | 32 | 128 | 4096 | 50.21 GiB | 41.60 GiB | 816,064 | 3.11x |
 
 Lowering `MAX_NUM_SEQS` from 64 to 32 and `MAX_BATCHED_TOKENS` from 8192 to
-4092 freed enough scheduler/cudagraph budget to add about 30k KV tokens on TP8.
+4096 freed enough scheduler/cudagraph budget to add about 30k KV tokens on TP8.
 `GPU_MEMORY_UTILIZATION=0.99` failed the startup free-memory check on this node.
 
 The same A8/MXFP4 setup is not currently valid at `TP=6`: B12X W4A8-MX rejects
