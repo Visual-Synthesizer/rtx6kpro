@@ -5,8 +5,9 @@ set -euo pipefail
 #
 # Stage 1 builds the normal vLLM+B12X image from the blackwell-llm-docker
 # Dockerfile using pinned source commits and the fp8.py bridge patch.
-# Stage 2 overlays InstantTensor from pinned latest git and makes buffered
-# InstantTensor loading the image default.
+# Stage 2 overlays InstantTensor from pinned latest git, makes buffered
+# InstantTensor loading the image default, and unifies PyTorch/vLLM/InstantTensor
+# on one NCCL runtime so ncclComm_t handles are never shared across libraries.
 
 BLACKWELL_DOCKER_DIR="${BLACKWELL_DOCKER_DIR:-/root/vllm/blackwell-llm-docker}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,63 +24,69 @@ INSTANTTENSOR_COMMIT="${INSTANTTENSOR_COMMIT:-85e7c5f5539d9c006ee0c26bc1b5233c65
 INSTANTTENSOR_REF="${INSTANTTENSOR_REF:-${INSTANTTENSOR_COMMIT}}"
 
 BASE_IMAGE="${BASE_IMAGE:-voipmonitor/vllm:${VLLM_BRANCH_TAG}-vllm${VLLM_COMMIT:0:7}-fp8${FP8_PATCH_COMMIT:0:7}-b12x${B12X_COMMIT:0:7}-cu132-${DATE_TAG}-base}"
-FINAL_IMAGE="${FINAL_IMAGE:-voipmonitor/vllm:${VLLM_BRANCH_TAG}-vllm${VLLM_COMMIT:0:7}-fp8${FP8_PATCH_COMMIT:0:7}-b12x${B12X_COMMIT:0:7}-it${INSTANTTENSOR_COMMIT:0:7}-cu132-${DATE_TAG}}"
+FINAL_IMAGE="${FINAL_IMAGE:-voipmonitor/vllm:${VLLM_BRANCH_TAG}-vllm${VLLM_COMMIT:0:7}-fp8${FP8_PATCH_COMMIT:0:7}-b12x${B12X_COMMIT:0:7}-it${INSTANTTENSOR_COMMIT:0:7}-nccl2304-cu132-${DATE_TAG}}"
 PUSH_IMAGE="${PUSH_IMAGE:-0}"
+SKIP_BASE_BUILD="${SKIP_BASE_BUILD:-0}"
 
 FP8_PATCH_URL="${FP8_PATCH_URL:-https://github.com/local-inference-lab/vllm/commit/${FP8_PATCH_COMMIT}.patch}"
 
-echo "Building base image: ${BASE_IMAGE}"
-(
-  cd "${BLACKWELL_DOCKER_DIR}"
-  export IMAGE="${BASE_IMAGE}"
-  export SYSTEM_BASE_IMAGE="${SYSTEM_BASE_IMAGE:-voipmonitor/vllm:glm-kimi-cu132-system-base-20260626}"
-  export BUILD_BASE_IMAGE_TAG="${BUILD_BASE_IMAGE_TAG:-voipmonitor/vllm:glm-kimi-cu132-build-base-20260626}"
-  export BUILD_BASE_IMAGE="${BUILD_BASE_IMAGE:-0}"
-  export PUSH_BASE_IMAGE="${PUSH_BASE_IMAGE:-0}"
-  export MAX_JOBS="${MAX_JOBS:-64}"
-  export VLLM_MAX_JOBS="${VLLM_MAX_JOBS:-64}"
-  export NVCC_THREADS="${NVCC_THREADS:-1}"
-  export VLLM_NVCC_THREADS="${VLLM_NVCC_THREADS:-1}"
-  export PIN_SOURCE_COMMITS=1
+if [[ "${SKIP_BASE_BUILD}" == "1" ]]; then
+  echo "Skipping base image build; verifying existing base image: ${BASE_IMAGE}"
+  docker image inspect "${BASE_IMAGE}" >/dev/null
+else
+  echo "Building base image: ${BASE_IMAGE}"
+  (
+    cd "${BLACKWELL_DOCKER_DIR}"
+    export IMAGE="${BASE_IMAGE}"
+    export SYSTEM_BASE_IMAGE="${SYSTEM_BASE_IMAGE:-voipmonitor/vllm:glm-kimi-cu132-system-base-20260626}"
+    export BUILD_BASE_IMAGE_TAG="${BUILD_BASE_IMAGE_TAG:-voipmonitor/vllm:glm-kimi-cu132-build-base-20260626}"
+    export BUILD_BASE_IMAGE="${BUILD_BASE_IMAGE:-0}"
+    export PUSH_BASE_IMAGE="${PUSH_BASE_IMAGE:-0}"
+    export MAX_JOBS="${MAX_JOBS:-64}"
+    export VLLM_MAX_JOBS="${VLLM_MAX_JOBS:-64}"
+    export NVCC_THREADS="${NVCC_THREADS:-1}"
+    export VLLM_NVCC_THREADS="${VLLM_NVCC_THREADS:-1}"
+    export PIN_SOURCE_COMMITS=1
 
-  export FLASHINFER_COMMIT="${FLASHINFER_COMMIT:-5a73a36a7169ec5533ba474bb9204bed765dd297}"
-  export FLASHINFER_REPO="${FLASHINFER_REPO:-https://github.com/flashinfer-ai/flashinfer.git}"
-  export FLASHINFER_REF="${FLASHINFER_REF:-${FLASHINFER_COMMIT}}"
-  export FLASHINFER_BUILD_CUBIN="${FLASHINFER_BUILD_CUBIN:-0}"
+    export FLASHINFER_COMMIT="${FLASHINFER_COMMIT:-5a73a36a7169ec5533ba474bb9204bed765dd297}"
+    export FLASHINFER_REPO="${FLASHINFER_REPO:-https://github.com/flashinfer-ai/flashinfer.git}"
+    export FLASHINFER_REF="${FLASHINFER_REF:-${FLASHINFER_COMMIT}}"
+    export FLASHINFER_BUILD_CUBIN="${FLASHINFER_BUILD_CUBIN:-0}"
 
-  export DEEPGEMM_COMMIT="${DEEPGEMM_COMMIT:-a6b593d2826719dcf4892609af7b84ee23aaf32a}"
-  export DEEPGEMM_REPO="${DEEPGEMM_REPO:-https://github.com/deepseek-ai/DeepGEMM.git}"
-  export DEEPGEMM_REF="${DEEPGEMM_REF:-${DEEPGEMM_COMMIT}}"
+    export DEEPGEMM_COMMIT="${DEEPGEMM_COMMIT:-a6b593d2826719dcf4892609af7b84ee23aaf32a}"
+    export DEEPGEMM_REPO="${DEEPGEMM_REPO:-https://github.com/deepseek-ai/DeepGEMM.git}"
+    export DEEPGEMM_REF="${DEEPGEMM_REF:-${DEEPGEMM_COMMIT}}"
 
-  export B12X_REPO="${B12X_REPO:-https://github.com/local-inference-lab/b12x.git}"
-  export B12X_REF="${B12X_REF:-master}"
-  export B12X_COMMIT="${B12X_COMMIT}"
+    export B12X_REPO="${B12X_REPO:-https://github.com/local-inference-lab/b12x.git}"
+    export B12X_REF="${B12X_REF:-master}"
+    export B12X_COMMIT="${B12X_COMMIT}"
 
-  export VLLM_REPO="${VLLM_REPO:-https://github.com/local-inference-lab/vllm.git}"
-  export VLLM_REF="${VLLM_REF}"
-  export VLLM_COMMIT="${VLLM_COMMIT}"
-  export VLLM_PATCH_URL="${FP8_PATCH_URL}"
-  export VLLM_PATCH_SHA256="${FP8_PATCH_SHA256}"
-  export VLLM_PATCH_FILE=""
-  export VLLM_BUILD_VERSION="${VLLM_BUILD_VERSION:-0.11.2.dev279+dev.eldritch.enlightenment.${VLLM_COMMIT:0:7}.fp8${FP8_PATCH_COMMIT:0:7}.b12x${B12X_COMMIT:0:7}.cu132.${DATE_TAG}}"
+    export VLLM_REPO="${VLLM_REPO:-https://github.com/local-inference-lab/vllm.git}"
+    export VLLM_REF="${VLLM_REF}"
+    export VLLM_COMMIT="${VLLM_COMMIT}"
+    export VLLM_PATCH_URL="${FP8_PATCH_URL}"
+    export VLLM_PATCH_SHA256="${FP8_PATCH_SHA256}"
+    export VLLM_PATCH_FILE=""
+    export VLLM_BUILD_VERSION="${VLLM_BUILD_VERSION:-0.11.2.dev279+dev.eldritch.enlightenment.${VLLM_COMMIT:0:7}.fp8${FP8_PATCH_COMMIT:0:7}.b12x${B12X_COMMIT:0:7}.cu132.${DATE_TAG}}"
 
-  export LAUNCHER_REPO="${LAUNCHER_REPO:-${VLLM_REPO}}"
-  export LAUNCHER_REF="${LAUNCHER_REF:-${VLLM_REF}}"
-  export LAUNCHER_COMMIT="${LAUNCHER_COMMIT:-${VLLM_COMMIT}}"
+    export LAUNCHER_REPO="${LAUNCHER_REPO:-${VLLM_REPO}}"
+    export LAUNCHER_REF="${LAUNCHER_REF:-${VLLM_REF}}"
+    export LAUNCHER_COMMIT="${LAUNCHER_COMMIT:-${VLLM_COMMIT}}"
 
-  export CUTLASS_REPO="${CUTLASS_REPO:-https://github.com/NVIDIA/cutlass.git}"
-  export CUTLASS_REF="${CUTLASS_REF:-d80a4e53b52b42550659a8696dab32705265e324}"
-  export CUTLASS_COMMIT="${CUTLASS_COMMIT:-d80a4e53b52b42550659a8696dab32705265e324}"
-  export HUMMING_KERNELS_SPEC="${HUMMING_KERNELS_SPEC:-humming-kernels[cu13]==0.1.6}"
+    export CUTLASS_REPO="${CUTLASS_REPO:-https://github.com/NVIDIA/cutlass.git}"
+    export CUTLASS_REF="${CUTLASS_REF:-d80a4e53b52b42550659a8696dab32705265e324}"
+    export CUTLASS_COMMIT="${CUTLASS_COMMIT:-d80a4e53b52b42550659a8696dab32705265e324}"
+    export HUMMING_KERNELS_SPEC="${HUMMING_KERNELS_SPEC:-humming-kernels[cu13]==0.1.6}"
 
-  # The overlay below is the canonical InstantTensor install. These exports are
-  # harmless for older blackwell Dockerfiles and pin the same source if the
-  # local Dockerfile already supports InstantTensor build args.
-  export INSTANTTENSOR_REF="${INSTANTTENSOR_REF}"
-  export INSTANTTENSOR_COMMIT="${INSTANTTENSOR_COMMIT}"
+    # The overlay below is the canonical InstantTensor install. These exports are
+    # harmless for older blackwell Dockerfiles and pin the same source if the
+    # local Dockerfile already supports InstantTensor build args.
+    export INSTANTTENSOR_REF="${INSTANTTENSOR_REF}"
+    export INSTANTTENSOR_COMMIT="${INSTANTTENSOR_COMMIT}"
 
-  ./build-vllm-b12x-cu132.sh "$@"
-)
+    ./build-vllm-b12x-cu132.sh "$@"
+  )
+fi
 
 echo "Building final InstantTensor overlay: ${FINAL_IMAGE}"
 overlay_dir="$(mktemp -d)"
@@ -123,12 +130,41 @@ import instanttensor
 print("instanttensor", md.version("instanttensor"), instanttensor.__file__)
 PY
 
+RUN torch_nccl=/opt/venv/lib/python3.12/site-packages/nvidia/nccl/lib/libnccl.so.2 \
+ && local_nccl=/opt/libnccl-local-inference.so.2.30.4 \
+ && normal_nccl=/opt/libnccl.so.2.30.4 \
+ && test -e "${torch_nccl}" \
+ && test -e "${local_nccl}" \
+ && if [[ ! -e "${normal_nccl}" ]]; then cp -aL "${local_nccl}" "${normal_nccl}"; fi \
+ && if [[ ! -e "${local_nccl}.orig" ]]; then cp -aL "${local_nccl}" "${local_nccl}.orig"; fi \
+ && if [[ ! -e "${torch_nccl}.torch-bundled-2.29.7" ]]; then cp -aL "${torch_nccl}" "${torch_nccl}.torch-bundled-2.29.7"; fi \
+ && readelf -d "${normal_nccl}" | grep -F 'Library soname: [libnccl.so.2]' \
+ && ln -sfn "${normal_nccl}" "${local_nccl}" \
+ && ln -sfn "${normal_nccl}" /opt/libnccl.so.2 \
+ && ln -sfn "${normal_nccl}" "${torch_nccl}" \
+ && /opt/venv/bin/python - <<'PY'
+import torch
+
+paths = []
+with open("/proc/self/maps", encoding="utf-8") as maps:
+    for line in maps:
+        if "libnccl" in line:
+            paths.append(line.split()[-1])
+
+unique = sorted(set(paths))
+print("torch.cuda.nccl.version", torch.cuda.nccl.version())
+print("mapped libnccl paths", unique)
+assert unique == ["/opt/libnccl.so.2.30.4"], unique
+PY
+
 ENV INSTANTTENSOR_BACKEND=BUFFERED
 
 LABEL local-inference.instanttensor.repo="${INSTANTTENSOR_REPO}" \
       local-inference.instanttensor.branch="${INSTANTTENSOR_REF}" \
       local-inference.instanttensor.commit="${INSTANTTENSOR_COMMIT}" \
       local-inference.instanttensor.backend_default="BUFFERED" \
+      local-inference.nccl.unified_runtime="/opt/libnccl.so.2.30.4" \
+      local-inference.nccl.pytorch_bundled_backup="/opt/venv/lib/python3.12/site-packages/nvidia/nccl/lib/libnccl.so.2.torch-bundled-2.29.7" \
       local-inference.glm52.launcher="/usr/local/bin/run-glm52-v14-server"
 DOCKERFILE
 

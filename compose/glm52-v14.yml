@@ -2,7 +2,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host

@@ -16,13 +16,13 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706
+voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706
 ```
 
 Docker Hub manifest digest:
 
 ```text
-sha256:2dfb16d1e890dbe637e13fc259dc596704974e2868f0d0679f734ad51eaa2934
+sha256:c591aaf6ff4384dae2f3494d72d5e5f840d5d5e40737a533a0991c6bad54e535
 ```
 
 Build script:
@@ -39,6 +39,7 @@ Pinned source stack:
 | fp8.py bridge patch | `d00593416aeb3925553ccd589d91df7075d618f6` |
 | B12X | `local-inference-lab/b12x master @ e44cb77777a075790ebe9f7aa9f225d073aea109` |
 | InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
+| NCCL runtime | unified `/opt/libnccl.so.2.30.4` |
 | FlashInfer | `5a73a36a7169ec5533ba474bb9204bed765dd297` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 
@@ -66,6 +67,12 @@ cache. `BUFFERED` expands to `URING_BUFFERED,AIO_BUFFERED,MMAP`, so repeated
 loads can reuse cached pages when the model is already hot in memory. See
 [`scitix/InstantTensor`](https://github.com/scitix/InstantTensor) and the
 [vLLM InstantTensor loader docs](https://docs.vllm.ai/en/latest/models/extensions/instanttensor/).
+
+The image also replaces PyTorch's bundled `libnccl.so.2` and the historical
+`/opt/libnccl-local-inference.so.2.30.4` path with symlinks to the same
+`/opt/libnccl.so.2.30.4` runtime. This keeps PyTorch distributed, vLLM PyNCCL,
+and InstantTensor on one NCCL library when InstantTensor receives a PyTorch
+process group.
 
 Previous benchmark images, kept here only for historical comparison:
 
@@ -139,7 +146,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:dev-eldritch-enlightenment-vllmc382f1d-fp8d005934-b12xe44cb77-it85e7c5f-nccl2304-cu132-20260706}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
