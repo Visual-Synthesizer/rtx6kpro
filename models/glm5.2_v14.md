@@ -612,6 +612,12 @@ Online A4 f8 DMA impact, keeping decode out of the comparison:
 
 ## KLD Keypoint Rerun
 
+For the separate Unsloth-style ctx512 WikiText-2 KLD reproduction with
+published BF16 reference logits, see
+[`glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md`](glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md).
+That run measures Luke NVFP4 A16 DCP1 MTP off against BF16 and reports
+`mean_kld=0.0845515281` over 288,715 positions.
+
 Retested on the v7 image with 5 runs per case:
 
 ```text
