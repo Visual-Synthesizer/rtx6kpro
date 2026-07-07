@@ -526,8 +526,14 @@ Still true on v14:
 - The v13 workaround `VLLM_ENABLE_PCIE_ALLREDUCE=0` is **no longer needed**:
   PCIe oneshot/fused-RMS allreduce at world size 6 started and ran cleanly in
   both validated configurations.
+- **Status update 2026-07-07: vLLM PR #80 (the zero-padding half of this fix)
+  was rejected upstream** — Luke wants native small-alignment support in the
+  W4A8-MX/packed-W4A16 kernels instead of padding to 128. Until that lands,
+  TP6 × MXFP4 (A8 and packed A16) does not boot on stock images; the table
+  below documents the padded-experiment results. b12x PR #26 (odd tile
+  counts) is unaffected and still pending.
 - The A8/MXFP4 shard-shape rejection (and the matching packed-W4A16 e8m0 tile
-  failure) is fixed by two stacked changes:
+  failure) was fixed experimentally by two stacked changes:
   [vllm PR #80](https://github.com/local-inference-lab/vllm/pull/80) zero-pads
   e8m0 expert shards 352 → 384 at the vLLM/B12X handoff (bit-exact — padded
   gate/up rows produce `silu(0)*0 = 0`; ~9% extra expert GEMM work), and
