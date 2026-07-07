@@ -8,8 +8,17 @@ PR. Delete this page once everything is merged and a clean image builds from
 
 ## vLLM — `local-inference-lab/vllm`, merge into `dev/eldritch-enlightenment`
 
-Stacked chain — merge **in this order** (each PR is based on the previous
-one's branch; GitHub retargets automatically when a base branch is deleted):
+**All six PRs now target `dev/eldritch-enlightenment` directly** (retargeted
+2026-07-07; GitHub reports `mergeable=true` for every one). They were
+developed as a stack, so until predecessors land, a later PR's diff shows the
+cumulative changes of its prefix — merge **strictly in this order** and each
+remaining diff shrinks to its own commits:
+
+`#76 → #77 → #78 → #79 → #80 → #81`
+
+(#80/#81 carry content-identical re-picks of #76–#79 with different SHAs from
+the v5 integration branch; after the originals merge these become empty
+effective diffs and the merges stay clean.)
 
 | # | PR | What it does | Proof |
 |---|---|---|---|
