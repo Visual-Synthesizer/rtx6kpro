@@ -135,6 +135,7 @@ Result roots:
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
 /root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z
+/root/bench-results/glm52-v14-v7-tp8-mxfp4-a8-dcp1-mtp0-20260707T133344Z
 ```
 
 ## Runtime Contract
@@ -636,6 +637,23 @@ Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 | Luke NVFP4 | A16 | yes | 5 | 0.07188 +/- 0.00203 | 0.06964 | 0.07457 |
 | BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.07610 +/- 0.00087 | 0.07486 | 0.07730 |
 | BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.07741 +/- 0.00060 | 0.07638 | 0.07782 |
+
+Combined TP8/DCP1/MTP0 speed and KLD view (`f8=0`, `MAX_NUM_SEQS=32`,
+`GRAPH=128`, `MAX_BATCHED_TOKENS=8192`, `MAX_MODEL_LEN=131072`). Luke NVFP4
+speed rows are from the full sweep; MXFP4 rows were rerun on the v7 image under:
+
+```text
+/root/bench-results/glm52-v14-v7-tp8-mxfp4-a8-dcp1-mtp0-20260707T133344Z
+```
+
+| Case | KLD mean | DCP | Decode cc1 | Prefill 8k | Prefill 64k |
+|---|---:|---:|---:|---:|---:|
+| Luke NVFP4 A4 orig | 0.10734 | 1 | 87.99 | 6,557 | 6,257 |
+| Luke NVFP4 A4 online MXFP8 | 0.10901 | 1 | 94.96 | 6,681 | 6,351 |
+| Luke NVFP4 A16 orig | 0.06662 | 1 | 86.56 | 6,140 | 5,849 |
+| Luke NVFP4 A16 online MXFP8 | 0.07188 | 1 | 93.30 | 6,239 | 5,941 |
+| BF16 AMD MXFP4 experts A8 orig | 0.07610 | 1 | 88.72 | 6,698 | 6,307 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 1 | 94.03 | 6,731 | 6,364 |
 
 ## Coding Peak Rerun
 
