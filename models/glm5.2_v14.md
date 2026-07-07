@@ -65,8 +65,10 @@ cd /root/rtx6kpro
 
 The script starts all servers through `scripts/run-glm52-v14-compose.sh`, waits
 until paired instances are fully loaded before benchmarking, writes progress to
-`/root/vllm/prubezne_vysledky`, measures TP6 MXFP4/online-MXFP8 for
-`DCP=2,3,6`, and measures TP8 NVFP4/A16/MTP3 decode for `DCP=2,4,8`.
+`${RESULT_ROOT}/progress.log` by default, measures TP6 MXFP4/online-MXFP8 for
+`DCP=1,2,3,6`, and measures TP8 NVFP4/A16/MTP3 decode for `DCP=2,4,8`.
+The benchmark client is run with `--no-hw-monitor`; the script records its own
+thermal CSV snapshots before and after each measured phase.
 
 The final image defaults InstantTensor to buffered I/O:
 
@@ -127,6 +129,9 @@ Result roots:
 /root/bench-results/glm52-v14-todo-and-sweep-20260706T0150Z
 /root/kld/glm52_v14_todo_20260706T0150Z
 /root/bench-results/glm52-v14-codingpeak-dcp1-mtp3-20260706T130151Z
+/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v5
+/root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z
+/root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
 ```
 
 ## Runtime Contract
@@ -406,6 +411,25 @@ the TP6 shard shape during weight preparation with
 So there is no TP6 KV-cache number for this exact A8 MXFP4 configuration without
 changing the MoE mode or kernel constraints.
 
+Retested on the v5 image with `MAX_NUM_SEQS=16`, `MAX_BATCHED_TOKENS=4096`,
+`MAX_MODEL_LEN=262144`, `GPU_MEMORY_UTILIZATION=0.98`, `MTP=3`, hybrid DCP
+defaults, and `ONLINE_QUANT=mxfp8`. vLLM enabled virtual TP padding
+(`attention heads 64 -> 66`, `MoE intermediate size 2048 -> 2112`), but B12X
+W4A8-MX still rejected the shard shape before KV cache creation:
+
+| TP | DCP | Boot result | KV cache size | Root cause |
+|---:|---:|---|---:|---|
+| 6 | 1 | failed before ready | n/a | `W4A8-MX QMMA layout requires hidden_size % 256 == 0 and intermediate_size % 128 == 0` |
+| 6 | 2 | failed before ready | n/a | same |
+| 6 | 3 | failed before ready | n/a | same |
+| 6 | 6 | failed before ready | n/a | same |
+
+Result root:
+
+```text
+/root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
+```
+
 ## f8 DMA Mode
 
 `f8` selects the FP8 PCIe DMA allreduce mode:
@@ -500,6 +524,30 @@ KV; `DCP=6` multiplies KV capacity ~6x for long-context or multi-user serving
 at roughly 57% of the DCP1 decode speed. `DCP=2` is the middle ground and
 keeps the B12X DCP fast path.
 
+## Hybrid DCP v5 Decode And KV
+
+Retested on the v5 image with the helper script after fixing the benchmark
+client invocation (`--host/--port`, `--no-hw-monitor`, and required JSON
+existence checks):
+
+```text
+/root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z
+```
+
+Config: Luke NVFP4 checkpoint, `TP=8`, `MOE_MODE=a16`, `MTP=3`, `F8_DMA=0`,
+`MAX_MODEL_LEN=131072`, `MAX_NUM_SEQS=32`, `MAX_BATCHED_TOKENS=8192`,
+`GRAPH=128`, `GPU_MEMORY_UTILIZATION=0.90`, `DCP_BACKEND=a2a`,
+`DCP_A2A_MAX_TOKENS=64`, `DCP_A2A_LARGE_BACKEND=ag_rs`.
+
+Decode values are `llm_decode_bench` ctx0 `aggregate_tps` for concurrency
+`1,2,4,8,16,32`.
+
+| TP | DCP | KV cache tokens | Max conc at 131k | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 | cc32 accept |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 8 | 2 | 1,079,424 | 8.24x | 111.89 | 176.03 | 339.21 | 493.84 | 763.46 | 1,144.29 | 0.579 |
+| 8 | 4 | 2,158,848 | 16.47x | 108.15 | 164.63 | 302.63 | 458.65 | 669.88 | 1,011.82 | 0.594 |
+| 8 | 8 | 4,302,336 | 32.82x | 101.50 | 155.71 | 277.93 | 401.52 | 532.59 | 793.33 | 0.576 |
+
 ## Direct DCP1 Measurements
 
 These rows replace the older placeholders. KLD is 5 runs against:
@@ -526,6 +574,37 @@ Online A4 f8 DMA impact, keeping decode out of the comparison:
 | `0` | 6,598 | 6,307 | 5,967 | 0.10761 +/- 0.00430 |
 | `ag` | 7,165 | 6,870 | 6,444 | 0.11171 +/- 0.00542 |
 | `ring` | 8,092 | 7,676 | 7,142 | 0.12100 +/- 0.00886 |
+
+## KLD Keypoint Rerun
+
+Retested on the v5 image with 5 runs per case:
+
+```text
+/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v5
+```
+
+Reference logits:
+
+```text
+/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618
+```
+
+Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
+`load_format=instanttensor`, `INSTANTTENSOR_BACKEND=BUFFERED`, and
+`VLLM_NCCL_SO_PATH=/opt/libnccl-local-inference.so.2.30.4`. Online MXFP8 used:
+
+```json
+{"linear":{"weight":"mxfp8"},"ignore":["re:.*kv_b_proj"]}
+```
+
+| Checkpoint | MoE mode | Online MXFP8 | Runs | KLD mean +/- sd | Min | Max |
+|---|---|---:|---:|---:|---:|---:|
+| Luke NVFP4 | A4 | no | 5 | 0.10892 +/- 0.00655 | 0.09950 | 0.11658 |
+| Luke NVFP4 | A4 | yes | 5 | 0.11048 +/- 0.00787 | 0.09798 | 0.11719 |
+| Luke NVFP4 | A16 | no | 5 | 0.06714 +/- 0.00341 | 0.06187 | 0.07035 |
+| Luke NVFP4 | A16 | yes | 5 | 0.07280 +/- 0.00124 | 0.07081 | 0.07416 |
+| BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.07512 +/- 0.00102 | 0.07421 | 0.07632 |
+| BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.07521 +/- 0.00197 | 0.07302 | 0.07778 |
 
 ## Coding Peak Rerun
 
@@ -753,13 +832,15 @@ MOE_MODE=a16 ONLINE_MXFP8=1 MTP=3 MAX_NUM_SEQS=32 \
 ./scripts/run-glm52-v14-compose.sh up
 ```
 
-The reproducible runner is checked in at:
+Reproducible runners are checked in at:
 
 ```text
 scripts/bench-glm52-v14-todo-and-sweep.sh
+scripts/bench-glm52-v14-kld-keypoints.sh
+scripts/bench-glm52-v14-dcp-hybrid-v5.sh
 ```
 
-Run the complete sweep:
+Run the original complete v14 sweep:
 
 ```bash
 cd /root/rtx6kpro
@@ -767,6 +848,25 @@ RUN_ID=20260706T0150Z \
 RESULT_ROOT=/root/bench-results/glm52-v14-todo-and-sweep-20260706T0150Z \
 KLD_ROOT=/root/kld/glm52_v14_todo_20260706T0150Z \
 ./scripts/bench-glm52-v14-todo-and-sweep.sh all
+```
+
+Run the v5 KLD keypoint rerun:
+
+```bash
+cd /root/rtx6kpro
+RUN_ID=20260707Tkeypoints-v5 RUNS=5 \
+./scripts/bench-glm52-v14-kld-keypoints.sh all
+```
+
+Run the v5 hybrid-DCP follow-up sweep:
+
+```bash
+cd /root/rtx6kpro
+RESULT_ROOT=/root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z \
+./scripts/bench-glm52-v14-dcp-hybrid-v5.sh tp8-decode
+
+RESULT_ROOT=/root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z \
+./scripts/bench-glm52-v14-dcp-hybrid-v5.sh tp6-mxfp4
 ```
 
 The runner supports narrower reruns:
@@ -778,7 +878,8 @@ The runner supports narrower reruns:
 ./scripts/bench-glm52-v14-todo-and-sweep.sh summarize
 ```
 
-Progress is appended to:
+The v5 DCP helper writes progress to `${RESULT_ROOT}/progress.log` by default.
+The original 2026-07-06 full-sweep helper appends progress to:
 
 ```text
 /root/vllm/prubezne_vysledky

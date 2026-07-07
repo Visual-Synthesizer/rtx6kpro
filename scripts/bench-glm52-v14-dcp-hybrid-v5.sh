@@ -6,7 +6,7 @@ HELPER="${HELPER:-${ROOT_DIR}/scripts/run-glm52-v14-compose.sh}"
 BENCH="${BENCH:-/root/llm-inference-bench/llm_decode_bench.py}"
 IMAGE="${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707}"
 RESULT_ROOT="${RESULT_ROOT:-/root/bench-results/glm52-v14-dcp-hybrid-v5-$(date -u +%Y%m%dT%H%M%SZ)}"
-PROGRESS_FILE="${PROGRESS_FILE:-/root/vllm/prubezne_vysledky}"
+PROGRESS_FILE="${PROGRESS_FILE:-${RESULT_ROOT}/progress.log}"
 
 NVFP4_MODEL="${NVFP4_MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}"
 MXFP4_MODEL="${MXFP4_MODEL:-/root/models/GLM-5.2-BF16-AMDMXFP4experts}"
@@ -109,15 +109,24 @@ run_decode() {
   local label="$1" port="$2" served="$3" out="$4"
   progress "GLM52_V14_V5_DECODE_START label=${label}"
   nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_before_decode.csv" 2>/dev/null || true
-  python3 "${BENCH}" \
-    --base-url "http://127.0.0.1:${port}/v1" \
+  if ! python3 "${BENCH}" \
+    --host 127.0.0.1 \
+    --port "${port}" \
     --model "${served}" \
     --skip-prefill \
     --contexts "${DECODE_CONTEXTS}" \
     --concurrency "${DECODE_CONCURRENCY}" \
     --duration "${DECODE_DURATION}" \
     --max-tokens "${DECODE_MAX_TOKENS}" \
-    --output "${out}/decode.json" > "${out}/decode.log" 2>&1
+    --no-hw-monitor \
+    --output "${out}/decode.json" > "${out}/decode.log" 2>&1; then
+    progress "GLM52_V14_V5_DECODE_FAILED label=${label} out=${out}/decode.log"
+    return 1
+  fi
+  if [[ ! -s "${out}/decode.json" ]]; then
+    progress "GLM52_V14_V5_DECODE_FAILED label=${label} missing=${out}/decode.json"
+    return 1
+  fi
   nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_after_decode.csv" 2>/dev/null || true
   progress "GLM52_V14_V5_DECODE_DONE label=${label} out=${out}/decode.json"
 }
@@ -126,15 +135,24 @@ run_prefill() {
   local label="$1" port="$2" served="$3" out="$4"
   progress "GLM52_V14_V5_PREFILL_START label=${label}"
   nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_before_prefill.csv" 2>/dev/null || true
-  python3 "${BENCH}" \
-    --base-url "http://127.0.0.1:${port}/v1" \
+  if ! python3 "${BENCH}" \
+    --host 127.0.0.1 \
+    --port "${port}" \
     --model "${served}" \
     --prefill-only \
     --standalone-prefill \
     --prefill-contexts "${PREFILL_CONTEXTS}" \
     --prefill-duration "${PREFILL_DURATION}" \
     --max-tokens 1 \
-    --output "${out}/prefill.json" > "${out}/prefill.log" 2>&1
+    --no-hw-monitor \
+    --output "${out}/prefill.json" > "${out}/prefill.log" 2>&1; then
+    progress "GLM52_V14_V5_PREFILL_FAILED label=${label} out=${out}/prefill.log"
+    return 1
+  fi
+  if [[ ! -s "${out}/prefill.json" ]]; then
+    progress "GLM52_V14_V5_PREFILL_FAILED label=${label} missing=${out}/prefill.json"
+    return 1
+  fi
   nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_after_prefill.csv" 2>/dev/null || true
   progress "GLM52_V14_V5_PREFILL_DONE label=${label} out=${out}/prefill.json"
 }
@@ -193,12 +211,26 @@ wait_pair_then_bench() {
   pid_a=$!
   run_decode "$(basename "${out_b}")" "${port_b}" "${served_b}" "${out_b}" &
   pid_b=$!
-  wait "${pid_a}" "${pid_b}"
+  ok_a=0
+  ok_b=0
+  wait "${pid_a}" || ok_a=$?
+  wait "${pid_b}" || ok_b=$?
+  if (( ok_a != 0 || ok_b != 0 )); then
+    progress "GLM52_V14_V5_DECODE_PAIR_FAILED out_a=${out_a} status_a=${ok_a} out_b=${out_b} status_b=${ok_b}"
+    return 1
+  fi
   run_prefill "$(basename "${out_a}")" "${port_a}" "${served_a}" "${out_a}" &
   pid_a=$!
   run_prefill "$(basename "${out_b}")" "${port_b}" "${served_b}" "${out_b}" &
   pid_b=$!
-  wait "${pid_a}" "${pid_b}"
+  ok_a=0
+  ok_b=0
+  wait "${pid_a}" || ok_a=$?
+  wait "${pid_b}" || ok_b=$?
+  if (( ok_a != 0 || ok_b != 0 )); then
+    progress "GLM52_V14_V5_PREFILL_PAIR_FAILED out_a=${out_a} status_a=${ok_a} out_b=${out_b} status_b=${ok_b}"
+    return 1
+  fi
 }
 
 wait_pair_then_decode() {
@@ -229,7 +261,14 @@ wait_pair_then_decode() {
   pid_a=$!
   run_decode "$(basename "${out_b}")" "${port_b}" "${served_b}" "${out_b}" &
   pid_b=$!
-  wait "${pid_a}" "${pid_b}"
+  ok_a=0
+  ok_b=0
+  wait "${pid_a}" || ok_a=$?
+  wait "${pid_b}" || ok_b=$?
+  if (( ok_a != 0 || ok_b != 0 )); then
+    progress "GLM52_V14_V5_DECODE_PAIR_FAILED out_a=${out_a} status_a=${ok_a} out_b=${out_b} status_b=${ok_b}"
+    return 1
+  fi
 }
 
 wait_single_then_bench() {
@@ -252,6 +291,12 @@ wait_single_then_bench() {
 tp6_mxfp4() {
   local base="${RESULT_ROOT}/tp6-mxfp4-online-mxfp8"
   local dcp_a dcp_b out_a out_b
+  stop_all_glm52_v5
+  out_a="${base}/dcp1"
+  bench_case "tp6-mxfp4-dcp1" "${MXFP4_MODEL}" "GLM-5.2-BF16-AMDMXFP4experts-online-mxfp8-tp6-dcp1" 5910 "0,1,2,3,4,5" 6 1 3 "force-a8-experimental" "mxfp4" "mxfp8" 262144 16 4096 64 0.98 "${out_a}"
+  wait_single_then_bench "${out_a}" || true
+  stop_case "${out_a}"
+
   for pair in "2 3"; do
     set -- ${pair}
     dcp_a="$1"
@@ -315,7 +360,7 @@ def decode_values(path):
         cc = row.get("concurrency")
         if cc is None:
             continue
-        rows[int(cc)] = row.get("aggregate_output_tokens_per_second")
+        rows[int(cc)] = row.get("aggregate_tps", row.get("aggregate_output_tokens_per_second"))
     return rows
 
 def prefill_values(path):
