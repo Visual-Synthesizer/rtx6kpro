@@ -62,12 +62,14 @@ Hybrid-DCP follow-up sweep helpers:
 cd /root/rtx6kpro
 ./scripts/bench-glm52-v14-dcp-hybrid-v5.sh tp8-decode
 ./scripts/bench-glm52-v14-tp6-mxfp4-v7.sh run
+./scripts/bench-glm52-v14-tp8-hybrid-table-v7.sh run
 ```
 
 The helpers start all servers through `scripts/run-glm52-v14-compose.sh`, wait
 until paired instances are fully loaded before benchmarking, write progress to
 `${RESULT_ROOT}/progress.log` by default, measures TP6 MXFP4/online-MXFP8 for
-`DCP=1,2,3,6`, and measures TP8 NVFP4/A16/MTP3 decode for `DCP=2,4,8`.
+`DCP=1,2,3,6`, measures TP8 NVFP4/A16/MTP3 decode for `DCP=2,4,8`, and builds
+the TP8/MTP0 comparison table for NVFP4 and MXFP4 across `DCP=1,2,4,8`.
 The benchmark client is run with `--no-hw-monitor`; the helpers record their own
 thermal CSV snapshots before and after each measured phase.
 
@@ -136,6 +138,7 @@ Result roots:
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
 /root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z
 /root/bench-results/glm52-v14-v7-tp8-mxfp4-a8-dcp1-mtp0-20260707T133344Z
+/root/bench-results/glm52-v14-v7-tp8-hybrid-table-mtp0-20260707T135950Z
 ```
 
 ## Runtime Contract
@@ -654,6 +657,43 @@ speed rows are from the full sweep; MXFP4 rows were rerun on the v7 image under:
 | Luke NVFP4 A16 online MXFP8 | 0.07188 | 1 | 93.30 | 6,239 | 5,941 |
 | BF16 AMD MXFP4 experts A8 orig | 0.07610 | 1 | 88.72 | 6,698 | 6,307 |
 | BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 1 | 94.03 | 6,731 | 6,364 |
+
+## TP8 Hybrid DCP MTP0 Comparison
+
+Current TP8, MTP0, `f8=0` comparison table for the key GLM 5.2 variants. The
+`DCP2/4/8` columns use the v7 hybrid DCP policy (`a2a` for small decode batches,
+`ag_rs` for larger prefill/extend batches). `DCP1` has no DCP collective; its
+values reuse the already-published DCP1 measurements where applicable, plus the
+missing MXFP4 `cc32` rerun from the table helper. No server was benchmarked while
+the paired 8-GPU instance was still loading.
+
+Settings: `TP=8`, `MTP=0`, `MAX_NUM_SEQS=32`, `GRAPH=128`,
+`MAX_BATCHED_TOKENS=8192`, `MAX_MODEL_LEN=131072`, `F8_DMA=0`,
+`LOAD_FORMAT=instanttensor`, `INSTANTTENSOR_BACKEND=BUFFERED`. `cc1` and `cc32`
+are `llm_decode_bench` ctx0 aggregate tok/s; prefill values are standalone prompt
+tok/s.
+
+Result root:
+
+```text
+/root/bench-results/glm52-v14-v7-tp8-hybrid-table-mtp0-20260707T135950Z
+```
+
+Reproduce:
+
+```bash
+cd /root/rtx6kpro
+./scripts/bench-glm52-v14-tp8-hybrid-table-v7.sh run
+```
+
+| Case | KLD mean | DCP1 cc1 | DCP1 cc32 | DCP1 prefill 8k | DCP1 prefill 64k | DCP2 cc1 | DCP2 cc32 | DCP2 prefill 8k | DCP2 prefill 64k | DCP4 cc1 | DCP4 cc32 | DCP4 prefill 8k | DCP4 prefill 64k | DCP8 cc1 | DCP8 cc32 | DCP8 prefill 8k | DCP8 prefill 64k |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Luke NVFP4 A4 orig | 0.10734 | 87.99 | 934.07 | 6,557 | 6,257 | 72.44 | 838.57 | 4,679 | 4,710 | 71.65 | 747.11 | 3,415 | 3,455 | 67.29 | 606.35 | 2,197 | 2,209 |
+| Luke NVFP4 A4 online MXFP8 | 0.10901 | 94.96 | 953.24 | 6,681 | 6,351 | 76.26 | 847.24 | 4,636 | 4,718 | 75.32 | 760.87 | 3,402 | 3,468 | 70.84 | 617.18 | 2,188 | 2,212 |
+| Luke NVFP4 A16 orig | 0.06662 | 86.56 | 932.72 | 6,140 | 5,849 | 71.48 | 828.30 | 4,455 | 4,481 | 70.74 | 750.20 | 3,301 | 3,326 | 66.11 | 610.88 | 2,147 | 2,157 |
+| Luke NVFP4 A16 online MXFP8 | 0.07188 | 93.30 | 954.52 | 6,239 | 5,941 | 74.85 | 837.81 | 4,385 | 4,471 | 73.99 | 752.91 | 3,270 | 3,331 | 69.45 | 610.40 | 2,132 | 2,155 |
+| BF16 AMD MXFP4 experts A8 orig | 0.07610 | 88.72 | 938.10 | 6,698 | 6,307 | 71.84 | 832.28 | 4,747 | 4,786 | 71.73 | 745.91 | 3,450 | 3,491 | 67.15 | 613.70 | 2,206 | 2,220 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 94.03 | 956.30 | 6,731 | 6,364 | 75.66 | 840.02 | 4,702 | 4,781 | 75.37 | 761.43 | 3,427 | 3,495 | 71.01 | 607.69 | 2,200 | 2,223 |
 
 ## Coding Peak Rerun
 
