@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}"
+GLM52_V14_IMAGE="${GLM52_V14_IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707}"
 BASE_IMAGE="${BASE_IMAGE:-${GLM52_V14_IMAGE}}"
 ONLINE_IMAGE="${ONLINE_IMAGE:-${GLM52_V14_IMAGE}}"
 DCP_BACKEND="${DCP_BACKEND:-a2a}"
@@ -10,7 +10,9 @@ DCP_A2A_LARGE_BACKEND="${DCP_A2A_LARGE_BACKEND:-ag_rs}"
 MODEL="${MODEL:-/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522}"
 QUANTIZATION="${QUANTIZATION:-modelopt_fp4}"
 if [[ -z "${QUANTIZATION_CONFIG_JSON+x}" ]]; then
-  QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}'
+  # Keep in sync with the mxfp8 preset in run-glm52-v14-server (kv_b_proj is
+  # dequantized at load for MLA absorb; quantizing it is noise, not speed).
+  QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"},"ignore":["re:.*kv_b_proj"]}'
 fi
 case "${DCP_BACKEND}" in
   ag_rs|a2a) ;;

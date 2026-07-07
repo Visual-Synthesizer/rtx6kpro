@@ -103,14 +103,17 @@ case "${ONLINE_QUANT}" in
     ONLINE_QUANT=none
     ;;
   mxfp8)
+    # kv_b_proj is dequantized at load for MLA absorb (W_UK/W_UV stay bf16),
+    # so quantizing it buys zero speed and only adds rounding noise
+    # (measured 0.152 -> 0.144 mean|dlogprob| at identical tok/s).
     if [[ -z "${QUANTIZATION_CONFIG_JSON}" ]]; then
-      QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}'
+      QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"},"ignore":["re:.*kv_b_proj"]}'
     fi
     ;;
   fp8|fp8_block|fp8-block|fp8-mxfp4)
     ONLINE_QUANT=fp8
     if [[ -z "${QUANTIZATION_CONFIG_JSON}" ]]; then
-      QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"fp8_per_block_static"},"ignore":["lm_head","model.layers.78.eh_proj","re:.*\\.mlp\\.gate$","re:.*\\.self_attn\\.indexer\\.weights_proj$","re:.*\\.self_attn\\.indexers_proj$"]}'
+      QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"fp8_per_block_static"},"ignore":["lm_head","model.layers.78.eh_proj","re:.*kv_b_proj","re:.*\\.mlp\\.gate$","re:.*\\.self_attn\\.indexer\\.weights_proj$","re:.*\\.self_attn\\.indexers_proj$"]}'
     fi
     ;;
   custom)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}
+IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707}
 MODEL=${MODEL:-/root/models/GLM-5.2-FP8-MXFP4experts}
 DRAFT_MODEL=${DRAFT_MODEL:-/root/.cache/huggingface/hub/models--RedHatAI--GLM-5.2-speculator.dspark/snapshots/7598747fe1f35995babeae5c730c8a8a4d9c8492}
 

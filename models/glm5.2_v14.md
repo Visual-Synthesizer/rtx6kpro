@@ -16,13 +16,13 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706
+voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707
 ```
 
 Docker Hub manifest digest:
 
 ```text
-sha256:0d073c44725fd9d9f9823af405d5f78fa2d2e8d6da7a1108fa7242361298ef56
+sha256:ffafaabdd45519792135ab7b464dc4600faac176218947063c93e4030dbb7d18
 ```
 
 Build script:
@@ -35,9 +35,9 @@ Pinned source stack:
 
 | Component | Ref |
 |---|---|
-| vLLM | `local-inference-lab/vllm fable/dcp-a2a-hybrid-20260707 @ 884fe48c429f093544372e8e68a4655a47011e58` |
+| vLLM | `local-inference-lab/vllm codex/eldritch-enlightenment-v5-dcp-hybrid-pr77-20260707 @ cd272c7b1acd82d50b609e123a55533fe32a5f94` |
 | vLLM upstream base | `dev/eldritch-enlightenment @ c382f1d28d5be2f867c216609408bdb424d6049a` |
-| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay`, `#78 DCP A2A hybrid token cap` |
+| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay + shared-expert fix`, `#78 DCP A2A hybrid token cap`, `#79 DCP warmup unsupported-world-size guard` |
 | Docker build repo | `local-inference-lab/blackwell-llm-docker main @ d25e34953b76e201676c29590be1b4d1079f56b0` |
 | B12X | `local-inference-lab/b12x master @ e44cb77777a075790ebe9f7aa9f225d073aea109` |
 | InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
@@ -55,6 +55,18 @@ Exact build and push:
 cd /root/rtx6kpro
 PUSH_IMAGE=1 ./scripts/build-glm52-v14-final-image.sh
 ```
+
+Hybrid-DCP follow-up sweep helper for the v5 image:
+
+```bash
+cd /root/rtx6kpro
+./scripts/bench-glm52-v14-dcp-hybrid-v5.sh all
+```
+
+The script starts all servers through `scripts/run-glm52-v14-compose.sh`, waits
+until paired instances are fully loaded before benchmarking, writes progress to
+`/root/vllm/prubezne_vysledky`, measures TP6 MXFP4/online-MXFP8 for
+`DCP=2,3,6`, and measures TP8 NVFP4/A16/MTP3 decode for `DCP=2,4,8`.
 
 The final image defaults InstantTensor to buffered I/O:
 
@@ -161,7 +173,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v3-vllm884fe48-b12xe44cb77-cu132-20260706}
+    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -298,7 +310,7 @@ ONLINE_QUANT=mxfp8
 
 ```bash
 --quantization modelopt_fp4 \
---quantization-config '{"linear":{"weight":"mxfp8"}}'
+--quantization-config '{"linear":{"weight":"mxfp8"},"ignore":["re:.*kv_b_proj"]}'
 ```
 
 ```bash
@@ -307,7 +319,7 @@ ONLINE_QUANT=fp8
 
 ```bash
 --quantization modelopt_fp4 \
---quantization-config '{"linear":{"weight":"fp8_per_block_static"},"ignore":["lm_head","model.layers.78.eh_proj","re:.*\\.mlp\\.gate$","re:.*\\.self_attn\\.indexer\\.weights_proj$","re:.*\\.self_attn\\.indexers_proj$"]}'
+--quantization-config '{"linear":{"weight":"fp8_per_block_static"},"ignore":["lm_head","model.layers.78.eh_proj","re:.*kv_b_proj","re:.*\\.mlp\\.gate$","re:.*\\.self_attn\\.indexer\\.weights_proj$","re:.*\\.self_attn\\.indexers_proj$"]}'
 ```
 
 In this overlay, `linear.weight=mxfp8` or `linear.weight=fp8_per_block_static`
@@ -316,6 +328,25 @@ eligible for online requant, load that weight in the selected online format
 instead of leaving it BF16. Existing checkpoint MXFP4 experts stay MXFP4.
 Layers that the overlay keeps BF16, including the sparse indexer projection path,
 are not forced by the generic `linear` rule.
+
+Both presets now ignore `kv_b_proj` (added 2026-07-07): MLA absorb dequantizes
+`kv_b_proj` at load into BF16 `W_UK`/`W_UV` copies and the quantized GEMM never
+runs, so quantizing it buys zero speed and only bakes rounding noise into every
+attention read. Measured with the paired teacher-forced logprob probe
+(GLM-5.2, 3.5k tokens, vs the clean NVFP4 baseline): mean|Δlogprob| 0.152 →
+0.144 and max 5.5 → 4.5 at identical throughput. At KLD level this is below
+the harness noise floor (the whole dense overlay measures 0.1068 → 0.1076
+± 0.004), so it is a free-quality detail, not a regression fix. The same
+reasoning applies to the offline zai-style FP8 checkpoints, which historically
+quantized `kv_b_proj` for checkpoint size only.
+
+Shared experts: the `linear` spec never quantizes shared-expert projections on
+any checkpoint format (as of `6a784b94` in
+[PR #77](https://github.com/local-inference-lab/vllm/pull/77), the MXFP4
+overlay path matches the ModelOpt behavior). Quantizing shared experts measured
+strictly worse on GLM-5.2 — quality 0.156 vs 0.152 mean|Δlogprob| **and**
+decode 90.1 vs 92.5 tok/s — so they stay BF16 unless an explicit
+`"shared_experts"` spec is passed.
 
 The baseline variant does not pass `--quantization-config`; it loads the Luke
 checkpoint as `--quantization modelopt_fp4`.
@@ -395,6 +426,79 @@ not expected to move decode throughput in a meaningful way; decode deltas with
 `ag`/`ring` are treated as measurement noise and are not shown in the main
 decode tables. `ag` and `ring` remain listed for prefill/KLD where the transport
 actually matters.
+
+## TP6 Notes
+
+Validated 2026-07-07 on the v14/v5 image (`vllmcd272c7-b12xe44cb77`). TP6
+works, but not with the original v14 helper defaults. Two independent failure
+modes were hit and resolved:
+
+1. **KV-cache OOM with default memory settings.** TP6 stores 1/6 of the
+   weights per GPU instead of 1/8, so with the helper defaults
+   (`GPU_MEMORY_UTILIZATION=0.90`, `MAX_MODEL_LEN=131072`,
+   `MAX_BATCHED_TOKENS=8192`, `MAX_NUM_SEQS=32`) startup dies with:
+
+   ```text
+   ValueError: To serve at least one request with the model's max seq len
+   (131072), (6.68 GiB KV cache is needed, which is larger than the available
+   KV cache memory (2.18 GiB). ... estimated maximum model length is 42752.
+   ```
+
+   Use the v13-era memory shape instead: `GPU_MEMORY_UTILIZATION=0.957`,
+   `MAX_MODEL_LEN=128000`, `MAX_BATCHED_TOKENS=2048`, and either a small
+   `MAX_NUM_SEQS` or DCP to spread the KV cache.
+
+2. **DCP3/DCP6 boot regression (fixed).** The B12X PCIe DCP channel only
+   supports world sizes 2/4/8. The DCP collective warmup introduced after v13
+   ("Optimize B12X DCP collectives and warmup") treated that as fatal and
+   killed EngineCore with
+   `RuntimeError: B12X PCIe DCP query all-gather is unavailable for the
+   configured attention geometry`, even though the runtime falls back to NCCL
+   per call (which is why the same config booted on v13). Fixed by
+   [PR #79](https://github.com/local-inference-lab/vllm/pull/79)
+   (`b75e72993c`, cherry-picked into this image as `cd272c7b1a`): unsupported
+   DCP world sizes log a warning and use NCCL collectives. In the v5 image,
+   TP6 with `DCP=3` or `DCP=6` no longer needs site-packages patch mounts.
+
+Still true on v14:
+
+- The head66 virtual-TP padding is automatic (`attention heads 64 -> 66` in
+  the boot log); no extra switch is needed.
+- Use `B12X_MLA_SPARSE` and DCP values that divide 6: `1`, `2`, `3`, `6`.
+  `DCP=2` keeps the B12X PCIe DCP channel (world size 2); `DCP=3`/`DCP=6`
+  use NCCL DCP collectives.
+- The v13 workaround `VLLM_ENABLE_PCIE_ALLREDUCE=0` is **no longer needed**:
+  PCIe oneshot/fused-RMS allreduce at world size 6 started and ran cleanly in
+  both validated configurations.
+- The A8/MXFP4 restriction above (W4A8-MX QMMA shard-shape rejection) still
+  applies; TP6 was validated with the NVFP4 checkpoint and `MOE_MODE=a16`.
+
+Validated launches (helper env; `MOE_MODE=a16`, `MTP=3`, `MAX_NUM_SEQS=1`,
+`GRAPH=16`, `GPU_MEMORY_UTILIZATION=0.957`, `MAX_MODEL_LEN=128000`,
+`MAX_BATCHED_TOKENS=2048`, GPUs `8-13`):
+
+```bash
+cd /root/rtx6kpro
+NAME=glm52-v14-tp6 PORT=5861 GPUS=8,9,10,11,12,13 \
+TP=6 DCP=1 MTP=3 MOE_MODE=a16 \
+GPU_MEMORY_UTILIZATION=0.957 MAX_MODEL_LEN=128000 \
+MAX_BATCHED_TOKENS=2048 MAX_NUM_SEQS=1 GRAPH=16 \
+./scripts/run-glm52-v14-compose.sh up
+# DCP variant: TP=6 DCP=6 (requires v5 image or newer for PR #79)
+```
+
+Measured (coding smoke `test.py`, short prompt and `-c 3000`, both coherent
+with `0` CJK characters):
+
+| Mode | MTP | KV cache tokens | Max conc at 128k | Short ctx tok/s | 3k ctx tok/s |
+|---|---:|---:|---:|---:|---:|
+| TP6 DCP1 | 3 | 168,384 | 1.32x | 131.1 | 106.7 |
+| TP6 DCP6 | 3 | 989,125 | 7.7x | 74.9 | 74.5 |
+
+`DCP=1` is the fast single-stream shape but fits only one ~128k request in
+KV; `DCP=6` multiplies KV capacity ~6x for long-context or multi-user serving
+at roughly 57% of the DCP1 decode speed. `DCP=2` is the middle ground and
+keeps the B12X DCP fast path.
 
 ## Direct DCP1 Measurements
 
