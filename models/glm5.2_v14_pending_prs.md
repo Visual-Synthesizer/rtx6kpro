@@ -38,11 +38,17 @@ only. b12x #26 (odd tile counts) is unaffected — its value is DS4-Pro TP8
 | PR | What it does | Proof |
 |---|---|---|
 | [#26](https://github.com/lukealonso/b12x/pull/26) | `tiny_decode` supports odd FC2 K-tile counts (`n % 128` instead of `n % 256`); FC2 K-tiles-per-task becomes a configure()-time value (2 if even — unchanged binaries — else 1) | TP6 A8 decode 72.2 → **83.0** tok/s (beats A16); prefill unchanged; oracle 10/10 incl. n=384. Also newly enables tiny for **DS4-Pro TP8** (3072/8 = 384/rank) and GLM TP16 (128/rank) |
+| [#27](https://github.com/lukealonso/b12x/pull/27) | **The #80 replacement Luke asked for**: native 32-aligned expert shards — ceil-tiled rp/sfb storage with half-aligned gated halves, tiny/dynamic/w4a16 all serve 352 (GLM TP6) and 192 (DS4-Pro TP16) with zero checkpoint padding. Includes #26's commits (merge either first). Also fixes a pre-existing silent-corruption bug (e8m0 small-M direct on multi-chunk tails) | E2E TP6/MXFP4/**A8**: decode **84.1/82.7** tok/s (beats the padded experiment 83.0/81.4), 30k TTFT 3.27 s, 0 CJK; A16 native 67.9/67.0; oracle n∈{1024,384,352,192}, suite parity vs master. vLLM needs NO change (dev never merged #80) |
 
 ## Image state vs PRs
 
 - `v6` (`vllm49bed029-b12x26144c0`) already **contains #74–#80 and b12x #26**
   via branch pins; #81 rides as a build patch until merged.
+- **Caveat for the next image**: v6's vLLM pin includes the rejected #80
+  padding — with b12x #27 the padding is superseded, so the next build should
+  pin vLLM WITHOUT #80 (current dev HEAD is fine) + b12x with #27; otherwise
+  vLLM pads 352→384 before b12x ever sees the shard and #27's native path
+  never engages.
 - After all merges: rebuild from `dev/eldritch-enlightenment` HEAD +
   `b12x master` HEAD, drop the branch pins and the #81 patch file, and delete
   this page.
