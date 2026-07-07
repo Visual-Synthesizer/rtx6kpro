@@ -8,11 +8,10 @@ GLM-5.2 uses vLLM prompt-logit capture, GLM-5.2 BF16 reference tensors, and the
 Status as of 2026-07-07:
 
 - The BF16 reference tensors are available locally under `/root/kld/glm52_refs`.
-- The intended Hugging Face dataset upload target is
+- The BF16 reference tensors are published as the Hugging Face dataset
   `festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618`.
-- That HF dataset is not visible from the local authenticated `festr2` read
-  token on 2026-07-07. The upload helper exists, but the dataset should be
-  treated as not published until the upload is rerun with a write token.
+- The dataset was verified public through the HF API on 2026-07-07 at commit
+  `b9b0d845f4e9937885081dffebf9e3c432c06e4e`.
 
 ## Reference Data
 
@@ -76,22 +75,28 @@ decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
 decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors.json
 ```
 
-On 2026-07-07 the local machine authenticated as `festr2` with a read-only HF
-token, and the HF API returned 404 for that dataset. Listing `festr2` datasets
-showed the older KLD datasets (`glm51-kld-reference-logits-wikitext-ctx2048-s512-20260517`
-and `glm51-decode-kld-refs`) but no GLM-5.2 BF16 reference dataset. If a
-colleague needs to reproduce this before the upload is fixed, copy
-`/root/kld/glm52_refs` from this machine.
+Verified HF state on 2026-07-07:
 
-To publish the references, login with a write token and run:
+```text
+repo:    festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618
+private: False
+sha:     b9b0d845f4e9937885081dffebf9e3c432c06e4e
+files:
+  .gitattributes
+  README.md
+  prefill/logits_0.safetensors
+  decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
+  decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors.json
+```
+
+To republish or repair the dataset, login with a write token and run:
 
 ```bash
 python3 /root/kld/upload_glm52_bf16_refs_to_hf.py \
   --repo-id festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618
 ```
 
-After the upload exists, a fresh machine can restore the expected local layout
-with:
+A fresh machine can restore the expected local layout with:
 
 ```bash
 mkdir -p /root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618
