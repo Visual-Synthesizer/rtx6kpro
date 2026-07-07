@@ -641,31 +641,14 @@ Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 | BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.07610 +/- 0.00087 | 0.07486 | 0.07730 |
 | BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.07741 +/- 0.00060 | 0.07638 | 0.07782 |
 
-Combined TP8/DCP1/MTP0 speed and KLD view (`f8=0`, `MAX_NUM_SEQS=32`,
-`GRAPH=128`, `MAX_BATCHED_TOKENS=8192`, `MAX_MODEL_LEN=131072`). Luke NVFP4
-speed rows are from the full sweep; MXFP4 rows were rerun on the v7 image under:
-
-```text
-/root/bench-results/glm52-v14-v7-tp8-mxfp4-a8-dcp1-mtp0-20260707T133344Z
-```
-
-| Case | KLD mean | DCP | Decode cc1 | Prefill 8k | Prefill 64k |
-|---|---:|---:|---:|---:|---:|
-| Luke NVFP4 A4 orig | 0.10734 | 1 | 87.99 | 6,557 | 6,257 |
-| Luke NVFP4 A4 online MXFP8 | 0.10901 | 1 | 94.96 | 6,681 | 6,351 |
-| Luke NVFP4 A16 orig | 0.06662 | 1 | 86.56 | 6,140 | 5,849 |
-| Luke NVFP4 A16 online MXFP8 | 0.07188 | 1 | 93.30 | 6,239 | 5,941 |
-| BF16 AMD MXFP4 experts A8 orig | 0.07610 | 1 | 88.72 | 6,698 | 6,307 |
-| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 1 | 94.03 | 6,731 | 6,364 |
-
 ## TP8 Hybrid DCP MTP0 Comparison
 
-Current TP8, MTP0, `f8=0` comparison table for the key GLM 5.2 variants. The
-`DCP2/4/8` columns use the v7 hybrid DCP policy (`a2a` for small decode batches,
-`ag_rs` for larger prefill/extend batches). `DCP1` has no DCP collective; its
-values reuse the already-published DCP1 measurements where applicable, plus the
-missing MXFP4 `cc32` rerun from the table helper. No server was benchmarked while
-the paired 8-GPU instance was still loading.
+Current TP8, MTP0, `f8=0` comparison for the key GLM 5.2 variants. The `DCP2/4/8`
+columns use the v7 hybrid DCP policy (`a2a` for small decode batches, `ag_rs`
+for larger prefill/extend batches). `DCP1` has no DCP collective; its values
+reuse the already-published DCP1 measurements where applicable, plus the missing
+MXFP4 `cc32` rerun from the table helper. No server was benchmarked while the
+paired 8-GPU instance was still loading.
 
 Settings: `TP=8`, `MTP=0`, `MAX_NUM_SEQS=32`, `GRAPH=128`,
 `MAX_BATCHED_TOKENS=8192`, `MAX_MODEL_LEN=131072`, `F8_DMA=0`,
@@ -673,9 +656,10 @@ Settings: `TP=8`, `MTP=0`, `MAX_NUM_SEQS=32`, `GRAPH=128`,
 are `llm_decode_bench` ctx0 aggregate tok/s; prefill values are standalone prompt
 tok/s.
 
-Result root:
+Result roots:
 
 ```text
+/root/bench-results/glm52-v14-v7-tp8-mxfp4-a8-dcp1-mtp0-20260707T133344Z
 /root/bench-results/glm52-v14-v7-tp8-hybrid-table-mtp0-20260707T135950Z
 ```
 
@@ -686,14 +670,65 @@ cd /root/rtx6kpro
 ./scripts/bench-glm52-v14-tp8-hybrid-table-v7.sh run
 ```
 
-| Case | KLD mean | DCP1 cc1 | DCP1 cc32 | DCP1 prefill 8k | DCP1 prefill 64k | DCP2 cc1 | DCP2 cc32 | DCP2 prefill 8k | DCP2 prefill 64k | DCP4 cc1 | DCP4 cc32 | DCP4 prefill 8k | DCP4 prefill 64k | DCP8 cc1 | DCP8 cc32 | DCP8 prefill 8k | DCP8 prefill 64k |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Luke NVFP4 A4 orig | 0.10734 | 87.99 | 934.07 | 6,557 | 6,257 | 72.44 | 838.57 | 4,679 | 4,710 | 71.65 | 747.11 | 3,415 | 3,455 | 67.29 | 606.35 | 2,197 | 2,209 |
-| Luke NVFP4 A4 online MXFP8 | 0.10901 | 94.96 | 953.24 | 6,681 | 6,351 | 76.26 | 847.24 | 4,636 | 4,718 | 75.32 | 760.87 | 3,402 | 3,468 | 70.84 | 617.18 | 2,188 | 2,212 |
-| Luke NVFP4 A16 orig | 0.06662 | 86.56 | 932.72 | 6,140 | 5,849 | 71.48 | 828.30 | 4,455 | 4,481 | 70.74 | 750.20 | 3,301 | 3,326 | 66.11 | 610.88 | 2,147 | 2,157 |
-| Luke NVFP4 A16 online MXFP8 | 0.07188 | 93.30 | 954.52 | 6,239 | 5,941 | 74.85 | 837.81 | 4,385 | 4,471 | 73.99 | 752.91 | 3,270 | 3,331 | 69.45 | 610.40 | 2,132 | 2,155 |
-| BF16 AMD MXFP4 experts A8 orig | 0.07610 | 88.72 | 938.10 | 6,698 | 6,307 | 71.84 | 832.28 | 4,747 | 4,786 | 71.73 | 745.91 | 3,450 | 3,491 | 67.15 | 613.70 | 2,206 | 2,220 |
-| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 94.03 | 956.30 | 6,731 | 6,364 | 75.66 | 840.02 | 4,702 | 4,781 | 75.37 | 761.43 | 3,427 | 3,495 | 71.01 | 607.69 | 2,200 | 2,223 |
+### Best Readout
+
+This table keeps the accuracy/speed tradeoff on one screen. `Best decode DCP`
+uses `cc32`; `Best prefill DCP` uses 64k prefill. For this particular TP8/MTP0
+sweep both are still `DCP1`, while `DCP2/4/8` are mainly useful for larger KV
+capacity.
+
+| Case | KLD mean | DCP1 cc1 | DCP1 cc32 | DCP1 prefill 8k | DCP1 prefill 64k | Best decode DCP | Best prefill DCP |
+|---|---:|---:|---:|---:|---:|---|---|
+| Luke NVFP4 A4 orig | 0.10734 | 87.99 | 934.07 | 6,557 | 6,257 | DCP1 | DCP1 |
+| Luke NVFP4 A4 online MXFP8 | 0.10901 | 94.96 | 953.24 | 6,681 | 6,351 | DCP1 | DCP1 |
+| Luke NVFP4 A16 orig | 0.06662 | 86.56 | 932.72 | 6,140 | 5,849 | DCP1 | DCP1 |
+| Luke NVFP4 A16 online MXFP8 | 0.07188 | 93.30 | 954.52 | 6,239 | 5,941 | DCP1 | DCP1 |
+| BF16 AMD MXFP4 experts A8 orig | 0.07610 | 88.72 | 938.10 | 6,698 | 6,307 | DCP1 | DCP1 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 94.03 | 956.30 | 6,731 | 6,364 | DCP1 | DCP1 |
+
+### Decode cc1
+
+| Case | DCP1 | DCP2 | DCP4 | DCP8 |
+|---|---:|---:|---:|---:|
+| Luke NVFP4 A4 orig | 87.99 | 72.44 | 71.65 | 67.29 |
+| Luke NVFP4 A4 online MXFP8 | 94.96 | 76.26 | 75.32 | 70.84 |
+| Luke NVFP4 A16 orig | 86.56 | 71.48 | 70.74 | 66.11 |
+| Luke NVFP4 A16 online MXFP8 | 93.30 | 74.85 | 73.99 | 69.45 |
+| BF16 AMD MXFP4 experts A8 orig | 88.72 | 71.84 | 71.73 | 67.15 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 94.03 | 75.66 | 75.37 | 71.01 |
+
+### Decode cc32
+
+| Case | DCP1 | DCP2 | DCP4 | DCP8 |
+|---|---:|---:|---:|---:|
+| Luke NVFP4 A4 orig | 934.07 | 838.57 | 747.11 | 606.35 |
+| Luke NVFP4 A4 online MXFP8 | 953.24 | 847.24 | 760.87 | 617.18 |
+| Luke NVFP4 A16 orig | 932.72 | 828.30 | 750.20 | 610.88 |
+| Luke NVFP4 A16 online MXFP8 | 954.52 | 837.81 | 752.91 | 610.40 |
+| BF16 AMD MXFP4 experts A8 orig | 938.10 | 832.28 | 745.91 | 613.70 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 956.30 | 840.02 | 761.43 | 607.69 |
+
+### Prefill 8k
+
+| Case | DCP1 | DCP2 | DCP4 | DCP8 |
+|---|---:|---:|---:|---:|
+| Luke NVFP4 A4 orig | 6,557 | 4,679 | 3,415 | 2,197 |
+| Luke NVFP4 A4 online MXFP8 | 6,681 | 4,636 | 3,402 | 2,188 |
+| Luke NVFP4 A16 orig | 6,140 | 4,455 | 3,301 | 2,147 |
+| Luke NVFP4 A16 online MXFP8 | 6,239 | 4,385 | 3,270 | 2,132 |
+| BF16 AMD MXFP4 experts A8 orig | 6,698 | 4,747 | 3,450 | 2,206 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 6,731 | 4,702 | 3,427 | 2,200 |
+
+### Prefill 64k
+
+| Case | DCP1 | DCP2 | DCP4 | DCP8 |
+|---|---:|---:|---:|---:|
+| Luke NVFP4 A4 orig | 6,257 | 4,710 | 3,455 | 2,209 |
+| Luke NVFP4 A4 online MXFP8 | 6,351 | 4,718 | 3,468 | 2,212 |
+| Luke NVFP4 A16 orig | 5,849 | 4,481 | 3,326 | 2,157 |
+| Luke NVFP4 A16 online MXFP8 | 5,941 | 4,471 | 3,331 | 2,155 |
+| BF16 AMD MXFP4 experts A8 orig | 6,307 | 4,786 | 3,491 | 2,220 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 6,364 | 4,781 | 3,495 | 2,223 |
 
 ## Coding Peak Rerun
 
