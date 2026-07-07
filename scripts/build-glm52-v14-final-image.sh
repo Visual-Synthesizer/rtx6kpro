@@ -5,8 +5,8 @@ set -euo pipefail
 #
 # Stage 1 builds the normal vLLM+B12X image from the blackwell-llm-docker
 # Dockerfile using pinned source commits. The vLLM ref already contains the
-# FP8 bridge and MXFP4 online dense overlay changes, so no local vLLM patch is
-# applied here.
+# FP8 bridge, MXFP4 online dense overlay, DCP hybrid dispatch, TP6 padding, and
+# the B12X DCP contiguous-LSE fix, so no local vLLM patch is applied here.
 # Stage 2 only adds the GLM 5.2 launcher and makes buffered InstantTensor
 # loading the image default.
 
@@ -16,10 +16,10 @@ RUN_GLM52_V14_SERVER="${RUN_GLM52_V14_SERVER:-${SCRIPT_DIR}/run-glm52-v14-server
 
 DATE_TAG="${DATE_TAG:-20260707}"
 VLLM_BRANCH_TAG="eldritch-enlightenment"
-IMAGE_FLAVOR_TAG="${IMAGE_FLAVOR_TAG:-eldritch-enlightenment-v5}"
-VLLM_REF="${VLLM_REF:-codex/eldritch-enlightenment-v5-dcp-hybrid-pr77-20260707}"
-VLLM_COMMIT="${VLLM_COMMIT:-cd272c7b1acd82d50b609e123a55533fe32a5f94}"
-B12X_COMMIT="${B12X_COMMIT:-e44cb77777a075790ebe9f7aa9f225d073aea109}"
+IMAGE_FLAVOR_TAG="${IMAGE_FLAVOR_TAG:-eldritch-enlightenment-v7}"
+VLLM_REF="${VLLM_REF:-fable/dcp-b12x-contiguous-lse-20260707}"
+VLLM_COMMIT="${VLLM_COMMIT:-e2e2eaf61d05834fb5f7f529b75ce75c4cafc289}"
+B12X_COMMIT="${B12X_COMMIT:-26144c0eda970ce7e30bf7c64a2f094abe1fea4d}"
 INSTANTTENSOR_COMMIT="${INSTANTTENSOR_COMMIT:-85e7c5f5539d9c006ee0c26bc1b5233c65251b6b}"
 INSTANTTENSOR_REF="${INSTANTTENSOR_REF:-${INSTANTTENSOR_COMMIT}}"
 

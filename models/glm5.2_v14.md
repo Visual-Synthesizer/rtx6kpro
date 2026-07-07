@@ -16,13 +16,13 @@ loading.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707
+voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707
 ```
 
 Docker Hub manifest digest:
 
 ```text
-sha256:ffafaabdd45519792135ab7b464dc4600faac176218947063c93e4030dbb7d18
+sha256:9b7d005575670ed3d007d7783932c1140d86f2b8ef66a2d9104b7ac609353466
 ```
 
 Build script:
@@ -35,11 +35,11 @@ Pinned source stack:
 
 | Component | Ref |
 |---|---|
-| vLLM | `local-inference-lab/vllm codex/eldritch-enlightenment-v5-dcp-hybrid-pr77-20260707 @ cd272c7b1acd82d50b609e123a55533fe32a5f94` |
+| vLLM | `local-inference-lab/vllm fable/dcp-b12x-contiguous-lse-20260707 @ e2e2eaf61d05834fb5f7f529b75ce75c4cafc289` |
 | vLLM upstream base | `dev/eldritch-enlightenment @ c382f1d28d5be2f867c216609408bdb424d6049a` |
-| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay + shared-expert fix`, `#78 DCP A2A hybrid token cap`, `#79 DCP warmup unsupported-world-size guard` |
+| vLLM stacked PRs | `#76 fp8.py bridge`, `#77 online dense FP8/MXFP8 overlay + shared-expert fix`, `#78 DCP A2A hybrid token cap`, `#79 DCP warmup unsupported-world-size guard`, `#80 TP6 MXFP4 W4A8 padding`, `#81 contiguous LSE for B12X DCP pool` |
 | Docker build repo | `local-inference-lab/blackwell-llm-docker main @ d25e34953b76e201676c29590be1b4d1079f56b0` |
-| B12X | `local-inference-lab/b12x master @ e44cb77777a075790ebe9f7aa9f225d073aea109` |
+| B12X | `local-inference-lab/b12x master @ 26144c0eda970ce7e30bf7c64a2f094abe1fea4d` |
 | InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | NCCL runtime | unified `/opt/libnccl.so.2.30.4` |
 | FlashInfer | `5a73a36a7169ec5533ba474bb9204bed765dd297` |
@@ -56,18 +56,19 @@ cd /root/rtx6kpro
 PUSH_IMAGE=1 ./scripts/build-glm52-v14-final-image.sh
 ```
 
-Hybrid-DCP follow-up sweep helper for the v5 image:
+Hybrid-DCP follow-up sweep helpers:
 
 ```bash
 cd /root/rtx6kpro
-./scripts/bench-glm52-v14-dcp-hybrid-v5.sh all
+./scripts/bench-glm52-v14-dcp-hybrid-v5.sh tp8-decode
+./scripts/bench-glm52-v14-tp6-mxfp4-v7.sh run
 ```
 
-The script starts all servers through `scripts/run-glm52-v14-compose.sh`, waits
-until paired instances are fully loaded before benchmarking, writes progress to
+The helpers start all servers through `scripts/run-glm52-v14-compose.sh`, wait
+until paired instances are fully loaded before benchmarking, write progress to
 `${RESULT_ROOT}/progress.log` by default, measures TP6 MXFP4/online-MXFP8 for
 `DCP=1,2,3,6`, and measures TP8 NVFP4/A16/MTP3 decode for `DCP=2,4,8`.
-The benchmark client is run with `--no-hw-monitor`; the script records its own
+The benchmark client is run with `--no-hw-monitor`; the helpers record their own
 thermal CSV snapshots before and after each measured phase.
 
 The final image defaults InstantTensor to buffered I/O:
@@ -130,8 +131,10 @@ Result roots:
 /root/kld/glm52_v14_todo_20260706T0150Z
 /root/bench-results/glm52-v14-codingpeak-dcp1-mtp3-20260706T130151Z
 /root/kld/glm52_v14_keypoints_20260707Tkeypoints-v5
+/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v7
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
+/root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z
 ```
 
 ## Runtime Contract
@@ -178,7 +181,7 @@ name: glm52-v14
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v5-vllmcd272c7-b12xe44cb77-cu132-20260707}
+    image: ${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707}
     container_name: ${NAME:-glm52-v14}
     network_mode: host
     ipc: host
@@ -405,29 +408,39 @@ Lowering `MAX_NUM_SEQS` from 64 to 32 and `MAX_BATCHED_TOKENS` from 8192 to
 4096 freed enough scheduler/cudagraph budget to add about 30k KV tokens on TP8.
 `GPU_MEMORY_UTILIZATION=0.99` failed the startup free-memory check on this node.
 
-The same A8/MXFP4 setup is not currently valid at `TP=6`: B12X W4A8-MX rejects
+The same A8/MXFP4 setup used to be invalid at `TP=6`: B12X W4A8-MX rejected
 the TP6 shard shape during weight preparation with
-`W4A8-MX QMMA layout requires hidden_size % 256 == 0 and intermediate_size % 128 == 0`.
-So there is no TP6 KV-cache number for this exact A8 MXFP4 configuration without
-changing the MoE mode or kernel constraints.
+`W4A8-MX QMMA layout requires hidden_size % 256 == 0 and intermediate_size % 128 == 0`,
+and the packed W4A16 e8m0 path failed at profile run with
+`no valid W4A16 tile config for M/N/K=16384/6144/352` (GLM-5.2
+`moe_intermediate 2048 / TP6 -> 352 per rank`, a multiple of 32 but not 128;
+NVFP4 checkpoints were unaffected because modelopt sources take the
+SOURCE_NATIVE w4a16 layout). Fixed by
+[vllm PR #80](https://github.com/local-inference-lab/vllm/pull/80): the
+vLLM/B12X weight handoff zero-pads e8m0 expert shards to the next 128 multiple
+(352 → 384, bit-exact — padded gate/up rows produce `silu(0)*0 = 0` and the
+padded w2 columns only multiply those zeros; ~9% extra expert GEMM work on the
+padded rank), plus [b12x PR #26](https://github.com/lukealonso/b12x/pull/26)
+so the `tiny_decode` M≤4 kernel accepts the padded 384 (odd FC2 K-tile
+counts). See the TP6 Notes section for measured numbers.
 
-Retested on the v5 image with `MAX_NUM_SEQS=16`, `MAX_BATCHED_TOKENS=4096`,
-`MAX_MODEL_LEN=262144`, `GPU_MEMORY_UTILIZATION=0.98`, `MTP=3`, hybrid DCP
-defaults, and `ONLINE_QUANT=mxfp8`. vLLM enabled virtual TP padding
-(`attention heads 64 -> 66`, `MoE intermediate size 2048 -> 2112`), but B12X
-W4A8-MX still rejected the shard shape before KV cache creation:
+Retested on the v7 image with `MAX_NUM_SEQS=16`, `MAX_BATCHED_TOKENS=2048`,
+`MAX_MODEL_LEN=128000`, `MTP=0`, hybrid DCP defaults, `ONLINE_QUANT=mxfp8`,
+and `MOE_MODE=force-a8-experimental`. `DCP=1` used
+`GPU_MEMORY_UTILIZATION=0.957`; `DCP>1` used `0.950` because `0.957` OOMs in
+`warmup_dynamic_launches`. All rows booted and completed decode/prefill.
 
-| TP | DCP | Boot result | KV cache size | Root cause |
-|---:|---:|---|---:|---|
-| 6 | 1 | failed before ready | n/a | `W4A8-MX QMMA layout requires hidden_size % 256 == 0 and intermediate_size % 128 == 0` |
-| 6 | 2 | failed before ready | n/a | same |
-| 6 | 3 | failed before ready | n/a | same |
-| 6 | 6 | failed before ready | n/a | same |
+| TP | DCP | KV cache tokens | Max conc at 128k | Decode ctx3k cc1 | Prefill 8k | Prefill 64k |
+|---:|---:|---:|---:|---:|---:|---:|
+| 6 | 1 | 335,168 | 2.62x | 82.12 | 5,628 | 5,315 |
+| 6 | 2 | 639,616 | 5.00x | 66.13 | 4,010 | 3,862 |
+| 6 | 3 | 958,944 | 7.49x | 63.97 | 3,167 | 3,218 |
+| 6 | 6 | 1,904,670 | 14.88x | 49.54 | 2,150 | 2,133 |
 
 Result root:
 
 ```text
-/root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
+/root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z
 ```
 
 ## f8 DMA Mode
@@ -453,8 +466,8 @@ actually matters.
 
 ## TP6 Notes
 
-Validated 2026-07-07 on the v14/v5 image (`vllmcd272c7-b12xe44cb77`). TP6
-works, but not with the original v14 helper defaults. Two independent failure
+Validated 2026-07-07 on the v14/v7 image (`vllme2e2eaf-b12x26144c0`). TP6
+works, but not with the original v14 helper defaults. Three independent failure
 modes were hit and resolved:
 
 1. **KV-cache OOM with default memory settings.** TP6 stores 1/6 of the
@@ -484,6 +497,21 @@ modes were hit and resolved:
    DCP world sizes log a warning and use NCCL collectives. In the v5 image,
    TP6 with `DCP=3` or `DCP=6` no longer needs site-packages patch mounts.
 
+3. **TP6 DCP2 B12X pool contiguity regression (fixed).** With TP6 virtual head
+   padding, sparse MLA returns LSE as a sliced view. The NCCL and AG+RS paths
+   accept strided views, but the B12X PCIe DCP pool validates contiguity. That
+   made the unique combination `TP=6`, `DCP>1`, and B12X A2A fail with:
+
+   ```text
+   partial_lse must be contiguous
+   ```
+
+   Fixed by [PR #81](https://github.com/local-inference-lab/vllm/pull/81):
+   after cheap reject checks and before the B12X pool call, `cp_attn_lse` is
+   made contiguous. The LSE tensor is tiny (`[B,H]` fp32), so the copy is only
+   paid on the padded TP6/DCP path and graph capture allocates it in the graph
+   pool.
+
 Still true on v14:
 
 - The head66 virtual-TP padding is automatic (`attention heads 64 -> 66` in
@@ -494,35 +522,38 @@ Still true on v14:
 - The v13 workaround `VLLM_ENABLE_PCIE_ALLREDUCE=0` is **no longer needed**:
   PCIe oneshot/fused-RMS allreduce at world size 6 started and ran cleanly in
   both validated configurations.
-- The A8/MXFP4 restriction above (W4A8-MX QMMA shard-shape rejection) still
-  applies; TP6 was validated with the NVFP4 checkpoint and `MOE_MODE=a16`.
+- The A8/MXFP4 shard-shape rejection (and the matching packed-W4A16 e8m0 tile
+  failure) is fixed by two stacked changes:
+  [vllm PR #80](https://github.com/local-inference-lab/vllm/pull/80) zero-pads
+  e8m0 expert shards 352 → 384 at the vLLM/B12X handoff (bit-exact — padded
+  gate/up rows produce `silu(0)*0 = 0`; ~9% extra expert GEMM work), and
+  [b12x PR #26](https://github.com/lukealonso/b12x/pull/26) teaches the
+  `tiny_decode` M≤4 kernel odd FC2 K-tile counts (`n % 128` instead of
+  `n % 256`), so A8 decode keeps its fast path at the padded 384. Measured on
+  the AMD MXFP4 experts checkpoint, TP6/DCP1, MTP0, online MXFP8 dense overlay,
+  v13 memory shape (all outputs 0 CJK in the smoke probes). In the v7 full TP6
+  helper run the fixed A8 row measured 335,168 KV tokens, 82.12 tok/s decode at
+  ctx3k, 5,628 tok/s prefill at 8k, and 5,315 tok/s prefill at 64k. Earlier
+  intermediate validation without the b12x #26 tiny-decode fix measured about
+  71 tok/s decode, so #26 is required to keep the padded 384 path fast.
 
-Validated launches (helper env; `MOE_MODE=a16`, `MTP=3`, `MAX_NUM_SEQS=1`,
-`GRAPH=16`, `GPU_MEMORY_UTILIZATION=0.957`, `MAX_MODEL_LEN=128000`,
-`MAX_BATCHED_TOKENS=2048`, GPUs `8-13`):
+Reproduce the current TP6/MXFP4 A8 table with the checked-in helper:
 
 ```bash
 cd /root/rtx6kpro
-NAME=glm52-v14-tp6 PORT=5861 GPUS=8,9,10,11,12,13 \
-TP=6 DCP=1 MTP=3 MOE_MODE=a16 \
-GPU_MEMORY_UTILIZATION=0.957 MAX_MODEL_LEN=128000 \
-MAX_BATCHED_TOKENS=2048 MAX_NUM_SEQS=1 GRAPH=16 \
-./scripts/run-glm52-v14-compose.sh up
-# DCP variant: TP=6 DCP=6 (requires v5 image or newer for PR #79)
+IMAGE=voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707 \
+RESULT_ROOT=/root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z \
+./scripts/bench-glm52-v14-tp6-mxfp4-v7.sh run
 ```
 
-Measured (coding smoke `test.py`, short prompt and `-c 3000`, both coherent
-with `0` CJK characters):
+The helper uses GPUs `0-5` and `8-13` in pairs, starts both servers, waits for
+both `/v1/models` endpoints, sleeps another 30 seconds, and only then starts
+benchmarks. It writes progress and summaries under `${RESULT_ROOT}` and keeps
+`DCP=1` at GMU `0.957` while using `0.950` for `DCP>1`.
 
-| Mode | MTP | KV cache tokens | Max conc at 128k | Short ctx tok/s | 3k ctx tok/s |
-|---|---:|---:|---:|---:|---:|
-| TP6 DCP1 | 3 | 168,384 | 1.32x | 131.1 | 106.7 |
-| TP6 DCP6 | 3 | 989,125 | 7.7x | 74.9 | 74.5 |
-
-`DCP=1` is the fast single-stream shape but fits only one ~128k request in
-KV; `DCP=6` multiplies KV capacity ~6x for long-context or multi-user serving
-at roughly 57% of the DCP1 decode speed. `DCP=2` is the middle ground and
-keeps the B12X DCP fast path.
+`DCP=1` is the fast single-stream shape; `DCP=6` multiplies KV capacity about
+5.7x for long-context or multi-user serving at roughly 60% of the DCP1 decode
+speed. `DCP=2` is the middle ground and keeps the B12X DCP fast path.
 
 ## Hybrid DCP v5 Decode And KV
 
@@ -577,10 +608,10 @@ Online A4 f8 DMA impact, keeping decode out of the comparison:
 
 ## KLD Keypoint Rerun
 
-Retested on the v5 image with 5 runs per case:
+Retested on the v7 image with 5 runs per case:
 
 ```text
-/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v5
+/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v7
 ```
 
 Reference logits:
@@ -599,12 +630,12 @@ Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 
 | Checkpoint | MoE mode | Online MXFP8 | Runs | KLD mean +/- sd | Min | Max |
 |---|---|---:|---:|---:|---:|---:|
-| Luke NVFP4 | A4 | no | 5 | 0.10892 +/- 0.00655 | 0.09950 | 0.11658 |
-| Luke NVFP4 | A4 | yes | 5 | 0.11048 +/- 0.00787 | 0.09798 | 0.11719 |
-| Luke NVFP4 | A16 | no | 5 | 0.06714 +/- 0.00341 | 0.06187 | 0.07035 |
-| Luke NVFP4 | A16 | yes | 5 | 0.07280 +/- 0.00124 | 0.07081 | 0.07416 |
-| BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.07512 +/- 0.00102 | 0.07421 | 0.07632 |
-| BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.07521 +/- 0.00197 | 0.07302 | 0.07778 |
+| Luke NVFP4 | A4 | no | 5 | 0.10734 +/- 0.00416 | 0.10154 | 0.11087 |
+| Luke NVFP4 | A4 | yes | 5 | 0.10901 +/- 0.00564 | 0.10490 | 0.11724 |
+| Luke NVFP4 | A16 | no | 5 | 0.06662 +/- 0.00130 | 0.06535 | 0.06838 |
+| Luke NVFP4 | A16 | yes | 5 | 0.07188 +/- 0.00203 | 0.06964 | 0.07457 |
+| BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.07610 +/- 0.00087 | 0.07486 | 0.07730 |
+| BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.07741 +/- 0.00060 | 0.07638 | 0.07782 |
 
 ## Coding Peak Rerun
 
@@ -838,6 +869,7 @@ Reproducible runners are checked in at:
 scripts/bench-glm52-v14-todo-and-sweep.sh
 scripts/bench-glm52-v14-kld-keypoints.sh
 scripts/bench-glm52-v14-dcp-hybrid-v5.sh
+scripts/bench-glm52-v14-tp6-mxfp4-v7.sh
 ```
 
 Run the original complete v14 sweep:
@@ -850,23 +882,27 @@ KLD_ROOT=/root/kld/glm52_v14_todo_20260706T0150Z \
 ./scripts/bench-glm52-v14-todo-and-sweep.sh all
 ```
 
-Run the v5 KLD keypoint rerun:
+Run the v7 KLD keypoint rerun:
 
 ```bash
 cd /root/rtx6kpro
-RUN_ID=20260707Tkeypoints-v5 RUNS=5 \
+IMAGE=voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707 \
+RUN_ID=keypoints-v7 \
+KLD_ROOT=/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v7 \
+RUNS=5 \
 ./scripts/bench-glm52-v14-kld-keypoints.sh all
 ```
 
-Run the v5 hybrid-DCP follow-up sweep:
+Run the v5/v7 hybrid-DCP follow-up sweeps:
 
 ```bash
 cd /root/rtx6kpro
 RESULT_ROOT=/root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z \
 ./scripts/bench-glm52-v14-dcp-hybrid-v5.sh tp8-decode
 
-RESULT_ROOT=/root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z \
-./scripts/bench-glm52-v14-dcp-hybrid-v5.sh tp6-mxfp4
+IMAGE=voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707 \
+RESULT_ROOT=/root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z \
+./scripts/bench-glm52-v14-tp6-mxfp4-v7.sh run
 ```
 
 The runner supports narrower reruns:
@@ -878,7 +914,7 @@ The runner supports narrower reruns:
 ./scripts/bench-glm52-v14-todo-and-sweep.sh summarize
 ```
 
-The v5 DCP helper writes progress to `${RESULT_ROOT}/progress.log` by default.
+The v5/v7 DCP helpers write progress to `${RESULT_ROOT}/progress.log` by default.
 The original 2026-07-06 full-sweep helper appends progress to:
 
 ```text
