@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-07](2026-07/2026-07-07.md) | GLM-5.2 v14 docker image released with new B12X backend (beats "lucifer" cutlass), instanttensor loa |
 | [2026-07-06](2026-07/2026-07-06.md) | - DeepSeek-V4-Flash-DSpark added FP4 indexer cache (7-token draft) — small KV gain (+18.6k tokens) |
 | [2026-07-05](2026-07/2026-07-05.md) | - jetha built a native NVFP4 attention kernel for sm120/121, speeding up Gemma 4 decode; wheels avai |
 | [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
@@ -138,6 +139,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-07](2026-07/2026-07-07.md) | GLM-5.2 v14 docker image released with new B12X backend (beats "lucifer" cutlass), instanttensor loa |
 | [2026-07-06](2026-07/2026-07-06.md) | - DeepSeek-V4-Flash-DSpark added FP4 indexer cache (7-token draft) — small KV gain (+18.6k tokens) |
 | [2026-07-05](2026-07/2026-07-05.md) | - jetha built a native NVFP4 attention kernel for sm120/121, speeding up Gemma 4 decode; wheels avai |
 | [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
