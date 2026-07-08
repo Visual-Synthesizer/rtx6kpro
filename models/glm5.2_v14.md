@@ -668,6 +668,24 @@ Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 | BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.08160 +/- 0.00432 | 0.07460 | 0.08597 |
 | BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.08030 +/- 0.00309 | 0.07818 | 0.08568 |
 
+MXFP4 backend cross-check for `/root/models/GLM-5.2-BF16-AMDMXFP4experts`
+against the same current BF16 reference:
+
+```text
+/root/kld/glm52_mxfp4_backend_crosscheck_current_bf16ref_20260708T053849Z
+```
+
+| Checkpoint | MoE backend | Activation mode | Runs | KLD mean +/- sd | Min | Max |
+|---|---:|---:|---:|---:|---:|---:|
+| BF16 AMD MXFP4 experts | B12X | forced A8 | 5 | 0.08160 +/- 0.00432 | 0.07460 | 0.08597 |
+| BF16 AMD MXFP4 experts | Marlin | W4A16 / BF16 activation | 5 | 0.07923 +/- 0.00189 | 0.07624 | 0.08079 |
+
+The Marlin cross-check is a non-B12X backend and lands in the same range as
+B12X A8, so the MXFP4 KLD is not explained by a B12X A8 runtime-only issue.
+`moe_backend=emulation` currently fails during MXFP4 load-time conversion
+(`Unsupported mxfp4_backend ... EMULATION`), and `moe_backend=triton_unfused`
+fails on this CUDA deployment (`kernel does not support current device cuda`).
+
 ### BF16-MXFP8 Experts Diagnostic
 
 The `/root/models/GLM-5.2-BF16-MXFP8experts` checkpoint was checked separately
