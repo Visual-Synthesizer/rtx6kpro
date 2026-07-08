@@ -132,8 +132,9 @@ Result roots:
 /root/bench-results/glm52-v14-todo-and-sweep-20260706T0150Z
 /root/kld/glm52_v14_todo_20260706T0150Z
 /root/bench-results/glm52-v14-codingpeak-dcp1-mtp3-20260706T130151Z
-/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v5
-/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v7
+/root/kld/glm52_v14_keypoints_current_bf16ref_20260708T0027Z
+/root/kld/glm52_v14_online_a4_f8_ag_current_bf16ref_20260708T0130Z
+/root/kld/glm52_v14_online_a4_f8_ring_current_bf16ref_20260708T0130Z
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp8-fixed-20260707T0330Z
 /root/bench-results/glm52-v14-dcp-hybrid-v5-tp6-fixed-20260707T0345Z
 /root/bench-results/glm52-v14-v7-tp6-mxfp4-a8-20260707T115913Z
@@ -591,10 +592,11 @@ Decode values are `llm_decode_bench` ctx0 `aggregate_tps` for concurrency
 
 ## Direct DCP1 Measurements
 
-These rows replace the older placeholders. KLD is 5 runs against:
+These rows replace the older placeholders. KLD is 5 runs against the current
+v7 BF16 reference logits:
 
 ```text
-/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618
+/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref
 context_length=2048
 stride=512
 max_windows=1
@@ -604,17 +606,17 @@ Primary DCP1 rows (`f8=0`):
 
 | Variant | Mode | Decode agg tok/s | Coding peak tok/s | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |
 |---|---|---:|---:|---:|---:|---:|---|
-| base | A4 | 88.53 | 88.81 | 6,491 | 6,238 | 5,883 | 0.10680 +/- 0.00323 |
-| base | A16 | 85.73 | 86.21 | 5,975 | 5,752 | 5,448 | 0.06842 +/- 0.00197 |
-| online | A4 | 95.51 | 96.12 | 6,598 | 6,307 | 5,967 | 0.10761 +/- 0.00430 |
+| base | A4 | 88.53 | 88.81 | 6,491 | 6,238 | 5,883 | 0.10228 +/- 0.00634 |
+| base | A16 | 85.73 | 86.21 | 5,975 | 5,752 | 5,448 | 0.05994 +/- 0.00129 |
+| online | A4 | 95.51 | 96.12 | 6,598 | 6,307 | 5,967 | 0.10800 +/- 0.00697 |
 
 Online A4 f8 DMA impact, keeping decode out of the comparison:
 
 | f8 | Prefill 30k | Prefill 64k | Prefill 120k | KLD mean +/- sd |
 |---|---:|---:|---:|---|
-| `0` | 6,598 | 6,307 | 5,967 | 0.10761 +/- 0.00430 |
-| `ag` | 7,165 | 6,870 | 6,444 | 0.11171 +/- 0.00542 |
-| `ring` | 8,092 | 7,676 | 7,142 | 0.12100 +/- 0.00886 |
+| `0` | 6,598 | 6,307 | 5,967 | 0.10800 +/- 0.00697 |
+| `ag` | 7,165 | 6,870 | 6,444 | 0.10468 +/- 0.00729 |
+| `ring` | 8,092 | 7,676 | 7,142 | 0.11525 +/- 0.00275 |
 
 ## KLD Keypoint Rerun
 
@@ -624,17 +626,24 @@ published BF16 reference logits, see
 That run measures Luke NVFP4 A16 DCP1 MTP off against BF16 and reports
 `mean_kld=0.0845515281` over 288,715 positions.
 
-Retested on the v7 image with 5 runs per case:
+Retested on the v7 image with 5 runs per case against a BF16 reference exported
+with the same v7 runtime:
 
 ```text
-/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v7
+/root/kld/glm52_v14_keypoints_current_bf16ref_20260708T0027Z
+/root/kld/glm52_v14_online_a4_f8_ag_current_bf16ref_20260708T0130Z
+/root/kld/glm52_v14_online_a4_f8_ring_current_bf16ref_20260708T0130Z
 ```
 
 Reference logits:
 
 ```text
-/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618
+/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref
 ```
+
+Do not mix these values with the older 2026-06-18 BF16 logits at
+`/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618`; that stale
+reference measures `mean_kld=0.0133422573` even against current v7 BF16 logits.
 
 Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 `load_format=instanttensor`, `INSTANTTENSOR_BACKEND=BUFFERED`, and
@@ -646,12 +655,12 @@ Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 
 | Checkpoint | MoE mode | Online MXFP8 | Runs | KLD mean +/- sd | Min | Max |
 |---|---|---:|---:|---:|---:|---:|
-| Luke NVFP4 | A4 | no | 5 | 0.10734 +/- 0.00416 | 0.10154 | 0.11087 |
-| Luke NVFP4 | A4 | yes | 5 | 0.10901 +/- 0.00564 | 0.10490 | 0.11724 |
-| Luke NVFP4 | A16 | no | 5 | 0.06662 +/- 0.00130 | 0.06535 | 0.06838 |
-| Luke NVFP4 | A16 | yes | 5 | 0.07188 +/- 0.00203 | 0.06964 | 0.07457 |
-| BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.07610 +/- 0.00087 | 0.07486 | 0.07730 |
-| BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.07741 +/- 0.00060 | 0.07638 | 0.07782 |
+| Luke NVFP4 | A4 | no | 5 | 0.10228 +/- 0.00634 | 0.09368 | 0.11098 |
+| Luke NVFP4 | A4 | yes | 5 | 0.10800 +/- 0.00697 | 0.09941 | 0.11877 |
+| Luke NVFP4 | A16 | no | 5 | 0.05994 +/- 0.00129 | 0.05844 | 0.06167 |
+| Luke NVFP4 | A16 | yes | 5 | 0.06587 +/- 0.00253 | 0.06288 | 0.06921 |
+| BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.08160 +/- 0.00432 | 0.07460 | 0.08597 |
+| BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.08030 +/- 0.00309 | 0.07818 | 0.08568 |
 
 ## TP8 Hybrid DCP MTP0 Comparison
 
@@ -691,12 +700,12 @@ capacity.
 
 | Case | KLD mean | DCP1 cc1 | DCP1 cc32 | DCP1 prefill 8k | DCP1 prefill 64k | Best decode DCP | Best prefill DCP |
 |---|---:|---:|---:|---:|---:|---|---|
-| Luke NVFP4 A4 orig | 0.10734 | 87.99 | 934.07 | 6,557 | 6,257 | DCP1 | DCP1 |
-| Luke NVFP4 A4 online MXFP8 | 0.10901 | 94.96 | 953.24 | 6,681 | 6,351 | DCP1 | DCP1 |
-| Luke NVFP4 A16 orig | 0.06662 | 86.56 | 932.72 | 6,140 | 5,849 | DCP1 | DCP1 |
-| Luke NVFP4 A16 online MXFP8 | 0.07188 | 93.30 | 954.52 | 6,239 | 5,941 | DCP1 | DCP1 |
-| BF16 AMD MXFP4 experts A8 orig | 0.07610 | 88.72 | 938.10 | 6,698 | 6,307 | DCP1 | DCP1 |
-| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.07741 | 94.03 | 956.30 | 6,731 | 6,364 | DCP1 | DCP1 |
+| Luke NVFP4 A4 orig | 0.10228 | 87.99 | 934.07 | 6,557 | 6,257 | DCP1 | DCP1 |
+| Luke NVFP4 A4 online MXFP8 | 0.10800 | 94.96 | 953.24 | 6,681 | 6,351 | DCP1 | DCP1 |
+| Luke NVFP4 A16 orig | 0.05994 | 86.56 | 932.72 | 6,140 | 5,849 | DCP1 | DCP1 |
+| Luke NVFP4 A16 online MXFP8 | 0.06587 | 93.30 | 954.52 | 6,239 | 5,941 | DCP1 | DCP1 |
+| BF16 AMD MXFP4 experts A8 orig | 0.08160 | 88.72 | 938.10 | 6,698 | 6,307 | DCP1 | DCP1 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 0.08030 | 94.03 | 956.30 | 6,731 | 6,364 | DCP1 | DCP1 |
 
 ### Decode cc1
 
@@ -992,9 +1001,29 @@ Run the v7 KLD keypoint rerun:
 ```bash
 cd /root/rtx6kpro
 IMAGE=voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707 \
-RUN_ID=keypoints-v7 \
-KLD_ROOT=/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v7 \
+RUN_ID=current-bf16ref-20260708T0027Z \
+KLD_ROOT=/root/kld/glm52_v14_keypoints_current_bf16ref_20260708T0027Z \
+PREFILL_REF=/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref \
 RUNS=5 \
+./scripts/bench-glm52-v14-kld-keypoints.sh all
+```
+
+Run only the online A4 f8 KLD follow-up rows:
+
+```bash
+cd /root/rtx6kpro
+IMAGE=voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707 \
+KLD_ROOT=/root/kld/glm52_v14_online_a4_f8_ag_current_bf16ref_20260708T0130Z \
+PREFILL_REF=/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref \
+RUNS=5 CASES='luke-a4-online-mxfp8' F8_DMA=ag \
+GPU_A=0,1,2,3,4,5,6,7 \
+./scripts/bench-glm52-v14-kld-keypoints.sh all
+
+IMAGE=voipmonitor/vllm:eldritch-enlightenment-v7-vllme2e2eaf-b12x26144c0-cu132-20260707 \
+KLD_ROOT=/root/kld/glm52_v14_online_a4_f8_ring_current_bf16ref_20260708T0130Z \
+PREFILL_REF=/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref \
+RUNS=5 CASES='luke-a4-online-mxfp8' F8_DMA=ring \
+GPU_A=8,9,10,11,12,13,14,15 \
 ./scripts/bench-glm52-v14-kld-keypoints.sh all
 ```
 

@@ -16,6 +16,8 @@ INSTANTTENSOR_BACKEND="${INSTANTTENSOR_BACKEND:-BUFFERED}"
 GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.74}"
 MAX_NUM_BATCHED_TOKENS="${MAX_NUM_BATCHED_TOKENS:-512}"
 KLD_CHUNK_ROWS="${KLD_CHUNK_ROWS:-32}"
+F8_DMA="${F8_DMA:-0}"
+CASES="${CASES:-luke-a4-orig luke-a16-orig luke-a4-online-mxfp8 luke-a16-online-mxfp8 mxfp4-a8-orig mxfp4-a8-online-mxfp8}"
 
 if [[ "${#PATTERN}" -ne 78 ]]; then
   echo "ERROR: index_topk_pattern must be 78 chars, got ${#PATTERN}" >&2
@@ -102,7 +104,7 @@ run_one() {
   read -r force_a8 force_a16 < <(case_force_env "${moe_mode}")
 
   out="${KLD_ROOT}/${case_name}/run${run}"
-  name="glm52-v14-kld-${case_name}-run${run}"
+  name="glm52-v14-kld-${case_name}-f8${F8_DMA}-run${run}"
   mkdir -p "${out}"
   docker rm -f "${name}" >/dev/null 2>&1 || true
 
@@ -117,6 +119,7 @@ run_one() {
   "online_quantization_config": ${quant_config:-null},
   "load_format": "${LOAD_FORMAT}",
   "instanttensor_backend": "${INSTANTTENSOR_BACKEND}",
+  "f8_dma": "${F8_DMA}",
   "gpus": "${gpu_devices}",
   "reference_logits": "${PREFILL_REF}",
   "hf_overrides": ${HF_OVERRIDES}
@@ -168,8 +171,8 @@ EOF
     -e VLLM_PCIE_ALLREDUCE_BACKEND=b12x \
     -e VLLM_PCIE_ONESHOT_ALLREDUCE_MAX_SIZE=64KB \
     -e VLLM_PCIE_ONESHOT_FUSED_ADD_RMS_NORM_MAX_SIZE=84KB \
-    -e VLLM_PCIE_DMA_FP8=0 \
-    -e B12X_PCIE_DMA_FP8=0 \
+    -e VLLM_PCIE_DMA_FP8="${F8_DMA}" \
+    -e B12X_PCIE_DMA_FP8="${F8_DMA}" \
     -e B12X_MLA_SM120_UNIFIED=1 \
     -e B12X_DENSE_SPLITK_TURBO=1 \
     -e B12X_W4A16_TC_DECODE=1 \
@@ -269,14 +272,8 @@ PY
 }
 
 run_all() {
-  local -a cases=(
-    luke-a4-orig
-    luke-a16-orig
-    luke-a4-online-mxfp8
-    luke-a16-online-mxfp8
-    mxfp4-a8-orig
-    mxfp4-a8-online-mxfp8
-  )
+  local -a cases
+  read -r -a cases <<< "${CASES}"
 
   for run in $(seq 1 "${RUNS}"); do
     local i case_a case_b pid_a pid_b
