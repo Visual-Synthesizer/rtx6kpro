@@ -5,23 +5,27 @@ Blackwell/vLLM runs. It is separate from the older Qwen/SGLang KLD page because
 GLM-5.2 uses vLLM prompt-logit capture, GLM-5.2 BF16 reference tensors, and the
 78-character GLM-5.2 IndexCache pattern.
 
-Status as of 2026-07-07:
+Status as of 2026-07-08:
 
-- The BF16 reference tensors are available locally under `/root/kld/glm52_refs`.
-- The BF16 reference tensors are published as the Hugging Face dataset
-  `festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618`.
-- The dataset was verified public through the HF API on 2026-07-07 at commit
-  `b9b0d845f4e9937885081dffebf9e3c432c06e4e`.
+- The current BF16 prompt-logit reference is available locally under
+  `/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref`.
+- The current BF16 prompt-logit reference is published as the Hugging Face
+  dataset `festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260708`.
+- The dataset was uploaded on 2026-07-08 at commit
+  `a8fbe8a277394e838c75190a0ab376625dfb1393`.
+- The older 2026-06-18 reference dataset is historical and should not be used
+  for new GLM-5.2 v14 comparisons unless the run explicitly says so.
 
 ## Reference Data
 
 The current prefill comparison uses:
 
 ```text
-/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618/logits_0.safetensors
+/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref/logits_0.safetensors
 ```
 
-The current decode reference, kept for teacher-forced decode KLD/JS checks, is:
+The current published dataset contains prompt logits only. The older decode
+reference, kept for historical teacher-forced decode KLD/JS checks, is:
 
 ```text
 /root/kld/glm52_refs/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
@@ -34,10 +38,10 @@ Reference generation details:
 |---|---|
 | Source model | `zai-org/GLM-5.2` |
 | Local BF16 snapshot | `/root/.cache/huggingface/hub/models--zai-org--GLM-5.2/snapshots/4d67f66cc64d3219133b767c253b2ad1425c6c88` |
-| Generation date | 2026-06-18 |
+| Generation date | 2026-07-08 00:04 UTC |
 | Dataset | `Salesforce/wikitext`, config `wikitext-2-raw-v1`, split `test` |
 | Prefill shape | tensor key `logits`, shape `[2047, 154880]`, dtype `float32` |
-| Decode shape | `logprobs` shape `[17, 154880]`, `prompt_token_ids` shape `[2048]`, `generated_token_ids` shape `[17]` |
+| Decode shape | historical 2026-06-18 decode file only |
 | Context | 2048 tokens |
 | Stride | 512 |
 | Windows | 1 |
@@ -54,65 +58,54 @@ The KLD direction is `KL(BF16 reference || candidate model)`.
 
 ## Hugging Face Upload
 
-The local upload helper is:
+The current upload helper is:
 
 ```text
-/root/kld/upload_glm52_bf16_refs_to_hf.py
+models/glm5.2/gguf-bf16-kld-2026-07-08/scripts/upload_glm52_current_bf16_ref_to_hf.py
 ```
 
 It targets this dataset:
 
 ```text
-https://huggingface.co/datasets/festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618
+https://huggingface.co/datasets/festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260708
 ```
 
-Expected HF file layout:
+Current HF file layout:
 
 ```text
 README.md
-prefill/logits_0.safetensors
-decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
-decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors.json
+reference-logits/logits_0.safetensors
+reference-logits/manifest.json
+generation-log/config.env
+generation-log/scoremode_kld.log
 ```
 
-Verified HF state on 2026-07-07:
+Verified HF state on 2026-07-08:
 
 ```text
-repo:    festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618
-private: False
-sha:     b9b0d845f4e9937885081dffebf9e3c432c06e4e
-files:
-  .gitattributes
-  README.md
-  prefill/logits_0.safetensors
-  decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
-  decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors.json
+repo: festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260708
+sha:  a8fbe8a277394e838c75190a0ab376625dfb1393
 ```
 
 To republish or repair the dataset, login with a write token and run:
 
 ```bash
-python3 /root/kld/upload_glm52_bf16_refs_to_hf.py \
-  --repo-id festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618
+python3 models/glm5.2/gguf-bf16-kld-2026-07-08/scripts/upload_glm52_current_bf16_ref_to_hf.py \
+  --repo-id festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260708
 ```
 
 A fresh machine can restore the expected local layout with:
 
 ```bash
-mkdir -p /root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618
+mkdir -p /root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z
 
-hf download festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260618 \
+huggingface-cli download festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260708 \
   --repo-type dataset \
-  --local-dir /root/kld/glm52_refs_hf
+  --local-dir /root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/hf
 
-ln -sf /root/kld/glm52_refs_hf/prefill/logits_0.safetensors \
-  /root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618/logits_0.safetensors
-
-ln -sf /root/kld/glm52_refs_hf/decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors \
-  /root/kld/glm52_refs/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
-
-ln -sf /root/kld/glm52_refs_hf/decode/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors.json \
-  /root/kld/glm52_refs/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors.json
+ln -sfn \
+  /root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/hf/reference-logits \
+  /root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref
 ```
 
 ## Current v14 Keypoint Run
@@ -134,7 +127,7 @@ Default checkpoints:
 ```text
 LUKE_MODEL=/root/.cache/huggingface/hub/models--lukealonso--GLM-5.2-NVFP4/snapshots/8a1f4a13204acf2b7ac840375efaed64c231c522
 MXFP4_MODEL=/root/models/GLM-5.2-BF16-AMDMXFP4experts
-PREFILL_REF=/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618
+PREFILL_REF=/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref
 ```
 
 The script runs five repeats by default and compares these six key cases:
@@ -187,20 +180,27 @@ aggregate_summary.json
 
 ## Current v14 Keypoint Results
 
-Latest local run:
+Latest local run against the 2026-07-08 BF16 reference:
 
 ```text
-/root/kld/glm52_v14_keypoints_20260707Tkeypoints-v5
+/root/kld/glm52_v14_keypoints_current_bf16ref_20260708T0027Z
 ```
 
 | Case | Quantization | MoE mode | Online MXFP8 | Runs | KLD mean +/- sd | Min | Max |
 |---|---|---:|---:|---:|---:|---:|---:|
-| `luke-a16-online-mxfp8` | `modelopt_fp4` | A16 | yes | 5 | 0.07280 +/- 0.00124 | 0.07081 | 0.07416 |
-| `luke-a16-orig` | `modelopt_fp4` | A16 | no | 5 | 0.06714 +/- 0.00341 | 0.06187 | 0.07035 |
-| `luke-a4-online-mxfp8` | `modelopt_fp4` | A4 | yes | 5 | 0.11048 +/- 0.00787 | 0.09798 | 0.11719 |
-| `luke-a4-orig` | `modelopt_fp4` | A4 | no | 5 | 0.10892 +/- 0.00655 | 0.09950 | 0.11658 |
-| `mxfp4-a8-online-mxfp8` | `mxfp4` | A8 | yes | 5 | 0.07521 +/- 0.00197 | 0.07302 | 0.07778 |
-| `mxfp4-a8-orig` | `mxfp4` | A8 | no | 5 | 0.07512 +/- 0.00102 | 0.07421 | 0.07632 |
+| `luke-a16-online-mxfp8` | `modelopt_fp4` | A16 | yes | 5 | 0.06587 +/- 0.00253 | 0.06288 | 0.06921 |
+| `luke-a16-orig` | `modelopt_fp4` | A16 | no | 5 | 0.05994 +/- 0.00129 | 0.05844 | 0.06167 |
+| `luke-a4-online-mxfp8` | `modelopt_fp4` | A4 | yes | 5 | 0.10800 +/- 0.00697 | 0.09941 | 0.11877 |
+| `luke-a4-orig` | `modelopt_fp4` | A4 | no | 5 | 0.10228 +/- 0.00634 | 0.09368 | 0.11098 |
+| `mxfp4-a8-online-mxfp8` | `mxfp4` | A8 | yes | 5 | 0.08030 +/- 0.00309 | 0.07818 | 0.08568 |
+| `mxfp4-a8-orig` | `mxfp4` | A8 | no | 5 | 0.08160 +/- 0.00432 | 0.07460 | 0.08597 |
+
+The weight-only GGUF/NVFP4/MXFP4 audit that uses the same 2026-07-08 reference
+logits is documented separately:
+
+```text
+models/glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md
+```
 
 ## Regenerating The BF16 References
 
@@ -215,7 +215,7 @@ Reference-only generation command:
 ```bash
 ACTION=refs \
 OUT_ROOT=/root/kld/glm52_kld_refs_$(date -u +%Y%m%dT%H%M%SZ) \
-PREFILL_REF=/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618 \
+PREFILL_REF=/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref \
 DECODE_REF=/root/kld/glm52_refs/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors \
 TP=16 \
 GPU_DEVICES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 \
@@ -236,7 +236,7 @@ Quick local inspection:
 python3 - <<'PY'
 from safetensors import safe_open
 for path in [
-    "/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618/logits_0.safetensors",
+    "/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref/logits_0.safetensors",
     "/root/kld/glm52_refs/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors",
 ]:
     print(path)
@@ -250,7 +250,7 @@ PY
 Expected output:
 
 ```text
-/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618/logits_0.safetensors
+/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref/logits_0.safetensors
   logits (2047, 154880) torch.float32
 /root/kld/glm52_refs/decode_teacher_bf16_ref_ctx2048_t17_20260618.safetensors
   generated_token_ids (17,) torch.int64
