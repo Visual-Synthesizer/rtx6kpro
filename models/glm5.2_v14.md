@@ -644,6 +644,12 @@ Reference logits:
 Do not mix these values with the older 2026-06-18 BF16 logits at
 `/root/kld/glm52_refs/bf16-b12xmlasparse-w1-ctx2048-s512-20260618`; that stale
 reference measures `mean_kld=0.0133422573` even against current v7 BF16 logits.
+The current BF16 reference self-check is exact (`mean_kld=0.0`, 2,047
+positions):
+
+```text
+/root/kld/glm52_bf16_selfcheck_vs_current_ref_20260708T015209Z
+```
 
 Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 `load_format=instanttensor`, `INSTANTTENSOR_BACKEND=BUFFERED`, and
@@ -661,6 +667,38 @@ Harness settings: `context_length=2048`, `stride=512`, `max_windows=1`,
 | Luke NVFP4 | A16 | yes | 5 | 0.06587 +/- 0.00253 | 0.06288 | 0.06921 |
 | BF16 AMD MXFP4 experts | A8 force | no | 5 | 0.08160 +/- 0.00432 | 0.07460 | 0.08597 |
 | BF16 AMD MXFP4 experts | A8 force | yes | 5 | 0.08030 +/- 0.00309 | 0.07818 | 0.08568 |
+
+### BF16-MXFP8 Experts Diagnostic
+
+The `/root/models/GLM-5.2-BF16-MXFP8experts` checkpoint was checked separately
+because its KLD was expected to be close to a simple 8-bit quantization. Its BF16
+tensors are bit-identical to the ZAI BF16 checkpoint (`1141/1141` compared
+tensors, `0` byte mismatches), so the BF16 layers are not the source of the KLD:
+
+```text
+/root/vllm/dspark/bf16_bitcmp_glm52_bf16_mxfp8experts_vs_zai_bf16.json
+```
+
+The remaining error comes from the stored MXFP8 expert weights/scales rather than
+from the native MXFP8 MoE kernel. A diagnostic runtime overlay enabled
+`moe_backend=emulation`, which keeps the checkpoint weights in MXFP8 but
+dequantizes them to BF16 for the forward pass and avoids the native marlin /
+deep_gemm MXFP8 expert kernels. It lands in the same KLD range:
+
+| Checkpoint | MoE backend | Mean KLD | Positions | Artifact |
+|---|---:|---:|---:|---|
+| BF16 reference self-check | BF16 | 0.000000 | 2,047 | `/root/kld/glm52_bf16_selfcheck_vs_current_ref_20260708T015209Z` |
+| BF16-MXFP8 experts | marlin MXFP8 | 0.016279 | 2,047 | `/root/kld/glm52_bf16_mxfp8experts_vs_current_bf16_ref_marlin_20260708T002205Z` |
+| BF16-MXFP8 experts | runtime emulation | 0.017643 | 2,047 | `/root/kld/glm52_bf16_mxfp8experts_vs_current_bf16_ref_emulation_runtime_20260708T020624Z` |
+| BF16-MXFP8 experts | deep_gemm MXFP8 | 0.020346 | 2,047 | `/root/kld/glm52_bf16_mxfp8experts_vs_current_bf16_ref_20260708T001257Z` |
+
+Load-time MXFP8-to-BF16 dequant was also attempted with the same overlay, but it
+does not fit on TP16 RTX PRO 6000 Blackwell cards in this harness (`CUDA OOM`
+with about 200 MiB free on the failing ranks):
+
+```text
+/root/kld/glm52_bf16_mxfp8experts_vs_current_bf16_ref_emulation_dequant_20260708T020124Z
+```
 
 ## TP8 Hybrid DCP MTP0 Comparison
 
