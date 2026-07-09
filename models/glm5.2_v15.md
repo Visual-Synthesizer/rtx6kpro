@@ -43,7 +43,7 @@ Pinned source stack:
 | vLLM | `local-inference-lab/vllm codex/ff-v15-mxfp4-online-mxfp8-20260709 @ f5f4af357e26643b355eb1190de7df1163bbcd98` |
 | vLLM upstream base | `dev/fathomless-firmament @ 4cf20be8682749d0cca18639304a1693b00ce421` |
 | vLLM FF PR | [`#84 Support MXFP4 online MXFP8 dense overlay`](https://github.com/local-inference-lab/vllm/pull/84) |
-| Docker build repo | `local-inference-lab/blackwell-llm-docker main @ d25e34953b76e201676c29590be1b4d1079f56b0` |
+| Docker build repo | `local-inference-lab/blackwell-llm-docker main @ ba8ccad7b39e4af367c1391ea19bd24845b5c8a3` |
 | B12X | `voipmonitor/b12x codex/ff-v15-cute-compile-fallback-20260709 @ 90172a504e96d246e07cb1ebad3b291532445560` |
 | B12X upstream base | `lukealonso/b12x master @ 97b3d642b8ce08ce23184a36882710ce3b60ba13` |
 | B12X FF PR | [`lukealonso/b12x#28 CuTe compile fallback`](https://github.com/lukealonso/b12x/pull/28) |
