@@ -12,10 +12,11 @@ set -euo pipefail
 
 BLACKWELL_DOCKER_DIR="${BLACKWELL_DOCKER_DIR:-/root/vllm/blackwell-llm-docker}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-RUN_GLM52_V14_SERVER="${RUN_GLM52_V14_SERVER:-${SCRIPT_DIR}/run-glm52-v14-server}"
+RUN_GLM52_SERVER="${RUN_GLM52_SERVER:-${RUN_GLM52_V14_SERVER:-${SCRIPT_DIR}/run-glm52-v14-server}}"
+OVERLAY_LAUNCHER_NAME="${OVERLAY_LAUNCHER_NAME:-run-glm52-v14-server}"
 
 DATE_TAG="${DATE_TAG:-20260707}"
-VLLM_BRANCH_TAG="eldritch-enlightenment"
+VLLM_BRANCH_TAG="${VLLM_BRANCH_TAG:-eldritch-enlightenment}"
 IMAGE_FLAVOR_TAG="${IMAGE_FLAVOR_TAG:-eldritch-enlightenment-v7}"
 VLLM_REF="${VLLM_REF:-fable/dcp-b12x-contiguous-lse-20260707}"
 VLLM_COMMIT="${VLLM_COMMIT:-e2e2eaf61d05834fb5f7f529b75ce75c4cafc289}"
@@ -75,6 +76,7 @@ else
     export CUTLASS_REF="${CUTLASS_REF:-d80a4e53b52b42550659a8696dab32705265e324}"
     export CUTLASS_COMMIT="${CUTLASS_COMMIT:-d80a4e53b52b42550659a8696dab32705265e324}"
     export HUMMING_KERNELS_SPEC="${HUMMING_KERNELS_SPEC:-humming-kernels[cu13]==0.1.6}"
+    export VLLM_RUNTIME_EXTRA_PACKAGES="${VLLM_RUNTIME_EXTRA_PACKAGES:-}"
 
     # The overlay below is the canonical InstantTensor install. These exports are
     # harmless for older blackwell Dockerfiles and pin the same source if the
@@ -93,16 +95,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
-install -m 0755 "${RUN_GLM52_V14_SERVER}" "${overlay_dir}/run-glm52-v14-server"
+install -m 0755 "${RUN_GLM52_SERVER}" "${overlay_dir}/${OVERLAY_LAUNCHER_NAME}"
 
-cat > "${overlay_dir}/Dockerfile" <<'DOCKERFILE'
+cat > "${overlay_dir}/Dockerfile" <<DOCKERFILE
 ARG BASE_IMAGE=voipmonitor/vllm:glm-kimi-cu132-system-base-20260626
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
-COPY run-glm52-v14-server /usr/local/bin/run-glm52-v14-server
-RUN bash -n /usr/local/bin/run-glm52-v14-server \
+COPY ${OVERLAY_LAUNCHER_NAME} /usr/local/bin/${OVERLAY_LAUNCHER_NAME}
+RUN bash -n /usr/local/bin/${OVERLAY_LAUNCHER_NAME} \
  && /opt/venv/bin/python - <<'PY'
 import importlib.metadata as md
 import instanttensor
@@ -115,7 +117,7 @@ PY
 ENV INSTANTTENSOR_BACKEND=BUFFERED
 
 LABEL local-inference.instanttensor.backend_default="BUFFERED" \
-      local-inference.glm52.launcher="/usr/local/bin/run-glm52-v14-server"
+      local-inference.glm52.launcher="/usr/local/bin/${OVERLAY_LAUNCHER_NAME}"
 DOCKERFILE
 
 DOCKER_BUILDKIT=1 docker build \

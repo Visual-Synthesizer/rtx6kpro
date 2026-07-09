@@ -39,6 +39,8 @@ CACHE_DIR="${CACHE_DIR:-${CACHE_ROOT}/${NAME}}"
 TMP_DIR="${TMP_DIR:-/root/vllm/tmp/${NAME}}"
 ENV_FILE="${ENV_FILE:-${CACHE_DIR}/compose.env}"
 ACTION="${1:-up}"
+CONTAINER_LAUNCHER="${CONTAINER_LAUNCHER:-/usr/local/bin/run-glm52-v14-server}"
+GPU_DEVICE_REQUESTS="${GPU_DEVICE_REQUESTS:-0}"
 COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-${NAME}}"
 COMPOSE_PROJECT_NAME="$(printf '%s' "${COMPOSE_PROJECT_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/_/g; s/^[^a-z0-9]+/glm52_/')"
 export COMPOSE_PROJECT_NAME
@@ -101,6 +103,25 @@ fi
 
 mkdir -p "${CACHE_DIR}" "${TMP_DIR}"
 
+if [[ "${GPU_DEVICE_REQUESTS}" == "1" ]]; then
+  GPU_COMPOSE_FILE="${GPU_COMPOSE_FILE:-${CACHE_DIR}/gpu-devices.yml}"
+  IFS=',' read -r -a gpu_ids <<< "${GPUS}"
+  {
+    printf '%s\n' 'services:' '  server:' '    privileged: false' '    deploy:' '      resources:' '        reservations:' '          devices:' '            - driver: nvidia' '              device_ids:'
+    for gpu_id in "${gpu_ids[@]}"; do
+      gpu_id="$(printf '%s' "${gpu_id}" | xargs)"
+      [[ "${gpu_id}" =~ ^[0-9]+$ ]] || die "GPUS must be a comma-separated list of numeric GPU ids when GPU_DEVICE_REQUESTS=1"
+      printf '                - "%s"\n' "${gpu_id}"
+    done
+    printf '%s\n' '              capabilities: [gpu]'
+  } > "${GPU_COMPOSE_FILE}"
+  if [[ -n "${COMPOSE_FILES:-}" ]]; then
+    COMPOSE_FILES="${COMPOSE_FILES}:${GPU_COMPOSE_FILE}"
+  else
+    COMPOSE_FILES="${COMPOSE_FILE}:${GPU_COMPOSE_FILE}"
+  fi
+fi
+
 cat > "${ENV_FILE}" <<EOF
 IMAGE=${IMAGE}
 NAME=${NAME}
@@ -136,7 +157,11 @@ CACHE_DIR=${CACHE_DIR}
 TMP_DIR=${TMP_DIR}
 EOF
 
-compose=(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}")
+compose=(docker compose --env-file "${ENV_FILE}")
+IFS=':' read -r -a compose_files <<< "${COMPOSE_FILES:-${COMPOSE_FILE}}"
+for compose_file in "${compose_files[@]}"; do
+  compose+=(-f "${compose_file}")
+done
 
 case "${ACTION}" in
   up|start)
@@ -183,6 +208,7 @@ load_format=${LOAD_FORMAT}
 instanttensor_backend=${INSTANTTENSOR_BACKEND}
 max_num_seqs=${MAX_NUM_SEQS}
 graph=${GRAPH}
-container_launcher=/usr/local/bin/run-glm52-v14-server
+container_launcher=${CONTAINER_LAUNCHER}
 compose_env=${ENV_FILE}
+compose_files=${COMPOSE_FILES:-${COMPOSE_FILE}}
 EOF
