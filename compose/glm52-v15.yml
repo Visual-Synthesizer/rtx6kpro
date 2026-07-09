@@ -2,7 +2,7 @@ name: glm52-v15
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:fathomless-firmament-v15-vllmf5f4af3-b12x90172a5-cu132-20260709}
+    image: ${IMAGE:-voipmonitor/vllm:fathomless-firmament-v19-vllm0d1ad03-b12x90172a5-cu132-20260709}
     container_name: ${NAME:-glm52-v15}
     network_mode: host
     ipc: host

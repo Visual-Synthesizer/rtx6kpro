@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HELPER="${HELPER:-${ROOT_DIR}/scripts/run-glm52-v15-compose.sh}"
 BENCH="${BENCH:-/root/llm-inference-bench/llm_decode_bench.py}"
-IMAGE="${IMAGE:-voipmonitor/vllm:fathomless-firmament-v15-vllmf5f4af3-b12x90172a5-cu132-20260709}"
+IMAGE="${IMAGE:-voipmonitor/vllm:fathomless-firmament-v19-vllm0d1ad03-b12x90172a5-cu132-20260709}"
 RESULT_ROOT="${RESULT_ROOT:-/root/bench-results/glm52-v15-reduced-$(date -u +%Y%m%dT%H%M%SZ)}"
 PROGRESS_FILE="${PROGRESS_FILE:-${RESULT_ROOT}/progress.log}"
 
@@ -28,9 +28,11 @@ DECODE_MAX_TOKENS="${DECODE_MAX_TOKENS:-2048}"
 PREFILL_CONTEXTS="${PREFILL_CONTEXTS:-8k,64k}"
 PREFILL_DURATION="${PREFILL_DURATION:-10}"
 SETTLE_SECONDS="${SETTLE_SECONDS:-30}"
+SKIP_PREFILL="${SKIP_PREFILL:-0}"
 
 CASES="${CASES:-nvfp4-a4-orig nvfp4-a4-online-mxfp8 nvfp4-a16-orig nvfp4-a16-online-mxfp8 mxfp4-a8-orig mxfp4-a8-online-mxfp8}"
 MTP3_CASE="${MTP3_CASE:-nvfp4-a16-orig}"
+RUN_MTP0="${RUN_MTP0:-1}"
 RUN_MTP3="${RUN_MTP3:-1}"
 
 mkdir -p "${RESULT_ROOT}" "$(dirname "${PROGRESS_FILE}")"
@@ -200,7 +202,7 @@ start_case() {
 run_decode() {
   local label="$1" port="$2" served="$3" out="$4"
   progress "DECODE_START label=${label} cc=${DECODE_CONCURRENCY}"
-  nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_before_decode.csv" 2>/dev/null || true
+  nvidia-smi -i "${GPUS}" --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_before_decode.csv" 2>/dev/null || true
   python3 "${BENCH}" \
     --host 127.0.0.1 \
     --port "${port}" \
@@ -212,14 +214,14 @@ run_decode() {
     --max-tokens "${DECODE_MAX_TOKENS}" \
     --no-hw-monitor \
     --output "${out}/decode.json" > "${out}/decode.log" 2>&1
-  nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_after_decode.csv" 2>/dev/null || true
+  nvidia-smi -i "${GPUS}" --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_after_decode.csv" 2>/dev/null || true
   progress "DECODE_DONE label=${label}"
 }
 
 run_prefill() {
   local label="$1" port="$2" served="$3" out="$4"
   progress "PREFILL_START label=${label}"
-  nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_before_prefill.csv" 2>/dev/null || true
+  nvidia-smi -i "${GPUS}" --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_before_prefill.csv" 2>/dev/null || true
   python3 "${BENCH}" \
     --host 127.0.0.1 \
     --port "${port}" \
@@ -231,7 +233,7 @@ run_prefill() {
     --max-tokens 1 \
     --no-hw-monitor \
     --output "${out}/prefill.json" > "${out}/prefill.log" 2>&1
-  nvidia-smi --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_after_prefill.csv" 2>/dev/null || true
+  nvidia-smi -i "${GPUS}" --query-gpu=timestamp,index,temperature.gpu,power.draw,clocks.sm,clocks.mem,memory.used,utilization.gpu --format=csv,noheader,nounits > "${out}/thermal_after_prefill.csv" 2>/dev/null || true
   progress "PREFILL_DONE label=${label}"
 }
 
@@ -253,7 +255,7 @@ run_case() {
   wait_ready "${name}" "${port}" "${out}"
   parse_kv "${out}"
   run_decode "${label}" "${port}" "${served}" "${out}"
-  if [[ "${mtp}" == "0" ]]; then
+  if [[ "${mtp}" == "0" && "${SKIP_PREFILL}" != "1" ]]; then
     run_prefill "${label}" "${port}" "${served}" "${out}"
   fi
   docker logs "${name}" > "${out}/server.final.log" 2>&1 || true
@@ -303,10 +305,12 @@ PY
 }
 
 progress "RESULT_ROOT=${RESULT_ROOT}"
-for case_key in ${CASES}; do
-  run_case "${case_key}" 0 "mtp0"
-  summarize || true
-done
+if [[ "${RUN_MTP0}" == "1" ]]; then
+  for case_key in ${CASES}; do
+    run_case "${case_key}" 0 "mtp0"
+    summarize || true
+  done
+fi
 
 if [[ "${RUN_MTP3}" == "1" ]]; then
   run_case "${MTP3_CASE}" 3 "mtp3"

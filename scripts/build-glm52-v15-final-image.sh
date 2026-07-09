@@ -8,11 +8,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 export DATE_TAG="${DATE_TAG:-20260709}"
 export VLLM_BRANCH_TAG="${VLLM_BRANCH_TAG:-fathomless-firmament}"
-export IMAGE_FLAVOR_TAG="${IMAGE_FLAVOR_TAG:-fathomless-firmament-v15}"
+export IMAGE_FLAVOR_TAG="${IMAGE_FLAVOR_TAG:-fathomless-firmament-v19}"
 
 export VLLM_REPO="${VLLM_REPO:-https://github.com/local-inference-lab/vllm.git}"
-export VLLM_REF="${VLLM_REF:-codex/ff-v15-mxfp4-online-mxfp8-20260709}"
-export VLLM_COMMIT="${VLLM_COMMIT:-f5f4af357e26643b355eb1190de7df1163bbcd98}"
+export VLLM_REF="${VLLM_REF:-codex/fathomless-firmament-v16-all-prs-20260709}"
+export VLLM_COMMIT="${VLLM_COMMIT:-0d1ad037bd1be895f552c596f2fb8507c2584494}"
 
 export B12X_REPO="${B12X_REPO:-https://github.com/voipmonitor/b12x.git}"
 export B12X_REF="${B12X_REF:-codex/ff-v15-cute-compile-fallback-20260709}"

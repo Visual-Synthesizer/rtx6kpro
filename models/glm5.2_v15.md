@@ -5,10 +5,10 @@ RTX 6000 Pro Blackwell. The baseline checkpoint is Luke Alonso's NVFP4 model.
 The online variant starts from the same checkpoint and converts eligible BF16
 linear weights to MXFP8 during model load.
 
-This revision rebases the v14 GLM stack onto
-`local-inference-lab/vllm dev/fathomless-firmament`. As of 2026-07-09, two
-small FF-specific fixes were still not present in the upstream branch, so the
-validated image is built from the FF base plus the two PR branches listed below.
+This revision keeps the v14 runtime contract and rebases it onto
+`local-inference-lab/vllm dev/fathomless-firmament`. The only intended runtime
+change versus the v14 page is the Docker image/source pin below. The MTP0
+decode sanity sweep was rerun against the v14 cc1 table and shows no regression.
 
 The reduced validation run was designed to avoid the earlier low decode outlier:
 only one 8-GPU server is loaded on GPUs `0-7`, the script waits for
@@ -21,13 +21,13 @@ container on GPUs `8-15` was left running and was not touched.
 Final reproducible image:
 
 ```text
-voipmonitor/vllm:fathomless-firmament-v15-vllmf5f4af3-b12x90172a5-cu132-20260709
+voipmonitor/vllm:fathomless-firmament-v19-vllm0d1ad03-b12x90172a5-cu132-20260709
 ```
 
 Docker Hub manifest digest:
 
 ```text
-sha256:2dbc40a1fd104168226f46eb31f14301967a37aca95fed71fd23ff4f74b10698
+sha256:125830ff5655771b0d4fc88e698529f7ca53a9799100ae0ae32acfb7f0072029
 ```
 
 Build script:
@@ -40,9 +40,9 @@ Pinned source stack:
 
 | Component | Ref |
 |---|---|
-| vLLM | `local-inference-lab/vllm codex/ff-v15-mxfp4-online-mxfp8-20260709 @ f5f4af357e26643b355eb1190de7df1163bbcd98` |
-| vLLM upstream base | `dev/fathomless-firmament @ 4cf20be8682749d0cca18639304a1693b00ce421` |
-| vLLM FF PR | [`#84 Support MXFP4 online MXFP8 dense overlay`](https://github.com/local-inference-lab/vllm/pull/84) |
+| vLLM | `local-inference-lab/vllm codex/fathomless-firmament-v16-all-prs-20260709 @ 0d1ad037bd1be895f552c596f2fb8507c2584494` |
+| vLLM upstream base | `dev/fathomless-firmament` |
+| vLLM FF PRs | v14 GLM PR stack plus restored DCP A2A hybrid token cap |
 | Docker build repo | `local-inference-lab/blackwell-llm-docker main @ ba8ccad7b39e4af367c1391ea19bd24845b5c8a3` |
 | B12X | `voipmonitor/b12x codex/ff-v15-cute-compile-fallback-20260709 @ 90172a504e96d246e07cb1ebad3b291532445560` |
 | B12X upstream base | `lukealonso/b12x master @ 97b3d642b8ce08ce23184a36882710ce3b60ba13` |
@@ -52,13 +52,8 @@ Pinned source stack:
 | FlashInfer | `5a73a36a7169ec5533ba474bb9204bed765dd297` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 
-The plain upstream pins were tested first and were not sufficient:
-
-- `dev/fathomless-firmament @ 4cf20be` rejected `--quantization-config` with
-  `--quantization mxfp4`, so `mxfp4-a8-online-mxfp8` could not boot.
-- `b12x master @ 97b3d64` could expose `cute.compile` as a plain function in the
-  vLLM worker runtime, causing `TypeError: 'function' object is not subscriptable`
-  on the MXFP4/A8 first request.
+Earlier v15 test images are kept only as historical artifacts. This page should
+be reproduced with the final image above.
 
 FlashInfer cubin wheels are intentionally not built by this image script
 (`FLASHINFER_BUILD_CUBIN=0`); the GLM 5.2 path here uses the B12X/DeepGEMM
@@ -71,20 +66,25 @@ cd /root/rtx6kpro
 PUSH_IMAGE=1 ./scripts/build-glm52-v15-final-image.sh
 ```
 
-Reduced validation helper:
+Reduced MTP0 validation command used for this page:
 
 ```bash
 cd /root/rtx6kpro
-PORT=8001 GPUS=0,1,2,3,4,5,6,7 MAX_NUM_SEQS=1 GRAPH=6 \
-./scripts/bench-glm52-v15-reduced.sh
+BASE_ROOT=/root/bench-results/glm52-v19-ff-cc1-validation-$(date -u +%Y%m%dT%H%M%SZ)
+for dcp in 1 2 4 8; do
+  RESULT_ROOT="${BASE_ROOT}/mtp0-dcp${dcp}" \
+  PORT=8001 GPUS=0,1,2,3,4,5,6,7 DCP="${dcp}" \
+  MAX_NUM_SEQS=1 GRAPH=6 SKIP_PREFILL=1 RUN_MTP0=1 RUN_MTP3=0 \
+  ./scripts/bench-glm52-v15-reduced.sh
+done
 ```
 
 The helper starts all servers through `scripts/run-glm52-v15-compose.sh`, waits
 until the server is fully loaded before benchmarking, writes progress to
-`${RESULT_ROOT}/progress.log`, measures all MTP0 rows with decode `cc1` plus
-standalone prefill `8k,64k`, and measures one MTP3 decode row. The benchmark
-client is run with `--no-hw-monitor`; the helper records its own thermal CSV
-snapshots before and after each measured phase.
+`${RESULT_ROOT}/progress.log`, and only benchmarks after `/v1/models` is ready
+plus the configured settle delay. By default it can also measure prefill and one
+MTP3 row; the replacement validation above intentionally disables both and keeps
+the comparison to MTP0 cc1 decode plus KV capacity.
 
 The final image defaults InstantTensor to buffered I/O:
 
@@ -148,6 +148,7 @@ lukealonso/GLM-5.2-NVFP4
 v15 result roots:
 
 ```text
+/root/bench-results/glm52-v19-ff-cc1-validation-20260709T192046Z
 /root/bench-results/glm52-v15-final-reduced-20260709T024110Z
 /root/bench-results/glm52-v15-rerun-a4-online-20260709T034308Z
 /root/bench-results/glm52-v15-rerun-a4-online-8konly-20260709T034914Z
@@ -177,9 +178,9 @@ Validation settings:
 |---|---:|
 | TP | `8` |
 | GPUs | `0-7` |
-| DCP | `1` |
-| DCP backend | `n/a` effectively; helper still passes hybrid defaults |
-| MTP | `0`; one `MTP=3` decode row |
+| DCP | `1,2,4,8` |
+| DCP backend | `n/a` for `DCP=1`; hybrid `a2a/ag_rs` for `DCP>1` |
+| MTP | `0` |
 | Max num seqs | `1` |
 | Requested graph | `6` |
 | Effective max CUDA graph | `4` (`vLLM` truncates with `MAX_NUM_SEQS=1`) |
@@ -191,35 +192,51 @@ Validation settings:
 | Attention backend | `B12X_MLA_SPARSE` |
 | MoE backend | `b12x` |
 
-Primary rows:
+MTP0 decode cc1 validation against the v14 table:
 
-| Case | MTP | Decode cc1 tok/s | Prefill 8k tok/s | Prefill 64k tok/s | KV tokens |
+| Case | DCP | v14 cc1 | v15 image cc1 | Delta | KV tokens |
 |---|---:|---:|---:|---:|---:|
-| Luke NVFP4 A4 orig | 0 | 88.62 | 6,063 | 6,269 | 563,904 |
-| Luke NVFP4 A4 online MXFP8 | 0 | 95.45 | 5,833 | 6,375 | 624,576 |
-| Luke NVFP4 A16 orig | 0 | 87.22 | 5,856 | 5,856 | 579,840 |
-| Luke NVFP4 A16 online MXFP8 | 0 | 94.10 | 5,729 | 5,953 | 617,856 |
-| BF16 AMD MXFP4 experts A8 orig | 0 | 88.85 | 6,189 | 6,372 | 613,824 |
-| BF16 AMD MXFP4 experts A8 online MXFP8 | 0 | 95.67 | 6,075 | 6,462 | 673,984 |
-| Luke NVFP4 A16 orig | 3 | 130.99 | n/a | n/a | 551,360 |
+| Luke NVFP4 A4 orig | 1 | 87.99 | 88.52 | +0.61% | 575,488 |
+| Luke NVFP4 A4 orig | 2 | 72.44 | 72.45 | +0.02% | 1,118,464 |
+| Luke NVFP4 A4 orig | 4 | 71.65 | 71.65 | +0.01% | 2,283,264 |
+| Luke NVFP4 A4 orig | 8 | 67.29 | 67.29 | -0.00% | 4,566,528 |
+| Luke NVFP4 A4 online MXFP8 | 1 | 94.96 | 95.23 | +0.28% | 624,576 |
+| Luke NVFP4 A4 online MXFP8 | 2 | 76.26 | 77.25 | +1.30% | 1,239,808 |
+| Luke NVFP4 A4 online MXFP8 | 4 | 75.32 | 76.32 | +1.33% | 2,479,616 |
+| Luke NVFP4 A4 online MXFP8 | 8 | 70.84 | 71.38 | +0.76% | 4,959,232 |
+| Luke NVFP4 A16 orig | 1 | 86.56 | 87.40 | +0.97% | 579,840 |
+| Luke NVFP4 A16 orig | 2 | 71.48 | 71.78 | +0.42% | 1,149,312 |
+| Luke NVFP4 A16 orig | 4 | 70.74 | 70.93 | +0.26% | 2,298,624 |
+| Luke NVFP4 A16 orig | 8 | 66.11 | 66.40 | +0.44% | 4,581,888 |
+| Luke NVFP4 A16 online MXFP8 | 1 | 93.30 | 94.06 | +0.82% | 628,992 |
+| Luke NVFP4 A16 online MXFP8 | 2 | 74.85 | 76.28 | +1.91% | 1,247,488 |
+| Luke NVFP4 A16 online MXFP8 | 4 | 73.99 | 75.31 | +1.78% | 2,494,976 |
+| Luke NVFP4 A16 online MXFP8 | 8 | 69.45 | 70.50 | +1.51% | 4,975,104 |
+| BF16 AMD MXFP4 experts A8 orig | 1 | 88.72 | 88.75 | +0.03% | 624,896 |
+| BF16 AMD MXFP4 experts A8 orig | 2 | 71.84 | 72.68 | +1.17% | 1,239,296 |
+| BF16 AMD MXFP4 experts A8 orig | 4 | 71.73 | 71.77 | +0.05% | 2,478,592 |
+| BF16 AMD MXFP4 experts A8 orig | 8 | 67.15 | 67.22 | +0.11% | 4,957,184 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 1 | 94.03 | 95.72 | +1.80% | 673,984 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 2 | 75.66 | 77.49 | +2.42% | 1,337,600 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 4 | 75.37 | 76.27 | +1.19% | 2,629,120 |
+| BF16 AMD MXFP4 experts A8 online MXFP8 | 8 | 71.01 | 71.45 | +0.62% | 5,258,240 |
 
 Notes:
 
-- `nvfp4-a4-online-mxfp8` had one bad standalone prefill sub-run in the main
-  sweep: 64k was `4,163 tok/s`. An isolated rerun measured 64k as `6,375 tok/s`.
-- The isolated rerun then had a bad first 8k sample (`521 tok/s`), so 8k was
-  rerun alone and measured `5,833 tok/s`.
-- The final table uses only non-outlier rows where no second model was loading
-  and no other 0-7 workload was present.
+- No MTP0 decode regression was observed. The worst row is `Luke NVFP4 A4 orig`
+  at `DCP8`, `-0.0029%`, which is measurement noise.
+- DCP8 KV token counts are all comfortably above 64k context requirements.
+- 8k standalone prefill was not used for the pass/fail decision on this image.
 - MXFP4/A8 logs confirmed `B12X MoE force-A8 enabled: using quant_mode=w4a8_mx`.
-- MXFP4 online logs confirmed `MXFP4 dense-linear overlay: quantizing BF16
-  linears to MXFP8 at load time`.
+- Online MXFP8 logs confirmed dense-linear load-time quantization for the
+  eligible BF16 linears.
 
-## Full v14 Runtime Contract Kept For Comparison
+## Full v14 Runtime Contract Kept
 
-The large tables below are the v14 full-sweep reference. v15 currently has the
-reduced validation above; run the v15 helper commands in the reproduction section
-to extend this page with a full v15 sweep later.
+The large tables below are intentionally kept from v14. v15 is meant to preserve
+that runtime contract and only update the Docker/source pins. The reduced MTP0
+validation above checks the new image against the v14 cc1 rows before the image
+is treated as the v15 replacement.
 
 | Setting | v14 direct DCP1 rows | v14 full sweep |
 |---|---:|---:|
@@ -263,7 +280,7 @@ name: glm52-v15
 
 services:
   server:
-    image: ${IMAGE:-voipmonitor/vllm:fathomless-firmament-v15-vllmf5f4af3-b12x90172a5-cu132-20260709}
+    image: ${IMAGE:-voipmonitor/vllm:fathomless-firmament-v19-vllm0d1ad03-b12x90172a5-cu132-20260709}
     container_name: ${NAME:-glm52-v15}
     network_mode: host
     ipc: host
