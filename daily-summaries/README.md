@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-09](2026-07/2026-07-09.md) | GLM-5.2 MXFP8-NVFP4-NF3-Hybrid quant hits GPQA-Diamond 88.38% and beats REAP-504B on aider polyglot  |
 | [2026-07-08](2026-07/2026-07-08.md) | GLM-5.2 v14 image: new hybrid a2a backend fixes DCP decode regression — +10% prefill / +13% decode |
 | [2026-07-07](2026-07/2026-07-07.md) | GLM-5.2 v14 docker image released with new B12X backend (beats "lucifer" cutlass), instanttensor loa |
 | [2026-07-06](2026-07/2026-07-06.md) | - DeepSeek-V4-Flash-DSpark added FP4 indexer cache (7-token draft) — small KV gain (+18.6k tokens) |
@@ -140,6 +141,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-09](2026-07/2026-07-09.md) | GLM-5.2 MXFP8-NVFP4-NF3-Hybrid quant hits GPQA-Diamond 88.38% and beats REAP-504B on aider polyglot  |
 | [2026-07-08](2026-07/2026-07-08.md) | GLM-5.2 v14 image: new hybrid a2a backend fixes DCP decode regression — +10% prefill / +13% decode |
 | [2026-07-07](2026-07/2026-07-07.md) | GLM-5.2 v14 docker image released with new B12X backend (beats "lucifer" cutlass), instanttensor loa |
 | [2026-07-06](2026-07/2026-07-06.md) | - DeepSeek-V4-Flash-DSpark added FP4 indexer cache (7-token draft) — small KV gain (+18.6k tokens) |
