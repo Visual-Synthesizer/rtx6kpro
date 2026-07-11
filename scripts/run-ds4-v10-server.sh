@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711}
+IMAGE=${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm3db3c68-b12x90172a5-fi2cba2f7-cu132-20260711}
 STANDARD_MODEL=${STANDARD_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash/snapshots/6976c7ff1b30a1b2cb7805021b8ba4684041f136}
 DSPARK_MODEL=${DSPARK_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-DSpark/snapshots/913f0657a874f76844e2e91cbe706dbcaceeb6d7}
 

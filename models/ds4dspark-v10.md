@@ -61,15 +61,15 @@ PRs are also non-draft PRs.
 ## Docker Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711
-sha256:55ac0a6bcebb11dafe8d1d1a0964d41c88f3768d9edcc0eb70e741073d0ba51b
+voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm3db3c68-b12x90172a5-fi2cba2f7-cu132-20260711
+sha256:afc61609a0dcd5ab9d487a9aa155f4555fafc902376783a0abfbc537a9bca7bd
 ```
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `2a62b4909c081013feb4fe1bfd8c7980802b88b3` |
+| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `3db3c6860d06252b62f60a315225b6fd6ad515fb` |
 | vLLM base | `dev/fathomless-firmament` @ `c649d41bd2d8f1cbb85075d1cf3027eb29cac2ea` when PR #88 was opened |
 | B12X | `codex/ff-v15-cute-compile-fallback-20260709` @ `90172a504e96d246e07cb1ebad3b291532445560` |
 | FlashInfer combined source | `codex/sm120-dspark-stack-20260711` @ `2cba2f7bbe8335fcabe18d29e6eb99de2093f991` |
@@ -91,7 +91,7 @@ the helper in `DRY_RUN` mode, unifies PyTorch and vLLM on the patched NCCL
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout c149645
+git checkout e3209b1450ad1b8a558afc96b743cd34d78b836a
 
 PUSH_IMAGE=1 ./build-fathomless-firmament-ds4-v10-cu132.sh
 ```
@@ -120,7 +120,7 @@ The equivalent minimal service is:
 ```yaml
 services:
   ds4:
-    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711
+    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm3db3c68-b12x90172a5-fi2cba2f7-cu132-20260711
     command: ["/usr/local/bin/serve-ds4-flash.sh"]
     network_mode: host
     ipc: host
