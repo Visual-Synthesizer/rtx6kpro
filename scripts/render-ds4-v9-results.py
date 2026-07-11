@@ -111,6 +111,32 @@ def prefill_table(out: Path, dspark: bool) -> str:
     return "\n".join(lines)
 
 
+def delta(value: float, baseline: float) -> str:
+    if baseline == 0:
+        return "n/a"
+    return f"{((value / baseline) - 1.0) * 100:+.1f}%"
+
+
+def comparison_table(out: Path, baseline: Path, dspark: bool) -> str:
+    lines = [
+        "| TP | Backend | Mode | cc1 delta | cc64 delta | 64k prefill delta |",
+        "|---:|---|---|---:|---:|---:|",
+    ]
+    modes = ["dspark"] if dspark else STANDARD_MODES
+    for tp in TPS:
+        for backend in BACKENDS:
+            for mode in modes:
+                current = load_case(out, tp, backend, mode)
+                previous = load_case(baseline, tp, backend, mode)
+                lines.append(
+                    f"| {tp} | {backend} | {mode} | "
+                    f"{delta(current['cc1'], previous['cc1'])} | "
+                    f"{delta(current['cc64'], previous['cc64'])} | "
+                    f"{delta(current['p64'], previous['p64'])} |"
+                )
+    return "\n".join(lines)
+
+
 def validate_case_set(out: Path) -> None:
     expected = {
         f"tp{tp}-{backend}-{mode}"
@@ -130,6 +156,11 @@ def validate_case_set(out: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("out", type=Path, help="Sweep output directory")
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="Optional complete sweep used to render percentage deltas",
+    )
     args = parser.parse_args()
 
     validate_case_set(args.out)
@@ -143,6 +174,13 @@ def main() -> None:
     print(prefill_table(args.out, dspark=True))
     print("\n### Standard Checkpoint\n")
     print(prefill_table(args.out, dspark=False))
+    if args.baseline is not None:
+        validate_case_set(args.baseline)
+        print("\n## Baseline Comparison\n")
+        print("### DSpark Checkpoint\n")
+        print(comparison_table(args.out, args.baseline, dspark=True))
+        print("\n### Standard Checkpoint\n")
+        print(comparison_table(args.out, args.baseline, dspark=False))
 
 
 if __name__ == "__main__":
