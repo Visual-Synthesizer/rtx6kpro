@@ -24,6 +24,7 @@ PORT_BASE=${PORT_BASE:-7100}
 STARTUP_TIMEOUT=${STARTUP_TIMEOUT:-2400}
 SYNC_WAVE_READY=${SYNC_WAVE_READY:-1}
 ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-1}
+RESUME=${RESUME:-1}
 VLLM_PATCH_FILE=${VLLM_PATCH_FILE:-/root/vllm/blackwell-llm-docker/patches/vllm-b12x-indexer-warmup-fallback-20260704.patch}
 CONTAINER_PREFIX=${CONTAINER_PREFIX:-ds4-v9}
 GPU_GROUPS_TP2=${GPU_GROUPS_TP2:-"0,1 2,3 4,5 6,7 8,9 10,11 12,13 14,15"}
@@ -351,7 +352,13 @@ run_tp_matrix() {
   cases=()
   for backend in $(split_csv "$BACKENDS"); do
     for mode in $(split_csv "$MODES"); do
-      cases+=("$tp:$backend:$mode")
+      local label="tp${tp}-${backend}-${mode}"
+      if [[ "$RESUME" == "1" ]] \
+        && validate_case_results "$OUT/$label" >/dev/null 2>&1; then
+        append_case_summary REUSED "$label" "$OUT/$label"
+      else
+        cases+=("$tp:$backend:$mode")
+      fi
     done
   done
 
@@ -439,8 +446,8 @@ record_repro_artifacts
     "$PREFILL_CONTEXTS" "$PREFILL_DURATION"
   printf 'backends=%s\nmodes=%s\ntps=%s\nsync_wave_ready=%s\nenable_topo_pin=%s\nvllm_patch_file=%s\n' \
     "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" "$VLLM_PATCH_FILE"
-  printf 'container_prefix=%s\ngpu_groups_tp2=%s\ngpu_groups_tp4=%s\n' \
-    "$CONTAINER_PREFIX" "$GPU_GROUPS_TP2" "$GPU_GROUPS_TP4"
+  printf 'container_prefix=%s\ngpu_groups_tp2=%s\ngpu_groups_tp4=%s\nresume=%s\n' \
+    "$CONTAINER_PREFIX" "$GPU_GROUPS_TP2" "$GPU_GROUPS_TP4" "$RESUME"
 } | tee "$OUT/run-config.txt"
 printf '%s sweep_start image=%s out=%s backends=%s modes=%s tps=%s sync_wave_ready=%s enable_topo_pin=%s\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$IMAGE" "$OUT" "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" \
