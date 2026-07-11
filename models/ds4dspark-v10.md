@@ -1,266 +1,297 @@
-# DeepSeek-V4-Flash v10 Fathomless Validation
+# DeepSeek-V4-Flash and DSpark v10
 
-This page documents the reduced DeepSeek-V4-Flash standard-checkpoint
-validation on the `dev/fathomless-firmament` vLLM line. It is the v10 follow-up
-to [DeepSeek-V4-Flash and DSpark v9](ds4dspark-v9.md).
+This page documents the DS4 standard-checkpoint and DSpark v10 release on the
+`dev/fathomless-firmament` line. It is a reproducible successor to
+[v9](ds4dspark-v9.md): the image is built from reviewed source refs, the launch
+contract lives inside the image, and the benchmark scheduler does not start a
+client until every server in the current GPU wave is ready.
 
-The requested fast validation uses only GPUs `0-7`, leaves the existing GLM
-container on GPUs `8-15` untouched, and runs with:
+The tested checkpoints are:
 
 ```text
-TP=4
-MAX_NUM_SEQS=1
-GRAPH=6
-DECODE_CONCURRENCY=1
-PREFILL_CONTEXTS=8k,64k
+deepseek-ai/DeepSeek-V4-Flash
+deepseek-ai/DeepSeek-V4-Flash-DSpark
 ```
 
-The DSpark checkpoint itself was not revalidated in this reduced pass. The
-primary target here is the base `DeepSeek-V4-Flash` checkpoint with B12X
-standard MTP off and MTP2.
+Standard MTP rows use `method=mtp` with two or three draft tokens. `mtp0`
+disables speculative decoding. DSpark uses its dedicated draft module with the
+validated fixed K=5 probabilistic path by default.
 
-## Image
+## What Changed From v9
 
-The DS4 v10 validation uses the same reproducible Fathomless image as the GLM
-5.2 v15 page:
+- DSpark draft randomness is independent from acceptance/recovery randomness,
+  including deterministic request state during padded CUDA-graph replays.
+- Prefix-cache-restored tokens are excluded from draft context and running
+  prefill chunks no longer allocate invalid lookahead slots.
+- DCP1 verifier causal lengths, B12X auxiliary-stream ordering, TP sampling
+  state, stale request slots, and CUDA-graph backbone-output lifetime are fixed.
+- Capacity-aware and variable-length DSpark verification, load-aware physical
+  depth, online SPS/STS profiling, block rejection, and a rowwise-FP8 draft head
+  are retained as opt-in research paths. They are not release defaults.
+- The SM120 PCIe serving work from upstream vLLM PR #47979 is included. Its
+  sequence-parallel/async-TP path cannot be used by DSpark yet because this
+  revision rejects sequence parallelism under the required V2 runner.
+- FlashInfer includes PR #3871 and the DS4 `topk=256` SM120 sparse-MLA decode
+  dispatch from PR #3923.
+- `/usr/local/bin/serve-ds4-flash.sh` is installed in the image. Compose and
+  benchmark wrappers pass environment settings to this helper instead of
+  duplicating the complete `vllm serve` command.
+- The v10 sweep is hard-limited to GPUs `0-7`. GPUs `8-15` are not present in
+  its scheduler allocation.
+
+## Pull Requests
+
+| Component | Pull request | Purpose |
+|---|---|---|
+| vLLM | [local-inference-lab/vllm#88](https://github.com/local-inference-lab/vllm/pull/88) | DSpark correctness/capacity work, SM120 PCIe stack, and env launcher |
+| B12X | [lukealonso/b12x#28](https://github.com/lukealonso/b12x/pull/28) | CuTe compiler compatibility fallback required by the pinned stack |
+| FlashInfer | [flashinfer-ai/flashinfer#3871](https://github.com/flashinfer-ai/flashinfer/pull/3871) | Graph-safe uniform multi-token FA2 decode |
+| FlashInfer | [flashinfer-ai/flashinfer#3923](https://github.com/flashinfer-ai/flashinfer/pull/3923) | SM120 DSV4 `topk=256` decode dispatch and explicit unsupported-shape error |
+| upstream vLLM | [vllm-project/vllm#47979](https://github.com/vllm-project/vllm/pull/47979) | SM120 PCIe serving stack |
+
+All three PRs created for this release (#88, B12X #28, and FlashInfer #3923)
+were opened ready for review, not as drafts.
+
+## Docker Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-v15-vllmf5f4af3-b12x90172a5-cu132-20260709
-voipmonitor/vllm@sha256:2dbc40a1fd104168226f46eb31f14301967a37aca95fed71fd23ff4f74b10698
-```
-
-Runtime version reported by vLLM:
-
-```text
-0.11.2.dev279+fathomless.firmament.f5f4af3.b12x90172a5.cu132.20260709
+voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm61f32d0-b12x90172a5-fi7176f85-cu132-20260710
+TBD_IMAGE_DIGEST
 ```
 
 Pinned source stack:
 
-| Component | Ref |
+| Component | Ref / commit |
 |---|---|
-| vLLM | `local-inference-lab/vllm codex/ff-v15-mxfp4-online-mxfp8-20260709 @ f5f4af357e26643b355eb1190de7df1163bbcd98` |
-| vLLM upstream base | `dev/fathomless-firmament @ 4cf20be8682749d0cca18639304a1693b00ce421` |
-| vLLM FF PR | [`#84 Support MXFP4 online MXFP8 dense overlay`](https://github.com/local-inference-lab/vllm/pull/84) |
-| B12X | `voipmonitor/b12x codex/ff-v15-cute-compile-fallback-20260709 @ 90172a504e96d246e07cb1ebad3b291532445560` |
-| B12X upstream base | `lukealonso/b12x master @ 97b3d642b8ce08ce23184a36882710ce3b60ba13` |
-| B12X FF PR | [`lukealonso/b12x#28 CuTe compile fallback`](https://github.com/lukealonso/b12x/pull/28) |
-| FlashInfer | `5a73a36a7169ec5533ba474bb9204bed765dd297` |
+| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `61f32d047589113606800c67a505e8cc02262402` |
+| vLLM base | `dev/fathomless-firmament` @ `c649d41bd2d8f1cbb85075d1cf3027eb29cac2ea` when PR #88 was opened |
+| B12X | `codex/ff-v15-cute-compile-fallback-20260709` @ `90172a504e96d246e07cb1ebad3b291532445560` |
+| FlashInfer combined source | `codex/sm120-dsv4-decode-pbs256-20260710` @ `7176f85bbaa12c851a7a4aabeedeea01449a0aac` |
+| FlashInfer clean TopK PR | `e939be505aae5fb8afb515cb9bd3dd5ba8c9e646` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
-| InstantTensor | `scitix/InstantTensor @ 85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
-| NCCL runtime | `2.30.4`, unified at `/opt/libnccl-local-inference.so.2.30.4` |
+| CUTLASS | `d80a4e53b52b42550659a8696dab32705265e324` |
+| InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
+| NCCL | `2.30.4`, `canonical/cu132-nccl2304-amd-noxml` @ `dfab7c1ace32da250ba97757879429c341b7bcf9` |
 | CUDA / PyTorch | CUDA `13.2.1`, PyTorch `2.12.0+cu132` |
 
-Build command:
+## Rebuild The Image
+
+The canonical build recipe is
+[`build-fathomless-firmament-ds4-v10-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/main/build-fathomless-firmament-ds4-v10-cu132.sh).
+It pins every source commit, requires `serve-ds4-flash.sh` to be present, checks
+the helper in `DRY_RUN` mode, unifies PyTorch and vLLM on the patched NCCL
+2.30.4 runtime, and can push the final tag.
 
 ```bash
-cd /root/rtx6kpro
-PUSH_IMAGE=1 ./scripts/build-glm52-v15-final-image.sh
+git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
+cd blackwell-llm-docker
+git checkout 50fc7fc
+
+PUSH_IMAGE=1 ./build-fathomless-firmament-ds4-v10-cu132.sh
 ```
 
-## Checkpoints
+No runtime source overlay or patch mount is used.
 
-Standard checkpoint:
+## Start A Server
 
-```text
-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash/snapshots/6976c7ff1b30a1b2cb7805021b8ba4684041f136
+The helper is already in the image; users do not need to download a launch
+script. The maintained minimal Compose example is
+[`examples/docker-compose-ds4-v10.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/main/examples/docker-compose-ds4-v10.yml).
+
+```bash
+git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
+cd blackwell-llm-docker
+
+MODE=dspark \
+BACKEND=lucifer-cutlass \
+TP_SIZE=2 \
+GPUS=0,1 \
+docker compose -f examples/docker-compose-ds4-v10.yml up -d
 ```
 
-DSpark checkpoint from v9, not remeasured here:
+The equivalent minimal service is:
 
-```text
-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-DSpark/snapshots/913f0657a874f76844e2e91cbe706dbcaceeb6d7
+```yaml
+services:
+  ds4:
+    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm61f32d0-b12x90172a5-fi7176f85-cu132-20260710
+    command: ["/usr/local/bin/serve-ds4-flash.sh"]
+    network_mode: host
+    ipc: host
+    shm_size: 32gb
+    gpus: all
+    environment:
+      CUDA_VISIBLE_DEVICES: ${GPUS:-0,1}
+      MODE: ${MODE:-dspark}
+      BACKEND: ${BACKEND:-lucifer-cutlass}
+      TP_SIZE: ${TP_SIZE:-2}
+      MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
 ```
 
-## Runtime Contract
+The helper derives the graph cap automatically: `4 * MAX_NUM_SEQS` for MTP0
+and `8 * MAX_NUM_SEQS` for MTP2, MTP3, and DSpark, with a minimum of 6.
 
-The v10 wrappers are thin defaults over the v9 DS4 helpers:
+### Stable Controls
+
+| Environment | Values / default | Meaning |
+|---|---|---|
+| `MODE` | `mtp0`, `mtp2`, `mtp3`, `dspark` (`dspark`) | Checkpoint/speculative mode |
+| `BACKEND` | five profiles below (`b12x-a8`) | Attention, MoE, linear, and force-mode profile |
+| `TP_SIZE` | positive integer (`2`) | Tensor parallel size |
+| `DCP_SIZE` | positive integer (`1`) | Decode-context parallel size; DSpark currently requires 1 |
+| `MAX_NUM_SEQS` | positive integer (`64`) | Scheduler concurrency and automatic graph input |
+| `MAX_MODEL_LEN` | tokens (`262144`) | Maximum sequence length |
+| `MAX_NUM_BATCHED_TOKENS` | tokens (`8192`) | Scheduler token budget |
+| `ALLREDUCE_MODE` | `b12x`, `vllm-custom`, `vllm-custom-2stage`, `nccl` (`b12x`) | TP collective implementation |
+| `INDEXER_BACKEND` | `auto`, `b12x`, `native` (`auto`) | Sparse indexer; auto follows the backend profile |
+| `CUDAGRAPH_CAPTURE_SIZES` | `default`, `auto`, `none`, or a list (`default`) | Optional explicit graph-capture pattern |
+| `MAX_CUDAGRAPH_CAPTURE_SIZE` | positive integer (`auto`) | Override the derived graph cap |
+
+### Backend Profiles
+
+| Backend | Attention | MoE / linear and activation force |
+|---|---|---|
+| `b12x-a16` | `B12X_MLA_SPARSE` | B12X MoE + B12X linear, force W4A16 |
+| `b12x-a8` | `B12X_MLA_SPARSE` | B12X MoE + B12X linear, force W4A8 MX |
+| `b12x-a8-dglin` | `B12X_MLA_SPARSE` | B12X MoE W4A8 MX + DeepGEMM linear |
+| `lucifer-default` | `FLASHINFER_MLA_SPARSE_DSV4` | default model MoE/linear selection |
+| `lucifer-cutlass` | `FLASHINFER_MLA_SPARSE_DSV4` | FlashInfer CUTLASS MoE |
+
+The helper also enables the serving defaults used by v9/v10:
 
 ```text
-scripts/run-ds4-v10-server.sh
-scripts/run-ds4-v10-sweep.sh
-```
-
-They set the Fathomless image above and call the existing v9 launch/sweep
-logic. Container names inside the sweep still use the `ds4-v9-*` prefix because
-the synchronized wave scheduler is shared with v9.
-
-Common server settings are inherited from `scripts/run-ds4-v9-server.sh`:
-
-```text
---kv-cache-dtype fp8
---block-size 256
---load-format auto
---decode-context-parallel-size 1
---max-model-len 262144
---max-num-batched-tokens 8192
---compilation-config {"cudagraph_mode":"FULL_AND_PIECEWISE","custom_ops":["all"]}
---async-scheduling
---no-scheduler-reserve-full-isl
---enable-chunked-prefill
 --enable-flashinfer-autotune
 --enable-prompt-tokens-details
 --enable-force-include-usage
 --enable-request-id-headers
-```
-
-B12X common env:
-
-```text
-VLLM_USE_B12X_WO_PROJECTION=1
-VLLM_USE_B12X_MHC=1
-VLLM_USE_B12X_MOE=1
-VLLM_USE_B12X_SPARSE_INDEXER=1
-VLLM_ENABLE_PCIE_ALLREDUCE=1
-VLLM_PCIE_ALLREDUCE_BACKEND=b12x
-VLLM_PCIE_ONESHOT_ALLREDUCE_MAX_SIZE=64KB
-B12X_MLA_SM120_UNIFIED=1
-B12X_MHC_MAX_TOKENS=16384
-B12X_DENSE_SPLITK_TURBO=1
-B12X_W4A16_TC_DECODE=1
 VLLM_MEMORY_PROFILE_INCLUDE_ATTN=1
 ```
 
-Backend rows:
+### Experimental DSpark Controls
 
-| Backend | Attention | MoE / linear |
-|---|---|---|
-| `b12x-a16` | `B12X_MLA_SPARSE` | `--moe-backend=b12x --linear-backend=b12x`, `VLLM_USE_B12X_FP8_GEMM=1`, `B12X_MOE_FORCE_A8=0`, `B12X_MOE_FORCE_A16=1` |
-| `b12x-a8` | `B12X_MLA_SPARSE` | `--moe-backend=b12x --linear-backend=b12x`, `VLLM_USE_B12X_FP8_GEMM=1`, `B12X_MOE_FORCE_A8=1`, `B12X_MOE_FORCE_A16=0` |
-| `b12x-a8-dglin` | `B12X_MLA_SPARSE` | `--moe-backend=b12x`, no `--linear-backend=b12x`, `VLLM_USE_B12X_FP8_GEMM=0`, `B12X_MOE_FORCE_A8=1`, `B12X_MOE_FORCE_A16=0` |
+These controls are preserved for future work but are disabled by default:
 
-The force paths were verified in logs:
+| Environment | Default | Purpose |
+|---|---:|---|
+| `DSPARK_CAPACITY` | `0` | Enable capacity-aware logical draft lengths |
+| `DSPARK_CAPACITY_VERIFICATION_MODE` | auto | `varlen` with B12X indexer, otherwise masked padded verification |
+| `DSPARK_DYNAMIC_DRAFT_DEPTH` | `0` | Load-aware physical draft-depth controller |
+| `DSPARK_FP8_DRAFT_HEAD` | `0` | Rowwise-FP8 DSpark draft LM head |
+| `REJECTION_SAMPLE_METHOD` | `standard` | Optional `block` rejection experiment |
+| `DSPARK_CONFIDENCE_THRESHOLD` | `0.0` | Capacity confidence cutoff |
+| `DSPARK_BUDGET_FRAC` | `1.0` | Capacity budget fraction |
+| `DSPARK_ONLINE_STS` | `1` when capacity is on | Online service-time profiling |
+| `DSPARK_SPS_CURVE` | `auto` | Measured service-time curve or explicit list |
 
-```text
-B12X MoE force-A16 enabled: using quant_mode=w4a16.
-B12X MoE force-A8 enabled: using quant_mode=w4a8_mx for E8M0 FP4 weights.
-```
+The masked CUTLASS capacity path lowers logical K but still executes padded
+target compute. In the measured C1-C128 range, dynamic K therefore did not beat
+fixed K=5. The FP8 draft head was approximately neutral at C1 and only about
+1.2% faster at C64 on RTX 6000 Pro. These are useful implementation points,
+not reasons to change the release default.
 
-## Reproduction Commands
+`SP_ASYNC_TP=1` is available only for compatible non-DSpark V1 runs. The helper
+fails explicitly if it is requested with DSpark instead of pretending that SP
+is active.
 
-The reduced validation was split into two waves so only GPUs `0-7` were used.
-Do not put four TP4 cases into one wave on this 16-GPU host unless you also want
-the helper to use GPUs `8-15`.
+## Full Synchronized Sweep
 
-Wave 1, A16 MTP0 and MTP2:
+The public scripts are:
+
+- [`run-ds4-v10-server.sh`](../scripts/run-ds4-v10-server.sh): Docker placement,
+  cache mounts, and CPU/NUMA pinning; all vLLM configuration is delegated to the
+  image helper.
+- [`run-ds4-v10-sweep.sh`](../scripts/run-ds4-v10-sweep.sh): v10 allocation and
+  synchronized wave entry point.
+- [`run-ds4-v9-sweep.sh`](../scripts/run-ds4-v9-sweep.sh): shared wave scheduler,
+  result validation, resume support, and reproducibility capture.
+- [`render-ds4-v9-results.py`](../scripts/render-ds4-v9-results.py): full tables
+  and optional v9 percentage deltas.
+
+Every wave follows this order:
+
+1. Start every server assigned to GPUs `0-7`.
+2. Wait for `/v1/models` from every server.
+3. Start benchmark clients only after the entire wave is ready.
+4. Validate JSON cells before a case can be reused by `RESUME=1`.
+
+This ordering prevents the false `132-133 tok/s` result caused by benchmarking
+one instance while another model was still loading.
 
 ```bash
 cd /root/rtx6kpro
-OUT=/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z
-mkdir -p "$OUT"
 
-OUT="$OUT" \
-PROGRESS_FILE="$OUT/progress.log" \
-TPS=4 \
-BACKENDS=b12x-a16 \
-MODES=standard-mtp0,standard-mtp2 \
-DECODE_CONCURRENCY=1 \
+OUT=/root/bench-results/ds4-v10-full-20260710 \
+TPS=2,4 \
+BACKENDS=b12x-a16,b12x-a8,b12x-a8-dglin,lucifer-default,lucifer-cutlass \
+MODES=standard-mtp0,standard-mtp2,standard-mtp3,dspark \
+MAX_NUM_SEQS=64 \
+DECODE_CONCURRENCY=1,16,32,64 \
 DECODE_CONTEXTS=0 \
-PREFILL_CONTEXTS=8k,64k \
-MAX_NUM_SEQS=1 \
-GRAPH=6 \
-PORT_BASE=7300 \
+DECODE_DURATION=30 \
+PREFILL_CONTEXTS=8k,64k,128k \
+PREFILL_DURATION=10 \
+STARTUP_TIMEOUT=2400 \
+ENABLE_TOPO_PIN=1 \
 scripts/run-ds4-v10-sweep.sh
 ```
 
-Wave 2, A8 full B12X and historical A8+DeepGEMM-linear hybrid:
+Render the completed run and compare it with v9:
 
 ```bash
-cd /root/rtx6kpro
-OUT=/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z
-
-OUT="$OUT" \
-PROGRESS_FILE="$OUT/progress.log" \
-TPS=4 \
-BACKENDS=b12x-a8,b12x-a8-dglin \
-MODES=standard-mtp0 \
-DECODE_CONCURRENCY=1 \
-DECODE_CONTEXTS=0 \
-PREFILL_CONTEXTS=8k,64k \
-MAX_NUM_SEQS=1 \
-GRAPH=6 \
-PORT_BASE=7340 \
-scripts/run-ds4-v10-sweep.sh
+scripts/render-ds4-v9-results.py \
+  /root/bench-results/ds4-v10-full-20260710 \
+  --baseline /root/bench-results/ds4-v9-refresh-pc1441b5-syncwave-20260704-102844
 ```
 
-Result root:
+## Decode Throughput
 
-```text
-/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z
-```
+Sustained decode is aggregate output tok/s from `llm_decode_bench.py`, context
+0, 30 seconds per cell. Coding peak is the median generation-only tok/s from
+five Sieve-of-Eratosthenes runs.
 
-Progress log:
+TBD_DECODE_TABLES
 
-```text
-/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z/progress.log
-```
+## Prefill Throughput
 
-## Reduced Validation Results
+Standalone prefill is client prompt tokens divided by TTFT, with non-repeating
+prompts and 10 seconds per context.
 
-Sustained decode is aggregate tok/s from `llm_decode_bench.py`, `ctx=0`,
-`cc1`, 30 seconds per cell. `coding peak` is median generation-only tok/s over
-five Sieve-of-Eratosthenes cc1 runs.
+TBD_PREFILL_TABLES
 
-| TP | Backend | Mode | cc1 tok/s | coding peak median | CJK runs | Prefill 8k tok/s | Prefill 64k tok/s |
-|---:|---|---|---:|---:|---:|---:|---:|
-| 4 | `b12x-a16` | `standard-mtp0` | 176.1 | 176.0 | 0 | 15,146 | 14,595 |
-| 4 | `b12x-a16` | `standard-mtp2` | 253.7 | 272.9 | 0 | 14,690 | 14,080 |
-| 4 | `b12x-a8` | `standard-mtp0` | 175.8 | 175.6 | 0 | 16,711 | 15,866 |
-| 4 | `b12x-a8-dglin` | `standard-mtp0` | 165.3 | 165.2 | 0 | 16,683 | 15,934 |
+## v9 Comparison
 
-## v9 Reference
+The compact comparison reports percentage change for the latency-sensitive
+decode endpoint (`cc1`), the tested high-concurrency endpoint (`cc64`), and the
+representative long prefill cell (`64k`).
 
-The v9 reference below is from the synchronized full sweep in
-`ds4dspark-v9.md`. It used `MAX_NUM_SEQS=64`, graph `256` for MTP0 and graph
-`512` for MTP2/MTP3, plus decode concurrencies up to cc64. Therefore the table
-is a reference, not a strict apples-to-apples comparison with the reduced v10
-`MAX_NUM_SEQS=1`, `GRAPH=6` run.
+TBD_V9_COMPARISON
 
-| TP | Backend | Mode | v9 cc1 | v10 cc1 | v9 8k | v10 8k | v9 64k | v10 64k |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-| 4 | `b12x-a16` | `standard-mtp0` | 174.6 | 176.1 | 14,360 | 15,146 | 13,894 | 14,595 |
-| 4 | `b12x-a16` | `standard-mtp2` | 302.3 | 253.7 | 13,938 | 14,690 | 13,436 | 14,080 |
-| 4 | `b12x-a8` | `standard-mtp0` | 174.4 | 175.8 | 15,733 | 16,711 | 15,080 | 15,866 |
-| 4 | `b12x-a8-dglin` | `standard-mtp0` | 177.0 | 165.3 | 15,723 | 16,683 | 15,130 | 15,934 |
+## Development Findings
 
-Readout:
-
-- Full B12X A16 and A8 MTP0 match or slightly exceed the v9 cc1 rows while
-  using the intentionally reduced graph settings.
-- Prefill 8k/64k is higher than the v9 reference for every measured reduced row.
-- The MTP2 reduced decode row is lower than the v9 full-graph reference. A
-  follow-up full-graph `MAX_NUM_SEQS=64`, `GRAPH=512` MTP2 check was attempted
-  at `/root/bench-results/ds4-v10-ff-mtp2-fullgraph-check-20260709T042200Z`,
-  but the server did not reach `/v1/models` after piecewise graph capture and
-  was stopped. Treat that as an open full-graph MTP2 issue, not as part of the
-  reduced validation result.
-- The historical A8+DeepGEMM-linear hybrid still has strong prefill but lower
-  cc1 decode than full B12X in this reduced run. The primary all-B12X A8 row is
-  the preferred A8 comparison.
+- The validated default is probabilistic fixed K=5.
+- Greedy draft sampling, separate draft Q/K/V, FP32 draft head, fake-FP8 main
+  projection input, and reference draft attention did not improve the result.
+- Dynamic/load-aware K is functionally implemented, but the masked CUTLASS
+  verifier does not skip target compute. A true compact target kernel is the
+  remaining opportunity for load-aware speedups.
+- The old draft-pass compaction experiment in local PR #71 targeted an earlier
+  architecture and is superseded. The FP8-head work from local PR #73 is
+  retained in PR #88 as an opt-in path.
+- B12X indexer plus Lucifer attention can enable true variable-length metadata,
+  but the hybrid was not a general default performance win.
+- Alternative vLLM custom, two-stage, symmetric-memory, and NCCL collectives are
+  selectable. B12X PCIe all-reduce remains the validated release default.
+- DSpark still requires the V2 model runner, so PR #47979 SP/async-TP cannot
+  accelerate DSpark until V2 sequence parallelism exists.
 
 ## Artifacts
 
 ```text
-/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z/
-/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z/repro/
-/root/bench-results/ds4-v10-ff-reduced-20260709T040432Z/progress.log
-/root/bench-results/ds4-v10-ff-mtp2-fullgraph-check-20260709T042200Z/
-/root/rtx6kpro/scripts/run-ds4-v10-server.sh
-/root/rtx6kpro/scripts/run-ds4-v10-sweep.sh
-/root/rtx6kpro/scripts/run-ds4-v9-server.sh
-/root/rtx6kpro/scripts/run-ds4-v9-sweep.sh
-/root/rtx6kpro/scripts/render-ds4-v9-results.py
+TBD_RESULT_ROOT
+TBD_RESULT_ROOT/repro/
+TBD_RESULT_ROOT/progress.log
 ```
 
-## Caveats
-
-- This page validates the standard `DeepSeek-V4-Flash` checkpoint only. The
-  DSpark checkpoint remains documented by v9 until it is explicitly remeasured
-  on Fathomless.
-- `standard-mtp0` disables speculative decoding. `standard-mtp2` uses the base
-  checkpoint MTP heads with two draft tokens and `moe_backend=b12x`.
-- The helper scripts assume the model snapshots already exist under
-  `/root/.cache/huggingface/hub`. Override `STANDARD_MODEL` or `DSPARK_MODEL`
-  if your path differs.
-- Use the synchronized sweep helper for comparisons. It launches every server in
-  a wave, waits until all are ready, and only then starts benchmark clients.
+The `repro/` directory contains the exact launcher and sweep scripts, SHA256
+hashes, image labels, image inspection JSON, repository state, benchmark hash,
+GPU inventory, and NVIDIA topology captured before the run.
