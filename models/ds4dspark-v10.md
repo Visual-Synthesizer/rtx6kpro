@@ -219,16 +219,31 @@ Every wave follows this order:
 
 1. Start every server assigned to GPUs `0-7`.
 2. Wait for `/v1/models` from every server.
-3. Start benchmark clients only after the entire wave is ready.
-4. Validate JSON cells before a case can be reused by `RESUME=1`.
+3. Wait 30 seconds after the final server becomes ready.
+4. Run an unreported warmup over C1/C16/C32/C64 and 8k/64k/128k prefill.
+5. Wait another 30 seconds, then record the server-log measurement boundary.
+6. Start benchmark clients only after the entire wave is ready and warmed.
+7. Validate every JSON cell and reject any JIT cache miss after the boundary.
 
-This ordering prevents the false `132-133 tok/s` result caused by benchmarking
-one instance while another model was still loading.
+The fixed post-ready settle is required. Starting C1 seven seconds after the
+long CUDA graph capture reproducibly measured about `133 tok/s`; waiting 30
+seconds restored `141 tok/s` on the same image, server configuration, GPU pair,
+and request. This was a post-capture boost/settling artifact, not a vLLM or B12X
+regression. Loading another model during measurement remains prohibited as an
+independent source of interference.
+
+The unreported runtime warmup is also required because some Triton and CuTeDSL
+shapes can compile after the API reports ready. The sweep stores
+`warmup-decode.json`, `warmup-prefill.json`, `warmup-server.log`, and
+`runtime-log-start-line.txt` for every case. A result is not reusable unless its
+recorded phase contains no `JIT compilation during inference` or post-engine
+disk-cache miss.
 
 ```bash
 cd /root/rtx6kpro
 
-OUT=/root/bench-results/ds4-v10-full-20260711 \
+OUT=/root/bench-results/ds4-v10-final-sweep-20260711 \
+SHARED_CACHE=/root/.cache/vllm-ds4-v10-sweep \
 TPS=2,4 \
 BACKENDS=b12x-a16,b12x-a8,b12x-a8-dglin,lucifer-default,lucifer-cutlass \
 MODES=standard-mtp0,standard-mtp2,standard-mtp3,dspark \
@@ -240,6 +255,9 @@ PREFILL_CONTEXTS=8k,64k,128k \
 PREFILL_DURATION=10 \
 STARTUP_TIMEOUT=2400 \
 ENABLE_TOPO_PIN=1 \
+POST_READY_SETTLE_SECONDS=30 \
+RUNTIME_WARMUP=1 \
+POST_WARMUP_SETTLE_SECONDS=30 \
 scripts/run-ds4-v10-sweep.sh
 ```
 
@@ -247,7 +265,7 @@ Render the completed run and compare it with v9:
 
 ```bash
 scripts/render-ds4-v9-results.py \
-  /root/bench-results/ds4-v10-full-20260711 \
+  /root/bench-results/ds4-v10-final-sweep-20260711 \
   --baseline /root/bench-results/ds4-v9-refresh-pc1441b5-syncwave-20260704-102844
 ```
 

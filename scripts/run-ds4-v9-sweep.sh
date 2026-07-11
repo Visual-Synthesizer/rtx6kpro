@@ -24,6 +24,11 @@ PORT_BASE=${PORT_BASE:-7100}
 STARTUP_TIMEOUT=${STARTUP_TIMEOUT:-2400}
 SYNC_WAVE_READY=${SYNC_WAVE_READY:-1}
 ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-1}
+POST_READY_SETTLE_SECONDS=${POST_READY_SETTLE_SECONDS:-30}
+RUNTIME_WARMUP=${RUNTIME_WARMUP:-1}
+RUNTIME_WARMUP_DECODE_DURATION=${RUNTIME_WARMUP_DECODE_DURATION:-3}
+RUNTIME_WARMUP_PREFILL_DURATION=${RUNTIME_WARMUP_PREFILL_DURATION:-1}
+POST_WARMUP_SETTLE_SECONDS=${POST_WARMUP_SETTLE_SECONDS:-30}
 RESUME=${RESUME:-1}
 VLLM_PATCH_FILE=${VLLM_PATCH_FILE:-/root/vllm/blackwell-llm-docker/patches/vllm-b12x-indexer-warmup-fallback-20260704.patch}
 CONTAINER_PREFIX=${CONTAINER_PREFIX:-ds4-v9}
@@ -257,6 +262,83 @@ if missing_prefill:
 PY
 }
 
+validate_runtime_log() {
+  local server_log=$1
+  local start_line=${2:-0}
+  local first_measured_line=$((start_line + 1))
+  if tail -n "+${first_measured_line}" "$server_log" | rg -q \
+    'JIT compilation during inference|reason=post-engine-start.*status=disk-cache-miss'; then
+    echo "invalid benchmark runtime: JIT cache miss occurred during inference" >&2
+    tail -n "+${first_measured_line}" "$server_log" | rg -n \
+      'JIT compilation during inference|reason=post-engine-start.*status=disk-cache-miss' \
+      >&2 || true
+    return 1
+  fi
+}
+
+validate_reusable_case() {
+  local case_dir=$1
+  local start_file="$case_dir/runtime-log-start-line.txt"
+  [[ -f "$case_dir/server.log" && -f "$start_file" ]] || return 1
+  validate_case_results "$case_dir" >/dev/null 2>&1 || return 1
+  validate_runtime_log "$case_dir/server.log" "$(<"$start_file")" \
+    >/dev/null 2>&1
+}
+
+settle_after_ready() {
+  if (( POST_READY_SETTLE_SECONDS > 0 )); then
+    echo "==> post-ready settle ${POST_READY_SETTLE_SECONDS}s"
+    sleep "$POST_READY_SETTLE_SECONDS"
+  fi
+}
+
+warm_runtime_case() {
+  local port=$1 model_name=$2 case_dir=$3
+  if [[ "$RUNTIME_WARMUP" != "1" ]]; then
+    return 0
+  fi
+
+  echo "==> runtime warmup decode ${DECODE_CONCURRENCY}"
+  python3 "$BENCH" \
+    --host localhost \
+    --port "$port" \
+    --model "$model_name" \
+    --concurrency "$DECODE_CONCURRENCY" \
+    --contexts "$DECODE_CONTEXTS" \
+    --duration "$RUNTIME_WARMUP_DECODE_DURATION" \
+    --decode-warmup-seconds 0 \
+    --max-tokens "$DECODE_MAX_TOKENS" \
+    --max-total-tokens "$DECODE_TOKEN_BUDGET" \
+    --skip-prefill \
+    --display-mode plain \
+    --no-hw-monitor \
+    --output "$case_dir/warmup-decode.json" \
+    > "$case_dir/warmup-decode.log" 2>&1
+
+  echo "==> runtime warmup prefill ${PREFILL_CONTEXTS}"
+  python3 "$BENCH" \
+    --host localhost \
+    --port "$port" \
+    --model "$model_name" \
+    --concurrency 1 \
+    --contexts 0 \
+    --prefill-only \
+    --standalone-prefill \
+    --prefill-contexts "$PREFILL_CONTEXTS" \
+    --prefill-duration "$RUNTIME_WARMUP_PREFILL_DURATION" \
+    --max-tokens "$DECODE_MAX_TOKENS" \
+    --max-total-tokens "$DECODE_TOKEN_BUDGET" \
+    --display-mode plain \
+    --no-hw-monitor \
+    --output "$case_dir/warmup-prefill.json" \
+    > "$case_dir/warmup-prefill.log" 2>&1
+
+  if (( POST_WARMUP_SETTLE_SECONDS > 0 )); then
+    echo "==> post-warmup settle ${POST_WARMUP_SETTLE_SECONDS}s"
+    sleep "$POST_WARMUP_SETTLE_SECONDS"
+  fi
+}
+
 launch_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
   local label name case_dir model_name cache_dir
@@ -295,6 +377,10 @@ bench_case() {
 
   curl -fsS "http://127.0.0.1:${port}/version" > "$case_dir/version.json" || true
   curl -fsS "http://127.0.0.1:${port}/v1/models" > "$case_dir/models.json" || return 1
+
+  warm_runtime_case "$port" "$model_name" "$case_dir" || return 1
+  docker logs "$name" > "$case_dir/warmup-server.log" 2>&1 || true
+  wc -l < "$case_dir/warmup-server.log" > "$case_dir/runtime-log-start-line.txt"
 
   echo "==> decode $label"
   if ! python3 "$BENCH" \
@@ -336,10 +422,12 @@ bench_case() {
     return 1
   fi
 
-  validate_case_results "$case_dir" || return 1
-
   curl -fsS "http://127.0.0.1:${port}/metrics" > "$case_dir/final-metrics.prom" || true
   docker logs "$name" > "$case_dir/server.log" 2>&1 || true
+  validate_case_results "$case_dir" || return 1
+  validate_runtime_log \
+    "$case_dir/server.log" \
+    "$(<"$case_dir/runtime-log-start-line.txt")" || return 1
   docker rm -f "$name" >/dev/null 2>&1 || true
   append_case_summary DONE "$label" "$case_dir"
 }
@@ -363,6 +451,7 @@ run_case() {
   name="${CONTAINER_PREFIX}-${label}"
   launch_case "$tp" "$backend" "$mode" "$gpus" "$port" || return 1
   wait_for_server "$name" "$port" || return 1
+  settle_after_ready
   bench_case "$tp" "$backend" "$mode" "$gpus" "$port"
 }
 
@@ -384,7 +473,7 @@ run_tp_matrix() {
     for mode in $(split_csv "$MODES"); do
       local label="tp${tp}-${backend}-${mode}"
       if [[ "$RESUME" == "1" ]] \
-        && validate_case_results "$OUT/$label" >/dev/null 2>&1; then
+        && validate_reusable_case "$OUT/$label"; then
         append_case_summary REUSED "$label" "$OUT/$label"
       else
         cases+=("$tp:$backend:$mode")
@@ -422,6 +511,7 @@ run_tp_matrix() {
       slot=$((slot + 1))
     done
     if [[ "$SYNC_WAVE_READY" == "1" ]]; then
+      settle_after_ready
       for spec in "${ready_cases[@]}"; do
         IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"$spec"
         bench_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port" &
@@ -457,6 +547,11 @@ record_repro_artifacts
     "$IMAGE" "$OUT" "$PROGRESS_FILE" "$LAUNCHER" "$BENCH"
   printf 'max_num_seqs=%s\nport_base=%s\nstartup_timeout=%s\n' \
     "$MAX_NUM_SEQS" "$PORT_BASE" "$STARTUP_TIMEOUT"
+  printf 'post_ready_settle_seconds=%s\n' "$POST_READY_SETTLE_SECONDS"
+  printf 'runtime_warmup=%s\nruntime_warmup_decode_duration=%s\n' \
+    "$RUNTIME_WARMUP" "$RUNTIME_WARMUP_DECODE_DURATION"
+  printf 'runtime_warmup_prefill_duration=%s\npost_warmup_settle_seconds=%s\n' \
+    "$RUNTIME_WARMUP_PREFILL_DURATION" "$POST_WARMUP_SETTLE_SECONDS"
   printf 'decode_concurrency=%s\ndecode_contexts=%s\ndecode_duration=%s\n' \
     "$DECODE_CONCURRENCY" "$DECODE_CONTEXTS" "$DECODE_DURATION"
   printf 'decode_max_tokens=%s\ndecode_token_budget=%s\n' \
