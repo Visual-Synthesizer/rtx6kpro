@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
-export IMAGE="${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm61f32d0-b12x90172a5-fi7176f85-cu132-20260710}"
+export IMAGE="${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711}"
 export OUT="${OUT:-/root/bench-results/ds4-v10-$(date -u +%Y%m%d-%H%M%S)}"
 export PROGRESS_FILE="${PROGRESS_FILE:-${OUT}/progress.log}"
 export LAUNCHER="${LAUNCHER:-${SCRIPT_DIR}/run-ds4-v10-server.sh}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm61f32d0-b12x90172a5-fi7176f85-cu132-20260710}
+IMAGE=${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711}
 STANDARD_MODEL=${STANDARD_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash/snapshots/6976c7ff1b30a1b2cb7805021b8ba4684041f136}
 DSPARK_MODEL=${DSPARK_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-DSpark/snapshots/913f0657a874f76844e2e91cbe706dbcaceeb6d7}
 
@@ -95,6 +95,7 @@ optional_env=(
   DSPARK_SPS_OVERHEAD_MS DSPARK_FP8_DRAFT_HEAD
   DSPARK_DYNAMIC_DRAFT_DEPTH DSPARK_DYNAMIC_DRAFT_DEPTH_WINDOW
   DSPARK_CAPACITY_LOG_INTERVAL DSPARK_STS_LOG_INTERVAL DSPARK_TP_CHECK
+  DSPARK_DRAFT_ATTENTION_BACKEND B12X_PCIE_DMA
   SP_ASYNC_TP SP_MIN_TOKEN_NUM EXTRA_VLLM_ARGS DRY_RUN
 )
 if [[ -n "${GPU_MEM+x}" ]]; then

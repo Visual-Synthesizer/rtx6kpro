@@ -25,14 +25,18 @@ validated fixed K=5 probabilistic path by default.
   prefill chunks no longer allocate invalid lookahead slots.
 - DCP1 verifier causal lengths, B12X auxiliary-stream ordering, TP sampling
   state, stale request slots, and CUDA-graph backbone-output lifetime are fixed.
+- Standard non-speculative requests no longer consume the stale CUDA-graph
+  padding buffer when building KV slot mappings. The old behavior could assign
+  `PAD_SLOT_ID` to live tokens, skip KV writes, and eventually produce garbled
+  or CJK output.
 - Capacity-aware and variable-length DSpark verification, load-aware physical
   depth, online SPS/STS profiling, block rejection, and a rowwise-FP8 draft head
   are retained as opt-in research paths. They are not release defaults.
 - The SM120 PCIe serving work from upstream vLLM PR #47979 is included. Its
   sequence-parallel/async-TP path cannot be used by DSpark yet because this
   revision rejects sequence parallelism under the required V2 runner.
-- FlashInfer includes PR #3871 and the DS4 `topk=256` SM120 sparse-MLA decode
-  dispatch from PR #3923.
+- FlashInfer includes PR #3871 plus the canonical DS4 `topk=256` SM120
+  sparse-MLA decode and prefill fixes from PRs #3817 and #3896.
 - `/usr/local/bin/serve-ds4-flash.sh` is installed in the image. Compose and
   benchmark wrappers pass environment settings to this helper instead of
   duplicating the complete `vllm serve` command.
@@ -46,28 +50,30 @@ validated fixed K=5 probabilistic path by default.
 | vLLM | [local-inference-lab/vllm#88](https://github.com/local-inference-lab/vllm/pull/88) | DSpark correctness/capacity work, SM120 PCIe stack, and env launcher |
 | B12X | [lukealonso/b12x#28](https://github.com/lukealonso/b12x/pull/28) | CuTe compiler compatibility fallback required by the pinned stack |
 | FlashInfer | [flashinfer-ai/flashinfer#3871](https://github.com/flashinfer-ai/flashinfer/pull/3871) | Graph-safe uniform multi-token FA2 decode |
-| FlashInfer | [flashinfer-ai/flashinfer#3923](https://github.com/flashinfer-ai/flashinfer/pull/3923) | SM120 DSV4 `topk=256` decode dispatch and explicit unsupported-shape error |
+| FlashInfer | [flashinfer-ai/flashinfer#3817](https://github.com/flashinfer-ai/flashinfer/pull/3817) | SM120 DSV4 `topk=256` decode instantiation |
+| FlashInfer | [flashinfer-ai/flashinfer#3896](https://github.com/flashinfer-ai/flashinfer/pull/3896) | SM120 DSV4 `topk=256` prefill dispatch |
 | upstream vLLM | [vllm-project/vllm#47979](https://github.com/vllm-project/vllm/pull/47979) | SM120 PCIe serving stack |
 
-All three PRs created for this release (#88, B12X #28, and FlashInfer #3923)
-were opened ready for review, not as drafts.
+The release PRs created in the local vLLM and B12X forks (#88 and #28) were
+opened ready for review, not as drafts. The three pinned upstream FlashInfer
+PRs are also non-draft PRs.
 
 ## Docker Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm61f32d0-b12x90172a5-fi7176f85-cu132-20260710
-TBD_IMAGE_DIGEST
+voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711
+sha256:55ac0a6bcebb11dafe8d1d1a0964d41c88f3768d9edcc0eb70e741073d0ba51b
 ```
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `61f32d047589113606800c67a505e8cc02262402` |
+| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `2a62b4909c081013feb4fe1bfd8c7980802b88b3` |
 | vLLM base | `dev/fathomless-firmament` @ `c649d41bd2d8f1cbb85075d1cf3027eb29cac2ea` when PR #88 was opened |
 | B12X | `codex/ff-v15-cute-compile-fallback-20260709` @ `90172a504e96d246e07cb1ebad3b291532445560` |
-| FlashInfer combined source | `codex/sm120-dsv4-decode-pbs256-20260710` @ `7176f85bbaa12c851a7a4aabeedeea01449a0aac` |
-| FlashInfer clean TopK PR | `e939be505aae5fb8afb515cb9bd3dd5ba8c9e646` |
+| FlashInfer combined source | `codex/sm120-dspark-stack-20260711` @ `2cba2f7bbe8335fcabe18d29e6eb99de2093f991` |
+| FlashInfer PR heads | #3871 `547ae8e42d9994d930ccd48713a178390f374a82`; #3817 `76fd3daf7064b73924ebb3bcb1e93a8a26fc6da9`; #3896 `1125246e4b2f19f6a77d42d937c8785a1f687445` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 | CUTLASS | `d80a4e53b52b42550659a8696dab32705265e324` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
@@ -85,7 +91,7 @@ the helper in `DRY_RUN` mode, unifies PyTorch and vLLM on the patched NCCL
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 07d927a
+git checkout c149645
 
 PUSH_IMAGE=1 ./build-fathomless-firmament-ds4-v10-cu132.sh
 ```
@@ -114,7 +120,7 @@ The equivalent minimal service is:
 ```yaml
 services:
   ds4:
-    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm61f32d0-b12x90172a5-fi7176f85-cu132-20260710
+    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm2a62b49-b12x90172a5-fi2cba2f7-cu132-20260711
     command: ["/usr/local/bin/serve-ds4-flash.sh"]
     network_mode: host
     ipc: host
@@ -143,6 +149,7 @@ and `8 * MAX_NUM_SEQS` for MTP2, MTP3, and DSpark, with a minimum of 6.
 | `MAX_MODEL_LEN` | tokens (`262144`) | Maximum sequence length |
 | `MAX_NUM_BATCHED_TOKENS` | tokens (`8192`) | Scheduler token budget |
 | `ALLREDUCE_MODE` | `b12x`, `vllm-custom`, `vllm-custom-2stage`, `nccl` (`b12x`) | TP collective implementation |
+| `B12X_PCIE_DMA` | `0`, `1` (`0`) | Opt-in large-tensor B12X DMA; decode keeps the B12X oneshot path either way |
 | `INDEXER_BACKEND` | `auto`, `b12x`, `native` (`auto`) | Sparse indexer; auto follows the backend profile |
 | `CUDAGRAPH_CAPTURE_SIZES` | `default`, `auto`, `none`, or a list (`default`) | Optional explicit graph-capture pattern |
 | `MAX_CUDAGRAPH_CAPTURE_SIZE` | positive integer (`auto`) | Override the derived graph cap |
@@ -177,6 +184,7 @@ These controls are preserved for future work but are disabled by default:
 | `DSPARK_CAPACITY_VERIFICATION_MODE` | auto | `varlen` with B12X indexer, otherwise masked padded verification |
 | `DSPARK_DYNAMIC_DRAFT_DEPTH` | `0` | Load-aware physical draft-depth controller |
 | `DSPARK_FP8_DRAFT_HEAD` | `0` | Rowwise-FP8 DSpark draft LM head |
+| `DSPARK_DRAFT_ATTENTION_BACKEND` | `auto` | Explicit draft-only attention backend experiment |
 | `REJECTION_SAMPLE_METHOD` | `standard` | Optional `block` rejection experiment |
 | `DSPARK_CONFIDENCE_THRESHOLD` | `0.0` | Capacity confidence cutoff |
 | `DSPARK_BUDGET_FRAC` | `1.0` | Capacity budget fraction |
@@ -220,7 +228,7 @@ one instance while another model was still loading.
 ```bash
 cd /root/rtx6kpro
 
-OUT=/root/bench-results/ds4-v10-full-20260710 \
+OUT=/root/bench-results/ds4-v10-full-20260711 \
 TPS=2,4 \
 BACKENDS=b12x-a16,b12x-a8,b12x-a8-dglin,lucifer-default,lucifer-cutlass \
 MODES=standard-mtp0,standard-mtp2,standard-mtp3,dspark \
@@ -239,7 +247,7 @@ Render the completed run and compare it with v9:
 
 ```bash
 scripts/render-ds4-v9-results.py \
-  /root/bench-results/ds4-v10-full-20260710 \
+  /root/bench-results/ds4-v10-full-20260711 \
   --baseline /root/bench-results/ds4-v9-refresh-pc1441b5-syncwave-20260704-102844
 ```
 

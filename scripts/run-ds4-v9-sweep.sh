@@ -27,6 +27,7 @@ ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-1}
 RESUME=${RESUME:-1}
 VLLM_PATCH_FILE=${VLLM_PATCH_FILE:-/root/vllm/blackwell-llm-docker/patches/vllm-b12x-indexer-warmup-fallback-20260704.patch}
 CONTAINER_PREFIX=${CONTAINER_PREFIX:-ds4-v9}
+SHARED_CACHE=${SHARED_CACHE:-}
 GPU_GROUPS_TP2=${GPU_GROUPS_TP2:-"0,1 2,3 4,5 6,7 8,9 10,11 12,13 14,15"}
 GPU_GROUPS_TP4=${GPU_GROUPS_TP4:-"0,1,2,3 4,5,6,7 8,9,10,11 12,13,14,15"}
 
@@ -47,6 +48,7 @@ record_repro_artifacts() {
     sha256sum "$VLLM_PATCH_FILE" > "$OUT/repro/vllm-patch.sha256" || true
   fi
   if [[ -f "$BENCH" ]]; then
+    cp "$BENCH" "$OUT/repro/$(basename "$BENCH")"
     sha256sum "$BENCH" > "$OUT/repro/bench.sha256" || true
   fi
   sha256sum "${script_hash_inputs[@]}" > "$OUT/repro/scripts.sha256" || true
@@ -217,11 +219,38 @@ missing_decode = [cc for cc in decode_concurrency if cc not in rows]
 if missing_decode:
     fail(f"missing decode aggregate_tps for concurrency {missing_decode}")
 
+coding = decode.get("coding_peak", {})
+coding_summary = coding.get("summary", {})
+if int(coding.get("runs_ok", -1)) != int(coding.get("runs_requested", -2)):
+    fail(
+        "incomplete coding peak: "
+        f"{coding.get('runs_ok')}/{coding.get('runs_requested')} runs"
+    )
+if not finite(coding_summary.get("median_generation_tok_s")):
+    fail("missing coding peak median_generation_tok_s")
+if int(coding_summary.get("cjk_runs", -1)) != 0:
+    fail(f"coding peak produced CJK in {coding_summary.get('cjk_runs')} run(s)")
+
 prefill = load("prefill.json")
 prefill_rows = prefill.get("prefill", {})
+
+def valid_prefill(row) -> bool:
+    if not isinstance(row, dict):
+        return False
+    if not finite(row.get("tok_per_sec")) or not finite(row.get("ttft_seconds")):
+        return False
+    # A failed streaming request used to be timed as an immediate TTFT and
+    # could yield multi-million tok/s. Keep resume fail-closed for those old
+    # result files as well as for empty samples.
+    return (
+        0 < float(row["tok_per_sec"]) < 1_000_000
+        and float(row["ttft_seconds"]) > 0
+        and int(row.get("samples", 0)) > 0
+    )
+
 missing_prefill = [
     ctx for ctx in prefill_contexts
-    if ctx not in prefill_rows or not finite(prefill_rows[ctx].get("tok_per_sec"))
+    if ctx not in prefill_rows or not valid_prefill(prefill_rows[ctx])
 ]
 if missing_prefill:
     fail(f"missing prefill tok_per_sec for contexts {missing_prefill}")
@@ -230,10 +259,11 @@ PY
 
 launch_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
-  local label name case_dir model_name
+  local label name case_dir model_name cache_dir
   label="tp${tp}-${backend}-${mode}"
   name="${CONTAINER_PREFIX}-${label}"
   case_dir="$OUT/$label"
+  cache_dir=${SHARED_CACHE:-$case_dir/cache}
   model_name=$(model_name_for_mode "$mode")
   mkdir -p "$case_dir"
 
@@ -247,7 +277,7 @@ launch_case() {
     MODE="$mode" \
     MAX_NUM_SEQS="$MAX_NUM_SEQS" \
     ENABLE_TOPO_PIN="$ENABLE_TOPO_PIN" \
-    CACHE="$case_dir/cache" \
+    CACHE="$cache_dir" \
     CONTAINER_TMP="$case_dir/tmp" \
     "$LAUNCHER" 2>&1 | tee "$case_dir/launch.log"; then
     return 1
@@ -365,9 +395,7 @@ run_tp_matrix() {
   local idx=0 wave=0 failures=0
   while (( idx < ${#cases[@]} )); do
     wave_pids=()
-    local -a wave_cases wait_pids ready_cases bench_pids
-    wave_cases=()
-    wait_pids=()
+    local -a ready_cases bench_pids
     ready_cases=()
     bench_pids=()
     local slot=0
@@ -375,8 +403,13 @@ run_tp_matrix() {
       IFS=: read -r c_tp c_backend c_mode <<<"${cases[$idx]}"
       local port=$((PORT_BASE + tp * 100 + wave * 20 + slot))
       if [[ "$SYNC_WAVE_READY" == "1" ]]; then
-        if launch_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port"; then
-          wave_cases+=("$c_tp:$c_backend:$c_mode:${groups[$slot]}:$port")
+        local spec="$c_tp:$c_backend:$c_mode:${groups[$slot]}:$port"
+        if launch_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port" \
+          && wait_for_server \
+            "${CONTAINER_PREFIX}-tp${c_tp}-${c_backend}-${c_mode}" "$port"; then
+          # Load and fully initialize each server before starting the next one.
+          # Benchmark clients are launched only after this whole wave is ready.
+          ready_cases+=("$spec")
         else
           fail_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port"
           failures=$((failures + 1))
@@ -389,20 +422,6 @@ run_tp_matrix() {
       slot=$((slot + 1))
     done
     if [[ "$SYNC_WAVE_READY" == "1" ]]; then
-      for spec in "${wave_cases[@]}"; do
-        IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"$spec"
-        wait_for_server "${CONTAINER_PREFIX}-tp${c_tp}-${c_backend}-${c_mode}" "$c_port" &
-        wait_pids+=("$!")
-      done
-      for i in "${!wait_pids[@]}"; do
-        IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"${wave_cases[$i]}"
-        if wait "${wait_pids[$i]}"; then
-          ready_cases+=("${wave_cases[$i]}")
-        else
-          fail_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port"
-          failures=$((failures + 1))
-        fi
-      done
       for spec in "${ready_cases[@]}"; do
         IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"$spec"
         bench_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port" &
@@ -448,6 +467,7 @@ record_repro_artifacts
     "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" "$VLLM_PATCH_FILE"
   printf 'container_prefix=%s\ngpu_groups_tp2=%s\ngpu_groups_tp4=%s\nresume=%s\n' \
     "$CONTAINER_PREFIX" "$GPU_GROUPS_TP2" "$GPU_GROUPS_TP4" "$RESUME"
+  printf 'shared_cache=%s\n' "${SHARED_CACHE:-disabled}"
 } | tee "$OUT/run-config.txt"
 printf '%s sweep_start image=%s out=%s backends=%s modes=%s tps=%s sync_wave_ready=%s enable_topo_pin=%s\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$IMAGE" "$OUT" "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" \
