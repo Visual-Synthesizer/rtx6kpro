@@ -85,7 +85,7 @@ the helper in `DRY_RUN` mode, unifies PyTorch and vLLM on the patched NCCL
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 50fc7fc
+git checkout 07d927a
 
 PUSH_IMAGE=1 ./build-fathomless-firmament-ds4-v10-cu132.sh
 ```
