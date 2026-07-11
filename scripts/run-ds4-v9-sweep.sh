@@ -25,14 +25,17 @@ STARTUP_TIMEOUT=${STARTUP_TIMEOUT:-2400}
 SYNC_WAVE_READY=${SYNC_WAVE_READY:-1}
 ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-1}
 VLLM_PATCH_FILE=${VLLM_PATCH_FILE:-/root/vllm/blackwell-llm-docker/patches/vllm-b12x-indexer-warmup-fallback-20260704.patch}
+CONTAINER_PREFIX=${CONTAINER_PREFIX:-ds4-v9}
+GPU_GROUPS_TP2=${GPU_GROUPS_TP2:-"0,1 2,3 4,5 6,7 8,9 10,11 12,13 14,15"}
+GPU_GROUPS_TP4=${GPU_GROUPS_TP4:-"0,1,2,3 4,5,6,7 8,9,10,11 12,13,14,15"}
 
 mkdir -p "$OUT"
 
 record_repro_artifacts() {
   local -a script_hash_inputs
   mkdir -p "$OUT/repro"
-  cp "$LAUNCHER" "$OUT/repro/run-ds4-v9-server.sh"
-  cp "$SWEEP_SCRIPT" "$OUT/repro/run-ds4-v9-sweep.sh"
+  cp "$LAUNCHER" "$OUT/repro/$(basename "$LAUNCHER")"
+  cp "$SWEEP_SCRIPT" "$OUT/repro/$(basename "$SWEEP_SCRIPT")"
   script_hash_inputs=("$LAUNCHER" "$SWEEP_SCRIPT")
   if [[ -f "$SCRIPT_DIR/render-ds4-v9-results.py" ]]; then
     cp "$SCRIPT_DIR/render-ds4-v9-results.py" "$OUT/repro/render-ds4-v9-results.py"
@@ -71,8 +74,8 @@ split_csv() {
 
 gpu_groups_for_tp() {
   case "$1" in
-    2) printf '%s\n' 0,1 2,3 4,5 6,7 8,9 10,11 12,13 14,15 ;;
-    4) printf '%s\n' 0,1,2,3 4,5,6,7 8,9,10,11 12,13,14,15 ;;
+    2) printf '%s\n' $GPU_GROUPS_TP2 ;;
+    4) printf '%s\n' $GPU_GROUPS_TP4 ;;
     *) echo "Unsupported TP=$1" >&2; return 2 ;;
   esac
 }
@@ -228,7 +231,7 @@ launch_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
   local label name case_dir model_name
   label="tp${tp}-${backend}-${mode}"
-  name="ds4-v9-${label}"
+  name="${CONTAINER_PREFIX}-${label}"
   case_dir="$OUT/$label"
   model_name=$(model_name_for_mode "$mode")
   mkdir -p "$case_dir"
@@ -254,7 +257,7 @@ bench_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
   local label name case_dir model_name
   label="tp${tp}-${backend}-${mode}"
-  name="ds4-v9-${label}"
+  name="${CONTAINER_PREFIX}-${label}"
   case_dir="$OUT/$label"
   model_name=$(model_name_for_mode "$mode")
   mkdir -p "$case_dir"
@@ -314,7 +317,7 @@ fail_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
   local label name case_dir
   label="tp${tp}-${backend}-${mode}"
-  name="ds4-v9-${label}"
+  name="${CONTAINER_PREFIX}-${label}"
   case_dir="$OUT/$label"
   mkdir -p "$case_dir"
   docker logs "$name" > "$case_dir/server.log" 2>&1 || true
@@ -326,7 +329,7 @@ run_case() {
   local tp=$1 backend=$2 mode=$3 gpus=$4 port=$5
   local label name
   label="tp${tp}-${backend}-${mode}"
-  name="ds4-v9-${label}"
+  name="${CONTAINER_PREFIX}-${label}"
   launch_case "$tp" "$backend" "$mode" "$gpus" "$port" || return 1
   wait_for_server "$name" "$port" || return 1
   bench_case "$tp" "$backend" "$mode" "$gpus" "$port"
@@ -381,7 +384,7 @@ run_tp_matrix() {
     if [[ "$SYNC_WAVE_READY" == "1" ]]; then
       for spec in "${wave_cases[@]}"; do
         IFS=: read -r c_tp c_backend c_mode c_gpus c_port <<<"$spec"
-        wait_for_server "ds4-v9-tp${c_tp}-${c_backend}-${c_mode}" "$c_port" &
+        wait_for_server "${CONTAINER_PREFIX}-tp${c_tp}-${c_backend}-${c_mode}" "$c_port" &
         wait_pids+=("$!")
       done
       for i in "${!wait_pids[@]}"; do
@@ -436,6 +439,8 @@ record_repro_artifacts
     "$PREFILL_CONTEXTS" "$PREFILL_DURATION"
   printf 'backends=%s\nmodes=%s\ntps=%s\nsync_wave_ready=%s\nenable_topo_pin=%s\nvllm_patch_file=%s\n' \
     "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" "$VLLM_PATCH_FILE"
+  printf 'container_prefix=%s\ngpu_groups_tp2=%s\ngpu_groups_tp4=%s\n' \
+    "$CONTAINER_PREFIX" "$GPU_GROUPS_TP2" "$GPU_GROUPS_TP4"
 } | tee "$OUT/run-config.txt"
 printf '%s sweep_start image=%s out=%s backends=%s modes=%s tps=%s sync_wave_ready=%s enable_topo_pin=%s\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$IMAGE" "$OUT" "$BACKENDS" "$MODES" "$TPS" "$SYNC_WAVE_READY" "$ENABLE_TOPO_PIN" \
