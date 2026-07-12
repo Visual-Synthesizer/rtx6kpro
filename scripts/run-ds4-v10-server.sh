@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE=${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm3db3c68-b12x90172a5-fi2cba2f7-cu132-20260711}
+IMAGE=${IMAGE:-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllmadf15ca-b12x90172a5-fi2cba2f7-cu132-20260712}
 STANDARD_MODEL=${STANDARD_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash/snapshots/6976c7ff1b30a1b2cb7805021b8ba4684041f136}
 DSPARK_MODEL=${DSPARK_MODEL:-/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-DSpark/snapshots/913f0657a874f76844e2e91cbe706dbcaceeb6d7}
 
@@ -16,6 +16,8 @@ MAX_MODEL_LEN=${MAX_MODEL_LEN:-262144}
 MAX_BATCHED=${MAX_BATCHED:-${MAX_NUM_BATCHED_TOKENS:-8192}}
 PREFIX_CACHE=${PREFIX_CACHE:-1}
 ALLREDUCE_MODE=${ALLREDUCE_MODE:-b12x}
+LOAD_FORMAT=${LOAD_FORMAT:-instanttensor}
+INSTANTTENSOR_BACKEND=${INSTANTTENSOR_BACKEND:-BUFFERED}
 CACHE=${CACHE:-/root/.cache/vllm-ds4-v10/${NAME}}
 CONTAINER_TMP=${CONTAINER_TMP:-${CACHE}/tmp}
 ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-0}
@@ -81,21 +83,26 @@ helper_env=(
   -e MAX_NUM_BATCHED_TOKENS="${MAX_BATCHED}"
   -e PREFIX_CACHE="${PREFIX_CACHE}"
   -e ALLREDUCE_MODE="${ALLREDUCE_MODE}"
+  -e LOAD_FORMAT="${LOAD_FORMAT}"
+  -e INSTANTTENSOR_BACKEND="${INSTANTTENSOR_BACKEND}"
 )
 
 # Forward only explicitly set expert/experimental controls. Defaults remain in
 # the image helper, so this wrapper cannot silently diverge from Compose.
 optional_env=(
-  GPU_MEMORY_UTILIZATION BLOCK_SIZE LOAD_FORMAT ENABLE_FLASHINFER_AUTOTUNE
+  GPU_MEMORY_UTILIZATION BLOCK_SIZE ENABLE_FLASHINFER_AUTOTUNE
   DSPARK_TOKENS DRAFT_SAMPLE_METHOD REJECTION_SAMPLE_METHOD INDEXER_BACKEND
   CUDAGRAPH_CAPTURE_SIZES MAX_CUDAGRAPH_CAPTURE_SIZE GRAPH
   DSPARK_CAPACITY DSPARK_CAPACITY_VERIFICATION_MODE
+  DSPARK_CAPACITY_ACTIVATION_BATCH_SIZE
   DSPARK_CONFIDENCE_THRESHOLD DSPARK_BUDGET_FRAC
   DSPARK_CONFIDENCE_TEMPERATURE DSPARK_ONLINE_STS DSPARK_SPS_CURVE
   DSPARK_SPS_OVERHEAD_MS DSPARK_FP8_DRAFT_HEAD
   DSPARK_DYNAMIC_DRAFT_DEPTH DSPARK_DYNAMIC_DRAFT_DEPTH_WINDOW
   DSPARK_CAPACITY_LOG_INTERVAL DSPARK_STS_LOG_INTERVAL DSPARK_TP_CHECK
   DSPARK_DRAFT_ATTENTION_BACKEND B12X_PCIE_DMA
+  VLLM_PCIE_ONESHOT_ALLREDUCE_MAX_SIZE
+  NCCL_MIN_NCHANNELS NCCL_MAX_NCHANNELS NCCL_PROTO
   SP_ASYNC_TP SP_MIN_TOKEN_NUM EXTRA_VLLM_ARGS DRY_RUN
 )
 if [[ -n "${GPU_MEM+x}" ]]; then
@@ -130,6 +137,7 @@ docker run -d \
   --entrypoint /usr/local/bin/serve-ds4-flash.sh \
   "${IMAGE}"
 
-printf '%s mode=%s backend=%s allreduce=%s tp=%s gpus=%s port=%s max_seqs=%s graph=%s cpuset=%s memset=%s\n' \
+printf '%s mode=%s backend=%s allreduce=%s tp=%s gpus=%s port=%s max_seqs=%s graph=%s load_format=%s instanttensor_backend=%s cpuset=%s memset=%s\n' \
   "${NAME}" "${MODE}" "${BACKEND}" "${ALLREDUCE_MODE}" "${TP}" "${GPUS}" \
-  "${PORT}" "${MAX_NUM_SEQS}" "${GRAPH:-auto}" "${topo_cpuset:-none}" "${topo_memset:-none}"
+  "${PORT}" "${MAX_NUM_SEQS}" "${GRAPH:-auto}" "${LOAD_FORMAT}" \
+  "${INSTANTTENSOR_BACKEND}" "${topo_cpuset:-none}" "${topo_memset:-none}"

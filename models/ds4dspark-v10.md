@@ -32,6 +32,10 @@ validated fixed K=5 probabilistic path by default.
 - Capacity-aware and variable-length DSpark verification, load-aware physical
   depth, online SPS/STS profiling, block rejection, and a rowwise-FP8 draft head
   are retained as opt-in research paths. They are not release defaults.
+- Variable-length capacity is canonicalized from TP rank 0 before any rank
+  selects a compact verifier graph. This prevents rank-local capacity estimates
+  from entering different shape-sensitive collectives and deadlocking after a
+  cold C1-to-C64 graph transition.
 - The SM120 PCIe serving work from upstream vLLM PR #47979 is included. Its
   sequence-parallel/async-TP path cannot be used by DSpark yet because this
   revision rejects sequence parallelism under the required V2 runner.
@@ -40,8 +44,9 @@ validated fixed K=5 probabilistic path by default.
 - `/usr/local/bin/serve-ds4-flash.sh` is installed in the image. Compose and
   benchmark wrappers pass environment settings to this helper instead of
   duplicating the complete `vllm serve` command.
-- The v10 sweep is hard-limited to GPUs `0-7`. GPUs `8-15` are not present in
-  its scheduler allocation.
+- The v10 sweep uses all GPUs `0-15` by default: eight TP2 instances or four
+  TP4 instances per wave. `GPU_GROUPS_TP2` and `GPU_GROUPS_TP4` can restrict
+  the allocation without changing the synchronized load/benchmark ordering.
 
 ## Pull Requests
 
@@ -61,15 +66,15 @@ PRs are also non-draft PRs.
 ## Docker Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm3db3c68-b12x90172a5-fi2cba2f7-cu132-20260711
-sha256:afc61609a0dcd5ab9d487a9aa155f4555fafc902376783a0abfbc537a9bca7bd
+voipmonitor/vllm:fathomless-firmament-ds4-v10-vllmadf15ca-b12x90172a5-fi2cba2f7-cu132-20260712
+sha256:4f07aefe2aa15f66d5fd90580eaa2553926aea0c3fa46bc227610e90c668c9f0
 ```
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `3db3c6860d06252b62f60a315225b6fd6ad515fb` |
+| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `adf15cadb9d0151663b001a7286674892c4daa3c` |
 | vLLM base | `dev/fathomless-firmament` @ `c649d41bd2d8f1cbb85075d1cf3027eb29cac2ea` when PR #88 was opened |
 | B12X | `codex/ff-v15-cute-compile-fallback-20260709` @ `90172a504e96d246e07cb1ebad3b291532445560` |
 | FlashInfer combined source | `codex/sm120-dspark-stack-20260711` @ `2cba2f7bbe8335fcabe18d29e6eb99de2093f991` |
@@ -91,7 +96,7 @@ the helper in `DRY_RUN` mode, unifies PyTorch and vLLM on the patched NCCL
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout e3209b1450ad1b8a558afc96b743cd34d78b836a
+git checkout b7588cc
 
 PUSH_IMAGE=1 ./build-fathomless-firmament-ds4-v10-cu132.sh
 ```
@@ -120,7 +125,7 @@ The equivalent minimal service is:
 ```yaml
 services:
   ds4:
-    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllm3db3c68-b12x90172a5-fi2cba2f7-cu132-20260711
+    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllmadf15ca-b12x90172a5-fi2cba2f7-cu132-20260712
     command: ["/usr/local/bin/serve-ds4-flash.sh"]
     network_mode: host
     ipc: host
@@ -132,10 +137,24 @@ services:
       BACKEND: ${BACKEND:-lucifer-cutlass}
       TP_SIZE: ${TP_SIZE:-2}
       MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
+      LOAD_FORMAT: ${LOAD_FORMAT:-instanttensor}
+      INSTANTTENSOR_BACKEND: ${INSTANTTENSOR_BACKEND:-BUFFERED}
 ```
 
-The helper derives the graph cap automatically: `4 * MAX_NUM_SEQS` for MTP0
-and `8 * MAX_NUM_SEQS` for MTP2, MTP3, and DSpark, with a minimum of 6.
+The helper derives the graph cap automatically: `4 * MAX_NUM_SEQS` for MTP0,
+`8 * MAX_NUM_SEQS` for MTP2/MTP3, and `(DSPARK_TOKENS + 1) * MAX_NUM_SEQS`
+for DSpark. The default K=5 DSpark configuration therefore uses 6x, with an
+absolute minimum graph cap of 6.
+All model variants default to InstantTensor with buffered I/O. `BUFFERED`
+expands to `URING_BUFFERED,AIO_BUFFERED,MMAP`, allowing hot checkpoint pages to
+be reused from the Linux page cache; another loader must be selected explicitly.
+Lucifer MTP2/MTP3 uses `GPU_MEMORY_UTILIZATION=0.912` by default; this preserves
+the documented 262,144-token limit with 266,246 profiled KV tokens. For DSpark,
+Lucifer default uses `0.953` (264,543 profiled KV tokens), Lucifer CUTLASS uses
+`0.94`, and B12X uses `0.95`. CUTLASS previously used `0.9465`, but TP4 had only
+777 MiB free when its first real prefill requested a 764 MiB FlashInfer MoE
+workspace. The lower default preserves far more than 262k KV tokens while
+providing transient headroom. Other non-DSpark profiles remain at `0.91`.
 
 ### Stable Controls
 
@@ -148,6 +167,8 @@ and `8 * MAX_NUM_SEQS` for MTP2, MTP3, and DSpark, with a minimum of 6.
 | `MAX_NUM_SEQS` | positive integer (`64`) | Scheduler concurrency and automatic graph input |
 | `MAX_MODEL_LEN` | tokens (`262144`) | Maximum sequence length |
 | `MAX_NUM_BATCHED_TOKENS` | tokens (`8192`) | Scheduler token budget |
+| `LOAD_FORMAT` | loader (`instanttensor`) | Model loader; override only for explicit loader comparisons |
+| `INSTANTTENSOR_BACKEND` | backend policy (`BUFFERED`) | Buffered InstantTensor policy shared with the GLM helper |
 | `ALLREDUCE_MODE` | `b12x`, `vllm-custom`, `vllm-custom-2stage`, `nccl` (`b12x`) | TP collective implementation |
 | `B12X_PCIE_DMA` | `0`, `1` (`0`) | Opt-in large-tensor B12X DMA; decode keeps the B12X oneshot path either way |
 | `INDEXER_BACKEND` | `auto`, `b12x`, `native` (`auto`) | Sparse indexer; auto follows the backend profile |
@@ -201,6 +222,35 @@ not reasons to change the release default.
 fails explicitly if it is requested with DSpark instead of pretending that SP
 is active.
 
+## Clean-Cache Release Validation
+
+Warm kernel caches hid the original TP failure, so the release image was
+validated from an empty compile/autotune cache. The tested TP2 profile used
+Lucifer CUTLASS attention/MoE, the B12X indexer and all-reduce, varlen capacity,
+capacity activation at 32 requests, dynamic depth with an eight-step window,
+online STS, and the FP8 draft head. The image was allowed to finish model load,
+autotuning, target FULL capture, and all 216 DSpark compact FULL captures before
+the client started.
+
+| Phase | Aggregate output tok/s | Result |
+|---|---:|---|
+| Cold C1 | 262.3 | passed |
+| C64 after the cold graph transition | 2718.3 | passed |
+| Recovery C1 after C64 | 239.5 | passed |
+| C64, continuous 120-second soak | 2763.4 | passed |
+
+After the soak, the server reported zero running and waiting requests,
+`431289` generated tokens, and no error or traceback. The focused capacity test
+module also passed all 22 tests inside the immutable image.
+
+The root cause was not an NCCL bandwidth limit. Before overlap is accounted
+for, NCCL kernels occupied about 42.8 ms of a 267.6 ms C64 GPU trace (roughly
+16%). A standalone same-pair test measured 56.4 GB/s CUDA peer copy, 39.47 GB/s
+NCCL, and 48.67 GB/s B12X DMA. Enabling large-message B12X DMA improved the
+three-run C128 mean from 3620.9 to 3670.2 tok/s (+1.36%). This remains a useful
+secondary optimization, but it neither explains nor fixes the TP graph-shape
+deadlock, so `B12X_PCIE_DMA=0` remains the release default.
+
 ## Full Synchronized Sweep
 
 The public scripts are:
@@ -217,7 +267,7 @@ The public scripts are:
 
 Every wave follows this order:
 
-1. Start every server assigned to GPUs `0-7`.
+1. Start every server assigned to the current GPU allocation.
 2. Wait for `/v1/models` from every server.
 3. Wait 30 seconds after the final server becomes ready.
 4. Run an unreported warmup over C1/C16/C32/C64 and 8k/64k/128k prefill.
@@ -242,8 +292,8 @@ disk-cache miss.
 ```bash
 cd /root/rtx6kpro
 
-OUT=/root/bench-results/ds4-v10-final-sweep-20260711 \
-SHARED_CACHE=/root/.cache/vllm-ds4-v10-sweep \
+OUT=/root/bench-results/ds4-v10-final-bbcc06f-sweep-20260712 \
+SHARED_CACHE=/root/.cache/vllm-ds4-v10-final-bbcc06f-sweep \
 TPS=2,4 \
 BACKENDS=b12x-a16,b12x-a8,b12x-a8-dglin,lucifer-default,lucifer-cutlass \
 MODES=standard-mtp0,standard-mtp2,standard-mtp3,dspark \
@@ -253,7 +303,7 @@ DECODE_CONTEXTS=0 \
 DECODE_DURATION=30 \
 PREFILL_CONTEXTS=8k,64k,128k \
 PREFILL_DURATION=10 \
-STARTUP_TIMEOUT=2400 \
+STARTUP_TIMEOUT=3600 \
 ENABLE_TOPO_PIN=1 \
 POST_READY_SETTLE_SECONDS=30 \
 RUNTIME_WARMUP=1 \
@@ -265,9 +315,20 @@ Render the completed run and compare it with v9:
 
 ```bash
 scripts/render-ds4-v9-results.py \
-  /root/bench-results/ds4-v10-final-sweep-20260711 \
+  /root/bench-results/ds4-v10-final-bbcc06f-sweep-20260712 \
   --baseline /root/bench-results/ds4-v9-refresh-pc1441b5-syncwave-20260704-102844
 ```
+
+The 40-case numerical sweep was collected on the `bbcc06f` release candidate.
+The final `adf15ca` commit changes only the embedded helper's default
+`GPU_MEMORY_UTILIZATION` for `lucifer-cutlass + dspark`; no packaged Python,
+CUDA, B12X, FlashInfer, or DeepGEMM implementation changed. That one TP4 row was
+rerun at `GPU_MEMORY_UTILIZATION=0.94`, exactly matching the final helper. The
+final image was also started without an override and revalidated through the
+same C1/C64 and 128k-prefill path. That exact-image validation profiled
+1,523,880 KV tokens and measured C1/C16/C32/C64 at
+`298.5/1702.6/2499.6/3454.8 tok/s`, coding median `416.7 tok/s`, and completed
+8k/64k/128k prefill without OOM.
 
 ## Decode Throughput
 
@@ -275,14 +336,115 @@ Sustained decode is aggregate output tok/s from `llm_decode_bench.py`, context
 0, 30 seconds per cell. Coding peak is the median generation-only tok/s from
 five Sieve-of-Eratosthenes runs.
 
-TBD_DECODE_TABLES
+### DSpark Checkpoint
+
+| TP | Backend | C1 | C16 | C32 | C64 | Coding median |
+|---:|---|---:|---:|---:|---:|---:|
+| 2 | `b12x-a16` | 236.2 | 1062.5 | 1567.5 | 2161.5 | 315.0 |
+| 2 | `b12x-a8` | 219.0 | 1041.2 | 1584.8 | 2210.0 | 294.7 |
+| 2 | `b12x-a8-dglin` | 227.2 | 1055.7 | 1609.3 | 2225.3 | 292.9 |
+| 2 | `lucifer-default` | 220.6 | 1065.4 | 1614.9 | 2403.1 | 296.8 |
+| 2 | `lucifer-cutlass` | 238.9 | 1190.1 | 1788.5 | 2606.9 | 324.8 |
+| 4 | `b12x-a16` | 309.4 | 1532.6 | 2178.0 | 2802.1 | 404.9 |
+| 4 | `b12x-a8` | 288.3 | 1469.9 | 2226.6 | 2942.2 | 391.1 |
+| 4 | `b12x-a8-dglin` | 283.5 | 1475.9 | 2227.2 | 2932.3 | 376.1 |
+| 4 | `lucifer-default` | 309.6 | 1596.2 | 2358.1 | 3306.5 | 389.3 |
+| 4 | `lucifer-cutlass` | 299.7 | 1770.7 | 2555.4 | 3524.9 | 404.4 |
+
+All coding probes completed five of five runs with zero CJK/garbled runs.
+
+### Standard Checkpoint
+
+| TP | Backend | Mode | C1 | C16 | C32 | C64 | Coding median |
+|---:|---|---|---:|---:|---:|---:|---:|
+| 2 | `b12x-a16` | MTP0 | 143.5 | 848.4 | 1260.7 | 1887.0 | 143.1 |
+| 2 | `b12x-a16` | MTP2 | 232.7 | 1162.3 | 1664.4 | 2518.6 | 245.5 |
+| 2 | `b12x-a16` | MTP3 | 218.4 | 1056.3 | 1568.4 | 2306.9 | 237.1 |
+| 2 | `b12x-a8` | MTP0 | 141.4 | 767.0 | 1184.7 | 1828.8 | 141.3 |
+| 2 | `b12x-a8` | MTP2 | 219.1 | 1081.4 | 1631.5 | 2545.0 | 236.7 |
+| 2 | `b12x-a8` | MTP3 | 224.8 | 1024.9 | 1558.6 | 2401.2 | 238.2 |
+| 2 | `b12x-a8-dglin` | MTP0 | 141.6 | 771.8 | 1188.2 | 1833.5 | 141.3 |
+| 2 | `b12x-a8-dglin` | MTP2 | 222.1 | 1081.1 | 1639.7 | 2595.0 | 245.3 |
+| 2 | `b12x-a8-dglin` | MTP3 | 221.1 | 1010.5 | 1560.7 | 2406.4 | 237.4 |
+| 2 | `lucifer-default` | MTP0 | 128.0 | 791.8 | 1182.2 | 1793.1 | 129.3 |
+| 2 | `lucifer-default` | MTP2 | 213.0 | 1071.5 | 1693.4 | 2581.8 | 218.4 |
+| 2 | `lucifer-default` | MTP3 | 199.2 | 998.3 | 1600.0 | 2431.0 | 221.9 |
+| 2 | `lucifer-cutlass` | MTP0 | 129.2 | 866.5 | 1275.2 | 1980.7 | 130.3 |
+| 2 | `lucifer-cutlass` | MTP2 | 222.1 | 1200.4 | 1859.7 | 2838.7 | 237.8 |
+| 2 | `lucifer-cutlass` | MTP3 | 220.9 | 1119.3 | 1742.8 | 2686.3 | 237.7 |
+| 4 | `b12x-a16` | MTP0 | 176.0 | 1211.8 | 1840.8 | 2689.8 | 175.6 |
+| 4 | `b12x-a16` | MTP2 | 299.2 | 1706.6 | 2431.9 | 3576.8 | 325.7 |
+| 4 | `b12x-a16` | MTP3 | 280.9 | 1541.5 | 2274.2 | 3176.4 | 308.1 |
+| 4 | `b12x-a8` | MTP0 | 175.7 | 1083.9 | 1664.1 | 2541.7 | 175.2 |
+| 4 | `b12x-a8` | MTP2 | 297.2 | 1591.4 | 2366.3 | 3628.6 | 313.7 |
+| 4 | `b12x-a8` | MTP3 | 276.2 | 1441.4 | 2215.3 | 3270.2 | 304.0 |
+| 4 | `b12x-a8-dglin` | MTP0 | 178.2 | 1093.4 | 1687.9 | 2531.0 | 177.9 |
+| 4 | `b12x-a8-dglin` | MTP2 | 295.9 | 1602.1 | 2392.5 | 3625.0 | 326.1 |
+| 4 | `b12x-a8-dglin` | MTP3 | 279.3 | 1470.4 | 2207.2 | 3271.2 | 307.8 |
+| 4 | `lucifer-default` | MTP0 | 160.2 | 1148.6 | 1722.9 | 2637.3 | 162.0 |
+| 4 | `lucifer-default` | MTP2 | 287.8 | 1635.2 | 2515.6 | 3847.8 | 304.3 |
+| 4 | `lucifer-default` | MTP3 | 277.7 | 1540.2 | 2364.4 | 3519.5 | 305.4 |
+| 4 | `lucifer-cutlass` | MTP0 | 154.9 | 1237.2 | 1910.3 | 2903.2 | 156.4 |
+| 4 | `lucifer-cutlass` | MTP2 | 290.8 | 1818.8 | 2809.4 | 4166.6 | 310.1 |
+| 4 | `lucifer-cutlass` | MTP3 | 281.7 | 1689.0 | 2608.9 | 3810.5 | 302.4 |
 
 ## Prefill Throughput
 
 Standalone prefill is client prompt tokens divided by TTFT, with non-repeating
 prompts and 10 seconds per context.
 
-TBD_PREFILL_TABLES
+### DSpark Checkpoint
+
+| TP | Backend | 8k | 64k | 128k |
+|---:|---|---:|---:|---:|
+| 2 | `b12x-a16` | 11192 | 11327 | 10598 |
+| 2 | `b12x-a8` | 12834 | 12933 | 12036 |
+| 2 | `b12x-a8-dglin` | 12140 | 12967 | 12028 |
+| 2 | `lucifer-default` | 12662 | 7929 | 5460 |
+| 2 | `lucifer-cutlass` | 13070 | 6642 | 5599 |
+| 4 | `b12x-a16` | 13613 | 13443 | 12650 |
+| 4 | `b12x-a8` | 14906 | 14689 | 13639 |
+| 4 | `b12x-a8-dglin` | 13636 | 14818 | 13711 |
+| 4 | `lucifer-default` | 14861 | 5608 | 5149 |
+| 4 | `lucifer-cutlass` | 15320 | 13553 | 6009 |
+
+Lucifer DSpark remains unsuitable when sustained 64k-128k prefill is the primary
+workload. B12X DSpark keeps long-prefill throughput close to the standard model.
+
+### Standard Checkpoint
+
+| TP | Backend | Mode | 8k | 64k | 128k |
+|---:|---|---|---:|---:|---:|
+| 2 | `b12x-a16` | MTP0 | 11906 | 11524 | 10758 |
+| 2 | `b12x-a16` | MTP2 | 11592 | 11245 | 10482 |
+| 2 | `b12x-a16` | MTP3 | 11675 | 11330 | 10542 |
+| 2 | `b12x-a8` | MTP0 | 13171 | 13153 | 12170 |
+| 2 | `b12x-a8` | MTP2 | 12921 | 12577 | 11663 |
+| 2 | `b12x-a8` | MTP3 | 13052 | 12652 | 11704 |
+| 2 | `b12x-a8-dglin` | MTP0 | 13649 | 13139 | 12100 |
+| 2 | `b12x-a8-dglin` | MTP2 | 13361 | 12900 | 11885 |
+| 2 | `b12x-a8-dglin` | MTP3 | 13399 | 12902 | 11927 |
+| 2 | `lucifer-default` | MTP0 | 13026 | 12817 | 11744 |
+| 2 | `lucifer-default` | MTP2 | 12793 | 12277 | 11271 |
+| 2 | `lucifer-default` | MTP3 | 12896 | 12371 | 11353 |
+| 2 | `lucifer-cutlass` | MTP0 | 13304 | 13034 | 11966 |
+| 2 | `lucifer-cutlass` | MTP2 | 13469 | 12864 | 11759 |
+| 2 | `lucifer-cutlass` | MTP3 | 13424 | 12854 | 11763 |
+| 4 | `b12x-a16` | MTP0 | 14371 | 13935 | 12913 |
+| 4 | `b12x-a16` | MTP2 | 14036 | 13583 | 12586 |
+| 4 | `b12x-a16` | MTP3 | 13784 | 13355 | 12353 |
+| 4 | `b12x-a8` | MTP0 | 15158 | 15139 | 13920 |
+| 4 | `b12x-a8` | MTP2 | 15281 | 14748 | 13552 |
+| 4 | `b12x-a8` | MTP3 | 14937 | 14457 | 13333 |
+| 4 | `b12x-a8-dglin` | MTP0 | 15858 | 15176 | 13953 |
+| 4 | `b12x-a8-dglin` | MTP2 | 15361 | 14815 | 13614 |
+| 4 | `b12x-a8-dglin` | MTP3 | 15111 | 14540 | 13382 |
+| 4 | `lucifer-default` | MTP0 | 14974 | 14868 | 13598 |
+| 4 | `lucifer-default` | MTP2 | 15214 | 14581 | 13319 |
+| 4 | `lucifer-default` | MTP3 | 14881 | 14306 | 13048 |
+| 4 | `lucifer-cutlass` | MTP0 | 15417 | 15191 | 13848 |
+| 4 | `lucifer-cutlass` | MTP2 | 15564 | 14871 | 13523 |
+| 4 | `lucifer-cutlass` | MTP3 | 15217 | 14590 | 13291 |
 
 ## v9 Comparison
 
@@ -290,7 +452,59 @@ The compact comparison reports percentage change for the latency-sensitive
 decode endpoint (`cc1`), the tested high-concurrency endpoint (`cc64`), and the
 representative long prefill cell (`64k`).
 
-TBD_V9_COMPARISON
+### DSpark Checkpoint
+
+| TP | Backend | C1 | C64 | 64k prefill |
+|---:|---|---:|---:|---:|
+| 2 | `b12x-a16` | +7.8% | +4.7% | +2.0% |
+| 2 | `b12x-a8` | +1.0% | +2.8% | +1.3% |
+| 2 | `b12x-a8-dglin` | +17.3% | +3.8% | +2.4% |
+| 2 | `lucifer-default` | +9.5% | +4.7% | -37.0% |
+| 2 | `lucifer-cutlass` | -0.3% | +4.3% | -45.5% |
+| 4 | `b12x-a16` | +5.8% | +7.1% | +0.8% |
+| 4 | `b12x-a8` | +7.4% | +24.3% | +0.7% |
+| 4 | `b12x-a8-dglin` | +12.7% | +177.0% | +0.8% |
+| 4 | `lucifer-default` | +12.7% | +5.7% | -61.5% |
+| 4 | `lucifer-cutlass` | +7.8% | +6.0% | -5.3% |
+
+### Standard Checkpoint
+
+| TP | Backend | Mode | C1 | C64 | 64k prefill |
+|---:|---|---|---:|---:|---:|
+| 2 | `b12x-a16` | MTP0 | +0.6% | +0.1% | +0.2% |
+| 2 | `b12x-a16` | MTP2 | +2.5% | +0.4% | +0.3% |
+| 2 | `b12x-a16` | MTP3 | +2.5% | +0.1% | +0.3% |
+| 2 | `b12x-a8` | MTP0 | +0.5% | -0.5% | +0.1% |
+| 2 | `b12x-a8` | MTP2 | +0.8% | -0.9% | +0.0% |
+| 2 | `b12x-a8` | MTP3 | +13.7% | +0.8% | -0.0% |
+| 2 | `b12x-a8-dglin` | MTP0 | +0.6% | +0.7% | +0.3% |
+| 2 | `b12x-a8-dglin` | MTP2 | -2.4% | +0.1% | +0.7% |
+| 2 | `b12x-a8-dglin` | MTP3 | +4.1% | -0.3% | +0.3% |
+| 2 | `lucifer-default` | MTP0 | +0.8% | +0.1% | +0.5% |
+| 2 | `lucifer-default` | MTP2 | +4.2% | +0.3% | +0.3% |
+| 2 | `lucifer-default` | MTP3 | +2.0% | +0.5% | +2.3% |
+| 2 | `lucifer-cutlass` | MTP0 | +1.1% | +0.5% | +4.8% |
+| 2 | `lucifer-cutlass` | MTP2 | +1.7% | -0.1% | +4.6% |
+| 2 | `lucifer-cutlass` | MTP3 | +4.9% | +1.0% | +5.0% |
+| 4 | `b12x-a16` | MTP0 | +0.8% | -0.4% | +0.3% |
+| 4 | `b12x-a16` | MTP2 | -1.0% | +0.1% | +1.1% |
+| 4 | `b12x-a16` | MTP3 | +10.4% | +2.3% | +1.0% |
+| 4 | `b12x-a8` | MTP0 | +0.8% | +0.5% | +0.4% |
+| 4 | `b12x-a8` | MTP2 | +2.5% | +1.0% | +0.6% |
+| 4 | `b12x-a8` | MTP3 | +10.6% | +0.3% | +0.3% |
+| 4 | `b12x-a8-dglin` | MTP0 | +0.7% | -1.0% | +0.3% |
+| 4 | `b12x-a8-dglin` | MTP2 | -0.4% | +0.1% | +0.7% |
+| 4 | `b12x-a8-dglin` | MTP3 | +9.5% | +0.9% | +0.7% |
+| 4 | `lucifer-default` | MTP0 | +1.1% | +0.1% | +0.3% |
+| 4 | `lucifer-default` | MTP2 | +8.2% | +1.5% | +1.1% |
+| 4 | `lucifer-default` | MTP3 | +4.3% | -0.0% | +0.3% |
+| 4 | `lucifer-cutlass` | MTP0 | +1.4% | +0.1% | +4.2% |
+| 4 | `lucifer-cutlass` | MTP2 | +4.0% | +0.5% | +4.8% |
+| 4 | `lucifer-cutlass` | MTP3 | +7.6% | +0.9% | +4.3% |
+
+MTP0 is effectively unchanged or faster than v9 in every latency-sensitive C1
+cell. The largest negative standard-checkpoint delta is `-2.4%` on TP2
+`b12x-a8-dglin` MTP2 C1; that is not an MTP0 regression.
 
 ## Development Findings
 
@@ -313,9 +527,10 @@ TBD_V9_COMPARISON
 ## Artifacts
 
 ```text
-TBD_RESULT_ROOT
-TBD_RESULT_ROOT/repro/
-TBD_RESULT_ROOT/progress.log
+/root/bench-results/ds4-v10-final-bbcc06f-sweep-20260712
+/root/bench-results/ds4-v10-final-bbcc06f-sweep-20260712/repro/
+/root/bench-results/ds4-v10-final-bbcc06f-sweep-20260712/progress.log
+/root/bench-results/ds4-v10-final-adf15ca-validation-20260712
 ```
 
 The `repro/` directory contains the exact launcher and sweep scripts, SHA256
