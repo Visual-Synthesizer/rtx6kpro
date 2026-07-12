@@ -13,8 +13,8 @@ MTP, DSpark, DFlash, KLD checks, and throughput validation.
 | Goal | Read |
 |---|---|
 | Run the current GLM-5.2 stack | [GLM-5.2 v15](models/glm5.2_v15.md) |
-| Run DeepSeek-V4-Flash standard / MTP | [DS4 Flash v6](models/ds4-flash-v6.md) |
-| Run DeepSeek-V4-Flash DSpark | [DS4 DSpark v10](models/ds4dspark-v10.md), with [v9](models/ds4dspark-v9.md) as the full DSpark reference |
+| Run DeepSeek-V4-Flash standard / MTP | [DS4 Flash v6](models/ds4-flash-v6.md); standard MTP rows are also in [DS4 DSpark v9](models/ds4dspark-v9.md) and [v10](models/ds4dspark-v10.md) |
+| Run DeepSeek-V4-Flash DSpark | [DS4 DSpark v10](models/ds4dspark-v10.md), with [v9](models/ds4dspark-v9.md) as the full DSpark plus standard-MTP reference |
 | Run Kimi-K2.7-Code with DFlash | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) |
 | Run Xiaomi MiMo V2.5 Pro FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) |
 | Rebuild the shared Eldritch image | [Eldritch Enlightenment Docker](models/eldritch-enlightenment-docker.md) |
@@ -28,7 +28,7 @@ MTP, DSpark, DFlash, KLD checks, and throughput validation.
 | GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v15.md](models/glm5.2_v15.md) | vLLM Fathomless + B12X | TP8 DCP1/2/4/8, TP6 notes, MTP0/MTP3, KLD, prefill/decode sweeps. |
 | GLM-5.2 FP8 + MXFP4 experts | [glm5.2_mxfp4.md](models/glm5.2_mxfp4.md) | vLLM + B12X MXFP4 expert path | Native MXFP4 routed experts, public checkpoint, A8 serving path. |
 | DeepSeek-V4-Flash | [ds4-flash-v6.md](models/ds4-flash-v6.md) | Eldritch image, B12X and Lucifer variants | B12X, FlashInfer/CUTLASS, DeepGEMM default, MTP token sweeps, prefill tables. |
-| DeepSeek-V4-Flash DSpark | [ds4dspark-v10.md](models/ds4dspark-v10.md) | Fathomless image | Reduced v10 validation plus v9 full DSpark reference. |
+| DeepSeek-V4-Flash standard MTP / DSpark | [ds4dspark-v10.md](models/ds4dspark-v10.md), [ds4dspark-v9.md](models/ds4dspark-v9.md) | Fathomless / Eldritch images | Standard-checkpoint MTP0/MTP2/MTP3 rows plus DSpark checkpoint validation. |
 | Kimi-K2.7-Code | [kimi-k27-code_v3.md](models/kimi-k27-code_v3.md) | vLLM V2 + DFlash | DCP4, Kimi parser/tool-call runtime, DFlash7 validation. |
 | Xiaomi MiMo V2.5 Pro FP4-DFlash | [xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | vLLM V2 + DFlash | FP4-DFlash checkpoint, seq-mask fix, expected fast/slow backend markers. |
 | GLM-5.1 | [glm5.1_v10.md](models/glm5.1_v10.md), [glm-5.1-mxfp4.md](models/glm-5.1-mxfp4.md) | Historical vLLM/B12X GLM work | Older DCP, MXFP4, KLD, and checkpoint-conversion notes. |
