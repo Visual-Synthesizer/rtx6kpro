@@ -1,6 +1,6 @@
 # Daily Summaries
 
-Automated daily summaries of the [RTX6kPRO Discord](https://discord.gg/FJye6yaWN3) community activity.
+Automated daily summaries of the [RTX6kPRO Discord](https://discord.gg/X54jjmcxWJ) community activity.
 Each highlight links directly to the relevant Discord message.
 
 *Auto-generated daily at 08:07 UTC. Source: Discord bot → Claude → Discord + wiki.*

@@ -1,83 +1,138 @@
-# RTX 6000 Pro Wiki — Running Large LLMs on PCIe GPUs
+# RTX PRO 6000 Blackwell LLM Wiki
 
-Community-sourced knowledge base for running large language models (Qwen3.5-397B, MiniMax M2.5, MiMo-V2.5-Pro, Kimi-K2.5, Kimi-K2.6, GLM-5) on NVIDIA RTX 6000 Pro (Blackwell, SM120) GPUs in 2×, 4×, and 8× PCIe configurations **without NVLink**.
+Field notes for serving frontier MoE models on NVIDIA RTX PRO 6000 Blackwell
+PCIe systems without NVLink. The wiki focuses on reproducible Docker images,
+exact vLLM/SGLang launch recipes, B12X/FlashInfer/DeepGEMM backends, DCP,
+MTP, DSpark, DFlash, KLD checks, and throughput validation.
 
-> Synthesized from ~5,000 [Discord](https://discord.gg/pYCvaQTf) messages, 300+ screenshots, and months of community experimentation.
+> Community workbench for the RTX PRO 6000 / SM120 Discord:
+> https://discord.gg/X54jjmcxWJ
 
-## Quick Links
+## Start Here
 
-### Models
+| Goal | Read |
+|---|---|
+| Run the current GLM-5.2 stack | [GLM-5.2 v15](models/glm5.2_v15.md) |
+| Run DeepSeek-V4-Flash standard / MTP | [DS4 Flash v6](models/ds4-flash-v6.md) |
+| Run DeepSeek-V4-Flash DSpark | [DS4 DSpark v10](models/ds4dspark-v10.md), with [v9](models/ds4dspark-v9.md) as the full DSpark reference |
+| Run Kimi-K2.7-Code with DFlash | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) |
+| Run Xiaomi MiMo V2.5 Pro FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) |
+| Rebuild the shared Eldritch image | [Eldritch Enlightenment Docker](models/eldritch-enlightenment-docker.md) |
+| Debug topology / PCIe bandwidth | [Topology](hardware/topology.md), [PCIe bandwidth](hardware/pcie-bandwidth.md), [GPU configs](hardware/gpu-configs.md) |
+| Compare quality and quantization | [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), [KLD evaluation](benchmarks/kld-evaluation.md), [NVFP4 comparison](benchmarks/nvfp4-quantization-comparison.md) |
 
-| Model | Params | Active | Min GPUs | Best Decode | Page |
-|-------|--------|--------|----------|-------------|------|
-| [Qwen3.5-397B](models/qwen35-397b.md) | 397B MoE | 17B | 4× | 350 tok/s (8×, SGLang) | [→](models/qwen35-397b.md) |
-| [Qwen3.5-27B/122B](models/qwen35-27b.md) | 27B–122B | — | 1× | — | [→](models/qwen35-27b.md) |
-| [MiniMax M2.5](models/minimax-m25.md) | 229B MoE | — | 2× | 85-89 tok/s (NVFP4) | [→](models/minimax-m25.md) |
-| [MiMo-V2.5-Pro](models/mimo-v25-pro/README.md) | MoE | — | 8× | TP8 NVFP4/MXFP8 + MTP/EAGLE | [→](models/mimo-v25-pro/README.md) |
-| [Kimi-K2.5](models/kimi-k25.md) | 530B MoE | — | 8× | 101 tok/s (PCIe switch) | [→](models/kimi-k25.md) |
-| [Kimi-K2.6](models/kimi-k26.md) | MoE | — | 8× | Community image + MLA Eagle | [→](models/kimi-k26.md) |
-| [Kimi-K2.6 v6](models/kimi-k26-v6.md) | MoE | — | 8× | LightSeek Eagle3.1 MLA + vLLM V2 | [→](models/kimi-k26-v6.md) |
-| [Kimi-K2.6 v5](models/kimi-k26-v5.md) | MoE | — | 8× | CUDA 13.2 vLLM V2 + p/q MTP | [→](models/kimi-k26-v5.md) |
-| [DeepSeek-V4-Pro TP16 Lucifer](models/deepseek-v4-pro-tp16-lucifer.md) | MoE | — | 16× | Lucifer FP8 KV + MTP TP16 overlay | [→](models/deepseek-v4-pro-tp16-lucifer.md) |
-| [GLM-5](models/glm5.md) | 744B MoE | 40B | 8× | 105 tok/s (MTP) | [→](models/glm5.md) |
-| [GLM-5.1](models/glm5.1/README.md) | MoE | — | 8× | vLLM b12x NSA/MTP port | [→](models/glm5.1/README.md) |
+## Current Model Runbooks
 
-### Hardware & Topology
-- [SM120 vs. SM100 Architecture](hardware/sm120-vs-sm100-architecture.md) — 5th Gen Tensor Cores, tcgen05/TMEM, why the bottleneck is the software fork not the silicon
-- [PCIe Topology](hardware/topology.md) — Switches, Turin vs Genoa, NUMA
-- [PCIe Bandwidth](hardware/pcie-bandwidth.md) — P2P measurements, BAR1, latency
-- [GPU Configurations](hardware/gpu-configs.md) — 4×/8× builds, VRAM, power, rigs
-- [ASUS ESC8000A-E13P + Broadcom Switches](hardware/asus-esc8000a-e13p-broadcom-switches.md) — Topology, ACS disable, P2P proof, benchmarks
-- [ASRock WRX90 + 3× c-payne Switches (hierarchy)](hardware/wrx90-cpayne-microchip-switches.md) — Root switch, uniform BW, no collapse bug
-- [ASRock WRX90 + 2× c-payne Switches (flat)](hardware/wrx90-cpayne-2switch-flat.md) — Flat topology, CPU-routed cross-switch, comparison
-- [ASRock WRX90 + 4× c-payne Switches (16 GPU)](hardware/wrx90-cpayne-16gpu-4switch.md) — 16 GPUs across 4 switches, three cabling variants (2/3/4-root) compared
-- [ASRockRack + EPYC Turin 9575F + 4× c-payne (16 GPU)](hardware/asrockrack-turin-cpayne-16gpu.md) — Same 16-GPU layout on Turin EPYC, no collapse, 204 GB/s aggregate WRITE
+| Model | Current page | Runtime focus | Notes |
+|---|---|---|---|
+| GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v15.md](models/glm5.2_v15.md) | vLLM Fathomless + B12X | TP8 DCP1/2/4/8, TP6 notes, MTP0/MTP3, KLD, prefill/decode sweeps. |
+| GLM-5.2 FP8 + MXFP4 experts | [glm5.2_mxfp4.md](models/glm5.2_mxfp4.md) | vLLM + B12X MXFP4 expert path | Native MXFP4 routed experts, public checkpoint, A8 serving path. |
+| DeepSeek-V4-Flash | [ds4-flash-v6.md](models/ds4-flash-v6.md) | Eldritch image, B12X and Lucifer variants | B12X, FlashInfer/CUTLASS, DeepGEMM default, MTP token sweeps, prefill tables. |
+| DeepSeek-V4-Flash DSpark | [ds4dspark-v10.md](models/ds4dspark-v10.md) | Fathomless image | Reduced v10 validation plus v9 full DSpark reference. |
+| Kimi-K2.7-Code | [kimi-k27-code_v3.md](models/kimi-k27-code_v3.md) | vLLM V2 + DFlash | DCP4, Kimi parser/tool-call runtime, DFlash7 validation. |
+| Xiaomi MiMo V2.5 Pro FP4-DFlash | [xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | vLLM V2 + DFlash | FP4-DFlash checkpoint, seq-mask fix, expected fast/slow backend markers. |
+| GLM-5.1 | [glm5.1_v10.md](models/glm5.1_v10.md), [glm-5.1-mxfp4.md](models/glm-5.1-mxfp4.md) | Historical vLLM/B12X GLM work | Older DCP, MXFP4, KLD, and checkpoint-conversion notes. |
+| Kimi-K2.6 | [kimi-k26-v9.md](models/kimi-k26-v9.md), [kimi-k26.md](models/kimi-k26.md) | Historical Kimi MLA/Eagle/DFlash work | Kept for regression comparisons and parser/spec-decode history. |
+| Qwen / MiniMax / older Kimi | [Qwen3.5-397B](models/qwen35-397b.md), [Qwen3.5-27B/122B](models/qwen35-27b.md), [MiniMax M2.5](models/minimax-m25.md), [Kimi-K2.5](models/kimi-k25.md) | Legacy recipes | Useful for topology, quantization, and older engine comparisons. |
 
-### Inference Engines
-- [vLLM](inference-engines/vllm.md) — Config, MTP, model-specific commands
-- [SGLang](inference-engines/sglang.md) — Config, DCP, MOE backends
-- [FlashInfer](inference-engines/flashinfer.md) — CUTLASS, SM120, bug fixes
+Older versioned pages are intentionally kept. Prefer the highest version number
+for a model family unless a page explicitly says it is a reduced validation or a
+historical reference.
 
-### Optimization
-- [NCCL Tuning](optimization/nccl-tuning.md) — Env vars, P2P levels, graph XML fix, tuner plugin
-- [PCIe Oneshot AllReduce](optimization/pcie-oneshot-allreduce.md) — 5–11% faster decode, setup guide, benchmarks
-- [NVFP4 Quantization](optimization/nvfp4-quantization.md) — Setup, calibration, models
-- [Speculative Decoding](optimization/speculative-decoding.md) — MTP configs, EAGLE
-- [Docker Images](optimization/docker-images.md) — Images, compose, custom builds
-- [I/O Tuning (md RAID5)](optimization/io-tuning.md) — stripe_cache, group_idle, Docker overlay2
-- [GLM-5.1 vLLM b12x NSA/MTP Port](models/glm5.1/vllm-b12x-nsa-mtp-port-2026-05-02.md) — fast prefill, PCIe barriers, KV cache limits, and upstream delta vs b12x/SGLang
+## Docker And Release Lines
 
-### Community
-- [Daily Summaries](daily-summaries/) — Auto-generated daily digests of Discord activity
+| Line | Page | Use |
+|---|---|---|
+| Fathomless Firmament | [GLM-5.2 v15 image section](models/glm5.2_v15.md#image-and-model), [DS4 DSpark v10 image section](models/ds4dspark-v10.md#image) | Current July 2026 GLM/DS4 validation line. |
+| Eldritch Enlightenment | [eldritch-enlightenment-docker.md](models/eldritch-enlightenment-docker.md) | June 2026 shared GLM/DS4/Kimi/MiMo fullstack baseline. |
+| General image notes | [Docker Images](optimization/docker-images.md) | Image naming, build conventions, and reusable operational notes. |
 
-### Results & Troubleshooting
-- [Benchmark Results](benchmarks/results.md) — Consolidated tables across all models
-- [KLD Evaluation](benchmarks/kld-evaluation.md) — Quantization quality (KL divergence vs FP8 reference)
-- [Common Issues](troubleshooting/common-issues.md) — Errors + fixes
-- [DS4-Flash: empty `content` from unclosed `<think>`](models/ds4f-empty-think/README.md) — Model writes the answer inside the reasoning field (~0.3–0.8% of synthesis requests); self-contained repro, build/MTP/temperature-independent
+Build docs are part of the model pages because each release line pins a different
+vLLM branch, B12X commit, FlashInfer commit, DeepGEMM commit, CUDA stack, and
+runtime wrapper.
 
-## Key Findings
+## Benchmarks And Quality
 
-1. **MTP=2 is the sweet spot** — +51-72% throughput across all models, MTP>3 unstable
-2. **NCCL graph XML fix is still the public Turin recipe** — current upstream NCCL draft fix is [`NVIDIA/nccl#2127`](https://github.com/NVIDIA/nccl/pull/2127), which aims to remove the no-XML pathological ring regression
-3. **PCIe switches dramatically help single-batch latency** — 101 vs 60 tok/s for Kimi K2.5
-4. **BF16 KV cache mandatory on SM120 for GLM-5** — FP8 produces garbled output
-5. **SGLang is the only option for GLM-5** — vLLM lacks SM120-compatible MLA+sparse attention backend
-6. **NVFP4 is native to SM120** — 2× decode speedup over FP8 for supported models
-7. **DCP is essential for Kimi K2.5 long context** — Without it, 200K context drops to <10 tok/s
+| Area | Page |
+|---|---|
+| Consolidated throughput | [Benchmark Results](benchmarks/results.md) |
+| vLLM vs SGLang throughput | [Inference throughput](benchmarks/inference-throughput/README.md) |
+| GLM-5.2 KLD and quant quality | [GLM-5.2 KLD Evaluation](benchmarks/glm52-kld-evaluation.md) |
+| General KLD methodology | [KLD Evaluation](benchmarks/kld-evaluation.md) |
+| MTP quality checks | [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) |
+| NVFP4 quantization comparison | [NVFP4 Quantization Comparison](benchmarks/nvfp4-quantization-comparison.md) |
 
-## Hardware Overview
+KLD is a regression and quantization-sanity tool, not a complete quality metric.
+Use it together with long-context decode, coding probes, acceptance-rate checks,
+and task-level benchmarks.
 
-All results are on **NVIDIA RTX PRO 6000** (Blackwell GB202, SM120):
-- 96 GB GDDR7 per GPU (768 GB total for 8×)
-- PCIe 5.0 x16 (~64 GB/s per direction)
-- No NVLink — all inter-GPU communication via PCIe
-- Typical configs: AMD EPYC Turin/Genoa, 4× or 8× GPUs
+## Optimization Topics
+
+| Topic | Page |
+|---|---|
+| PCIe oneshot all-reduce | [pcie-oneshot-allreduce.md](optimization/pcie-oneshot-allreduce.md) |
+| NCCL tuning and graph XML issues | [nccl-tuning.md](optimization/nccl-tuning.md) |
+| Speculative decoding | [speculative-decoding.md](optimization/speculative-decoding.md) |
+| NVFP4 quantization | [nvfp4-quantization.md](optimization/nvfp4-quantization.md) |
+| Hybrid NVFP4 assembly | [hybrid-nvfp4-assembly.md](optimization/hybrid-nvfp4-assembly.md) |
+| B12X FP8 / DeepGEMM comparison | [b12x-dense-fp8-gemm-vs-deepgemm.md](optimization/b12x-dense-fp8-gemm-vs-deepgemm.md) |
+| B12X W4A8 tiny-decode work | [b12x-w4a8mx-tiny-decode-kernel.md](optimization/b12x-w4a8mx-tiny-decode-kernel.md) |
+| DSpark upstream consolidation | [dspark-upstream-consolidation.md](optimization/dspark-upstream-consolidation.md) |
+| I/O tuning | [io-tuning.md](optimization/io-tuning.md) |
+
+## Hardware And Topology
+
+All modern measurements are on NVIDIA RTX PRO 6000 Blackwell / GB202 / SM120:
+
+- 96 GB GDDR7 per GPU.
+- PCIe 5.0 x16, no NVLink.
+- 4-GPU, 8-GPU, and 16-GPU PCIe switch systems.
+- AMD EPYC Turin/Genoa hosts are the most common community targets.
+
+Key pages:
+
+- [SM120 vs SM100 Architecture](hardware/sm120-vs-sm100-architecture.md)
+- [PCIe Topology](hardware/topology.md)
+- [PCIe Bandwidth](hardware/pcie-bandwidth.md)
+- [GPU Configurations](hardware/gpu-configs.md)
+- [ASUS ESC8000A-E13P + Broadcom Switches](hardware/asus-esc8000a-e13p-broadcom-switches.md)
+- [ASRockRack + EPYC Turin + 4x c-payne, 16 GPU](hardware/asrockrack-turin-cpayne-16gpu.md)
+- [ASRock WRX90 + 4x c-payne, 16 GPU](hardware/wrx90-cpayne-16gpu-4switch.md)
+- [Blackwell power limit sweep](hardware/blackwell-power-limit-sweep.md)
+
+## Inference Engines
+
+| Engine | Page | Current role |
+|---|---|---|
+| vLLM | [vllm.md](inference-engines/vllm.md) | Primary runtime for GLM-5.2, DS4 Flash, Kimi 2.7, MiMo DFlash. |
+| FlashInfer | [flashinfer.md](inference-engines/flashinfer.md) | SM120 sparse MLA, CUTLASS MoE, sampler, and kernel integration notes. |
+| SGLang | [sglang.md](inference-engines/sglang.md) | Historical and alternate runtime notes, especially for older GLM/MiMo paths. |
+
+## Common Operational Rules
+
+- Do not launch with `NCCL_GRAPH_FILE=` set to an empty string. Unset it if no
+  real XML graph file is used.
+- Reuse cache directories while debugging; otherwise TileLang/Triton/CuTe
+  rebuilds dominate iteration time.
+- For quick smoke tests, use small `MAX_NUM_SEQS` and graph caps. For published
+  tables, use the graph sizes documented in the model page.
+- For DFlash and DSpark, confirm the backend markers and acceptance rates before
+  trusting throughput numbers.
+- For GLM-5.2, keep the exact `index_topk_pattern` and DCP policy from the
+  relevant runbook; a truncated pattern can silently degrade output.
+
+## Troubleshooting
+
+- [Common Issues](troubleshooting/common-issues.md)
+- [DS4-Flash empty `content` from unclosed `<think>`](models/ds4f-empty-think/README.md)
+- [ASUS ESC8000A-E13P PEX890xx bug report](troubleshooting/asus-esc8000a-e13p-pex890xx-bug-report.md)
+- [Daily summaries](daily-summaries/) for chronological context and regression history
 
 ## Contributing
 
-This wiki is synthesized from Discord discussions. If you have corrections, additional benchmarks, or new configurations, please open an issue or PR.
+Open a PR with exact commands, Docker image tags, model snapshot IDs, GPU layout,
+backend choices, and raw benchmark artifacts where possible. For performance
+claims, include both the launch config and the client command so results can be
+reproduced on another PCIe-only Blackwell host.
 
----
-
-*Generated March 2026. Data sourced from community Discord server.*
+Maintained from community Discord experiments through July 2026.
