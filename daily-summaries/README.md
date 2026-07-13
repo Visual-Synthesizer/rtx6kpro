@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-13](2026-07/2026-07-13.md) | ds4dspark v10 released — fixes draft/acceptance randomness independence, prefix-cache token exclus |
 | [2026-07-12](2026-07/2026-07-12.md) | DS4-Flash "dspark" is 50%+ faster than MTP2 but unstable — random Chinese-language token spam unde |
 | [2026-07-11](2026-07/2026-07-11.md) | - New GLM-5.2-MXFP8-NVFP4-NF3-Hybrid v3.6 checkpoint hits 91.92% GPQA Diamond (up from 88.38% baseli |
 | [2026-07-10](2026-07/2026-07-10.md) | - GLM-5.2-MXFP8-NVFP4-NF3-Hybrid "healed" weights (KLD 0.15→0.12, GPQA +0.5) jumped aider-polyglot |
@@ -144,6 +145,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-13](2026-07/2026-07-13.md) | ds4dspark v10 released — fixes draft/acceptance randomness independence, prefix-cache token exclus |
 | [2026-07-12](2026-07/2026-07-12.md) | DS4-Flash "dspark" is 50%+ faster than MTP2 but unstable — random Chinese-language token spam unde |
 | [2026-07-11](2026-07/2026-07-11.md) | - New GLM-5.2-MXFP8-NVFP4-NF3-Hybrid v3.6 checkpoint hits 91.92% GPQA Diamond (up from 88.38% baseli |
 | [2026-07-10](2026-07/2026-07-10.md) | - GLM-5.2-MXFP8-NVFP4-NF3-Hybrid "healed" weights (KLD 0.15→0.12, GPQA +0.5) jumped aider-polyglot |
