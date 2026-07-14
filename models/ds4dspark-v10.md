@@ -44,6 +44,8 @@ validated fixed K=5 probabilistic path by default.
 - `/usr/local/bin/serve-ds4-flash.sh` is installed in the image. Compose and
   benchmark wrappers pass environment settings to this helper instead of
   duplicating the complete `vllm serve` command.
+- The current release image is shared with GLM-5.2 v16. Model-specific behavior
+  remains in separate helpers behind one `MODEL_FAMILY` dispatcher.
 - The v10 sweep uses all GPUs `0-15` by default: eight TP2 instances or four
   TP4 instances per wave. `GPU_GROUPS_TP2` and `GPU_GROUPS_TP4` can restrict
   the allocation without changing the synchronized load/benchmark ordering.
@@ -54,51 +56,52 @@ validated fixed K=5 probabilistic path by default.
 |---|---|---|
 | vLLM | [local-inference-lab/vllm#88](https://github.com/local-inference-lab/vllm/pull/88) | DSpark correctness/capacity work, SM120 PCIe stack, and env launcher |
 | B12X | [lukealonso/b12x#28](https://github.com/lukealonso/b12x/pull/28) | CuTe compiler compatibility fallback required by the pinned stack |
+| B12X | [lukealonso/b12x#32](https://github.com/lukealonso/b12x/pull/32) | Cooperative resident-grid launch for the dynamic W4A8 kernel |
 | FlashInfer | [flashinfer-ai/flashinfer#3871](https://github.com/flashinfer-ai/flashinfer/pull/3871) | Graph-safe uniform multi-token FA2 decode |
 | FlashInfer | [flashinfer-ai/flashinfer#3817](https://github.com/flashinfer-ai/flashinfer/pull/3817) | SM120 DSV4 `topk=256` decode instantiation |
 | FlashInfer | [flashinfer-ai/flashinfer#3896](https://github.com/flashinfer-ai/flashinfer/pull/3896) | SM120 DSV4 `topk=256` prefill dispatch |
 | upstream vLLM | [vllm-project/vllm#47979](https://github.com/vllm-project/vllm/pull/47979) | SM120 PCIe serving stack |
 
-The release PRs created in the local vLLM and B12X forks (#88 and #28) were
+The release PRs created in the local vLLM and B12X forks (#88, #28, and #32) were
 opened ready for review, not as drafts. The three pinned upstream FlashInfer
 PRs are also non-draft PRs.
 
 ## Docker Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-ds4-v10-vllmadf15ca-b12x90172a5-fi2cba2f7-cu132-20260712
-sha256:4f07aefe2aa15f66d5fd90580eaa2553926aea0c3fa46bc227610e90c668c9f0
+voipmonitor/vllm:fathomless-firmament-v16-vllm8f86f42-b12xfe06f49-fi801d57a-cu132-20260714
+sha256:7a0ed4f956bc2f753fd8c67d32d4ee7358e71922794a471abdb9ae6513cabc54
 ```
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| vLLM | `codex/fathomless-firmament-dspark-pr47979-combined-20260710` @ `adf15cadb9d0151663b001a7286674892c4daa3c` |
+| vLLM | `codex/fathomless-firmament-v16-unified-20260712` @ `8f86f425102cee08745462615d54115eee275f9f` |
 | vLLM base | `dev/fathomless-firmament` @ `c649d41bd2d8f1cbb85075d1cf3027eb29cac2ea` when PR #88 was opened |
-| B12X | `codex/ff-v15-cute-compile-fallback-20260709` @ `90172a504e96d246e07cb1ebad3b291532445560` |
-| FlashInfer combined source | `codex/sm120-dspark-stack-20260711` @ `2cba2f7bbe8335fcabe18d29e6eb99de2093f991` |
+| B12X | `codex/fathomless-firmament-v16-integration-20260714` @ `fe06f494719267fa3b399878b67caffb915dbdc4` |
+| FlashInfer combined source | `codex/sm120-dspark-stack-20260711` @ `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | FlashInfer PR heads | #3871 `547ae8e42d9994d930ccd48713a178390f374a82`; #3817 `76fd3daf7064b73924ebb3bcb1e93a8a26fc6da9`; #3896 `1125246e4b2f19f6a77d42d937c8785a1f687445` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 | CUTLASS | `d80a4e53b52b42550659a8696dab32705265e324` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | NCCL | `2.30.4`, `canonical/cu132-nccl2304-amd-noxml` @ `dfab7c1ace32da250ba97757879429c341b7bcf9` |
 | CUDA / PyTorch | CUDA `13.2.1`, PyTorch `2.12.0+cu132` |
+| Docker build repo | `local-inference-lab/blackwell-llm-docker main` @ `d104659` |
 
 ## Rebuild The Image
 
 The canonical build recipe is
-[`build-fathomless-firmament-ds4-v10-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/main/build-fathomless-firmament-ds4-v10-cu132.sh).
-It pins every source commit, requires `serve-ds4-flash.sh` to be present, checks
-the helper in `DRY_RUN` mode, unifies PyTorch and vLLM on the patched NCCL
-2.30.4 runtime, and can push the final tag.
+[`build-fathomless-firmament-v16-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/main/build-fathomless-firmament-v16-cu132.sh).
+It pins every source commit, requires both GLM and DS4 helpers, validates the
+TP2/TP4 DSpark memory policies and cooperative W4A8 launch, unifies PyTorch and
+vLLM on the patched NCCL 2.30.4 runtime, and can push the final tag.
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout b7588cc
-
-PUSH_IMAGE=1 ./build-fathomless-firmament-ds4-v10-cu132.sh
+git checkout d104659
+PUSH_IMAGE=1 ./build-fathomless-firmament-v16-cu132.sh
 ```
 
 No runtime source overlay or patch mount is used.
@@ -125,13 +128,14 @@ The equivalent minimal service is:
 ```yaml
 services:
   ds4:
-    image: voipmonitor/vllm:fathomless-firmament-ds4-v10-vllmadf15ca-b12x90172a5-fi2cba2f7-cu132-20260712
-    command: ["/usr/local/bin/serve-ds4-flash.sh"]
+    image: voipmonitor/vllm:fathomless-firmament-v16-vllm8f86f42-b12xfe06f49-fi801d57a-cu132-20260714
+    entrypoint: ["/usr/local/bin/serve-fathomless-firmament.sh"]
     network_mode: host
     ipc: host
     shm_size: 32gb
     gpus: all
     environment:
+      MODEL_FAMILY: ds4
       CUDA_VISIBLE_DEVICES: ${GPUS:-0,1}
       MODE: ${MODE:-dspark}
       BACKEND: ${BACKEND:-lucifer-cutlass}
@@ -151,10 +155,12 @@ be reused from the Linux page cache; another loader must be selected explicitly.
 Lucifer MTP2/MTP3 uses `GPU_MEMORY_UTILIZATION=0.912` by default; this preserves
 the documented 262,144-token limit with 266,246 profiled KV tokens. For DSpark,
 Lucifer default uses `0.953` (264,543 profiled KV tokens), Lucifer CUTLASS uses
-`0.94`, and B12X uses `0.95`. CUTLASS previously used `0.9465`, but TP4 had only
-777 MiB free when its first real prefill requested a 764 MiB FlashInfer MoE
-workspace. The lower default preserves far more than 262k KV tokens while
-providing transient headroom. Other non-DSpark profiles remain at `0.91`.
+`0.9465` at TP2 and `0.94` at TP4 or larger, and B12X uses `0.95`. TP4 at
+`0.9465` had only 777 MiB free when its first real prefill requested a 764 MiB
+FlashInfer MoE workspace, while TP2 at `0.94` had only 7.28 GiB of KV memory
+and could not satisfy the 7.89 GiB required for 262,144 tokens. The topology-
+aware defaults preserve both constraints without a runtime override. Other
+non-DSpark profiles remain at `0.91`.
 
 ### Stable Controls
 
@@ -221,6 +227,37 @@ not reasons to change the release default.
 `SP_ASYNC_TP=1` is available only for compatible non-DSpark V1 runs. The helper
 fails explicitly if it is requested with DSpark instead of pretending that SP
 is active.
+
+## Unified v16 Image Canaries
+
+Only two DS4 canaries were run after unifying the GLM and DS4 image; the
+published v10 sweep below was not repeated. Both used TP2, InstantTensor
+`BUFFERED`, B12X all-reduce, max model length 262,144, and the same helper and
+backend defaults documented above.
+
+| Checkpoint / mode | Metric | v10 reference | Unified v16 | Delta |
+|---|---|---:|---:|---:|
+| Standard, B12X A16, MTP0 | Decode C1 | 143.5 | 143.4 | -0.1% |
+| Standard, B12X A16, MTP0 | Prefill 64k | 11,524 | 11,635 | +1.0% |
+| DSpark, Lucifer CUTLASS, fixed K5 | Decode C1 | 238.9 | 239.95 | +0.4% |
+| DSpark, Lucifer CUTLASS, fixed K5 | Prefill 64k | 6,642 | 6,892 | +3.8% |
+
+The DSpark row was run on the exact final image with no memory override. It
+profiled 7.89 GiB of KV memory and 262,144 GPU KV tokens. The first 64k request
+compiled `_prepare_dflash_inputs_kernel` and measured 6,489 tok/s; the clean
+post-JIT repetition shown in the table measured 6,892 tok/s. The server log
+contained no CUDA, NCCL, or Xid failure.
+
+The standard row used the immediately preceding image. The final vLLM commit
+changes only the `lucifer-cutlass + dspark` TP-aware memory branch, so the
+standard B12X/MTP0 command and all code it reaches are identical.
+
+Canary artifacts:
+
+```text
+/root/bench-results/ds4-v16-canary-b12xfe06-20260714/standard-tp2-b12x-a16-mtp0
+/root/bench-results/ds4-v16-canary-b12xfe06-20260714/dspark-tp2-lucifer-cutlass
+```
 
 ## Clean-Cache Release Validation
 
@@ -320,11 +357,11 @@ scripts/render-ds4-v9-results.py \
 ```
 
 The 40-case numerical sweep was collected on the `bbcc06f` release candidate.
-The final `adf15ca` commit changes only the embedded helper's default
+The original v10 `adf15ca` commit changes only the embedded helper's default
 `GPU_MEMORY_UTILIZATION` for `lucifer-cutlass + dspark`; no packaged Python,
 CUDA, B12X, FlashInfer, or DeepGEMM implementation changed. That one TP4 row was
 rerun at `GPU_MEMORY_UTILIZATION=0.94`, exactly matching the final helper. The
-final image was also started without an override and revalidated through the
+original v10 image was also started without an override and revalidated through the
 same C1/C64 and 128k-prefill path. That exact-image validation profiled
 1,523,880 KV tokens and measured C1/C16/C32/C64 at
 `298.5/1702.6/2499.6/3454.8 tok/s`, coding median `416.7 tok/s`, and completed

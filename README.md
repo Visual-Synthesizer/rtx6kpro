@@ -12,7 +12,7 @@ MTP, DSpark, DFlash, KLD checks, and throughput validation.
 
 | Goal | Read |
 |---|---|
-| Run the current GLM-5.2 stack | [GLM-5.2 v15](models/glm5.2_v15.md) |
+| Run the current GLM-5.2 stack | [GLM-5.2 v16](models/glm5.2_v16.md), with [v15](models/glm5.2_v15.md) for the complete historical sweep |
 | Run DeepSeek-V4-Flash standard / MTP | [DS4 Flash v6](models/ds4-flash-v6.md); standard MTP rows are also in [DS4 DSpark v9](models/ds4dspark-v9.md) and [v10](models/ds4dspark-v10.md) |
 | Run DeepSeek-V4-Flash DSpark | [DS4 DSpark v10](models/ds4dspark-v10.md), with [v9](models/ds4dspark-v9.md) as the full DSpark plus standard-MTP reference |
 | Run Kimi-K2.7-Code with DFlash | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) |
@@ -25,7 +25,7 @@ MTP, DSpark, DFlash, KLD checks, and throughput validation.
 
 | Model | Current page | Runtime focus | Notes |
 |---|---|---|---|
-| GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v15.md](models/glm5.2_v15.md) | vLLM Fathomless + B12X | TP8 DCP1/2/4/8, TP6 notes, MTP0/MTP3, KLD, prefill/decode sweeps. |
+| GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v16.md](models/glm5.2_v16.md), [glm5.2_v15.md](models/glm5.2_v15.md) | Unified Fathomless + B12X | Current shared image and TP6 fix in v16; complete TP8/MTP/KLD history in v15. |
 | GLM-5.2 FP8 + MXFP4 experts | [glm5.2_mxfp4.md](models/glm5.2_mxfp4.md) | vLLM + B12X MXFP4 expert path | Native MXFP4 routed experts, public checkpoint, A8 serving path. |
 | DeepSeek-V4-Flash | [ds4-flash-v6.md](models/ds4-flash-v6.md) | Eldritch image, B12X and Lucifer variants | B12X, FlashInfer/CUTLASS, DeepGEMM default, MTP token sweeps, prefill tables. |
 | DeepSeek-V4-Flash standard MTP / DSpark | [ds4dspark-v10.md](models/ds4dspark-v10.md), [ds4dspark-v9.md](models/ds4dspark-v9.md) | Fathomless / Eldritch images | Standard-checkpoint MTP0/MTP2/MTP3 rows plus DSpark checkpoint validation. |
@@ -43,7 +43,7 @@ historical reference.
 
 | Line | Page | Use |
 |---|---|---|
-| Fathomless Firmament | [GLM-5.2 v15 image section](models/glm5.2_v15.md#image-and-model), [DS4 DSpark v10 image section](models/ds4dspark-v10.md#image) | Current July 2026 GLM/DS4 validation line. |
+| Fathomless Firmament | [GLM-5.2 v16 image section](models/glm5.2_v16.md#release-image), [DS4 DSpark v10 image section](models/ds4dspark-v10.md#docker-image) | Current July 2026 unified GLM/DS4 validation line. |
 | Eldritch Enlightenment | [eldritch-enlightenment-docker.md](models/eldritch-enlightenment-docker.md) | June 2026 shared GLM/DS4/Kimi/MiMo fullstack baseline. |
 | General image notes | [Docker Images](optimization/docker-images.md) | Image naming, build conventions, and reusable operational notes. |
 
