@@ -3,8 +3,9 @@
 This page documents the July 14, 2026 TP4 release for
 `madeby561/GLM-5.2-MXFP8-NVFP4-NF3-Hybrid`. The release adds native loading
 and execution of the mixed NVFP4/NF3 expert checkpoint, NVFP4 MLA KV cache,
-the B12X NF3 tile-binding correctness fix, and an optimized TP4/DCP4 sparse
-MLA prefill path. The same image remains the unified GLM-5.2 and DS4 base.
+the B12X NF3 tile-binding correctness fix, and optimized sparse-MLA DCP
+prefill paths for the validated TP4, TP6, and TP8 topologies. The same image
+remains the unified GLM-5.2 and DS4 base.
 
 The published image is a clean source build. Runtime source or wheel overlays
 are not required.
@@ -12,18 +13,18 @@ are not required.
 ## Release Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-v17-vllm137d2eb-b12x1377d5f-fi801d57a-cu132-20260714
-Docker manifest: sha256:8892c8ecae957a3cf131ebd32159aecc0b29daf03bf4ee2deb4dcc3acdafbcd0
-Local image ID: sha256:2dd2e4d3e4b1e8b4e3fdc324b7c142e69f15892773a556c14a2b7040c8292f7a
+voipmonitor/vllm:fathomless-firmament-v17-vllm6ccc3eb-b12x1377d5f-fi801d57a-cu132-20260714
+Docker manifest: sha256:a1ec6a43cbe4192abd5597123d9270cf16c6241ebfe74066dd7c2383bb41bb27
+Local image ID: sha256:988415592c05e2d3dc12cbc8ab36af8b6557221849f095ec3d5442602a02e304
 ```
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| vLLM | `local-inference-lab/vllm codex/fathomless-firmament-v17-dcp-prefill-opt-20260714` @ `137d2eb3931b62d7710d26573cb69dacbac52059` |
+| vLLM | `local-inference-lab/vllm codex/fathomless-firmament-v17-dcp-prefill-opt-20260714` @ `6ccc3ebbd17edb05ce11b095a5b14f25839774dd` |
 | vLLM base | `dev/fathomless-firmament` plus the v16 unified stack |
-| vLLM changes | hybrid format [#92](https://github.com/local-inference-lab/vllm/pull/92), NVFP4 KV [#82](https://github.com/local-inference-lab/vllm/pull/82), and DCP4 prefill [#94](https://github.com/local-inference-lab/vllm/pull/94) |
+| vLLM changes | hybrid format [#92](https://github.com/local-inference-lab/vllm/pull/92), NVFP4 KV [#82](https://github.com/local-inference-lab/vllm/pull/82), and generalized DCP prefill [#94](https://github.com/local-inference-lab/vllm/pull/94) |
 | B12X | `voipmonitor/b12x codex/fathomless-firmament-v17-nf3-nvfp4kv-20260714` @ `1377d5f22c98de0c17d9b3f35a5b56d7587992fa` |
 | B12X changes | NF3/NVFP4 work from [lukealonso/b12x #31](https://github.com/lukealonso/b12x/pull/31) plus the [preplanned-tile fix](https://github.com/MadeBy561/b12x/pull/1) |
 | FlashInfer | `voipmonitor/flashinfer codex/sm120-dspark-stack-20260711` @ `801d57a08958c13d375ddbb6be3be4808f48a708` |
@@ -31,7 +32,7 @@ Pinned source stack:
 | CUTLASS | `d80a4e53b52b42550659a8696dab32705265e324` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | NCCL | local-inference `2.30.4`, CUDA 13.2 |
-| Docker build repo | `local-inference-lab/blackwell-llm-docker main` @ `37c95f1818727958b5b3d1a1439ec58ecf2f40cb` |
+| Docker build repo | `local-inference-lab/blackwell-llm-docker main` @ `6d3d0aad820107fba6cb9f8589f40c01bd83c108` |
 
 The canonical build script is
 [`build-fathomless-firmament-v17-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/main/build-fathomless-firmament-v17-cu132.sh).
@@ -42,7 +43,7 @@ local NCCL 2.30.4 library, and validates the installed source paths.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 37c95f1818727958b5b3d1a1439ec58ecf2f40cb
+git checkout 6d3d0aad820107fba6cb9f8589f40c01bd83c108
 PUSH_IMAGE=1 ./build-fathomless-firmament-v17-cu132.sh
 ```
 
@@ -96,7 +97,7 @@ docker run -d --name glm52-v17-hybrid \
   -v /root/models:/root/models:ro \
   -v /root/.cache/vllm-glm52-v17:/cache \
   -v /root/vllm/tmp/glm52-v17:/container-tmp \
-  voipmonitor/vllm:fathomless-firmament-v17-vllm137d2eb-b12x1377d5f-fi801d57a-cu132-20260714
+  voipmonitor/vllm:fathomless-firmament-v17-vllm6ccc3eb-b12x1377d5f-fi801d57a-cu132-20260714
 ```
 
 To use a local checkpoint, add:
@@ -126,6 +127,7 @@ User-facing controls:
 | `GPUS` | `0,1,2,3` | Four physical GPUs used by TP4 |
 | `PORT` | `8000` | OpenAI-compatible API port |
 | `DCP` | `1`, `2`, or `4` | Decode-context parallel size |
+| `DCP_PREFILL_WORKSPACE` | `auto` | Enables validated workspace paths by default; use `0` for the baseline path |
 | `MTP` | `0` | This page validates MTP off |
 | `MAX_NUM_SEQS` | `8` | Scheduler concurrency ceiling |
 | `GRAPH` | `64` | Maximum CUDA graph capture size |
@@ -149,8 +151,8 @@ serially. No model loaded while a benchmark was active.
 
 DCP2 decode was repeated and produced 43.9 tok/s both times. An earlier DCP2
 run on GPU 0-3 measured 44.9 tok/s, while the clean release run used GPU 8-11.
-PR #94's runtime optimization is strictly gated out for DCP1/DCP2 and for
-decode, so the one-token difference is treated as GPU-group/run variance.
+PR #94's runtime optimization is strictly gated out for TP4/DCP1, TP4/DCP2,
+and decode, so the one-token difference is treated as GPU-group/run variance.
 
 ### DCP4 Prefill Improvement
 
@@ -164,14 +166,53 @@ decode, so the one-token difference is treated as GPU-group/run variance.
 The prefill path projects each sparse-MLA partial output from 512 to 256 before
 the LSE-corrected reduce-scatter. For eligible eager TP4/DCP4 prefills it also
 borrows existing B12X query and scratch workspaces for gather, projection, and
-caller-owned reduce-scatter output. The gate requires B12X sparse MLA, DCP4,
-`MAX_BATCHED_TOKENS=3072`, and 1,025-3,072 active rows. Other shapes retain the
-existing path.
+caller-owned reduce-scatter output. The gate requires B12X sparse MLA, a
+validated TP/DCP topology, AG/RS, non-DBO eager execution, and at least 1,025
+active rows. Other shapes retain the existing path.
 
-The image helper enables this gate automatically for the tested profile. An
-advanced `DCP_PREFILL_WORKSPACE=0` override disables it for A/B testing;
-`DCP_PREFILL_WORKSPACE=1` forces the preset on but does not bypass source-level
-shape and backend safety checks.
+The image helper enables this gate automatically for TP4/DCP4, TP6/DCP2/3/6,
+and TP8/DCP2/4/8. `DCP_PREFILL_WORKSPACE=0` disables it for A/B testing;
+`DCP_PREFILL_WORKSPACE=1` requests it explicitly but does not bypass
+source-level topology, shape, capture, and backend safety checks.
+
+### Generalized TP6/TP8 Results
+
+These A/B runs validate the generalized PR #94 implementation. All rows use
+MTP off, `F8_DMA=0`, InstantTensor `BUFFERED`, hybrid DCP (`a2a` for small
+rows and `ag_rs` for large rows), exact 8,192/65,536-token prompts, and two
+runs per side. All servers were loaded before benchmarking and clients ran
+serially.
+
+TP8 used `lukealonso/GLM-5.2-NVFP4`, A16, `MAX_BATCHED_TOKENS=8192`,
+`MAX_NUM_SEQS=32`, and graph 128.
+
+| Topology | Baseline 8k | Optimized 8k | Change | Baseline 64k | Optimized 64k | Change |
+|---|---:|---:|---:|---:|---:|---:|
+| TP8/DCP2 | 4,476 | 4,633 | +3.51% | 4,481.5 | 4,641.5 | +3.57% |
+| TP8/DCP4 | 3,312 | 3,551.5 | +7.23% | 3,328.5 | 3,576 | +7.44% |
+| TP8/DCP8 | 2,150.5 | 2,378.5 | +10.60% | 2,157.5 | 2,388 | +10.68% |
+
+TP6 used `/root/models/GLM-5.2-BF16-AMDMXFP4experts`, forced A8,
+`MAX_BATCHED_TOKENS=2048`, `MAX_NUM_SEQS=16`, and graph 64.
+
+TP6 relies on FF's automatic B12X virtual-TP layout. Before vLLM's normal
+divisibility check, it pads attention heads 64 -> 66, MoE intermediate width
+2048 -> 2112, and vocabulary 129280 -> 129408; checkpoint tails are
+zero-filled by the loader. There is no user-facing virtual-sharding flag. A
+`64 heads must be divisible by TP 6` error means this B12X configuration step
+did not run, normally because the wrong image/backend was used.
+
+| Topology | Baseline 8k | Optimized 8k | Change | Baseline 64k | Optimized 64k | Change |
+|---|---:|---:|---:|---:|---:|---:|
+| TP6/DCP2 | 3,912 | 3,975.5 | +1.62% | 3,912.5 | 3,966.5 | +1.38% |
+| TP6/DCP3 | 3,172.5 | 3,299 | +3.99% | 3,200.5 | 3,326.5 | +3.94% |
+| TP6/DCP6 | 2,119 | 2,275 | +7.36% | 2,132.5 | 2,293 | +7.53% |
+
+The fixed-half comparison is conservative because GPUs 0-7 were faster than
+GPUs 8-15. Cross-over runs on both identical GPU groups measured the intrinsic
+TP8/DCP2 gain at 4.56-4.80% and TP6/DCP2 at 2.92-3.31%. Logs confirmed the
+borrowed-workspace path on every optimized topology. Decode and KV capacity
+are unchanged because the optimization is confined to eager prefill.
 
 ## v1.3 Investigation
 
@@ -215,13 +256,15 @@ backend, stream, graph, or runtime feature is disabled.
 
 Validation:
 
-- 14 focused vLLM tests passed; one unrelated environment-dependent case was
-  skipped.
+- 26 focused PR #94 tests passed in the final runtime environment.
 - Ruff check and format check passed.
 - DCP2 and DCP4 booted and warmed B12X PCIe DCP collective signatures.
-- The clean DCP4 log confirmed the borrowed-workspace path was active.
+- TP4/DCP4, TP6/DCP2/3/6, and TP8/DCP2/4/8 all served exact 8k/64k requests;
+  every optimized log confirmed the borrowed-workspace path was active.
 - A 30,017-token DCP4 generation produced coherent Python code with zero CJK
   characters; TTFT was 8.26 seconds.
+- A deterministic long-prompt baseline/optimized comparison produced exactly
+  the same output.
 - The running containers had only model, Hugging Face, JIT-cache, and temporary
   mounts. There were no source or site-packages overlays.
 
@@ -253,6 +296,7 @@ Raw local validation results from the release run are under:
 
 ```text
 /root/bench-results/glm52-hybrid-v17-tp4-20260714/final-clean-source
+/root/bench-results/pr94-generalization-20260714
 ```
 
 This v17 campaign validates serving correctness and performance. It does not
