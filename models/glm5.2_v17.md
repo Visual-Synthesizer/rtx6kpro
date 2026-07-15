@@ -11,6 +11,8 @@ one clean source image. It adds:
 - the B12X NF3 tile-binding correctness fix;
 - optimized sparse-MLA DCP prefill for TP4/DCP4, TP6/DCP2/3/6, and
   TP8/DCP2/4/8;
+- virtual-TP padding for independently constructed MTP draft models, fixing
+  TP6 with MTP enabled;
 - a selective v17 benchmark campaign that remeasures only the affected prefill
   cells and preserves unchanged v15/v16 results with explicit provenance.
 
@@ -36,18 +38,18 @@ would only measure noise on code paths the change cannot reach.
 ## Release Image
 
 ```text
-voipmonitor/vllm:fathomless-firmament-v17-vllm6ccc3eb-b12x1377d5f-fi801d57a-cu132-20260714
-Docker manifest: sha256:a1ec6a43cbe4192abd5597123d9270cf16c6241ebfe74066dd7c2383bb41bb27
-Local image ID: sha256:988415592c05e2d3dc12cbc8ab36af8b6557221849f095ec3d5442602a02e304
+voipmonitor/vllm:fathomless-firmament-v17-vllm05f50ae-b12x1377d5f-fi801d57a-cu132-20260715
+Docker manifest: sha256:9b6f1ab6db4d3a7b7b786481eb32abe82e86d185648d62c3ac1cfa6d72a55e47
+Local image ID: sha256:b9346a51992e4ff6897905fac1aa6819ab069a25de6a395a2d726ce520de5230
 ```
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| vLLM | `local-inference-lab/vllm codex/fathomless-firmament-v17-dcp-prefill-opt-20260714` @ `6ccc3ebbd17edb05ce11b095a5b14f25839774dd` |
-| vLLM base | `dev/fathomless-firmament` plus the v16 unified stack |
-| vLLM changes | hybrid format [#92](https://github.com/local-inference-lab/vllm/pull/92), NVFP4 KV [#82](https://github.com/local-inference-lab/vllm/pull/82), and generalized DCP prefill [#94](https://github.com/local-inference-lab/vllm/pull/94) |
+| vLLM | `local-inference-lab/vllm build/fathomless-firmament-v17-tp6-mtp-fix-20260715` @ `05f50ae79c48835275f22f76e8dfb10b0024dec6` |
+| vLLM v17 parent | `codex/fathomless-firmament-v17-dcp-prefill-opt-20260714` @ `6ccc3ebbd17edb05ce11b095a5b14f25839774dd` |
+| vLLM changes | hybrid format [#92](https://github.com/local-inference-lab/vllm/pull/92), NVFP4 KV [#82](https://github.com/local-inference-lab/vllm/pull/82), generalized DCP prefill [#94](https://github.com/local-inference-lab/vllm/pull/94), and TP6 MTP draft padding [#96](https://github.com/local-inference-lab/vllm/pull/96) |
 | B12X | `voipmonitor/b12x codex/fathomless-firmament-v17-nf3-nvfp4kv-20260714` @ `1377d5f22c98de0c17d9b3f35a5b56d7587992fa` |
 | B12X changes | NF3/NVFP4 work from [lukealonso/b12x #31](https://github.com/lukealonso/b12x/pull/31) plus the [preplanned-tile fix](https://github.com/MadeBy561/b12x/pull/1) |
 | FlashInfer | `voipmonitor/flashinfer codex/sm120-dspark-stack-20260711` @ `801d57a08958c13d375ddbb6be3be4808f48a708` |
@@ -55,10 +57,10 @@ Pinned source stack:
 | CUTLASS | `d80a4e53b52b42550659a8696dab32705265e324` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | NCCL | local-inference `2.30.4`, CUDA 13.2 |
-| Docker build repo | `local-inference-lab/blackwell-llm-docker main` @ `1f2367d3316caa437739e36de524e3cd7bccaf33` |
+| Docker build repo | `local-inference-lab/blackwell-llm-docker main` @ `ee75ffa239565504cc2b86735cd91a65cf711501` |
 
 The canonical build script is
-[`build-fathomless-firmament-v17-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/1f2367d3316caa437739e36de524e3cd7bccaf33/build-fathomless-firmament-v17-cu132.sh).
+[`build-fathomless-firmament-v17-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/ee75ffa239565504cc2b86735cd91a65cf711501/build-fathomless-firmament-v17-cu132.sh).
 It clones the exact vLLM, B12X, FlashInfer, InstantTensor, DeepGEMM, and
 CUTLASS commits, builds the wheel, maps PyTorch and InstantTensor to the same
 local NCCL 2.30.4 library, and validates the installed source paths.
@@ -66,9 +68,49 @@ local NCCL 2.30.4 library, and validates the installed source paths.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 1f2367d3316caa437739e36de524e3cd7bccaf33
+git checkout ee75ffa239565504cc2b86735cd91a65cf711501
 PUSH_IMAGE=1 ./build-fathomless-firmament-v17-cu132.sh
 ```
+
+### TP6 With MTP
+
+Virtual TP pads GLM-5.2 from 64 to 66 attention heads and from 2,048 to 2,112
+routed experts so TP6 can shard both dimensions. The July 14 image applied
+that transformation to the target model, but an independently constructed MTP
+draft was still validated with 64 heads. TP6 with MTP therefore failed before
+worker or weight initialization.
+
+[vLLM PR #96](https://github.com/local-inference-lab/vllm/pull/96) applies the
+same virtual-TP transformation to the draft configuration before TP
+validation. The PR is based directly on `dev/fathomless-firmament` at
+`522c626de89b629a18d05db21ba02b5acf6e6f30`, so it does not depend on a Codex
+integration branch. The release commit
+`05f50ae79c48835275f22f76e8dfb10b0024dec6` carries the equivalent fix on the
+exact v17 parent so the rest of the tested v17 stack is preserved.
+
+The release build checks the helper expansion for TP6/DCP6/MTP3. A
+model-aware validation using the real `lukealonso/GLM-5.2-NVFP4`
+configuration produced:
+
+```text
+target: attention_heads=66, moe_experts=2112
+draft:  attention_heads=66, moe_experts=2112
+```
+
+The existing minimal Compose configuration is valid; only its image tag must
+be updated. For example:
+
+```yaml
+environment:
+  GPUS: 1,2,3,4,5,6
+  TP: 6
+  DCP: 6
+  MTP: 3
+```
+
+This validation constructed both configs from the cached checkpoint. It did
+not repeat a full six-GPU weight load or speed benchmark because the patch
+does not change runtime kernels.
 
 ## Standard Checkpoints And Modes
 
@@ -128,14 +170,14 @@ owns the exact 78-character sparse-indexer pattern. The host only supplies the
 deployment and model choices.
 
 The maintained minimal Compose file is
-[`examples/docker-compose-glm52-v17.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/1f2367d3316caa437739e36de524e3cd7bccaf33/examples/docker-compose-glm52-v17.yml).
+[`examples/docker-compose-glm52-v17.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/ee75ffa239565504cc2b86735cd91a65cf711501/examples/docker-compose-glm52-v17.yml).
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
 
 # Luke NVFP4, highest-accuracy A16 mode, MTP off.
-IMAGE=voipmonitor/vllm:fathomless-firmament-v17-vllm6ccc3eb-b12x1377d5f-fi801d57a-cu132-20260714 \
+IMAGE=voipmonitor/vllm:fathomless-firmament-v17-vllm05f50ae-b12x1377d5f-fi801d57a-cu132-20260715 \
 GPUS=0,1,2,3,4,5,6,7 PORT=8000 TP=8 DCP=1 MTP=0 \
 MOE_MODE=a16 ONLINE_QUANT=none MAX_NUM_SEQS=64 \
   docker compose -f examples/docker-compose-glm52-v17.yml up -d
@@ -540,7 +582,7 @@ docker run -d --name glm52-v17-hybrid \
   -v /root/models:/root/models:ro \
   -v /root/.cache/vllm-glm52-v17:/cache \
   -v /root/vllm/tmp/glm52-v17:/container-tmp \
-  voipmonitor/vllm:fathomless-firmament-v17-vllm6ccc3eb-b12x1377d5f-fi801d57a-cu132-20260714
+  voipmonitor/vllm:fathomless-firmament-v17-vllm05f50ae-b12x1377d5f-fi801d57a-cu132-20260715
 ```
 
 To use a local checkpoint, add:
@@ -550,7 +592,7 @@ To use a local checkpoint, add:
 ```
 
 The maintained minimal Compose file is
-[`examples/docker-compose-glm52-hybrid-v17.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/1f2367d3316caa437739e36de524e3cd7bccaf33/examples/docker-compose-glm52-hybrid-v17.yml).
+[`examples/docker-compose-glm52-hybrid-v17.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/ee75ffa239565504cc2b86735cd91a65cf711501/examples/docker-compose-glm52-hybrid-v17.yml).
 It exposes only the deployment envelope; the quantization, backend, loader,
 and exact 78-character `index_topk_pattern` stay in the image helper.
 
@@ -642,8 +684,10 @@ TP6 relies on FF's automatic B12X virtual-TP layout. Before vLLM's normal
 divisibility check, it pads attention heads 64 -> 66, MoE intermediate width
 2048 -> 2112, and vocabulary 129280 -> 129408; checkpoint tails are
 zero-filled by the loader. There is no user-facing virtual-sharding flag. A
-`64 heads must be divisible by TP 6` error means this B12X configuration step
-did not run, normally because the wrong image/backend was used.
+`64 heads must be divisible by TP 6` error with MTP off means this B12X
+configuration step did not run, normally because the wrong image/backend was
+used. With MTP enabled, the same error on the July 14 image came from the
+separate unpadded draft config and is fixed by the July 15 image above.
 
 | Topology | Baseline 8k | Optimized 8k | Change | Baseline 64k | Optimized 64k | Change |
 |---|---:|---:|---:|---:|---:|---:|
