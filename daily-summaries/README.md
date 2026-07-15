@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
 | [2026-07-14](2026-07/2026-07-14.md) | GLM-5.2 vLLM v1.3 released (davidsyoung/vllm-glm52): guarded B12X A2A decode +9-11%, hitting 83 tok/ |
 | [2026-07-13](2026-07/2026-07-13.md) | ds4dspark v10 released — fixes draft/acceptance randomness independence, prefix-cache token exclus |
 | [2026-07-12](2026-07/2026-07-12.md) | DS4-Flash "dspark" is 50%+ faster than MTP2 but unstable — random Chinese-language token spam unde |
@@ -146,6 +147,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
 | [2026-07-14](2026-07/2026-07-14.md) | GLM-5.2 vLLM v1.3 released (davidsyoung/vllm-glm52): guarded B12X A2A decode +9-11%, hitting 83 tok/ |
 | [2026-07-13](2026-07/2026-07-13.md) | ds4dspark v10 released — fixes draft/acceptance randomness independence, prefix-cache token exclus |
 | [2026-07-12](2026-07/2026-07-12.md) | DS4-Flash "dspark" is 50%+ faster than MTP2 but unstable — random Chinese-language token spam unde |
