@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-17](2026-07/2026-07-17.md) | Kimi K3 (Moonshot) unveiled: 2.8T params, 896 experts (16 active), native MXFP4/MXFP8 training, Atte |
 | [2026-07-16](2026-07/2026-07-16.md) | Bug: DSpark v10 (lucifer-cutlass) shows a big regression vs v8 — JSON schema output error rate spi |
 | [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
 | [2026-07-14](2026-07/2026-07-14.md) | GLM-5.2 vLLM v1.3 released (davidsyoung/vllm-glm52): guarded B12X A2A decode +9-11%, hitting 83 tok/ |
@@ -148,6 +149,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-17](2026-07/2026-07-17.md) | Kimi K3 (Moonshot) unveiled: 2.8T params, 896 experts (16 active), native MXFP4/MXFP8 training, Atte |
 | [2026-07-16](2026-07/2026-07-16.md) | Bug: DSpark v10 (lucifer-cutlass) shows a big regression vs v8 — JSON schema output error rate spi |
 | [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
 | [2026-07-14](2026-07/2026-07-14.md) | GLM-5.2 vLLM v1.3 released (davidsyoung/vllm-glm52): guarded B12X A2A decode +9-11%, hitting 83 tok/ |
