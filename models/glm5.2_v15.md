@@ -10,6 +10,17 @@ This revision keeps the v14 runtime contract and rebases it onto
 change versus the v14 page is the Docker image/source pin below. The MTP0
 decode sanity sweep was rerun against the v14 cc1 table and shows no regression.
 
+## Status
+
+| Field | Value |
+|---|---|
+| Status | Current GLM-5.2 production-style runbook |
+| Model family | GLM-5.2 |
+| Recommended entry point | [GLM-5.2 Runbook Hub](glm-5.2.md) |
+| Main checkpoint | `lukealonso/GLM-5.2-NVFP4` |
+| Main runtime | Fathomless vLLM + B12X |
+| Validated focus | DCP, MTP, KLD, online FP8/MXFP8 overlay |
+
 The reduced validation run was designed to avoid the earlier low decode outlier:
 only one 8-GPU server is loaded on GPUs `0-7`, the script waits for
 `/v1/models`, waits another 30 seconds, and only then starts benchmark clients.

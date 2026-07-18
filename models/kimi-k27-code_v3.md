@@ -3,6 +3,18 @@
 This page documents the Kimi-K2.7-Code DFlash validation on the shared
 Fathomless Firmament image plus the Kimi runtime patch from vLLM PR #86.
 
+## Status
+
+| Field | Value |
+|---|---|
+| Status | Current Kimi-K2.7-Code Fathomless runbook |
+| Model family | Kimi |
+| Recommended entry point | [Kimi Runbook Hub](kimi.md) |
+| Target checkpoint | `moonshotai/Kimi-K2.7-Code` |
+| Draft path | DFlash |
+| Main runtime | vLLM V2 with PR #86 overlay until merged into the image |
+| Validated focus | DCP4, DFlash7, Kimi parser/tool-call runtime |
+
 ## Image And Patch
 
 Validated base image:

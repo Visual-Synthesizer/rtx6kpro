@@ -17,6 +17,72 @@ Standard MTP rows use `method=mtp` with two or three draft tokens. `mtp0`
 disables speculative decoding. DSpark uses its dedicated draft module with the
 validated fixed K=5 probabilistic path by default.
 
+## Start Here: Recommended TP2 Launch
+
+For a normal TP2 launch, start with the packaged helper or Compose file and keep
+these defaults unless you are intentionally benchmarking another envelope:
+
+| Setting | Recommended TP2 default |
+|---|---:|
+| Tensor parallel size | `TP_SIZE=2` |
+| Max sequences | `MAX_NUM_SEQS=16` |
+| CUDA graph capture size | `MAX_NUM_SEQS * (1 + speculative_tokens)` |
+| Max batched tokens | `MAX_NUM_BATCHED_TOKENS=4096` |
+| GPU memory utilization | `GPU_MEMORY_UTILIZATION=0.95` |
+| Prefix-cache retention interval | `VLLM_PREFIX_CACHE_RETENTION_INTERVAL=4096` |
+
+With `MAX_NUM_SEQS=16`, the default graph caps are:
+
+| Mode | Speculative tokens | Graph cap |
+|---|---:|---:|
+| `mtp0` | `0` | `16` |
+| `mtp2` | `2` | `48` |
+| `mtp3` | `3` | `64` |
+| `dspark` | `5` | `96` |
+
+Preferred DSpark TP2 start:
+
+```bash
+git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
+cd blackwell-llm-docker
+git checkout 7f3cbc6
+
+MODE=dspark \
+BACKEND=lucifer-cutlass \
+TP_SIZE=2 \
+GPUS=0,1 \
+MAX_NUM_SEQS=16 \
+MAX_NUM_BATCHED_TOKENS=4096 \
+GPU_MEMORY_UTILIZATION=0.95 \
+VLLM_PREFIX_CACHE_RETENTION_INTERVAL=4096 \
+docker compose -f examples/docker-compose-ds4-v18.yml up -d
+```
+
+Standard checkpoint with speculative decoding disabled:
+
+```bash
+cd blackwell-llm-docker
+
+MODE=mtp0 \
+BACKEND=b12x-a8 \
+TP_SIZE=2 \
+GPUS=0,1 \
+MAX_NUM_SEQS=16 \
+MAX_NUM_BATCHED_TOKENS=4096 \
+GPU_MEMORY_UTILIZATION=0.95 \
+VLLM_PREFIX_CACHE_RETENTION_INTERVAL=4096 \
+docker compose -f examples/docker-compose-ds4-v18.yml up -d
+```
+
+The v10 wrapper in this repository uses the same defaults:
+
+```bash
+cd /root/rtx6kpro
+
+MODE=dspark BACKEND=lucifer-cutlass TP=2 GPUS=0,1 \
+  scripts/run-ds4-v10-server.sh
+```
+
 ## Current Unified Image
 
 New deployments can use the same Gilded Gnosis v18 image as GLM-5.2. It
@@ -169,15 +235,18 @@ services:
       MODE: ${MODE:-dspark}
       BACKEND: ${BACKEND:-lucifer-cutlass}
       TP_SIZE: ${TP_SIZE:-2}
-      MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
+      MAX_NUM_SEQS: ${MAX_NUM_SEQS:-16}
+      MAX_NUM_BATCHED_TOKENS: ${MAX_NUM_BATCHED_TOKENS:-4096}
+      GPU_MEMORY_UTILIZATION: ${GPU_MEMORY_UTILIZATION:-0.95}
+      VLLM_PREFIX_CACHE_RETENTION_INTERVAL: ${VLLM_PREFIX_CACHE_RETENTION_INTERVAL:-4096}
       LOAD_FORMAT: ${LOAD_FORMAT:-instanttensor}
       INSTANTTENSOR_BACKEND: ${INSTANTTENSOR_BACKEND:-BUFFERED}
 ```
 
-The helper derives the graph cap automatically: `4 * MAX_NUM_SEQS` for MTP0,
-`8 * MAX_NUM_SEQS` for MTP2/MTP3, and `(DSPARK_TOKENS + 1) * MAX_NUM_SEQS`
-for DSpark. The default K=5 DSpark configuration therefore uses 6x, with an
-absolute minimum graph cap of 6.
+The v10 wrapper in this repo uses `MAX_NUM_SEQS * (1 + speculative_tokens)` for
+its default graph cap. The helper inside the image can still derive a larger
+production graph envelope when no explicit graph cap is supplied by another
+launcher.
 All model variants default to InstantTensor with buffered I/O. `BUFFERED`
 expands to `URING_BUFFERED,AIO_BUFFERED,MMAP`, allowing hot checkpoint pages to
 be reused from the Linux page cache; another loader must be selected explicitly.
@@ -199,9 +268,11 @@ non-DSpark profiles remain at `0.91`.
 | `BACKEND` | five profiles below (`b12x-a8`) | Attention, MoE, linear, and force-mode profile |
 | `TP_SIZE` | positive integer (`2`) | Tensor parallel size |
 | `DCP_SIZE` | positive integer (`1`) | Decode-context parallel size; DSpark currently requires 1 |
-| `MAX_NUM_SEQS` | positive integer (`64`) | Scheduler concurrency and automatic graph input |
+| `MAX_NUM_SEQS` | positive integer (`16` for the TP2 wrapper) | Scheduler concurrency and automatic graph input |
 | `MAX_MODEL_LEN` | tokens (`262144`) | Maximum sequence length |
-| `MAX_NUM_BATCHED_TOKENS` | tokens (`8192`) | Scheduler token budget |
+| `MAX_NUM_BATCHED_TOKENS` | tokens (`4096` for the TP2 wrapper) | Scheduler token budget |
+| `GPU_MEMORY_UTILIZATION` | fraction (`0.95` for the TP2 wrapper) | GPU memory target used by vLLM profiling |
+| `VLLM_PREFIX_CACHE_RETENTION_INTERVAL` | iterations (`4096`) | Prefix-cache retention interval |
 | `LOAD_FORMAT` | loader (`instanttensor`) | Model loader; override only for explicit loader comparisons |
 | `INSTANTTENSOR_BACKEND` | backend policy (`BUFFERED`) | Buffered InstantTensor policy shared with the GLM helper |
 | `ALLREDUCE_MODE` | `b12x`, `vllm-custom`, `vllm-custom-2stage`, `nccl` (`b12x`) | TP collective implementation |
