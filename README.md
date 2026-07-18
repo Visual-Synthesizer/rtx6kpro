@@ -1,56 +1,76 @@
 # RTX PRO 6000 Blackwell LLM Wiki
 
-Field notes for serving frontier MoE models on NVIDIA RTX PRO 6000 Blackwell
-PCIe systems without NVLink. The wiki focuses on reproducible Docker images,
-exact vLLM/SGLang launch recipes, B12X/FlashInfer/DeepGEMM backends, DCP,
-MTP, DSpark, DFlash, KLD checks, and throughput validation.
+This repository is a field wiki for running frontier LLMs on NVIDIA RTX PRO
+6000 Blackwell / SM120 PCIe systems. It is more than a few launch snippets: it
+contains reproducible Docker builds, exact vLLM and SGLang runbooks, benchmark
+tables, KLD quality checks, quantization notes, DCP/MTP/DSpark/DFlash debugging,
+PCIe topology work, and regression history.
 
-> Community workbench for the RTX PRO 6000 / SM120 Discord:
+> Community workbench for RTX PRO 6000 / SM120 serving:
 > https://discord.gg/X54jjmcxWJ
 
 ## Start Here
 
-| Goal | Read |
-|---|---|
-| Run the current GLM-5.2 stack | [GLM-5.2 v18](models/glm5.2_v18.md), with [v17](models/glm5.2_v17.md), [v16](models/glm5.2_v16.md), and [v15](models/glm5.2_v15.md) retained as release history |
-| Run DeepSeek-V4-Flash standard / MTP | [DS4 Flash v6](models/ds4-flash-v6.md); standard MTP rows are also in [DS4 DSpark v9](models/ds4dspark-v9.md) and [v10](models/ds4dspark-v10.md) |
-| Run DeepSeek-V4-Flash DSpark | [DS4 DSpark v10](models/ds4dspark-v10.md), with [v9](models/ds4dspark-v9.md) as the full DSpark plus standard-MTP reference |
-| Run Kimi-K2.7-Code with DFlash | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) |
-| Run Xiaomi MiMo V2.5 Pro FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) |
-| Rebuild the shared Eldritch image | [Eldritch Enlightenment Docker](models/eldritch-enlightenment-docker.md) |
-| Debug topology / PCIe bandwidth | [Topology](hardware/topology.md), [PCIe bandwidth](hardware/pcie-bandwidth.md), [GPU configs](hardware/gpu-configs.md) |
-| Compare quality and quantization | [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), [KLD evaluation](benchmarks/kld-evaluation.md), [NVFP4 comparison](benchmarks/nvfp4-quantization-comparison.md) |
+If you just want to run a model, use these stable hub pages first:
 
-## Current Model Runbooks
-
-| Model | Current page | Runtime focus | Notes |
-|---|---|---|---|
-| GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v18.md](models/glm5.2_v18.md), [glm5.2_v17.md](models/glm5.2_v17.md), [glm5.2_v16.md](models/glm5.2_v16.md), [glm5.2_v15.md](models/glm5.2_v15.md) | Unified Gilded Gnosis + B12X | v18 is the cumulative runbook with the TP8 full-CKV fast path and final-image regression results; older pages remain immutable history. |
-| GLM-5.2 FP8 + MXFP4 experts | [glm5.2_mxfp4.md](models/glm5.2_mxfp4.md) | vLLM + B12X MXFP4 expert path | Native MXFP4 routed experts, public checkpoint, A8 serving path. |
-| DeepSeek-V4-Flash | [ds4-flash-v6.md](models/ds4-flash-v6.md) | Eldritch image, B12X and Lucifer variants | B12X, FlashInfer/CUTLASS, DeepGEMM default, MTP token sweeps, prefill tables. |
-| DeepSeek-V4-Flash standard MTP / DSpark | [ds4dspark-v10.md](models/ds4dspark-v10.md), [ds4dspark-v9.md](models/ds4dspark-v9.md) | Fathomless / Eldritch images | Standard-checkpoint MTP0/MTP2/MTP3 rows plus DSpark checkpoint validation. |
-| Kimi-K2.7-Code | [kimi-k27-code_v3.md](models/kimi-k27-code_v3.md) | vLLM V2 + DFlash | DCP4, Kimi parser/tool-call runtime, DFlash7 validation. |
-| Xiaomi MiMo V2.5 Pro FP4-DFlash | [xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | vLLM V2 + DFlash | FP4-DFlash checkpoint, seq-mask fix, expected fast/slow backend markers. |
-| GLM-5.1 | [glm5.1_v10.md](models/glm5.1_v10.md), [glm-5.1-mxfp4.md](models/glm-5.1-mxfp4.md) | Historical vLLM/B12X GLM work | Older DCP, MXFP4, KLD, and checkpoint-conversion notes. |
-| Kimi-K2.6 | [kimi-k26-v9.md](models/kimi-k26-v9.md), [kimi-k26.md](models/kimi-k26.md) | Historical Kimi MLA/Eagle/DFlash work | Kept for regression comparisons and parser/spec-decode history. |
-| Qwen / MiniMax / older Kimi | [Qwen3.5-397B](models/qwen35-397b.md), [Qwen3.5-27B/122B](models/qwen35-27b.md), [MiniMax M2.5](models/minimax-m25.md), [Kimi-K2.5](models/kimi-k25.md) | Legacy recipes | Useful for topology, quantization, and older engine comparisons. |
-
-Older versioned pages are intentionally kept. Prefer the highest version number
-for a model family unless a page explicitly says it is a reduced validation or a
-historical reference.
-
-## Docker And Release Lines
-
-| Line | Page | Use |
+| Model family | Start here | Current focus |
 |---|---|---|
-| Gilded Gnosis | [GLM-5.2 v18 image section](models/glm5.2_v18.md#release-image), [DS4 DSpark current image](models/ds4dspark-v10.md#current-unified-image) | Current July 2026 unified GLM/DS4 validation line. |
-| Fathomless Firmament | [GLM-5.2 v17 image section](models/glm5.2_v17.md#release-image) | Previous unified GLM/DS4 release line. |
-| Eldritch Enlightenment | [eldritch-enlightenment-docker.md](models/eldritch-enlightenment-docker.md) | June 2026 shared GLM/DS4/Kimi/MiMo fullstack baseline. |
-| General image notes | [Docker Images](optimization/docker-images.md) | Image naming, build conventions, and reusable operational notes. |
+| GLM-5.2 | [GLM-5.2 Runbook Hub](models/glm-5.2.md) | Fathomless vLLM, NVFP4, online FP8/MXFP8, B12X, DCP, MTP, KLD. |
+| DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Standard checkpoint, MTP, DSpark, B12X, Lucifer, CUTLASS. |
+| Kimi | [Kimi Runbook Hub](models/kimi.md) | Kimi-K2.7-Code, DFlash, parser/tool-call runtime. |
+| Xiaomi MiMo | [MiMo Runbook Hub](models/mimo.md) | MiMo V2.5 Pro FP4-DFlash. |
+| GLM-5.1 | [GLM-5.1 Runbook Hub](models/glm-5.1.md) | Historical GLM-5.1, KLD methodology, older B12X/SGLang work. |
+| Legacy / secondary models | [Legacy Model Runbooks](models/legacy.md) | DeepSeek-V4-Pro, GLM-4.7, Qwen, MiniMax, older Kimi pages. |
 
-Build docs are part of the model pages because each release line pins a different
-vLLM branch, B12X commit, FlashInfer commit, DeepGEMM commit, CUDA stack, and
-runtime wrapper.
+Need the complete map of every Markdown page?
+
+| Index | Use |
+|---|---|
+| [Full Wiki Index](INDEX.md) | Complete generated catalog of every page in this repository. |
+| [Glossary And Acronym Guide](GLOSSARY.md) | Acronym expansions and writing rules for newcomer-friendly docs. |
+| [Newcomer Onboarding](docs/newcomer-onboarding.md) | How to ask useful questions without lowering the technical signal. |
+
+## What Is In This Repository?
+
+| Need | Where |
+|---|---|
+| Copy/paste production launch commands | Model hubs and current versioned model pages. |
+| Rebuild the Docker image | [Eldritch Docker](models/eldritch-enlightenment-docker.md), current model image sections, and build scripts in [scripts](scripts/). |
+| Compare backend speed | Model benchmark tables plus [Benchmark Results](benchmarks/results.md). |
+| Check quantization quality | [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), [KLD Evaluation](benchmarks/kld-evaluation.md), and model-specific KLD sections. |
+| Understand MTP, DSpark, or DFlash | [Speculative Decoding](optimization/speculative-decoding.md), DS4/Kimi/MiMo pages. |
+| Debug topology or PCIe behavior | [Topology](hardware/topology.md), [PCIe Bandwidth](hardware/pcie-bandwidth.md), [GPU Configurations](hardware/gpu-configs.md). |
+| Avoid known runtime footguns | [Common Issues](troubleshooting/common-issues.md), model caveats, and daily summaries. |
+| Understand old measurements | Historical versioned pages and [Daily Summaries](daily-summaries/). |
+
+## Current Production-Style Pages
+
+| Area | Page | Why it matters |
+|---|---|---|
+| GLM-5.2 current stack | [GLM-5.2 v15](models/glm5.2_v15.md) | Current Fathomless image/source pins, DCP, MTP, KLD, reduced validation. |
+| GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
+| DS4 current quick start | [DS4 DSpark v10](models/ds4dspark-v10.md) | Recommended TP2 launch defaults and Fathomless validation. |
+| DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
+| Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
+| MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | Current MiMo DFlash validation and fix notes. |
+
+Older pages are intentionally preserved. Prefer the hub page for each model
+family unless you are reproducing a specific old result.
+
+## Core Topics
+
+| Topic | Page |
+|---|---|
+| Docker images and release lines | [Docker Images](optimization/docker-images.md) |
+| PCIe oneshot all-reduce | [PCIe oneshot all-reduce](optimization/pcie-oneshot-allreduce.md) |
+| NCCL tuning and empty graph-file failures | [NCCL tuning](optimization/nccl-tuning.md) |
+| Speculative decoding | [Speculative decoding](optimization/speculative-decoding.md) |
+| NVFP4 quantization | [NVFP4 quantization](optimization/nvfp4-quantization.md) |
+| Hybrid NVFP4 assembly | [Hybrid NVFP4 assembly](optimization/hybrid-nvfp4-assembly.md) |
+| B12X FP8 / DeepGEMM comparison | [B12X dense FP8 GEMM vs DeepGEMM](optimization/b12x-dense-fp8-gemm-vs-deepgemm.md) |
+| B12X W4A8 tiny decode | [B12X W4A8 MX tiny decode](optimization/b12x-w4a8mx-tiny-decode-kernel.md) |
+| DSpark upstream consolidation | [DSpark upstream consolidation](optimization/dspark-upstream-consolidation.md) |
+| I/O tuning | [I/O tuning](optimization/io-tuning.md) |
 
 ## Benchmarks And Quality
 
@@ -67,73 +87,82 @@ KLD is a regression and quantization-sanity tool, not a complete quality metric.
 Use it together with long-context decode, coding probes, acceptance-rate checks,
 and task-level benchmarks.
 
-## Optimization Topics
-
-| Topic | Page |
-|---|---|
-| PCIe oneshot all-reduce | [pcie-oneshot-allreduce.md](optimization/pcie-oneshot-allreduce.md) |
-| NCCL tuning and graph XML issues | [nccl-tuning.md](optimization/nccl-tuning.md) |
-| Speculative decoding | [speculative-decoding.md](optimization/speculative-decoding.md) |
-| NVFP4 quantization | [nvfp4-quantization.md](optimization/nvfp4-quantization.md) |
-| Hybrid NVFP4 assembly | [hybrid-nvfp4-assembly.md](optimization/hybrid-nvfp4-assembly.md) |
-| B12X FP8 / DeepGEMM comparison | [b12x-dense-fp8-gemm-vs-deepgemm.md](optimization/b12x-dense-fp8-gemm-vs-deepgemm.md) |
-| B12X W4A8 tiny-decode work | [b12x-w4a8mx-tiny-decode-kernel.md](optimization/b12x-w4a8mx-tiny-decode-kernel.md) |
-| DSpark upstream consolidation | [dspark-upstream-consolidation.md](optimization/dspark-upstream-consolidation.md) |
-| I/O tuning | [io-tuning.md](optimization/io-tuning.md) |
-
 ## Hardware And Topology
 
-All modern measurements are on NVIDIA RTX PRO 6000 Blackwell / GB202 / SM120:
+Most current measurements target RTX PRO 6000 Blackwell / GB202 / SM120 cards:
+96 GB GDDR7 per GPU, PCIe 5.0 x16, no NVLink, usually 4-GPU, 8-GPU, or 16-GPU
+PCIe-switch systems.
 
-- 96 GB GDDR7 per GPU.
-- PCIe 5.0 x16, no NVLink.
-- 4-GPU, 8-GPU, and 16-GPU PCIe switch systems.
-- AMD EPYC Turin/Genoa hosts are the most common community targets.
-
-Key pages:
-
-- [SM120 vs SM100 Architecture](hardware/sm120-vs-sm100-architecture.md)
-- [PCIe Topology](hardware/topology.md)
-- [PCIe Bandwidth](hardware/pcie-bandwidth.md)
-- [GPU Configurations](hardware/gpu-configs.md)
-- [ASUS ESC8000A-E13P + Broadcom Switches](hardware/asus-esc8000a-e13p-broadcom-switches.md)
-- [ASRockRack + EPYC Turin + 4x c-payne, 16 GPU](hardware/asrockrack-turin-cpayne-16gpu.md)
-- [ASRock WRX90 + 4x c-payne, 16 GPU](hardware/wrx90-cpayne-16gpu-4switch.md)
-- [Blackwell power limit sweep](hardware/blackwell-power-limit-sweep.md)
+| Area | Page |
+|---|---|
+| SM120 vs SM100 | [SM120 vs SM100 Architecture](hardware/sm120-vs-sm100-architecture.md) |
+| PCIe topology | [Topology](hardware/topology.md) |
+| PCIe bandwidth | [PCIe Bandwidth](hardware/pcie-bandwidth.md) |
+| GPU configs | [GPU Configurations](hardware/gpu-configs.md) |
+| ASUS ESC8000A-E13P | [ASUS ESC8000A-E13P + Broadcom Switches](hardware/asus-esc8000a-e13p-broadcom-switches.md) |
+| ASRockRack Turin 16 GPU | [ASRockRack + EPYC Turin + 4x c-payne](hardware/asrockrack-turin-cpayne-16gpu.md) |
+| ASRock WRX90 16 GPU | [ASRock WRX90 + 4x c-payne](hardware/wrx90-cpayne-16gpu-4switch.md) |
+| Power tuning | [Blackwell power limit sweep](hardware/blackwell-power-limit-sweep.md) |
 
 ## Inference Engines
 
 | Engine | Page | Current role |
 |---|---|---|
-| vLLM | [vllm.md](inference-engines/vllm.md) | Primary runtime for GLM-5.2, DS4 Flash, Kimi 2.7, MiMo DFlash. |
-| FlashInfer | [flashinfer.md](inference-engines/flashinfer.md) | SM120 sparse MLA, CUTLASS MoE, sampler, and kernel integration notes. |
-| SGLang | [sglang.md](inference-engines/sglang.md) | Historical and alternate runtime notes, especially for older GLM/MiMo paths. |
+| vLLM | [vLLM](inference-engines/vllm.md) | Primary runtime for current GLM-5.2, DS4, Kimi, and MiMo pages. |
+| FlashInfer | [FlashInfer](inference-engines/flashinfer.md) | SM120 sparse MLA, CUTLASS MoE, sampler, and kernel integration notes. |
+| SGLang | [SGLang](inference-engines/sglang.md) | Historical and alternate runtime notes, especially older GLM/MiMo paths. |
+
+## Acronym Policy
+
+The wiki uses many acronyms: DCP, MTP, DSpark, DFlash, MLA, MoE, KLD, TP, CC,
+NVFP4, MXFP8, and more. To make pages readable for newcomers:
+
+- Expand important acronyms on first use: `Decode Context Parallelism (DCP)`.
+- Do not expand acronyms inside commands, Docker tags, environment variables,
+  JSON, file paths, or raw logs.
+- Use [Glossary And Acronym Guide](GLOSSARY.md) as the source of truth.
+- Run `python3 scripts/check-acronyms.py` before polishing a major page.
+
+## Keeping The Community Useful
+
+The wiki should reduce accidental gatekeeping: newcomers should be able to find
+the right runbook, decode acronyms, and reproduce a known-good launch without
+needing tribal knowledge. That does not mean every Discord question can be
+answered from memory.
+
+Use [Newcomer Onboarding](docs/newcomer-onboarding.md) as the support contract:
+bring the model page, Docker image, full launch command, GPU layout, TP/DCP/MTP
+or DSpark settings, client command, and logs. That keeps the server welcoming
+without turning it into an unstructured support queue.
 
 ## Common Operational Rules
 
 - Do not launch with `NCCL_GRAPH_FILE=` set to an empty string. Unset it if no
   real XML graph file is used.
-- Reuse cache directories while debugging; otherwise TileLang/Triton/CuTe
-  rebuilds dominate iteration time.
+- Reuse cache directories while debugging; otherwise TileLang, Triton, CuTe,
+  and FlashInfer rebuilds dominate iteration time.
 - For quick smoke tests, use small `MAX_NUM_SEQS` and graph caps. For published
   tables, use the graph sizes documented in the model page.
-- For DFlash and DSpark, confirm the backend markers and acceptance rates before
+- For DFlash and DSpark, confirm backend markers and acceptance rates before
   trusting throughput numbers.
 - For GLM-5.2, keep the exact `index_topk_pattern` and DCP policy from the
   relevant runbook; a truncated pattern can silently degrade output.
 
-## Troubleshooting
+## Maintaining The Wiki
 
-- [Common Issues](troubleshooting/common-issues.md)
-- [DS4-Flash empty `content` from unclosed `<think>`](models/ds4f-empty-think/README.md)
-- [ASUS ESC8000A-E13P PEX890xx bug report](troubleshooting/asus-esc8000a-e13p-pex890xx-bug-report.md)
-- [Daily summaries](daily-summaries/) for chronological context and regression history
+When adding a page:
 
-## Contributing
+- Link it from the relevant model hub.
+- Add a short status block if it is a current runbook.
+- Keep exact Docker image tags, source commits, model snapshot IDs, GPU layout,
+  backend choices, and benchmark commands.
+- Regenerate the full index:
 
-Open a PR with exact commands, Docker image tags, model snapshot IDs, GPU layout,
-backend choices, and raw benchmark artifacts where possible. For performance
-claims, include both the launch config and the client command so results can be
-reproduced on another PCIe-only Blackwell host.
+```bash
+python3 scripts/generate-wiki-index.py > INDEX.md
+```
+
+For performance claims, include both the server launch config and the client
+command so results can be reproduced on another PCIe-only Blackwell host.
 
 Maintained from community Discord experiments through July 2026.

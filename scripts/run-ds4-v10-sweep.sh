@@ -15,6 +15,11 @@ export CONTAINER_PREFIX="${CONTAINER_PREFIX:-ds4-v10}"
 # allocation without changing the synchronized load/benchmark scheduler.
 export GPU_GROUPS_TP2="${GPU_GROUPS_TP2:-0,1 2,3 4,5 6,7 8,9 10,11 12,13 14,15}"
 export GPU_GROUPS_TP4="${GPU_GROUPS_TP4:-0,1,2,3 4,5,6,7 8,9,10,11 12,13,14,15}"
+export TPS="${TPS:-2}"
+export MAX_NUM_SEQS="${MAX_NUM_SEQS:-16}"
+export MAX_BATCHED="${MAX_BATCHED:-4096}"
+export GPU_MEM="${GPU_MEM:-0.95}"
+export VLLM_PREFIX_CACHE_RETENTION_INTERVAL="${VLLM_PREFIX_CACHE_RETENTION_INTERVAL:-4096}"
 export SYNC_WAVE_READY=1
 
 exec "${SCRIPT_DIR}/run-ds4-v9-sweep.sh" "$@"

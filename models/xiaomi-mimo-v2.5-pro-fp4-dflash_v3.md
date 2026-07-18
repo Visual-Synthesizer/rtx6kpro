@@ -7,6 +7,18 @@ The published FF v15 image needs the vLLM fix from PR #85 for MiMo DFlash. Until
 that PR is merged into `dev/fathomless-firmament` and the image is rebuilt, run
 the image with the one-file bind mount shown below.
 
+## Status
+
+| Field | Value |
+|---|---|
+| Status | Current MiMo FP4-DFlash Fathomless runbook |
+| Model family | Xiaomi MiMo |
+| Recommended entry point | [Xiaomi MiMo Runbook Hub](mimo.md) |
+| Main checkpoint | `XiaomiMiMo/MiMo-V2.5-Pro-FP4-DFlash` |
+| Draft path | DFlash |
+| Main runtime | vLLM V2 with PR #85 overlay until merged into the image |
+| Validated focus | DFlash acceptance, seq-mask fix, fast backend markers |
+
 ## Image
 
 ```text
@@ -158,4 +170,3 @@ Result files:
 /root/bench-results/mimo-v3-ff-argfix-20260709T080216Z/prefill_8k_64k.json
 /root/bench-results/mimo-v2-control-rerun-20260709T092609Z/decode_cc1.json
 ```
-

@@ -11,9 +11,9 @@ GPUS=${GPUS:-0,1}
 TP=${TP:-${TP_SIZE:-2}}
 MODE=${MODE:-dspark}
 BACKEND=${BACKEND:-lucifer-cutlass}
-MAX_NUM_SEQS=${MAX_NUM_SEQS:-${SEQ:-64}}
+MAX_NUM_SEQS=${MAX_NUM_SEQS:-${SEQ:-16}}
 MAX_MODEL_LEN=${MAX_MODEL_LEN:-262144}
-MAX_BATCHED=${MAX_BATCHED:-${MAX_NUM_BATCHED_TOKENS:-8192}}
+MAX_BATCHED=${MAX_BATCHED:-${MAX_NUM_BATCHED_TOKENS:-4096}}
 PREFIX_CACHE=${PREFIX_CACHE:-1}
 ALLREDUCE_MODE=${ALLREDUCE_MODE:-b12x}
 LOAD_FORMAT=${LOAD_FORMAT:-instanttensor}
@@ -24,6 +24,26 @@ ENABLE_TOPO_PIN=${ENABLE_TOPO_PIN:-0}
 VLLM_INTERNAL_HOST_IP=${VLLM_INTERNAL_HOST_IP:-${VLLM_HOST_IP:-127.0.0.1}}
 GLOO_SOCKET_IFNAME=${GLOO_SOCKET_IFNAME:-lo}
 NCCL_SOCKET_IFNAME=${NCCL_SOCKET_IFNAME:-lo}
+VLLM_PREFIX_CACHE_RETENTION_INTERVAL=${VLLM_PREFIX_CACHE_RETENTION_INTERVAL:-4096}
+
+if [[ -z "${GPU_MEM+x}" && -z "${GPU_MEMORY_UTILIZATION+x}" ]]; then
+  GPU_MEM=0.95
+fi
+
+default_speculative_tokens() {
+  case "${MODE}" in
+    off|mtp0|standard-mtp0) printf '0\n' ;;
+    mtp2|standard-mtp2) printf '2\n' ;;
+    mtp3|standard-mtp3) printf '3\n' ;;
+    dspark) printf '%s\n' "${DSPARK_TOKENS:-5}" ;;
+    *) printf '0\n' ;;
+  esac
+}
+
+if [[ -z "${GRAPH+x}" && -z "${MAX_CUDAGRAPH_CAPTURE_SIZE+x}" && -z "${CUDAGRAPH_CAPTURE_SIZES+x}" ]]; then
+  GRAPH=$((MAX_NUM_SEQS * (1 + $(default_speculative_tokens))))
+  MAX_CUDAGRAPH_CAPTURE_SIZE="${GRAPH}"
+fi
 
 case "${MODE}" in
   off|mtp0|standard-mtp0|mtp2|standard-mtp2|mtp3|standard-mtp3)
@@ -85,6 +105,7 @@ helper_env=(
   -e ALLREDUCE_MODE="${ALLREDUCE_MODE}"
   -e LOAD_FORMAT="${LOAD_FORMAT}"
   -e INSTANTTENSOR_BACKEND="${INSTANTTENSOR_BACKEND}"
+  -e VLLM_PREFIX_CACHE_RETENTION_INTERVAL="${VLLM_PREFIX_CACHE_RETENTION_INTERVAL}"
 )
 
 # Forward only explicitly set expert/experimental controls. Defaults remain in
