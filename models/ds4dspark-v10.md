@@ -17,6 +17,34 @@ Standard MTP rows use `method=mtp` with two or three draft tokens. `mtp0`
 disables speculative decoding. DSpark uses its dedicated draft module with the
 validated fixed K=5 probabilistic path by default.
 
+## Current Unified Image
+
+New deployments can use the same Gilded Gnosis v18 image as GLM-5.2. It
+contains the v10 DS4 helper and DSpark stack together with the consolidated GG
+runtime fixes. The original v10 benchmark image remains pinned below so its
+published measurements stay reproducible.
+
+```text
+voipmonitor/vllm:gilded-gnosis-v18-vllm264bce1-b12xbc85ef3-fi801d57a-cu132-20260718
+Docker manifest: sha256:1a6c388b76dee43969760ca700ddaf222dc133f5d603a2e32124fcccdfd9c15e
+```
+
+Use the v18 Compose file; the launch helper is already inside the image:
+
+```bash
+git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
+cd blackwell-llm-docker
+git checkout 7f3cbc6
+
+MODE=mtp2 BACKEND=b12x-a8 TP_SIZE=2 GPUS=0,1 \
+  docker compose -f examples/docker-compose-ds4-v18.yml up -d
+```
+
+The full image provenance and build command are on the
+[GLM-5.2 v18 release page](glm5.2_v18.md#release-image). The v18 Compose file
+defaults to InstantTensor `BUFFERED`; the image helper still computes the CUDA
+graph cap from mode, draft depth, and `MAX_NUM_SEQS`.
+
 ## What Changed From v9
 
 - DSpark draft randomness is independent from acceptance/recovery randomness,
@@ -44,8 +72,9 @@ validated fixed K=5 probabilistic path by default.
 - `/usr/local/bin/serve-ds4-flash.sh` is installed in the image. Compose and
   benchmark wrappers pass environment settings to this helper instead of
   duplicating the complete `vllm serve` command.
-- The current release image is shared with GLM-5.2 v16. Model-specific behavior
-  remains in separate helpers behind one `MODEL_FAMILY` dispatcher.
+- The original v10 release image was shared with GLM-5.2 v16. The current v18
+  image keeps the same model-specific helpers behind one `MODEL_FAMILY`
+  dispatcher.
 - The v10 sweep uses all GPUs `0-15` by default: eight TP2 instances or four
   TP4 instances per wave. `GPU_GROUPS_TP2` and `GPU_GROUPS_TP4` can restrict
   the allocation without changing the synchronized load/benchmark ordering.
@@ -66,7 +95,7 @@ The release PRs created in the local vLLM and B12X forks (#88, #28, and #32) wer
 opened ready for review, not as drafts. The three pinned upstream FlashInfer
 PRs are also non-draft PRs.
 
-## Docker Image
+## Original v10 Benchmark Image
 
 ```text
 voipmonitor/vllm:fathomless-firmament-v16-vllm8f86f42-b12xfe06f49-fi801d57a-cu132-20260714

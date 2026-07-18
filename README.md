@@ -12,7 +12,7 @@ MTP, DSpark, DFlash, KLD checks, and throughput validation.
 
 | Goal | Read |
 |---|---|
-| Run the current GLM-5.2 stack | [GLM-5.2 v17](models/glm5.2_v17.md), with [v16](models/glm5.2_v16.md) and [v15](models/glm5.2_v15.md) retained as release history |
+| Run the current GLM-5.2 stack | [GLM-5.2 v18](models/glm5.2_v18.md), with [v17](models/glm5.2_v17.md), [v16](models/glm5.2_v16.md), and [v15](models/glm5.2_v15.md) retained as release history |
 | Run DeepSeek-V4-Flash standard / MTP | [DS4 Flash v6](models/ds4-flash-v6.md); standard MTP rows are also in [DS4 DSpark v9](models/ds4dspark-v9.md) and [v10](models/ds4dspark-v10.md) |
 | Run DeepSeek-V4-Flash DSpark | [DS4 DSpark v10](models/ds4dspark-v10.md), with [v9](models/ds4dspark-v9.md) as the full DSpark plus standard-MTP reference |
 | Run Kimi-K2.7-Code with DFlash | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) |
@@ -25,7 +25,7 @@ MTP, DSpark, DFlash, KLD checks, and throughput validation.
 
 | Model | Current page | Runtime focus | Notes |
 |---|---|---|---|
-| GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v17.md](models/glm5.2_v17.md), [glm5.2_v16.md](models/glm5.2_v16.md), [glm5.2_v15.md](models/glm5.2_v15.md) | Unified Fathomless + B12X | v17 is the cumulative runbook with generalized DCP-prefill results; v15/v16 remain immutable history. |
+| GLM-5.2 NVFP4 / online MXFP8 | [glm5.2_v18.md](models/glm5.2_v18.md), [glm5.2_v17.md](models/glm5.2_v17.md), [glm5.2_v16.md](models/glm5.2_v16.md), [glm5.2_v15.md](models/glm5.2_v15.md) | Unified Gilded Gnosis + B12X | v18 is the cumulative runbook with the TP8 full-CKV fast path and final-image regression results; older pages remain immutable history. |
 | GLM-5.2 FP8 + MXFP4 experts | [glm5.2_mxfp4.md](models/glm5.2_mxfp4.md) | vLLM + B12X MXFP4 expert path | Native MXFP4 routed experts, public checkpoint, A8 serving path. |
 | DeepSeek-V4-Flash | [ds4-flash-v6.md](models/ds4-flash-v6.md) | Eldritch image, B12X and Lucifer variants | B12X, FlashInfer/CUTLASS, DeepGEMM default, MTP token sweeps, prefill tables. |
 | DeepSeek-V4-Flash standard MTP / DSpark | [ds4dspark-v10.md](models/ds4dspark-v10.md), [ds4dspark-v9.md](models/ds4dspark-v9.md) | Fathomless / Eldritch images | Standard-checkpoint MTP0/MTP2/MTP3 rows plus DSpark checkpoint validation. |
@@ -43,7 +43,8 @@ historical reference.
 
 | Line | Page | Use |
 |---|---|---|
-| Fathomless Firmament | [GLM-5.2 v17 image section](models/glm5.2_v17.md#release-image), [DS4 DSpark v10 image section](models/ds4dspark-v10.md#docker-image) | Current July 2026 unified GLM/DS4 validation line. |
+| Gilded Gnosis | [GLM-5.2 v18 image section](models/glm5.2_v18.md#release-image), [DS4 DSpark current image](models/ds4dspark-v10.md#current-unified-image) | Current July 2026 unified GLM/DS4 validation line. |
+| Fathomless Firmament | [GLM-5.2 v17 image section](models/glm5.2_v17.md#release-image) | Previous unified GLM/DS4 release line. |
 | Eldritch Enlightenment | [eldritch-enlightenment-docker.md](models/eldritch-enlightenment-docker.md) | June 2026 shared GLM/DS4/Kimi/MiMo fullstack baseline. |
 | General image notes | [Docker Images](optimization/docker-images.md) | Image naming, build conventions, and reusable operational notes. |
 
