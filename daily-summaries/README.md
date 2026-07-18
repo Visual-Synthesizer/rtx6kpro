@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-18](2026-07/2026-07-18.md) | - koush's DCP CKV-gather patch (a general fix for any DSA-based model) delivers massive prefill gain |
 | [2026-07-17](2026-07/2026-07-17.md) | Kimi K3 (Moonshot) unveiled: 2.8T params, 896 experts (16 active), native MXFP4/MXFP8 training, Atte |
 | [2026-07-16](2026-07/2026-07-16.md) | Bug: DSpark v10 (lucifer-cutlass) shows a big regression vs v8 — JSON schema output error rate spi |
 | [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
@@ -149,6 +150,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-18](2026-07/2026-07-18.md) | - koush's DCP CKV-gather patch (a general fix for any DSA-based model) delivers massive prefill gain |
 | [2026-07-17](2026-07/2026-07-17.md) | Kimi K3 (Moonshot) unveiled: 2.8T params, 896 experts (16 active), native MXFP4/MXFP8 training, Atte |
 | [2026-07-16](2026-07/2026-07-16.md) | Bug: DSpark v10 (lucifer-cutlass) shows a big regression vs v8 — JSON schema output error rate spi |
 | [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
