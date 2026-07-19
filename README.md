@@ -115,7 +115,7 @@ PCIe-switch systems.
 ## Acronym Policy
 
 The wiki uses many acronyms: DCP, MTP, DSpark, DFlash, MLA, MoE, KLD, TP, CC,
-NVFP4, MXFP8, and more. To make pages readable for newcomers:
+P2P, NVFP4, MXFP8, and more. To make pages readable for newcomers:
 
 - Expand important acronyms on first use: `Decode Context Parallelism (DCP)`.
 - Do not expand acronyms inside commands, Docker tags, environment variables,

@@ -68,6 +68,7 @@ variables, file paths, JSON, or raw logs.
 | CUTLASS | CUDA Templates for Linear Algebra Subroutines | NVIDIA CUDA kernel template library. |
 | GEMM | General Matrix Multiply | Core dense matrix multiplication operation. |
 | NCCL | NVIDIA Collective Communications Library | GPU collective communication library. |
+| P2P | Peer-to-Peer | Direct GPU-to-GPU communication path, commonly controlled through NCCL P2P settings. |
 | PCIe | Peripheral Component Interconnect Express | Host/GPU interconnect used on RTX PRO 6000 systems. |
 | RDMA | Remote Direct Memory Access | Direct memory-transfer mechanism; appears in cache/transfer notes. |
 | RMS | Root Mean Square | Often appears in RMSNorm / fused RMS all-reduce contexts. |
