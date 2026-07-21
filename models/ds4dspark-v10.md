@@ -45,7 +45,7 @@ Preferred DSpark TP2 start:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 7f3cbc6
+git checkout beaf6e5
 
 MODE=dspark \
 BACKEND=lucifer-cutlass \
@@ -55,7 +55,7 @@ MAX_NUM_SEQS=16 \
 MAX_NUM_BATCHED_TOKENS=4096 \
 GPU_MEMORY_UTILIZATION=0.95 \
 VLLM_PREFIX_CACHE_RETENTION_INTERVAL=4096 \
-docker compose -f examples/docker-compose-ds4-v18.yml up -d
+docker compose -f examples/docker-compose-ds4-v19.yml up -d
 ```
 
 Standard checkpoint with speculative decoding disabled:
@@ -71,7 +71,7 @@ MAX_NUM_SEQS=16 \
 MAX_NUM_BATCHED_TOKENS=4096 \
 GPU_MEMORY_UTILIZATION=0.95 \
 VLLM_PREFIX_CACHE_RETENTION_INTERVAL=4096 \
-docker compose -f examples/docker-compose-ds4-v18.yml up -d
+docker compose -f examples/docker-compose-ds4-v19.yml up -d
 ```
 
 The v10 wrapper in this repository uses the same defaults:
@@ -85,29 +85,29 @@ MODE=dspark BACKEND=lucifer-cutlass TP=2 GPUS=0,1 \
 
 ## Current Unified Image
 
-New deployments can use the same Gilded Gnosis v18 image as GLM-5.2. It
+New deployments can use the same Gilded Gnosis v19 image as GLM-5.2. It
 contains the v10 DS4 helper and DSpark stack together with the consolidated GG
 runtime fixes. The original v10 benchmark image remains pinned below so its
 published measurements stay reproducible.
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v18-vllm264bce1-b12xbc85ef3-fi801d57a-cu132-20260718
-Docker manifest: sha256:1a6c388b76dee43969760ca700ddaf222dc133f5d603a2e32124fcccdfd9c15e
+voipmonitor/vllm:gilded-gnosis-v19-vllmf879d86-b12xc7dc733-fi801d57a-cu132-20260719
+Docker manifest: sha256:dfd3b7a4f2e02ecf1b2ad826d03293de9648dbefcd29b195422c38166b01fe8b
 ```
 
-Use the v18 Compose file; the launch helper is already inside the image:
+Use the v19 Compose file; the launch helper is already inside the image:
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 7f3cbc6
+git checkout beaf6e5
 
 MODE=mtp2 BACKEND=b12x-a8 TP_SIZE=2 GPUS=0,1 \
-  docker compose -f examples/docker-compose-ds4-v18.yml up -d
+  docker compose -f examples/docker-compose-ds4-v19.yml up -d
 ```
 
 The full image provenance and build command are on the
-[GLM-5.2 v18 release page](glm5.2_v18.md#release-image). The v18 Compose file
+[GLM-5.2 v19 release page](glm5.2_v19.md#release-image). The v19 Compose file
 defaults to InstantTensor `BUFFERED`; the image helper still computes the CUDA
 graph cap from mode, draft depth, and `MAX_NUM_SEQS`.
 
