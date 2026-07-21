@@ -47,7 +47,7 @@ Need the complete map of every Markdown page?
 
 | Area | Page | Why it matters |
 |---|---|---|
-| GLM-5.2 current stack | [GLM-5.2 v15](models/glm5.2_v15.md) | Current Fathomless image/source pins, DCP, MTP, KLD, reduced validation. |
+| GLM-5.2 current stack | [GLM-5.2 v20](models/glm5.2_v20.md) | Current Gilded Gnosis/SparkInfer image, source pins, TP6 fixes, Xid validation, and release gate. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
 | DS4 current quick start | [DS4 DSpark v10](models/ds4dspark-v10.md) | Recommended TP2 launch defaults and Fathomless validation. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
