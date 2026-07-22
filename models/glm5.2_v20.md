@@ -14,6 +14,11 @@ v19 DCP optimization background remains on [v19](glm5.2_v19.md). This page
 records the exact v20 artifact, source composition, launch recipe, and matched
 release-gate results.
 
+Canonical source merging and the required post-merge rebuild are tracked in
+[rtx6kpro issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33).
+The image below remains the exact measured artifact until that checklist is
+complete; merging a PR does not silently change the documented image.
+
 ## Release Image
 
 ```text
@@ -60,7 +65,9 @@ PUSH_IMAGE=1 ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
 The build deliberately excludes the separate weight-lifetime experiments in
-vLLM PR #154, vLLM PR #157, and SparkInfer PR #62.
+vLLM PR #154, vLLM PR #157, and SparkInfer PR #62. It also excludes the
+experimental sparse-CKV decode stack in vLLM PRs #159-#161 and SparkInfer PRs
+#64-#65.
 
 ## Source Changes
 
@@ -87,6 +94,33 @@ The release source adds these independently reviewable deltas:
 The release build itself does not merge PRs. The exact release branches remain
 the integration points for reproducing the tested artifact regardless of each
 review's later merge state.
+
+### Canonical Merge Status
+
+[Issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33) is the
+authoritative ordered checklist for landing this stack in canonical GG and
+SparkInfer. As of 2026-07-22, every open runtime PR listed above is non-draft,
+mergeable against its canonical base, and has no unresolved current review
+thread. SparkInfer must land #59, #60, and #48 before the paired vLLM changes
+#149, #150, and #162 are used together in a rebuilt image.
+
+The review cleanup after the image was pushed is intentionally explicit:
+
+- vLLM #149 gained two runtime corrections in `c1b446a121`: projected AG_RS
+  fallback memory is included in profiling, and a lazily created breakable
+  CUDA graph inherits the disposable profiling pool;
+- SparkInfer #48 gained only a tighter scratch-allocation regression assertion
+  in `73de085078`;
+- vLLM #156 was rebased onto current GG as `b7710b5ad1` without changing its
+  intended materialized-MLA fallback behavior;
+- [SparkInfer #68](https://github.com/local-inference-lab/sparkinfer/pull/68)
+  fixes Python 3.10 compatibility in the packaging test and does not affect the
+  runtime image.
+
+Consequently, the existing image is the reproducible performance artifact, but
+the canonical-head image must be rebuilt and pass the release gate after the
+merge checklist completes. The sparse-CKV PRs remain available for future work
+but are not v20 release dependencies or launcher defaults.
 
 ## Start The Server
 
