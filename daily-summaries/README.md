@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-22](2026-07/2026-07-22.md) | Poolside Laguna S 2.1 (118B MoE, 8B active, 1M ctx, single-GPU fit) launched but failed community te |
 | [2026-07-21](2026-07/2026-07-21.md) | - GLM-5.2 NVFP4 KV-cache bug found (outer scale unused) — fixed, KLD improved, merged as vLLM PR # |
 | [2026-07-20](2026-07/2026-07-20.md) | - b12x fused-indexer IMA crash (long-ctx + spec-decode) root-caused, fix merged [(jump)](https://dis |
 | [2026-07-19](2026-07/2026-07-19.md) | - New vLLM image v18→v19 (gilded-gnosis) adds CKV gather + fp8 KV-rope, pushing GLM-5.2 hybrid col |
@@ -153,6 +154,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-22](2026-07/2026-07-22.md) | Poolside Laguna S 2.1 (118B MoE, 8B active, 1M ctx, single-GPU fit) launched but failed community te |
 | [2026-07-21](2026-07/2026-07-21.md) | - GLM-5.2 NVFP4 KV-cache bug found (outer scale unused) — fixed, KLD improved, merged as vLLM PR # |
 | [2026-07-20](2026-07/2026-07-20.md) | - b12x fused-indexer IMA crash (long-ctx + spec-decode) root-caused, fix merged [(jump)](https://dis |
 | [2026-07-19](2026-07/2026-07-19.md) | - New vLLM image v18→v19 (gilded-gnosis) adds CKV gather + fp8 KV-rope, pushing GLM-5.2 hybrid col |
