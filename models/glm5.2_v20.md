@@ -9,10 +9,10 @@ canonical GG/SparkInfer stack and fixing two release blockers:
 - virtual TP6 accepts partial pitched DCP workspaces and correctly plans the
   N128-padded W4A8-MX scratch extent.
 
-The broad quant/DCP comparison tables remain on [v18](glm5.2_v18.md) and the
-v19 DCP optimization background remains on [v19](glm5.2_v19.md). This page
-records the exact v20 artifact, source composition, launch recipe, and matched
-release-gate results.
+Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
+optimization background remains on [v19](glm5.2_v19.md). This page is
+self-contained for building, starting, operating, and validating v20; older
+pages are provenance, not required setup instructions.
 
 Canonical source merging and the required post-merge rebuild are tracked in
 [rtx6kpro issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33).
@@ -125,7 +125,17 @@ but are not v20 release dependencies or launcher defaults.
 ## Start The Server
 
 The helper is inside the image, so users do not need to download a launch
-script. This minimal Compose file exposes only deployment choices:
+script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
+Blackwell GPUs is required. Pull the immutable image first:
+
+```bash
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-cu132-20260721
+```
+
+Save the following as `compose.yml`. Bare environment entries pass a host
+variable only when it is set; otherwise the helper chooses the correct default
+for `MODEL_FAMILY`. This matters for the TP4 NF3 preset, whose model, TP,
+quantization, KV dtype, and memory defaults differ from standard GLM-5.2.
 
 ```yaml
 services:
@@ -145,22 +155,40 @@ services:
         soft: 1048576
         hard: 1048576
     environment:
-      MODEL_FAMILY: ${MODEL_FAMILY:-glm52}
-      GPUS: ${GPUS:-0,1,2,3,4,5,6,7}
-      PORT: ${PORT:-8000}
-      MODEL: ${MODEL:-lukealonso/GLM-5.2-NVFP4}
-      TP: ${TP:-8}
-      DCP: ${DCP:-1}
-      MTP: ${MTP:-0}
-      MAX_NUM_SEQS: ${MAX_NUM_SEQS:-64}
-      MAX_MODEL_LEN: ${MAX_MODEL_LEN:-131072}
-      MAX_BATCHED_TOKENS: ${MAX_BATCHED_TOKENS:-8192}
-      GPU_MEMORY_UTILIZATION: ${GPU_MEMORY_UTILIZATION:-0.90}
-      MOE_MODE: ${MOE_MODE:-a16}
-      QUANTIZATION: ${QUANTIZATION:-modelopt_fp4}
-      ONLINE_QUANT: ${ONLINE_QUANT:-none}
-      QUANTIZATION_CONFIG_JSON: "${QUANTIZATION_CONFIG_JSON:-}"
-      F8_DMA: ${F8_DMA:-0}
+      - MODEL_FAMILY=${MODEL_FAMILY:-glm52}
+      - MODEL
+      - MODEL_REVISION
+      - SERVED_MODEL_NAME
+      - GPUS
+      - PORT
+      - TP
+      - DCP
+      - DCP_BACKEND
+      - DCP_A2A_MAX_TOKENS
+      - DCP_A2A_LARGE_BACKEND
+      - DCP_QUERY_SPLIT
+      - DCP_CKV_GATHER
+      - DCP_PREFILL_WORKSPACE
+      - MTP
+      - MAX_NUM_SEQS
+      - GRAPH
+      - MAX_MODEL_LEN
+      - MAX_BATCHED_TOKENS
+      - GPU_MEMORY_UTILIZATION
+      - MOE_MODE
+      - MOE_BACKEND
+      - LINEAR_BACKEND
+      - QUANTIZATION
+      - ONLINE_QUANT
+      - QUANTIZATION_CONFIG_JSON
+      - KV_CACHE_DTYPE
+      - F8_DMA
+      - B12X_PCIE_DMA
+      - NF3_GRID188
+      - LOAD_FORMAT
+      - INSTANTTENSOR_BACKEND
+      - PYTORCH_CUDA_ALLOC_CONF
+      - DRY_RUN
     volumes:
       - ${HF_CACHE:-/root/.cache/huggingface}:/root/.cache/huggingface
       - ${MODEL_ROOT:-/root/models}:/root/models:ro
@@ -168,22 +196,214 @@ services:
       - ${CONTAINER_TMP:-./cache/glm52-v20/tmp}:/container-tmp
 ```
 
-The helper supplies InstantTensor `BUFFERED`, local NCCL, FlashInfer autotune,
-the exact 78-character sparse-indexer pattern, FP8 KV defaults, request usage
-details, and a topology-aware CUDA graph cap. It enables query split plus
-transient full-CKV gather for aligned TP4/TP8 `DCP>1` topologies and keeps the
-borrowed-workspace path for virtual TP6.
+### Start, Inspect, And Stop
 
-Important user-facing modes:
+The standard helper default is Luke NVFP4, TP8/DCP1, native A4, MTP off. The
+highest-accuracy standard launch changes only `MOE_MODE` to A16:
 
-| Checkpoint / mode | Required controls |
+```bash
+MOE_MODE=a16 docker compose up -d
+docker compose logs -f glm52
+```
+
+Wait for the health endpoint before sending traffic:
+
+```bash
+curl -fsS http://127.0.0.1:${PORT:-8000}/health
+curl -fsS http://127.0.0.1:${PORT:-8000}/v1/models | jq .
+```
+
+The first start compiles kernels. Reuse the same `JIT_CACHE` for the same image
+and configuration family; do not benchmark while this or another model is
+still loading. Stop the service without deleting either model or JIT cache:
+
+```bash
+docker compose down
+```
+
+Inspect the fully expanded environment and `vllm serve` command without loading
+weights:
+
+```bash
+DRY_RUN=1 MOE_MODE=a16 docker compose run --rm --no-deps glm52
+```
+
+### Common Launch Recipes
+
+These commands use the same Compose file. Variables not shown remain owned by
+the image helper.
+
+```bash
+# Luke NVFP4, highest-accuracy routed-expert mode, no speculation.
+MOE_MODE=a16 MTP=0 TP=8 DCP=1 docker compose up -d
+
+# Luke NVFP4, native A4 expert activations with three-token MTP.
+MOE_MODE=a4 MTP=3 TP=8 DCP=1 docker compose up -d
+
+# Luke NVFP4 with eligible BF16 dense linears converted online to MXFP8.
+MOE_MODE=a16 ONLINE_QUANT=mxfp8 MTP=0 TP=8 DCP=1 \
+  QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}' \
+  docker compose up -d
+
+# AMD MXFP4 experts, forced A8 path, native BF16 dense linears.
+MODEL=/root/models/GLM-5.2-BF16-AMDMXFP4experts \
+  SERVED_MODEL_NAME=GLM-5.2-BF16-AMDMXFP4experts \
+  QUANTIZATION=mxfp4 MOE_MODE=force-a8-experimental \
+  ONLINE_QUANT=none MTP=0 TP=8 DCP=1 docker compose up -d
+
+# The same AMD checkpoint with online MXFP8 dense linears.
+MODEL=/root/models/GLM-5.2-BF16-AMDMXFP4experts \
+  SERVED_MODEL_NAME=GLM-5.2-BF16-AMDMXFP4experts \
+  QUANTIZATION=mxfp4 MOE_MODE=force-a8-experimental \
+  ONLINE_QUANT=mxfp8 MTP=0 TP=8 DCP=1 \
+  QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}' \
+  docker compose up -d
+
+# Virtual TP6/DCP3 validation profile for the AMD checkpoint.
+MODEL=/root/models/GLM-5.2-BF16-AMDMXFP4experts \
+  SERVED_MODEL_NAME=GLM-5.2-BF16-AMDMXFP4experts \
+  QUANTIZATION=mxfp4 MOE_MODE=force-a8-experimental \
+  TP=6 DCP=3 MTP=3 MAX_NUM_SEQS=16 GRAPH=64 \
+  MAX_MODEL_LEN=128000 MAX_BATCHED_TOKENS=4096 \
+  GPU_MEMORY_UTILIZATION=0.95 docker compose up -d
+
+# TP8/DCP4 full-CKV prefill profile for Luke A16, MTP off.
+MOE_MODE=a16 TP=8 DCP=4 MTP=0 MAX_NUM_SEQS=32 GRAPH=128 \
+  MAX_BATCHED_TOKENS=8192 docker compose up -d
+
+# NF3 hybrid. MODEL_FAMILY selects its TP4/A16/NVFP4-KV defaults.
+MODEL_FAMILY=glm52-hybrid DCP=4 MTP=3 docker compose up -d
+```
+
+For a local checkpoint, `MODEL` must use its in-container path below
+`/root/models`. For another Hugging Face repository, set both `MODEL` and its
+immutable `MODEL_REVISION`; the standard preset otherwise pins Luke's tested
+revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
+
+### Stable Controls
+
+| Variable | Default and meaning |
 |---|---|
-| Luke NVFP4 A4 | `MODEL_FAMILY=glm52 MOE_MODE=a4 ONLINE_QUANT=none` |
-| Luke NVFP4 A16 | `MODEL_FAMILY=glm52 MOE_MODE=a16 ONLINE_QUANT=none` |
-| Luke NVFP4 online MXFP8 | add `ONLINE_QUANT=mxfp8` |
-| AMD MXFP4 experts A8 | `QUANTIZATION=mxfp4 MOE_MODE=force-a8-experimental` |
-| AMD MXFP4 online MXFP8 | add `ONLINE_QUANT=mxfp8` |
-| NF3 hybrid | `MODEL_FAMILY=glm52-hybrid`; its TP4/A16/NF3 defaults are built in |
+| `MODEL_FAMILY` | `glm52`; use `glm52-hybrid` for the TP4 NF3 preset. The unified image also accepts `ds4`. |
+| `MODEL` | Luke NVFP4 for `glm52`; the madeby561 NF3 checkpoint for `glm52-hybrid`; local paths are supported. |
+| `MODEL_REVISION` | Immutable tested Hugging Face revision. Set the correct revision when changing a remote `MODEL`. |
+| `SERVED_MODEL_NAME` | API model name; defaults to the selected checkpoint preset. |
+| `GPUS` | Physical GPU list. Standard default is `0,1,2,3,4,5,6,7`; NF3 default is `0,1,2,3`. |
+| `PORT` | `8000`. Host networking exposes it directly. |
+| `TP` | Standard `8`, virtual-sharded `6`, or NF3 `4`. |
+| `DCP` | Decode context parallel size. `1` disables DCP communication; validated values are topology-dependent. |
+| `MTP` | `0` disables speculation. `3` is the principal validated speculative mode; the helper accepts an integer token count. |
+| `MAX_NUM_SEQS` | Standard `64`; scheduler concurrency and the input to automatic graph sizing. |
+| `GRAPH` | When unset, standard GLM uses `4 * MAX_NUM_SEQS`; the NF3 preset uses `64`. |
+| `MAX_MODEL_LEN` | Standard `131072`; NF3 `262144`. Raise only within the KV capacity reported at startup. |
+| `MAX_BATCHED_TOKENS` | Standard `8192`; NF3 `2048`. The validated virtual-TP6 profile uses `4096`. |
+| `GPU_MEMORY_UTILIZATION` | Standard `0.90`; NF3 `0.96`. The validated TP6 profile uses at most `0.95`. |
+| `MOE_MODE` | `a4`, `a16`, or `force-a8-experimental`. |
+| `ONLINE_QUANT` | `none`, `mxfp8`, `fp8`, `nf3-mxfp8`, or `custom`. |
+| `QUANTIZATION_CONFIG_JSON` | Explicit online quantization policy; overrides the helper preset. |
+| `KV_CACHE_DTYPE` | Standard `fp8`; NF3 uses `nvfp4_ds_mla`. |
+| `F8_DMA` | `0`, `ag`, or `ring`; optional FP8 DCP transport experiment. It does not accelerate decode. |
+
+Advanced A/B controls are `DCP_QUERY_SPLIT`, `DCP_CKV_GATHER`, and
+`DCP_PREFILL_WORKSPACE` (`auto`, `0`, or `1`), plus `B12X_PCIE_DMA` (`1` by
+default), `DCP_A2A_MAX_TOKENS` (`64` for standard GLM and `16` for NF3), and
+`DCP_A2A_LARGE_BACKEND` (`ag_rs`). Keep them on `auto` or their defaults for
+published results. Backend overrides such as `MOE_BACKEND` and
+`LINEAR_BACKEND` are diagnostic controls, not separate release modes.
+
+### Checkpoint And Quantization Modes
+
+| Checkpoint | `QUANTIZATION` | `MOE_MODE` | Supported tested online mode |
+|---|---|---|---|
+| `lukealonso/GLM-5.2-NVFP4` | `modelopt_fp4` | `a4` or `a16` | `none` or `mxfp8` |
+| `festr2/GLM-5.2-BF16-AMDMXFP4experts` | `mxfp4` | `force-a8-experimental` | `none`, `mxfp8`, or `fp8` |
+| `madeby561/GLM-5.2-MXFP8-NVFP4-NF3-Hybrid` | `nvfp4_nf3_hybrid` | `a16` | `nf3-mxfp8` |
+
+For Luke NVFP4, A4 and A16 select the routed-expert activation path; they do
+not rewrite the NVFP4 checkpoint weights. A16 uses BF16 expert activations and
+is the highest-accuracy tested mode. Force-A8 selects MXFP4 expert W4A8 and
+applies to the AMD checkpoint, not Luke NVFP4. Generic online MXFP8 converts
+eligible BF16 dense linears and does not rewrite existing NVFP4/MXFP4 routed
+expert tensors.
+
+With `MTP>0`, the helper creates a same-checkpoint MTP draft using the same MoE
+backend and probabilistic draft sampling. The target and draft share the
+virtual 66-head layout at TP6. Acceptance must be read from the server log for
+the exact measurement window; the client acceptance field is not the release
+source of truth.
+
+### DCP Dispatch
+
+`auto` chooses the validated prefill path by physical head geometry:
+
+| TP / DCP | Query split | Full-CKV gather | Prefill path |
+|---|---:|---:|---|
+| TP8 / DCP1 | off | off | Ordinary non-collective DCP1 path. |
+| TP8 / DCP2, DCP4, DCP8 | on | on | Local query heads plus transient full-CKV gather. |
+| TP4 / DCP1 | off | off | Ordinary non-collective DCP1 path. |
+| TP4 / DCP2, DCP4 | on | on | Local query heads plus transient full-CKV gather. |
+| virtual TP6 / DCP1 | off | off | Ordinary DCP1 path. |
+| virtual TP6 / DCP2, DCP3, DCP6 | off | off | Project-before-merge borrowed workspace. |
+
+Virtual TP6 pads 64 attention heads to 66, leaving 11 local heads per rank.
+The aligned full-CKV kernel is not its default: the measured experimental
+11-to-16 padding made TP6/DCP3 64k prefill slower. v20 instead validates and
+compacts the exact pitched partial workspace returned by that topology.
+
+For short DCP messages, the helper uses the SparkInfer PCIe A2A pool. Messages
+above `DCP_A2A_MAX_TOKENS=64` use `ag_rs`. `F8_DMA=ag` or `ring` changes the
+experimental PCIe payload representation; it is irrelevant to DCP1 and does
+not change decode arithmetic.
+
+### Helper-Owned Serving Contract
+
+The embedded helper, not the Compose file, owns these release defaults:
+
+- InstantTensor `BUFFERED`, page-cache-aware model loading;
+- local-inference NCCL 2.30.4 through both `LD_PRELOAD` and
+  `VLLM_NCCL_SO_PATH`;
+- B12X sparse MLA, B12X MoE, B12X PCIe all-reduce, and hybrid DCP transport;
+- AOT/mega-AOT, FlashInfer sampler and autotune, async scheduling, chunked
+  prefill, and prefix caching;
+- attention-inclusive memory profiling, CUDA-graph memory estimation, and the
+  v2 model runner;
+- FP8 KV for standard GLM and NVFP4 MLA KV for the NF3 preset;
+- `--enable-prompt-tokens-details`, `--enable-force-include-usage`, and
+  `--enable-request-id-headers`;
+- GLM tool/reasoning parsers and `reasoning_effort=high`;
+- the exact 78-character sparse-indexer pattern:
+
+```text
+FFFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSSFSSS
+```
+
+Do not manually duplicate these flags in Compose. The startup gate must contain
+both loader/runtime lines before benchmarking:
+
+```text
+Loading safetensors using InstantTensor loader
+vLLM is using nccl==2.30.4
+```
+
+## Accuracy Reference
+
+Lower KLD is better. The unchanged checkpoint modes retain the corrected
+five-run reference campaign used by v18/v19; v20 did not rerun every unchanged
+cell. The A16 online-MXFP8 release smoke and the larger ignore-pattern study
+below independently remain in the same range.
+
+| Case | Corrected-reference KLD mean +/- sample SD | Role |
+|---|---:|---|
+| Luke NVFP4 A4 original | `0.10228 +/- 0.00634` | Native A4 activation path. |
+| Luke NVFP4 A4 online MXFP8 | `0.10800 +/- 0.00697` | Faster BF16 dense linears, with an accuracy cost. |
+| Luke NVFP4 A16 original | **`0.05994 +/- 0.00129`** | Highest-accuracy tested standard mode. |
+| Luke NVFP4 A16 online MXFP8 | `0.06587 +/- 0.00253` | A16 accuracy/speed balance. |
+| AMD MXFP4 experts A8 original | `0.08160 +/- 0.00432` | Native BF16 dense linears. |
+| AMD MXFP4 experts A8 online MXFP8 | `0.08030 +/- 0.00309` | Faster dense linears; same measured distribution. |
+
+These values compare each served checkpoint against the same corrected BF16
+reference logits. They are not directly comparable to old June logits or a
+different prompt/window policy.
 
 ## Online MXFP8 Attention Precision
 
@@ -244,6 +464,57 @@ ONLINE_QUANT=mxfp8 \
 QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}' \
 docker compose up
 ```
+
+Reference-logit provenance, Hugging Face artifacts, metric definitions, and
+the exact corrected-reference workflow are documented on the standalone
+[GLM-5.2 KLD evaluation page](../benchmarks/glm52-kld-evaluation.md). Do not
+mix these results with the superseded June GLM logits.
+
+## Validation Method
+
+The reproducible v20 wrapper is
+[`scripts/bench-glm52-v20-validation.sh`](../scripts/bench-glm52-v20-validation.sh).
+It pins both the immutable tag and Docker image ID, sets the corrected no-ignore
+online-MXFP8 policy, and delegates execution to the maintained v18/v19 runner.
+The complete `all` campaign contains 40 configurations:
+
+- seven TP8/DCP1/MTP0 checkpoint and online-quant cases;
+- six TP8/DCP1/MTP3 cases;
+- seven cases each at TP8/DCP2, DCP4, and DCP8 with MTP off;
+- native and online-MXFP8 AMD cases at TP6/DCP3 and DCP6 with MTP3;
+- NF3 TP4/DCP4 with MTP off and MTP3.
+
+The runner uses two topology- and CPU-isolated slots on the 16-GPU host. TP8
+uses all 16 GPUs, TP6 uses 12, and TP4 uses 8. It starts both containers and
+waits for both health checks and required loader logs, then waits another 30
+seconds before starting either client. The two clients run serially. No result
+is accepted while another model is loading.
+
+| Validation profile | TP | DCP | MTP | Max seqs | Graph | Batched tokens | Max model len | GMU |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Standard DCP1 | 8 | 1 | 0 or 3 | 32 | 128 | 8,192 | 131,072 | 0.90 |
+| Standard fast DCP | 8 | 2, 4, 8 | 0 | 32 | 128 | 8,192 | 131,072 | 0.90 |
+| Virtual TP6 | 6 | 3, 6 | 3 | 16 | 64 | 4,096 | 128,000 | 0.950 |
+| NF3 hybrid | 4 | 4 | 0 or 3 | 8 | 64 | 3,072 | 131,072 | 0.960 |
+
+Every configuration performs:
+
+1. image-ID and source-mount rejection checks;
+2. a short greedy coding response check that rejects empty or obviously
+   corrupted output;
+3. a 30-second context-zero CC1 decode run with up to 2,048 output tokens;
+4. one discarded standalone 64k prefill warmup;
+5. three standalone 64k prefill measurements, reported as the median;
+6. mode-specific log assertions for A16/A8, online MXFP8/FP8, full-CKV DCP,
+   borrowed TP6 workspace, and NF3 Grid188 execution;
+7. server logs, container inspection, thermal snapshots, client JSON, and a
+   per-case `summary.json` plus completion marker.
+
+Published serving comparisons use `F8_DMA=0`. DMA `ag` and `ring` are separate
+transport experiments and do not belong in the main decode table. Acceptance
+statistics come from the exact post-decode server-log window. Prefill token
+targeting must be recorded as either `estimate` for historical comparison or
+`exact` for an exact 65,536-token prompt; never combine the two silently.
 
 ## Release Gate
 
@@ -335,19 +606,69 @@ At `MAX_NUM_SEQS=16`, graph=64, batch=4096, and GMU=0.95, TP6/DCP3 exposes
 `700,449` KV tokens. This is lower than older unsafe estimates because v20 also
 accounts for MRV2 graph and sparse-DCP transient memory before allocating KV.
 
-## Reproduce The Gate
+## Reproduce The Campaign
 
 The release wrapper is
 [`scripts/bench-glm52-v20-validation.sh`](../scripts/bench-glm52-v20-validation.sh).
 It pins both the image tag and local image ID and delegates to the established
-resumable v18/v19 runner.
+resumable v18/v19 runner. Install the benchmark client at
+`/root/llm-inference-bench/llm_decode_bench.py`, or set `BENCH` to its path.
 
 ```bash
+git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-cu132-20260721
 
-TOKEN_TARGETING=estimate scripts/bench-glm52-v20-validation.sh dcp1-mtp0
-TOKEN_TARGETING=exact scripts/bench-glm52-v20-validation.sh tp6-mtp3
+# Complete 40-case historical-compatible campaign. Existing completed cases
+# under RESULT_ROOT are skipped only when both summary.json and complete exist.
+RESULT_ROOT=/root/bench-results/glm52-v20-full-estimate \
+  TOKEN_TARGETING=estimate \
+  scripts/bench-glm52-v20-validation.sh all
+
+# Exact-token TP8 DCP2/DCP4/DCP8 prefill campaign in a separate result root.
+RESULT_ROOT=/root/bench-results/glm52-v20-dcp-fast-exact \
+  TOKEN_TARGETING=exact \
+  scripts/bench-glm52-v20-validation.sh dcp-fast
 ```
+
+Individual resumable groups are also available:
+
+```bash
+TOKEN_TARGETING=estimate scripts/bench-glm52-v20-validation.sh dcp1-mtp0
+TOKEN_TARGETING=estimate scripts/bench-glm52-v20-validation.sh dcp1-mtp3
+TOKEN_TARGETING=estimate scripts/bench-glm52-v20-validation.sh tp6-mtp3
+TOKEN_TARGETING=estimate scripts/bench-glm52-v20-validation.sh nf3
+
+# One or more explicit cases use: "case TP DCP MTP".
+TOKEN_TARGETING=exact scripts/bench-glm52-v20-validation.sh configs \
+  "nvfp4-a16-orig 8 4 0" \
+  "mxfp4-a8-orig 6 3 3"
+```
+
+Default checkpoint locations are the tested Luke snapshot under the Hugging
+Face cache, `/root/models/GLM-5.2-BF16-AMDMXFP4experts`, and
+`/root/models/GLM-5.2-MXFP8-NVFP4-NF3-Hybrid`. Override `NVFP4_MODEL`,
+`MXFP4_MODEL`, or `NF3_MODEL` when the same immutable checkpoints live
+elsewhere. The runner defaults to GPU slots `0-7` and `8-15`, ports 8190/8191,
+and CPU sets `0-31,64-95` and `32-63,96-127`; topology, ports, and CPU sets are
+all explicit environment overrides.
+
+Useful operational controls:
+
+| Variable | Effect |
+|---|---|
+| `RESULT_ROOT` | Stable resumable output root. Use a different root for `estimate` and `exact`. |
+| `FORCE_RERUN=1` | Ignore completion markers and rerun selected cases. |
+| `KEEP_SERVERS=1` | Leave the last measured server pair running for manual inspection. |
+| `SETTLE_SECONDS` | Delay after all paired servers become healthy; release default is 30. |
+| `PREFILL_REPEATS` | Measured 64k repeats after warmup; release default is 3. |
+| `CACHE_A`, `CACHE_B` | Persistent, isolated JIT caches for the two slots. |
+| `CUDA_ALLOC_CONF` | Allocator setting passed as `PYTORCH_CUDA_ALLOC_CONF`. |
+
+Each result root ends with aggregate `summary.json` and `summary.tsv`. Raw
+case directories retain the exact command inputs, image/container inspection,
+server logs, decode and prefill JSON, correctness response, thermal data, and
+backend markers needed to audit an outlier.
 
 The final validation artifacts on the release host are under:
 
@@ -355,8 +676,3 @@ The final validation artifacts on the release host are under:
 /root/bench-results/glm52-v20-final-validation-20260721
 /root/kld/glm52_v20_validation_20260721
 ```
-
-The runner records client JSON, server logs, correctness responses, thermal
-snapshots, image identity, and backend-path markers. Do not benchmark one
-instance while another model is still loading; v20 release measurements began
-only after every concurrently started server reported healthy.
