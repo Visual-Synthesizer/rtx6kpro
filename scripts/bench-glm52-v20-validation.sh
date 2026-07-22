@@ -11,5 +11,8 @@ export CACHE_B="${CACHE_B:-/root/.cache/vllm-glm52-release/slot-b}"
 export TMP_ROOT="${TMP_ROOT:-/root/vllm/tmp/glm52-v20-validation}"
 export RELEASE_LABEL="${RELEASE_LABEL:-v20}"
 export NAME_PREFIX="${NAME_PREFIX:-glm52-v20-validation}"
+if [[ -z "${ONLINE_MXFP8_CONFIG_JSON+x}" ]]; then
+  export ONLINE_MXFP8_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}'
+fi
 
 exec "${script_dir}/bench-glm52-v18-validation.sh" "$@"

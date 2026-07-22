@@ -125,6 +125,7 @@ services:
       MOE_MODE: ${MOE_MODE:-a16}
       QUANTIZATION: ${QUANTIZATION:-modelopt_fp4}
       ONLINE_QUANT: ${ONLINE_QUANT:-none}
+      QUANTIZATION_CONFIG_JSON: "${QUANTIZATION_CONFIG_JSON:-}"
       F8_DMA: ${F8_DMA:-0}
     volumes:
       - ${HF_CACHE:-/root/.cache/huggingface}:/root/.cache/huggingface
@@ -150,6 +151,66 @@ Important user-facing modes:
 | AMD MXFP4 online MXFP8 | add `ONLINE_QUANT=mxfp8` |
 | NF3 hybrid | `MODEL_FAMILY=glm52-hybrid`; its TP4/A16/NF3 defaults are built in |
 
+## Online MXFP8 Attention Precision
+
+A 2026-07-22 factorial KLD test measured which BF16 GLM-5.2 attention
+projections should be excluded from online MXFP8 conversion. Each run used the
+same Luke NVFP4 snapshot, corrected BF16 reference logits, TP8/DCP1, A16,
+MTP off, FP8 KV, and 2,047 teacher-forced positions. Lower KLD is better.
+
+| MXFP8 ignore set | Runs | Mean KLD | SD between runs | VRAM delta / GPU |
+|---|---:|---:|---:|---:|
+| none | 10 | `0.066006794` | `0.002060655` | baseline |
+| `kv_b_proj` only | 20 | `0.065398317` | `0.002308562` | about `+0.13 GiB` |
+| `q_a_proj` + `kv_a_proj_with_mqa` | 20 | **`0.064174724`** | `0.001603532` | about `+1.09 GiB` |
+| all three | 10 | `0.065975578` | `0.001666660` | about `+1.22 GiB` |
+
+The old `kv_b_proj`-only exclusion has no detectable benefit versus quantizing
+all eligible linears (`p=0.83`). Keeping all three projections in BF16 is also
+indistinguishable from ignoring none: the mean changes by only `-0.0000312`
+(`-0.05%`, `p` approximately `0.97`) while consuming about `1.22 GiB/GPU`.
+Therefore the current helper source no longer excludes `kv_b_proj` by default.
+The corrected launcher is
+[`serve-glm52-v16.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/2993b2c02f4f00d562451105de740130d90da4a0/launchers/serve-glm52-v16.sh).
+
+Keeping only the fused q/kv-a pair in BF16 is an optional quality experiment.
+Its aggregate mean was 1.87% lower than the old `kv_b_proj`-only preset;
+bootstrap P(improvement) was 97.69%, while the Welch test remained borderline
+at `p=0.0599`. It costs about `1.09 GiB/GPU`, so it is not the memory-efficient
+default.
+
+The default online MXFP8 config in the updated helper source is:
+
+```json
+{"linear":{"weight":"mxfp8"}}
+```
+
+To retain the fused q/kv-a projection in BF16, set an explicit override:
+
+```bash
+ONLINE_QUANT=mxfp8 \
+QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"},"ignore":["re:.*[.]q_a_proj$","re:.*[.]kv_a_proj_with_mqa$"]}' \
+docker compose up
+```
+
+Both q/kv-a patterns must be supplied together because GLM-5.2 maps their
+checkpoint shards into the runtime `fused_qkv_a_proj` module. Ignoring only one
+creates an invalid mixed-precision fused module. Additional ignore patterns can
+be appended to the same JSON array. For example, the historical `kv_b_proj`
+override is `"re:.*kv_b_proj"`, although the KLD result above does not justify
+using it.
+
+The pushed v20 image is immutable and predates this measurement. Its embedded
+helper still selects the historical `kv_b_proj`-only config when
+`ONLINE_QUANT=mxfp8` is used without `QUANTIZATION_CONFIG_JSON`. To obtain the
+new no-ignore behavior with that exact image, pass this explicitly:
+
+```bash
+ONLINE_QUANT=mxfp8 \
+QUANTIZATION_CONFIG_JSON='{"linear":{"weight":"mxfp8"}}' \
+docker compose up
+```
+
 ## Release Gate
 
 All values below were measured from the exact pushed image. Models finished
@@ -173,11 +234,11 @@ Matched interpretation:
   value of `2,292 tok/s` predates the DCP prefill optimization. An earlier v20
   run at `3,624 tok/s` was a favorable run, not a separate v20 speedup.
 
-The representative corrected-reference KLD smoke for Luke A16 online MXFP8
-was `0.0662177` over 2,047 positions, consistent with the existing five-run
-distribution on the [KLD page](../benchmarks/glm52-kld-evaluation.md). No new
-full KLD campaign was required because v20 does not change the selected model
-weight formats.
+The release-gate corrected-reference KLD smoke for Luke A16 online MXFP8 was
+`0.0662177` over 2,047 positions. It used the historical `kv_b_proj`-only
+helper preset and is consistent with the new 20-run mean of `0.065398317`.
+See [Online MXFP8 Attention Precision](#online-mxfp8-attention-precision) for
+the later four-way campaign and the current recommendation.
 
 ## Xid 31 / cuBLAS Layout Fix
 

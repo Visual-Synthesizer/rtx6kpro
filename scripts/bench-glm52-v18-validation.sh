@@ -39,6 +39,7 @@ TP6_MAX_MODEL_LEN="${TP6_MAX_MODEL_LEN:-128000}"
 TP4_MAX_MODEL_LEN="${TP4_MAX_MODEL_LEN:-131072}"
 KEEP_SERVERS="${KEEP_SERVERS:-0}"
 FORCE_RERUN="${FORCE_RERUN:-0}"
+ONLINE_MXFP8_CONFIG_JSON="${ONLINE_MXFP8_CONFIG_JSON:-}"
 
 NAME_A="${NAME_PREFIX}-a"
 NAME_B="${NAME_PREFIX}-b"
@@ -67,6 +68,7 @@ safe_name() {
 case_vars() {
   local key="$1"
   MODEL_PATH= DISPLAY_NAME= MOE_MODE= QUANTIZATION= ONLINE_QUANT=
+  QUANTIZATION_CONFIG_JSON=
   MODEL_FAMILY=glm52 KV_CACHE_DTYPE=fp8
   case "${key}" in
     nvfp4-a4-orig)
@@ -74,19 +76,22 @@ case_vars() {
       MOE_MODE=a4; QUANTIZATION=modelopt_fp4; ONLINE_QUANT=none ;;
     nvfp4-a4-online-mxfp8)
       MODEL_PATH="${NVFP4_MODEL}"; DISPLAY_NAME="Luke NVFP4 A4 online MXFP8"
-      MOE_MODE=a4; QUANTIZATION=modelopt_fp4; ONLINE_QUANT=mxfp8 ;;
+      MOE_MODE=a4; QUANTIZATION=modelopt_fp4; ONLINE_QUANT=mxfp8
+      QUANTIZATION_CONFIG_JSON="${ONLINE_MXFP8_CONFIG_JSON}" ;;
     nvfp4-a16-orig)
       MODEL_PATH="${NVFP4_MODEL}"; DISPLAY_NAME="Luke NVFP4 A16 original"
       MOE_MODE=a16; QUANTIZATION=modelopt_fp4; ONLINE_QUANT=none ;;
     nvfp4-a16-online-mxfp8)
       MODEL_PATH="${NVFP4_MODEL}"; DISPLAY_NAME="Luke NVFP4 A16 online MXFP8"
-      MOE_MODE=a16; QUANTIZATION=modelopt_fp4; ONLINE_QUANT=mxfp8 ;;
+      MOE_MODE=a16; QUANTIZATION=modelopt_fp4; ONLINE_QUANT=mxfp8
+      QUANTIZATION_CONFIG_JSON="${ONLINE_MXFP8_CONFIG_JSON}" ;;
     mxfp4-a8-orig)
       MODEL_PATH="${MXFP4_MODEL}"; DISPLAY_NAME="AMD MXFP4 experts A8 original"
       MOE_MODE=force-a8-experimental; QUANTIZATION=mxfp4; ONLINE_QUANT=none ;;
     mxfp4-a8-online-mxfp8)
       MODEL_PATH="${MXFP4_MODEL}"; DISPLAY_NAME="AMD MXFP4 experts A8 online MXFP8"
-      MOE_MODE=force-a8-experimental; QUANTIZATION=mxfp4; ONLINE_QUANT=mxfp8 ;;
+      MOE_MODE=force-a8-experimental; QUANTIZATION=mxfp4; ONLINE_QUANT=mxfp8
+      QUANTIZATION_CONFIG_JSON="${ONLINE_MXFP8_CONFIG_JSON}" ;;
     mxfp4-a8-online-fp8)
       MODEL_PATH="${MXFP4_MODEL}"; DISPLAY_NAME="AMD MXFP4 experts A8 online FP8"
       MOE_MODE=force-a8-experimental; QUANTIZATION=mxfp4; ONLINE_QUANT=fp8 ;;
@@ -158,6 +163,7 @@ start_case() {
     -e GRAPH="${graph}" -e MAX_MODEL_LEN="${max_len}" -e MAX_BATCHED_TOKENS="${batched}" \
     -e GPU_MEMORY_UTILIZATION="${gmu}" -e MOE_MODE="${MOE_MODE}" -e MOE_BACKEND=b12x \
     -e LINEAR_BACKEND=auto -e QUANTIZATION="${QUANTIZATION}" -e ONLINE_QUANT="${ONLINE_QUANT}" \
+    -e QUANTIZATION_CONFIG_JSON="${QUANTIZATION_CONFIG_JSON}" \
     -e SPARSE_MLA_FORCE_MQA="${SPARSE_MLA_FORCE_MQA}" \
     -e PYTORCH_CUDA_ALLOC_CONF="${CUDA_ALLOC_CONF}" \
     -e F8_DMA=0 -e KV_CACHE_DTYPE="${KV_CACHE_DTYPE}" \
