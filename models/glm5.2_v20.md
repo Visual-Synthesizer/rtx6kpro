@@ -134,8 +134,10 @@ docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-c
 
 Save the following as `compose.yml`. Bare environment entries pass a host
 variable only when it is set; otherwise the helper chooses the correct default
-for `MODEL_FAMILY`. This matters for the TP4 NF3 preset, whose model, TP,
-quantization, KV dtype, and memory defaults differ from standard GLM-5.2.
+for `MODEL_FAMILY`. The two explicit memory entries raise the recommended
+standard TP8 service to a 262k context and a validated 0.96 memory budget. The
+TP6 recipe below overrides the memory budget with its separately validated
+limit.
 
 ```yaml
 services:
@@ -172,9 +174,9 @@ services:
       - MTP
       - MAX_NUM_SEQS
       - GRAPH
-      - MAX_MODEL_LEN
+      - MAX_MODEL_LEN=${MAX_MODEL_LEN:-262144}
       - MAX_BATCHED_TOKENS
-      - GPU_MEMORY_UTILIZATION
+      - GPU_MEMORY_UTILIZATION=${GPU_MEMORY_UTILIZATION:-0.96}
       - MOE_MODE
       - MOE_BACKEND
       - LINEAR_BACKEND
@@ -196,9 +198,16 @@ services:
       - ${CONTAINER_TMP:-./cache/glm52-v20/tmp}:/container-tmp
 ```
 
+The immutable image was measured with the older internal fallback of
+`MAX_MODEL_LEN=131072` and `GPU_MEMORY_UTILIZATION=0.90`. The Compose contract
+above intentionally overrides those two fallback values. A direct `docker run`
+must likewise pass `MAX_MODEL_LEN=262144` and `GPU_MEMORY_UTILIZATION=0.96`;
+future builds use these topology-aware values directly through
+[`serve-glm52-v16.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/02411928c62260300d79c45c0f280851db2219b6/launchers/serve-glm52-v16.sh).
+
 ### Start, Inspect, And Stop
 
-The standard helper default is Luke NVFP4, TP8/DCP1, native A4, MTP off. The
+The standard model preset is Luke NVFP4, TP8/DCP1, native A4, MTP off. The
 highest-accuracy standard launch changes only `MOE_MODE` to A16:
 
 ```bash
@@ -295,9 +304,9 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `MTP` | `0` disables speculation. `3` is the principal validated speculative mode; the helper accepts an integer token count. |
 | `MAX_NUM_SEQS` | Standard `64`; scheduler concurrency and the input to automatic graph sizing. |
 | `GRAPH` | When unset, standard GLM uses `4 * MAX_NUM_SEQS`; the NF3 preset uses `64`. |
-| `MAX_MODEL_LEN` | Standard `131072`; NF3 `262144`. Raise only within the KV capacity reported at startup. |
+| `MAX_MODEL_LEN` | Recommended standard and NF3 default: `262144`. TP6 remains `128000`. Raise only within the KV capacity reported at startup. |
 | `MAX_BATCHED_TOKENS` | Standard `8192`; NF3 `2048`. The validated virtual-TP6 profile uses `4096`. |
-| `GPU_MEMORY_UTILIZATION` | Standard `0.90`; NF3 `0.96`. The validated TP6 profile uses at most `0.95`. |
+| `GPU_MEMORY_UTILIZATION` | Recommended TP8 and NF3 default: `0.96`; TP6 at most `0.95`. TP8 `0.98` boots but is unsafe for long-prefill runtime allocations. |
 | `MOE_MODE` | `a4`, `a16`, or `force-a8-experimental`. |
 | `ONLINE_QUANT` | `none`, `mxfp8`, `fp8`, `nf3-mxfp8`, or `custom`. |
 | `QUANTIZATION_CONFIG_JSON` | Explicit online quantization policy; overrides the helper preset. |
@@ -310,6 +319,21 @@ default), `DCP_A2A_MAX_TOKENS` (`64` for standard GLM and `16` for NF3), and
 `DCP_A2A_LARGE_BACKEND` (`ag_rs`). Keep them on `auto` or their defaults for
 published results. Backend overrides such as `MOE_BACKEND` and
 `LINEAR_BACKEND` are diagnostic controls, not separate release modes.
+
+The 262k/0.96 standard memory pair was validated on the exact v20 image with
+Luke A16, MTP3, seq=64, graph=256, batch=8,192, FP8 KV, and no online quant.
+Each topology processed a 240,041-token prompt followed by 512 decode tokens:
+
+| Topology | GMU | KV tokens | Max concurrency at 262,144 | 240k + decode |
+|---|---:|---:|---:|---|
+| TP8 / DCP1 | `0.96` | 603,456 | 2.30x | pass; server remained healthy |
+| TP8 / DCP4 | `0.96` | 2,285,824 | 8.72x | pass; query-split/full-CKV active |
+
+Do not raise the generic default to `0.98`. That value booted TP8/DCP1 and
+reported 641,088 KV tokens, but the same 240k request OOMed when an unprofiled
+Inductor buffer requested another 64 MiB with only 66.38 MiB physically free.
+This is why successful startup and reported KV capacity alone are insufficient
+for selecting the serving memory budget.
 
 ### Checkpoint And Quantization Modes
 
@@ -334,7 +358,18 @@ source of truth.
 
 ### DCP Dispatch
 
-`auto` chooses the validated prefill path by physical head geometry:
+`auto` is a launcher decision, not a value passed into vLLM. When neither the
+helper control nor its low-level runtime variable is set, the launcher starts
+with `auto`, resolves the `TP:DCP` pair below, and exports concrete `0` or `1`
+values before starting vLLM:
+
+```text
+DCP_QUERY_SPLIT  -> VLLM_DCP_QUERY_SPLIT
+DCP_CKV_GATHER   -> VLLM_B12X_MLA_CKV_GATHER
+```
+
+An explicit helper value of `0` or `1` bypasses this decision independently
+for each feature. The automatic mapping is:
 
 | TP / DCP | Query split | Full-CKV gather | Prefill path |
 |---|---:|---:|---|
@@ -344,6 +379,25 @@ source of truth.
 | TP4 / DCP2, DCP4 | on | on | Local query heads plus transient full-CKV gather. |
 | virtual TP6 / DCP1 | off | off | Ordinary DCP1 path. |
 | virtual TP6 / DCP2, DCP3, DCP6 | off | off | Project-before-merge borrowed workspace. |
+
+For example, this is sufficient to enable both optimizations; writing either
+flag manually is unnecessary:
+
+```bash
+TP=8 DCP=4 docker compose up -d
+```
+
+To inspect the decision without loading weights:
+
+```bash
+DRY_RUN=1 TP=8 DCP=4 docker compose run --rm --no-deps glm52
+# VLLM_DCP_QUERY_SPLIT=1
+# VLLM_B12X_MLA_CKV_GATHER=1
+```
+
+At runtime, full-CKV use is confirmed by
+`Using transient full-CKV gather for B12X sparse MLA prefill`. Query split
+creates a `query_split` process group. Both features optimize prefill only.
 
 Virtual TP6 pads 64 attention heads to 66, leaving 11 local heads per rank.
 The aligned full-CKV kernel is not its default: the measured experimental
@@ -489,6 +543,10 @@ uses all 16 GPUs, TP6 uses 12, and TP4 uses 8. It starts both containers and
 waits for both health checks and required loader logs, then waits another 30
 seconds before starting either client. The two clients run serially. No result
 is accepted while another model is loading.
+
+The following are fixed historical-comparison benchmark profiles, not the
+recommended serving memory defaults. Keeping their model length and GMU fixed
+avoids attributing a changed memory shape to a runtime performance change.
 
 | Validation profile | TP | DCP | MTP | Max seqs | Graph | Batched tokens | Max model len | GMU |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
