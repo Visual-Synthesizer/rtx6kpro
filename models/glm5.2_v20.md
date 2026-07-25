@@ -1,13 +1,16 @@
-# GLM-5.2 v20: Gilded Gnosis Safety And TP6
+# GLM-5.2 v20: Gilded Gnosis DCP Release
 
 v20 is the tested successor to [v19](glm5.2_v19.md). It keeps the same GLM-5.2,
 NF3, MXFP4, DCP, MTP, and InstantTensor launch contract while updating the
-canonical GG/SparkInfer stack and fixing two release blockers:
+canonical GG/SparkInfer stack, fixing two release blockers, and adding the
+measured DCP prefill topology:
 
 - DCP outputs now preserve a cuBLAS-safe physical head-major layout without a
   hot-path clone or tail-padding reservation;
 - virtual TP6 accepts partial pitched DCP workspaces and correctly plans the
-  N128-padded W4A8-MX scratch extent.
+  N128-padded W4A8-MX scratch extent;
+- exact owner top-k merge, partial indexer replication, and a bounded
+  one-layer CKV prefetch improve DCP prefill without lossy transport.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -16,16 +19,21 @@ pages are provenance, not required setup instructions.
 
 Canonical source merging and the required post-merge rebuild are tracked in
 [rtx6kpro issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33).
-The image below remains the exact measured artifact until that checklist is
-complete; merging a PR does not silently change the documented image.
+The image below is the exact measured release candidate. The listed source
+PRs remain independently reviewable and were not merged while producing it.
 
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-cu132-20260721
-Docker manifest: sha256:0eb4b6710200e22162ede859f49a5ef4f5ff7deadcb1ee02246d1a17d2325877
-Local image ID: sha256:710e15143a31e97ded855612237bd211ad8f73f6f7a06f300eea02a1326beea4
+voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
+Docker manifest: sha256:e7a8a8549c10b5d16899e0fb45ff7eeca09dd7c1d1a83eee13fb03930d8eb80a
+Local image ID: sha256:727ac3af71b729be93fd01c9fe60472c27f619c8ef0e3c67b4f627023933027c
 ```
+
+This supersedes the earlier `vllm83a1f7f` candidate. Its hand-resolved stacked
+integration let the partial-indexer change restore a `DCP>1` gate over the
+DCP1 query-split path. The final source tree is a conflict-free merge of the
+public PR heads and restores DCP1 query split without a private patch.
 
 `si` identifies SparkInfer, the renamed B12X project. Legacy B12X environment
 variable names remain accepted for compatibility.
@@ -34,17 +42,18 @@ Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `b07bef75b6ef964b00f6278432d3d5973fee06de` |
-| vLLM release source | `voipmonitor/vllm build/gilded-gnosis-v20-final-candidate-20260721` @ `2167295cd3e133d38ab22a67a42b0004db65d0a6` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `c0a464f5e4173e26822e3c6e10059b6f3be0f7eb` |
-| SparkInfer release source | `local-inference-lab/sparkinfer build/sparkinfer-v20-final-candidate-20260721` @ `6a92bcc0f2bf03b13dd03dbc7ce97e26133c580e` |
+| Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `89b4a98d1ffebb2dda1e1ac5e55238e3a9cfbd58` |
+| vLLM release source | `voipmonitor/vllm build/gilded-gnosis-v20-dcp-final2-20260725` @ `551719766029e78824a30d97ae6ac63917405b5f` |
+| SparkInfer base | `local-inference-lab/sparkinfer master` @ `c39b8062ba450c030e669d898a026d10980c9470` |
+| SparkInfer release source | `local-inference-lab/sparkinfer build/sparkinfer-v20-dcp-final-20260725` @ `be0edcaae6f5d284bb29a82325aba7a0ead6960f` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / cuDNN | `2.12.0+cu132` / `13.2.1` / `9.22.0.52` |
-| Build repository | `local-inference-lab/blackwell-llm-docker` @ `60b65fd0b2dfd82b43a8559e1bbec84ef1742906` |
+| Launcher source | `local-inference-lab/blackwell-llm-docker` @ `48c8add4907775babeac03da68ee47224c23475c` |
+| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `b620596be1b8955fe3c4bf2854b65d6bff38aaaf` |
 
 The image contains no `VLLM_PATCH_URL`, `VLLM_PATCH_FILE`, source bind mount,
 or private source overlay. Image labels expose every source pin and a cache
@@ -53,14 +62,14 @@ fingerprint derived from the vLLM and SparkInfer commits.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/60b65fd0b2dfd82b43a8559e1bbec84ef1742906/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/b620596be1b8955fe3c4bf2854b65d6bff38aaaf/build-gilded-gnosis-v20-final-cu132.sh).
 It builds with the exact commits above, validates runtime symbols and source
 contracts, verifies the image labels, and only then allows an optional push.
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 60b65fd0b2dfd82b43a8559e1bbec84ef1742906
+git checkout b620596be1b8955fe3c4bf2854b65d6bff38aaaf
 PUSH_IMAGE=1 ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -79,48 +88,31 @@ The release source adds these independently reviewable deltas:
 | Project | Review | Purpose |
 |---|---|---|
 | vLLM | [#145](https://github.com/local-inference-lab/vllm/pull/145) | Calibrated NVFP4 MLA KV outer-scale wiring. |
-| vLLM | [#149](https://github.com/local-inference-lab/vllm/pull/149) | Isolate target/draft graph resources and account for MRV2 graph memory. |
-| vLLM | [#150](https://github.com/local-inference-lab/vllm/pull/150) | Allow shared-expert overlap only before resident grids make it unsafe. |
-| vLLM | [#153](https://github.com/local-inference-lab/vllm/pull/153) | Defer KV-offload stores until request metadata is ready. |
-| vLLM | [#155](https://github.com/local-inference-lab/vllm/pull/155) | Cap same-model draft positions at the model context limit. |
-| vLLM | [#156](https://github.com/local-inference-lab/vllm/pull/156) | Preallocate absorbed MLA projections before dequant scratch. |
-| vLLM | [#162](https://github.com/local-inference-lab/vllm/pull/162) | Accept the exact partial pitched TP6 DCP workspace layout. |
-| SparkInfer | [#57](https://github.com/local-inference-lab/sparkinfer/pull/57) | Package PCIe CUDA sources needed by runtime compilation. |
-| SparkInfer | [#59](https://github.com/local-inference-lab/sparkinfer/pull/59) | Isolate CUDA-graph PCIe channel lifecycle. |
-| SparkInfer | [#60](https://github.com/local-inference-lab/sparkinfer/pull/60) | Expose MoE plans that safely permit shared-expert overlap. |
-| SparkInfer | [#63](https://github.com/local-inference-lab/sparkinfer/pull/63) | Separate identity and dynamic MLA latent-scale compile keys. |
-| SparkInfer | [#48](https://github.com/local-inference-lab/sparkinfer/pull/48) | Plan W4A8 scratch from the physical N128-padded TP shard. |
+| vLLM | [#172](https://github.com/local-inference-lab/vllm/pull/172) | Profile persistent kernel resources before allocating KV cache. |
+| vLLM | [#175](https://github.com/local-inference-lab/vllm/pull/175) | Split sparse prefill queries and reduce gathered result traffic. |
+| vLLM | [#177](https://github.com/local-inference-lab/vllm/pull/177) | Preallocate a bounded, memory-profiled CKV prefetch workspace. |
+| vLLM | [#178](https://github.com/local-inference-lab/vllm/pull/178) | Merge exact FP32 sparse top-k candidates by query-row owner. |
+| vLLM | [#179](https://github.com/local-inference-lab/vllm/pull/179) | Add partial replicated-indexer topology and mixed target/draft grouping. |
+| SparkInfer | [#76](https://github.com/local-inference-lab/sparkinfer/pull/76) | Account persistent PCIe DMA output storage during KV profiling and release it on close. |
 
-The release build itself does not merge PRs. The exact release branches remain
-the integration points for reproducing the tested artifact regardless of each
-review's later merge state.
+The release build itself does not merge canonical branches. Its exact
+integration branches contain only the GG/SparkInfer bases and the reviews
+listed above. There is no runtime patch file or source bind mount.
 
 ### Canonical Merge Status
 
 [Issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33) is the
-authoritative ordered checklist for landing this stack in canonical GG and
-SparkInfer. As of 2026-07-22, every open runtime PR listed above is non-draft,
-mergeable against its canonical base, and has no unresolved current review
-thread. SparkInfer must land #59, #60, and #48 before the paired vLLM changes
-#149, #150, and #162 are used together in a rebuilt image.
+authoritative ordered merge checklist. As of 2026-07-25, every runtime PR above
+is non-draft, mergeable against `dev/gilded-gnosis` or `sparkinfer/master`, and
+has no unresolved review thread. The `pre-commit` jobs for #172 and #175 are
+queued without a runner; their pre-run checks passed and no check failed.
 
-The review cleanup after the image was pushed is intentionally explicit:
-
-- vLLM #149 gained two runtime corrections in `c1b446a121`: projected AG_RS
-  fallback memory is included in profiling, and a lazily created breakable
-  CUDA graph inherits the disposable profiling pool;
-- SparkInfer #48 gained only a tighter scratch-allocation regression assertion
-  in `73de085078`;
-- vLLM #156 was rebased onto current GG as `b7710b5ad1` without changing its
-  intended materialized-MLA fallback behavior;
-- [SparkInfer #68](https://github.com/local-inference-lab/sparkinfer/pull/68)
-  fixes Python 3.10 compatibility in the packaging test and does not affect the
-  runtime image.
-
-Consequently, the existing image is the reproducible performance artifact, but
-the canonical-head image must be rebuilt and pass the release gate after the
-merge checklist completes. The sparse-CKV PRs remain available for future work
-but are not v20 release dependencies or launcher defaults.
+PR #145 is intentionally present in the image but is not requested for merge
+yet. The exact SparkInfer candidate-owner transport in
+[SparkInfer #79](https://github.com/local-inference-lab/sparkinfer/pull/79)
+was measured separately and is not in this release image or its default path.
+The broader DCP design and rejected experiments are recorded in
+[research issue #35](https://github.com/local-inference-lab/rtx6kpro/issues/35).
 
 ## Start The Server
 
@@ -129,7 +121,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-cu132-20260721
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -142,7 +134,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-cu132-20260721
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -170,6 +162,10 @@ services:
       - DCP_A2A_LARGE_BACKEND
       - DCP_QUERY_SPLIT
       - DCP_CKV_GATHER
+      - DCP_TOPK_OWNER_MERGE
+      - DCP_INDEXER_SHARDS
+      - DCP_CKV_PREFETCH_DEPTH
+      - DCP_CKV_PREFETCH_WORKSPACE_MIB
       - DCP_PREFILL_WORKSPACE
       - MTP
       - MAX_NUM_SEQS
@@ -198,12 +194,9 @@ services:
       - ${CONTAINER_TMP:-./cache/glm52-v20/tmp}:/container-tmp
 ```
 
-The immutable image was measured with the older internal fallback of
-`MAX_MODEL_LEN=131072` and `GPU_MEMORY_UTILIZATION=0.90`. The Compose contract
-above intentionally overrides those two fallback values. A direct `docker run`
-must likewise pass `MAX_MODEL_LEN=262144` and `GPU_MEMORY_UTILIZATION=0.96`;
-future builds use these topology-aware values directly through
-[`serve-glm52-v16.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/02411928c62260300d79c45c0f280851db2219b6/launchers/serve-glm52-v16.sh).
+The image helper and Compose contract both use `MAX_MODEL_LEN=262144` and
+`GPU_MEMORY_UTILIZATION=0.96` for standard TP8. Virtual TP6 remains separately
+validated at `128000` and `0.95`.
 
 ### Start, Inspect, And Stop
 
@@ -313,12 +306,14 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `KV_CACHE_DTYPE` | Standard `fp8`; NF3 uses `nvfp4_ds_mla`. |
 | `F8_DMA` | `0`, `ag`, or `ring`; optional FP8 DCP transport experiment. It does not accelerate decode. |
 
-Advanced A/B controls are `DCP_QUERY_SPLIT`, `DCP_CKV_GATHER`, and
-`DCP_PREFILL_WORKSPACE` (`auto`, `0`, or `1`), plus `B12X_PCIE_DMA` (`1` by
-default), `DCP_A2A_MAX_TOKENS` (`64` for standard GLM and `16` for NF3), and
-`DCP_A2A_LARGE_BACKEND` (`ag_rs`). Keep them on `auto` or their defaults for
-published results. Backend overrides such as `MOE_BACKEND` and
-`LINEAR_BACKEND` are diagnostic controls, not separate release modes.
+Advanced A/B controls are `DCP_QUERY_SPLIT`, `DCP_CKV_GATHER`,
+`DCP_TOPK_OWNER_MERGE`, `DCP_INDEXER_SHARDS`, `DCP_CKV_PREFETCH_DEPTH`,
+`DCP_CKV_PREFETCH_WORKSPACE_MIB`, and `DCP_PREFILL_WORKSPACE`. Keep them on
+`auto` or their defaults for published results. `B12X_PCIE_DMA=1`,
+`DCP_A2A_MAX_TOKENS=64` (`16` for NF3), and
+`DCP_A2A_LARGE_BACKEND=ag_rs` remain transport defaults. Backend overrides
+such as `MOE_BACKEND` and `LINEAR_BACKEND` are diagnostic controls, not
+separate release modes.
 
 The 262k/0.96 standard memory pair was validated on the exact v20 image with
 Luke A16, MTP3, seq=64, graph=256, batch=8,192, FP8 KV, and no online quant.
@@ -359,26 +354,36 @@ source of truth.
 ### DCP Dispatch
 
 `auto` is a launcher decision, not a value passed into vLLM. When neither the
-helper control nor its low-level runtime variable is set, the launcher starts
-with `auto`, resolves the `TP:DCP` pair below, and exports concrete `0` or `1`
-values before starting vLLM:
+helper control nor its low-level runtime variable is set, the launcher resolves
+the measured `TP:DCP` policy below before starting vLLM:
 
 ```text
 DCP_QUERY_SPLIT  -> VLLM_DCP_QUERY_SPLIT
 DCP_CKV_GATHER   -> VLLM_B12X_MLA_CKV_GATHER
+DCP_TOPK_OWNER_MERGE -> VLLM_DCP_TOPK_OWNER_MERGE
+DCP_INDEXER_SHARDS   -> VLLM_DCP_INDEXER_SHARDS
+DCP_CKV_PREFETCH_DEPTH -> VLLM_B12X_MLA_CKV_PREFETCH_DEPTH
 ```
 
-An explicit helper value of `0` or `1` bypasses this decision independently
-for each feature. The automatic mapping is:
+An explicit helper value bypasses the decision independently for that feature.
+`DCP_INDEXER_SHARDS` and `DCP_CKV_PREFETCH_DEPTH` also accept non-negative
+integers. The automatic mapping is:
 
-| TP / DCP | Query split | Full-CKV gather | Prefill path |
-|---|---:|---:|---|
-| TP8 / DCP1 | off | off | Ordinary non-collective DCP1 path. |
-| TP8 / DCP2, DCP4, DCP8 | on | on | Local query heads plus transient full-CKV gather. |
-| TP4 / DCP1 | off | off | Ordinary non-collective DCP1 path. |
-| TP4 / DCP2, DCP4 | on | on | Local query heads plus transient full-CKV gather. |
-| virtual TP6 / DCP1 | off | off | Ordinary DCP1 path. |
-| virtual TP6 / DCP2, DCP3, DCP6 | off | off | Project-before-merge borrowed workspace. |
+| TP / DCP | Query split | Full CKV | Owner merge | Indexer shards | Prefetch depth |
+|---|---:|---:|---:|---:|---:|
+| TP8 / DCP1 | on | off | off | `0` | `0` |
+| TP8 / DCP2 | on | on | on | `0` | `1` |
+| TP8 / DCP4 | on | on | on | `2` | `1` |
+| TP8 / DCP8 | on | on | on | `4` | `1` |
+| TP4 / DCP1 | on | off | off | `0` | `0` |
+| TP4 / DCP2, DCP4 | on | on | on | `0` | `1` |
+| virtual TP6 / DCP1 | off | off | off | `0` | `0` |
+| virtual TP6 / DCP2, DCP3, DCP6 | off | off | on | `0` | `0` |
+
+`DCP_INDEXER_SHARDS=0` means the ordinary fully sharded indexer. At TP8/DCP4,
+`2` creates a measured partial `2x2` topology; at TP8/DCP8, `4` creates `2x4`.
+The CKV cache remains sharded by the full DCP size. The query-split flag at
+DCP1 does not create inter-rank DCP traffic.
 
 For example, this is sufficient to enable both optimizations; writing either
 flag manually is unnecessary:
@@ -393,11 +398,16 @@ To inspect the decision without loading weights:
 DRY_RUN=1 TP=8 DCP=4 docker compose run --rm --no-deps glm52
 # VLLM_DCP_QUERY_SPLIT=1
 # VLLM_B12X_MLA_CKV_GATHER=1
+# VLLM_DCP_TOPK_OWNER_MERGE=1
+# VLLM_DCP_INDEXER_SHARDS=2
+# VLLM_B12X_MLA_CKV_PREFETCH_DEPTH=1
 ```
 
 At runtime, full-CKV use is confirmed by
 `Using transient full-CKV gather for B12X sparse MLA prefill`. Query split
-creates a `query_split` process group. Both features optimize prefill only.
+creates a `query_split` process group. Owner merge keeps candidate scores FP32
+and final indices exact; the release policy does not use lossy peer-DMA score
+transport.
 
 Virtual TP6 pads 64 attention heads to 66, leaving 11 local heads per rank.
 The aligned full-CKV kernel is not its default: the measured experimental
@@ -508,10 +518,8 @@ be appended to the same JSON array. For example, the historical `kv_b_proj`
 override is `"re:.*kv_b_proj"`, although the KLD result above does not justify
 using it.
 
-The pushed v20 image is immutable and predates this measurement. Its embedded
-helper still selects the historical `kv_b_proj`-only config when
-`ONLINE_QUANT=mxfp8` is used without `QUANTIZATION_CONFIG_JSON`. To obtain the
-new no-ignore behavior with that exact image, pass this explicitly:
+The release image embeds this no-ignore default. An explicit value remains
+useful when auditing a deployment or comparing alternate ignore sets:
 
 ```bash
 ONLINE_QUANT=mxfp8 \
@@ -576,26 +584,46 @@ targeting must be recorded as either `estimate` for historical comparison or
 
 ## Release Gate
 
-All values below were measured from the exact pushed image. Models finished
-loading before any client started.
+All performance rows are MTP0 and were measured only after every paired model
+finished loading. The final SparkInfer review commit changes only explicit
+`out=` allocation and `close()` lifetime handling; after rebuilding, the pushed
+image passed TP8/DCP2 boot, inference, and log checks on GPU 0-7.
 
-| Case | Topology | MTP | Decode CC1 | Prefill 64k | Acceptance | KV tokens |
-|---|---:|---:|---:|---:|---:|---:|
-| Luke NVFP4 A16 original | TP8 / DCP1 | 0 | 87.18 | - | - | - |
-| Luke NVFP4 A16 original | TP8 / DCP4 | 0 | - | 5,343 | - | - |
-| AMD MXFP4 experts A8 original | TP6 / DCP3 | 0 | 57.27 | - | - | 700,449 |
-| NF3 hybrid A16 | TP4 / DCP4 | 3 | 104.52 | 3,532 | 0.610 | - |
+### TP8 Luke NVFP4 A16
 
-Matched interpretation:
+| DCP | Indexer topology | Decode CC1 | Prefill 64k median | Prefill 400k | KV tokens |
+|---:|---|---:|---:|---:|---:|
+| 1 | sharded | 87.98 aggregate / 88.69 active | 6,149.9 exact | - | 559,616 |
+| 2 | sharded | 73.2 | 5,866 | 5,197.2 | 1,040,128 |
+| 4 | partial 2x2 | 72.7 | 5,834 | 5,106.1 | 1,984,256 |
+| 8 | partial 2x4 | 67.6 | 5,741 | 5,025.5 | 3,964,928 |
 
-- DCP1 decode matches the established `~87 tok/s` baseline.
-- TP8/DCP4 prefill matches the optimized v19 runs (`5,338-5,361 tok/s`).
-- TP6/DCP3 matches the same-GPU v20 candidate (`57.3 tok/s`) and the current
-  v19 control (`56.2 tok/s`); the historical single number is not a stable
-  MTP-independent baseline.
-- NF3 `3,532 tok/s` matches optimized v19 (`3,545-3,552 tok/s`). The older v18
-  value of `2,292 tok/s` predates the DCP prefill optimization. An earlier v20
-  run at `3,624 tok/s` was a favorable run, not a separate v20 speedup.
+DCP4 is the throughput profile. DCP8 retains 99.8% more KV capacity than DCP4
+while remaining within 1.6% at 64k and 1.6% at 400k. DCP1 remains at the
+established `~87-88 tok/s` decode baseline.
+
+### Virtual TP6 AMD MXFP4 A8, online MXFP8 dense
+
+| DCP | Decode CC1 | Prefill 64k median | Prefill 400k | KV tokens |
+|---:|---:|---:|---:|---:|
+| 1 | 83.5 | - | - | 312,000 |
+| 2 | 68.5 | 4,249 | 3,697.8 | 562,944 |
+| 3 | 66.14 | 3,614 | 3,359.3 | 842,753 |
+| 6 | 51.03 | 2,379 | 2,343.2 | 1,661,337 |
+
+The DCP1 result matches the historical online-MXFP8 control (`83.43 tok/s`).
+DCP3 improved 64k and 400k prefill by 43.5% and 39.7% over the older path;
+DCP2 and DCP6 remain at their prior performance envelope.
+
+### TP4 NF3 hybrid A16
+
+| DCP | Decode CC1 | Prefill 64k median | Prefill 400k | KV tokens |
+|---:|---:|---:|---:|---:|
+| 2 | 57.2 | 4,040 | 3,184.1 | - |
+| 4 | 57.3 | 3,992 | 3,340.9 | 934,912 |
+
+These are MTP0 numbers. The older `~104 tok/s` NF3 rows are MTP3 and must not
+be compared directly to this table.
 
 The release-gate corrected-reference KLD smoke for Luke A16 online MXFP8 was
 `0.0662177` over 2,047 positions. It used the historical `kv_b_proj`-only
@@ -631,6 +659,13 @@ Two consecutive transitions passed:
 |---|---:|---:|---:|---:|
 | 1 | 300,068 | 512 | yes | none |
 | 2 | 320,063 | 512 | yes | none |
+
+The clean 2026-07-25 release tree was gated again with
+`PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.8`, so expandable
+segments were still disabled. A short request followed by a 301,244-token
+prompt and 32 decode tokens completed; server logs and `dmesg` contained no
+`Xid`, `FAULT_PDE`, or illegal-memory error. References to the "Xid gate" in
+the validation logs name this regression test; they do not report a new Xid.
 
 Reproduce the client side after the server is healthy:
 
@@ -675,7 +710,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm2167295-si6a92bcc-fi801d57a-cu132-20260721
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
@@ -731,6 +766,10 @@ backend markers needed to audit an outlier.
 The final validation artifacts on the release host are under:
 
 ```text
-/root/bench-results/glm52-v20-final-validation-20260721
-/root/kld/glm52_v20_validation_20260721
+/root/bench-results/glm52-v20-final-tp6-20260725
+/root/bench-results/glm52-v20-final-xid-transition-20260725
+/root/bench-results/glm52-v20-final2-clean-20260725
+/root/bench-results/glm52-v20-final2-xid-transition-20260725
+/root/bench-results/glm52-gg-dcp-topology-matrix-20260725
+/root/bench-results/glm52-gg-dcp8-indexer-2x4-20260725
 ```
