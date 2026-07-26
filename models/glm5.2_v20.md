@@ -113,6 +113,11 @@ yet. The exact SparkInfer candidate-owner transport in
 was measured separately and is not in this release image or its default path.
 The broader DCP design and rejected experiments are recorded in
 [research issue #35](https://github.com/local-inference-lab/rtx6kpro/issues/35).
+The subsequent remote selected-record and query-sharding POC is archived with
+its exact source branches, tests, and measurements in
+[research issue #36](https://github.com/local-inference-lab/rtx6kpro/issues/36).
+Those paths were correct but slower than the retained local-CKV design; they
+do not change this image, its defaults, or the canonical merge checklist.
 
 ## Start The Server
 
