@@ -10,7 +10,10 @@ measured DCP prefill topology:
 - virtual TP6 accepts partial pitched DCP workspaces and correctly plans the
   N128-padded W4A8-MX scratch extent;
 - exact owner top-k merge, partial indexer replication, and a bounded
-  one-layer CKV prefetch improve DCP prefill without lossy transport.
+  one-layer CKV prefetch improve DCP prefill without lossy transport;
+- a pre-model lossless PCIe probe now measures DMA, query-split, and CKV
+  overlap crossovers for the selected GPU/NUMA topology instead of assuming
+  that the development host's overlap policy is portable.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -25,15 +28,15 @@ PRs remain independently reviewable and were not merged while producing it.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
-Docker manifest: sha256:e7a8a8549c10b5d16899e0fb45ff7eeca09dd7c1d1a83eee13fb03930d8eb80a
-Local image ID: sha256:727ac3af71b729be93fd01c9fe60472c27f619c8ef0e3c67b4f627023933027c
+voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
+Docker manifest: sha256:10261c7d65101c8aba2ce1fb59eabe73aff9d35eca5043b330cc0ce76d3c98d0
+Local image ID: sha256:d3fc099dde96a5bbee3e4195df69ced0b978bcadc56b7aae26333ef46798bc37
 ```
 
-This supersedes the earlier `vllm83a1f7f` candidate. Its hand-resolved stacked
-integration let the partial-indexer change restore a `DCP>1` gate over the
-DCP1 query-split path. The final source tree is a conflict-free merge of the
-public PR heads and restores DCP1 query split without a private patch.
+This supersedes all earlier v20 candidates. The registry manifest is the exact
+24,834,221,607-byte local image used for the serialized release gates below;
+there was no rebuild between testing and push. The final source tree is a
+conflict-free merge of the public PR heads and contains no private patch.
 
 `si` identifies SparkInfer, the renamed B12X project. Legacy B12X environment
 variable names remain accepted for compatibility.
@@ -43,17 +46,18 @@ Pinned source stack:
 | Component | Ref / commit |
 |---|---|
 | Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `89b4a98d1ffebb2dda1e1ac5e55238e3a9cfbd58` |
-| vLLM release source | `voipmonitor/vllm build/gilded-gnosis-v20-dcp-final2-20260725` @ `551719766029e78824a30d97ae6ac63917405b5f` |
+| vLLM release source | `voipmonitor/vllm build/gilded-gnosis-v20-pcie-auto-20260726` @ `0c79e41db41f250ccdfc4be92d171960a5787f73` |
 | SparkInfer base | `local-inference-lab/sparkinfer master` @ `c39b8062ba450c030e669d898a026d10980c9470` |
-| SparkInfer release source | `local-inference-lab/sparkinfer build/sparkinfer-v20-dcp-final-20260725` @ `be0edcaae6f5d284bb29a82325aba7a0ead6960f` |
+| SparkInfer release source | `local-inference-lab/sparkinfer build/sparkinfer-v20-pcie-auto-20260726` @ `e603f74bb67d0fce547336f1fb73c3c23e8f1887` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 | NCCL | local-inference `2.30.4` |
-| PyTorch / CUDA / cuDNN | `2.12.0+cu132` / `13.2.1` / `9.22.0.52` |
-| Launcher source | `local-inference-lab/blackwell-llm-docker` @ `48c8add4907775babeac03da68ee47224c23475c` |
-| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `b620596be1b8955fe3c4bf2854b65d6bff38aaaf` |
+| PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
+| CUDA system-base cuDNN packages | `9.22.0.52` |
+| Launcher source | `local-inference-lab/blackwell-llm-docker` @ `05626808ebdf9e0be89657d49bebbaae03ef0933` |
+| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `c9d96ea75257e77b3e4a31a9f46831c7591f7dea` |
 
 The image contains no `VLLM_PATCH_URL`, `VLLM_PATCH_FILE`, source bind mount,
 or private source overlay. Image labels expose every source pin and a cache
@@ -62,16 +66,19 @@ fingerprint derived from the vLLM and SparkInfer commits.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/b620596be1b8955fe3c4bf2854b65d6bff38aaaf/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/c9d96ea75257e77b3e4a31a9f46831c7591f7dea/build-gilded-gnosis-v20-final-cu132.sh).
 It builds with the exact commits above, validates runtime symbols and source
 contracts, verifies the image labels, and only then allows an optional push.
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout b620596be1b8955fe3c4bf2854b65d6bff38aaaf
+git checkout c9d96ea75257e77b3e4a31a9f46831c7591f7dea
 PUSH_IMAGE=1 ./build-gilded-gnosis-v20-final-cu132.sh
 ```
+
+The review for the build, embedded helper, calibrator, and their tests is
+[blackwell-llm-docker #5](https://github.com/local-inference-lab/blackwell-llm-docker/pull/5).
 
 The build deliberately excludes the separate weight-lifetime experiments in
 vLLM PR #154, vLLM PR #157, and SparkInfer PR #62. It also excludes the
@@ -93,7 +100,11 @@ The release source adds these independently reviewable deltas:
 | vLLM | [#177](https://github.com/local-inference-lab/vllm/pull/177) | Preallocate a bounded, memory-profiled CKV prefetch workspace. |
 | vLLM | [#178](https://github.com/local-inference-lab/vllm/pull/178) | Merge exact FP32 sparse top-k candidates by query-row owner. |
 | vLLM | [#179](https://github.com/local-inference-lab/vllm/pull/179) | Add partial replicated-indexer topology and mixed target/draft grouping. |
+| vLLM | [#180](https://github.com/local-inference-lab/vllm/pull/180) | Isolate the profiled MRV2 CUDA graph-pool lifecycle. |
+| vLLM | [#184](https://github.com/local-inference-lab/vllm/pull/184) | Dispatch lossless BF16 PCIe DMA above a measured byte crossover. |
+| vLLM | [#185](https://github.com/local-inference-lab/vllm/pull/185) | Gate DCP query split by a measured context crossover. |
 | SparkInfer | [#76](https://github.com/local-inference-lab/sparkinfer/pull/76) | Account persistent PCIe DMA output storage during KV profiling and release it on close. |
+| SparkInfer | [#81](https://github.com/local-inference-lab/sparkinfer/pull/81) | Measure lossless collective/overlap crossovers and derive a cached serving policy. |
 
 The release build itself does not merge canonical branches. Its exact
 integration branches contain only the GG/SparkInfer bases and the reviews
@@ -102,10 +113,10 @@ listed above. There is no runtime patch file or source bind mount.
 ### Canonical Merge Status
 
 [Issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33) is the
-authoritative ordered merge checklist. As of 2026-07-25, every runtime PR above
-is non-draft, mergeable against `dev/gilded-gnosis` or `sparkinfer/master`, and
-has no unresolved review thread. The `pre-commit` jobs for #172 and #175 are
-queued without a runner; their pre-run checks passed and no check failed.
+authoritative ordered merge checklist. As of 2026-07-26, every runtime PR above
+is non-draft and mergeable against `dev/gilded-gnosis` or `sparkinfer/master`.
+Some vLLM `pre-commit` jobs remain queued without a runner; their pre-run checks
+passed. CodeRabbit reports no actionable comment on the new calibration PRs.
 
 PR #145 is intentionally present in the image but is not requested for merge
 yet. The exact SparkInfer candidate-owner transport in
@@ -126,7 +137,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -139,7 +150,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -166,12 +177,19 @@ services:
       - DCP_A2A_MAX_TOKENS
       - DCP_A2A_LARGE_BACKEND
       - DCP_QUERY_SPLIT
+      - DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS
       - DCP_CKV_GATHER
       - DCP_TOPK_OWNER_MERGE
       - DCP_INDEXER_SHARDS
       - DCP_CKV_PREFETCH_DEPTH
       - DCP_CKV_PREFETCH_WORKSPACE_MIB
+      - DCP_CKV_PREFETCH_TOPOLOGY
       - DCP_PREFILL_WORKSPACE
+      - PCIE_CALIBRATION
+      - PCIE_CALIBRATION_ONLY
+      - PCIE_CALIBRATION_TIMEOUT
+      - PCIE_CALIBRATION_CACHE_DIR
+      - PCIE_DMA_MIN_BYTES
       - MTP
       - MAX_NUM_SEQS
       - GRAPH
@@ -309,12 +327,19 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `ONLINE_QUANT` | `none`, `mxfp8`, `fp8`, `nf3-mxfp8`, or `custom`. |
 | `QUANTIZATION_CONFIG_JSON` | Explicit online quantization policy; overrides the helper preset. |
 | `KV_CACHE_DTYPE` | Standard `fp8`; NF3 uses `nvfp4_ds_mla`. |
-| `F8_DMA` | `0`, `ag`, or `ring`; optional FP8 DCP transport experiment. It does not accelerate decode. |
+| `F8_DMA` | Default `0` (lossless BF16 wire). `ag`, `ring`, `a2a`, `i8*`, and `mx*` are explicit compressed-wire experiments and are never auto-selected. |
+| `PCIE_CALIBRATION` | `auto` uses a matching cached result or measures before model loading; `force` remeasures; `off` uses the conservative static/topology policy. |
+| `PCIE_CALIBRATION_ONLY` | `1` prints the effective policy and exits without loading the model. |
+| `PCIE_CALIBRATION_CACHE_DIR` | Defaults below the active fingerprinted XDG cache, normally `/cache/jit/<fingerprint>/pcie-calibration`. |
+| `PCIE_DMA_MIN_BYTES` | `auto`, `off`, or an explicit byte/KiB/MiB threshold for lossless BF16 PCIe DMA dispatch. |
+| `DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS` | `auto` uses the measured crossover; an integer is an explicit minimum context. |
 
 Advanced A/B controls are `DCP_QUERY_SPLIT`, `DCP_CKV_GATHER`,
 `DCP_TOPK_OWNER_MERGE`, `DCP_INDEXER_SHARDS`, `DCP_CKV_PREFETCH_DEPTH`,
-`DCP_CKV_PREFETCH_WORKSPACE_MIB`, and `DCP_PREFILL_WORKSPACE`. Keep them on
-`auto` or their defaults for published results. `B12X_PCIE_DMA=1`,
+`DCP_CKV_PREFETCH_WORKSPACE_MIB`, `DCP_CKV_PREFETCH_TOPOLOGY`, and
+`DCP_PREFILL_WORKSPACE`. Keep them on `auto` or their defaults for published
+results. An explicit low-level `VLLM_*` value also wins over calibration.
+`B12X_PCIE_DMA=1`,
 `DCP_A2A_MAX_TOKENS=64` (`16` for NF3), and
 `DCP_A2A_LARGE_BACKEND=ag_rs` remain transport defaults. Backend overrides
 such as `MOE_BACKEND` and `LINEAR_BACKEND` are diagnostic controls, not
@@ -358,30 +383,38 @@ source of truth.
 
 ### DCP Dispatch
 
-`auto` is a launcher decision, not a value passed into vLLM. When neither the
-helper control nor its low-level runtime variable is set, the launcher resolves
-the measured `TP:DCP` policy below before starting vLLM:
+`auto` is a launcher decision, not a value passed into vLLM. The helper now
+combines two layers:
+
+1. a conservative topology/profile policy chooses eligible DCP mechanisms;
+2. a pre-model lossless probe measures whether DMA, query split, and CKV
+   overlap actually repay their overhead on the selected machine.
+
+The helper controls map to these runtime variables:
 
 ```text
 DCP_QUERY_SPLIT  -> VLLM_DCP_QUERY_SPLIT
+DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS
+                 -> VLLM_DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS
 DCP_CKV_GATHER   -> VLLM_B12X_MLA_CKV_GATHER
 DCP_TOPK_OWNER_MERGE -> VLLM_DCP_TOPK_OWNER_MERGE
 DCP_INDEXER_SHARDS   -> VLLM_DCP_INDEXER_SHARDS
 DCP_CKV_PREFETCH_DEPTH -> VLLM_B12X_MLA_CKV_PREFETCH_DEPTH
+PCIE_DMA_MIN_BYTES -> VLLM_PCIE_DMA_MIN_BYTES
 ```
 
 An explicit helper value bypasses the decision independently for that feature.
 `DCP_INDEXER_SHARDS` and `DCP_CKV_PREFETCH_DEPTH` also accept non-negative
-integers. The automatic mapping is:
+integers. The static eligibility mapping is:
 
 | TP / DCP | Query split | Full CKV | Owner merge | Indexer shards | Prefetch depth |
 |---|---:|---:|---:|---:|---:|
-| TP8 / DCP1 | on | off | off | `0` | `0` |
-| TP8 / DCP2 | on | on | on | `0` | `1` |
-| TP8 / DCP4 | on | on | on | `2` | `1` |
-| TP8 / DCP8 | on | on | on | `4` | `1` |
-| TP4 / DCP1 | on | off | off | `0` | `0` |
-| TP4 / DCP2, DCP4 | on | on | on | `0` | `1` |
+| TP8 / DCP1 | eligible | off | off | `0` | `0` |
+| TP8 / DCP2 | eligible | on | on | `0` | measured `0/1` |
+| TP8 / DCP4 | eligible | on | on | `2` | measured `0/1` |
+| TP8 / DCP8 | eligible | on | on | `4` | measured `0/1` |
+| TP4 / DCP1 | eligible | off | off | `0` | `0` |
+| TP4 / DCP2, DCP4 | eligible | on | on | `0` | measured `0/1` |
 | virtual TP6 / DCP1 | off | off | off | `0` | `0` |
 | virtual TP6 / DCP2, DCP3, DCP6 | off | off | on | `0` | `0` |
 
@@ -390,14 +423,67 @@ integers. The automatic mapping is:
 The CKV cache remains sharded by the full DCP size. The query-split flag at
 DCP1 does not create inter-rank DCP traffic.
 
-For example, this is sufficient to enable both optimizations; writing either
-flag manually is unnecessary:
+#### Lossless calibration
+
+For supported TP4/TP8 configurations, calibration runs before the first model
+load when at least one relevant control is still `auto`. It uses the same
+SparkInfer/NCCL environment and actual selected GPU order as the eventual
+server. The result is cached under the active fingerprinted XDG cache, normally
+`/cache/jit/<fingerprint>/pcie-calibration`. The calibration fingerprint itself
+includes GPU order and topology, TP/DCP/indexer geometry, CPU affinity and NUMA
+placement, image/software/probe revisions, NCCL configuration, and relevant
+environment overrides.
+
+The probe independently determines:
+
+- the smallest byte size at which **lossless BF16** SparkInfer DMA beats NCCL,
+  or `off` if it never wins the measured ladder;
+- whether query split wins and the first measured context crossover;
+- whether one-layer CKV prefetch overlap wins over synchronous full gather.
+
+On this host's adjacent TP8/DCP4 layout, the final release calibration selected:
+
+```text
+VLLM_PCIE_DMA_MIN_BYTES=25165824
+VLLM_DCP_QUERY_SPLIT=1
+VLLM_DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS=8192
+VLLM_B12X_MLA_CKV_GATHER=1
+VLLM_DCP_TOPK_OWNER_MERGE=1
+VLLM_DCP_INDEXER_SHARDS=2
+VLLM_B12X_MLA_CKV_PREFETCH_DEPTH=1
+```
+
+The isolated query-split gain was 23.5% at 8k, 57.9% at 64k, and 59.9% at
+131k. The lossless DMA crossover was 24 MiB. On the tested interleaved layout,
+the probe retained beneficial query split but selected prefetch depth 0 because
+the overlap contended with TP traffic. This is the dual-socket/PCIe topology
+failure mode that a hard-coded depth 1 could not handle.
+
+Calibration never changes numerical wire format. `F8_DMA=ag`, `ring`, `i8*`,
+or `mx*` is an explicit compressed-wire choice and causes the BF16 calibrator
+to be skipped. DMA compression remains user opt-in even when a lossless probe
+would favor DMA.
+
+If calibration is unsupported, disabled, times out, or fails, the helper keeps
+the conservative static/topology policy and the prior 6 MiB lossless DMA
+crossover. Explicit values always take precedence, including an explicit
+`PCIE_DMA_MIN_BYTES=off`.
+
+For normal serving, this is sufficient; no low-level flags are required:
 
 ```bash
 TP=8 DCP=4 docker compose up -d
 ```
 
-To inspect the decision without loading weights:
+To run the real probe, print its effective policy, and exit before loading
+weights:
+
+```bash
+PCIE_CALIBRATION_ONLY=1 TP=8 DCP=4 docker compose run --rm --no-deps glm52
+```
+
+`DRY_RUN=1` is faster but deliberately skips measurement and shows only the
+static fallback expansion:
 
 ```bash
 DRY_RUN=1 TP=8 DCP=4 docker compose run --rm --no-deps glm52
@@ -405,8 +491,11 @@ DRY_RUN=1 TP=8 DCP=4 docker compose run --rm --no-deps glm52
 # VLLM_B12X_MLA_CKV_GATHER=1
 # VLLM_DCP_TOPK_OWNER_MERGE=1
 # VLLM_DCP_INDEXER_SHARDS=2
-# VLLM_B12X_MLA_CKV_PREFETCH_DEPTH=1
 ```
+
+Use `PCIE_CALIBRATION=force` after changing hardware placement or when auditing
+a cached result. `PCIE_CALIBRATION=off` disables the probe but not the eligible
+DCP features. Individual explicit overrides remain available for A/B tests.
 
 At runtime, full-CKV use is confirmed by
 `Using transient full-CKV gather for B12X sparse MLA prefill`. Query split
@@ -420,9 +509,10 @@ The aligned full-CKV kernel is not its default: the measured experimental
 compacts the exact pitched partial workspace returned by that topology.
 
 For short DCP messages, the helper uses the SparkInfer PCIe A2A pool. Messages
-above `DCP_A2A_MAX_TOKENS=64` use `ag_rs`. `F8_DMA=ag` or `ring` changes the
-experimental PCIe payload representation; it is irrelevant to DCP1 and does
-not change decode arithmetic.
+above `DCP_A2A_MAX_TOKENS=64` use `ag_rs`. The measured
+`VLLM_PCIE_DMA_MIN_BYTES` applies to lossless byte dispatch; `F8_DMA` changes
+the payload representation only when explicitly requested. It is irrelevant
+to DCP1 and does not change decode arithmetic.
 
 ### Helper-Owned Serving Contract
 
@@ -590,9 +680,34 @@ targeting must be recorded as either `estimate` for historical comparison or
 ## Release Gate
 
 All performance rows are MTP0 and were measured only after every paired model
-finished loading. The final SparkInfer review commit changes only explicit
-`out=` allocation and `close()` lifetime handling; after rebuilding, the pushed
-image passed TP8/DCP2 boot, inference, and log checks on GPU 0-7.
+finished loading. The final 2026-07-26 image was tested serially on GPU 0-7;
+no benchmark overlapped another model load.
+
+### Final 2026-07-26 candidate
+
+| Gate | Configuration | Result |
+|---|---|---:|
+| Standard decode | Luke NVFP4, TP8/DCP1, A16, seq=1, graph=6 | `87.503 tok/s` aggregate; `88.310` active per user |
+| Calibrated prefill | Luke NVFP4, TP8/DCP4, A16, exact 65,538-token prompt | `5,835 tok/s`; TTFT `11.231 s` |
+| Hybrid decode | local NF3, TP4/DCP4, A16/Grid188 | `57.3 tok/s` |
+
+All three correctness checks passed. DCP4 resolved the measured 24 MiB
+lossless-DMA crossover, 8k query-split crossover, partial `2x2` indexer, owner
+merge, and CKV prefetch depth 1. It is within 0.3% of the preceding 5,853 tok/s
+run. DCP1 remains in the established `~87-88 tok/s` envelope and NF3 matches
+the preceding 57.2 tok/s result.
+
+Raw final artifacts are under:
+
+```text
+/root/bench-results/glm52-v20-final-20260726/final-vllm0c79e41-sie603f74/
+```
+
+### Broader retained matrix
+
+The tables below are the broader pre-calibration v20 topology campaign. They
+remain useful cross-topology reference data; unchanged cells were not rerun
+merely to publish the final image.
 
 ### TP8 Luke NVFP4 A16
 
@@ -715,7 +830,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm5517197-sibe0edca-fi801d57a-cu132-20260725
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
@@ -771,6 +886,7 @@ backend markers needed to audit an outlier.
 The final validation artifacts on the release host are under:
 
 ```text
+/root/bench-results/glm52-v20-final-20260726/final-vllm0c79e41-sie603f74
 /root/bench-results/glm52-v20-final-tp6-20260725
 /root/bench-results/glm52-v20-final-xid-transition-20260725
 /root/bench-results/glm52-v20-final2-clean-20260725
