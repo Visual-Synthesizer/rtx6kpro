@@ -1,0 +1,194 @@
+--- a/calibration_encoder/encode_b300.py
++++ b/calibration_encoder/encode_b300.py
+@@ -23,14 +23,19 @@
+ import traceback
+ 
+ 
+-BASE_ENCODER_SHA256 = "e9a85a47e165c8d8644354cef611efbb81dfd9ba88544ca59f0c80ee6bc75032"
++BASE_ENCODER_SHA256 = "3bc6839fbb35074a369673748b1effa9b74346cfe7162390e5bbb943926004e4"  # encode_tr3_v31.py + mtp78 patch
+ CORPUS_SHA256 = "cf247acc7c5da9f0600c7d6ab3b7c2fcfc54ec30b794e3b6047559285fa44df4"
+ EXPECTED_SHARDS = 282
+ EXPECTED_LAYER_TENSORS = 256 * 3 * 4 * 4
+-EXPECTED_TOTAL_TR3_TENSORS = 75 * EXPECTED_LAYER_TENSORS
+-EXPECTED_REPLACED_WEIGHTS = 75 * 256 * 3
++EXPECTED_TOTAL_TR3_TENSORS = 76 * EXPECTED_LAYER_TENSORS  # layers 3..78 incl. MTP
++EXPECTED_REPLACED_WEIGHTS = 76 * 256 * 3  # layers 3..78 incl. MTP
+ CAPTURE_PLAN_SCHEMA = "glm52-b300-capture-plan-v1"
+ DONE_SCHEMA = "glm52-b300-exl3-layer-v1"
++MTP_LAYER = 78
++MTP78_CAPTURE_TRANSPORT = "mtp78_xcapture-serving"
++MTP78_FINGERPRINT_SCHEMA = "glm52-mtp78-serving-capture-v1"
++MTP78_TARGET_PREFIX = "model.layers.78.mlp"
++MTP78_MIN_TOKENS = 1_048_576
+ ADAPTER_VERSION = "1"
+ RAM_FILESYSTEMS = {"tmpfs", "ramfs"}
+ GIB = 1 << 30
+@@ -268,7 +273,7 @@
+         "adapter_version": ADAPTER_VERSION,
+         "exllamav3": "0.0.43",
+         "scope": {
+-            "layers": [3, 77],
++            "layers": [3, 78],
+             "experts_per_layer": 256,
+             "projections": ["gate_proj", "up_proj", "down_proj"],
+             "keep_nvfp4": 0,
+@@ -377,7 +382,9 @@
+ 
+         layer_dir = Path(capture_dir) / f"layer_{layer:03d}"
+         manifest = json.loads((layer_dir / "layer_manifest.json").read_text())
+-        if manifest.get("capture_fingerprint") != getattr(self.__class__, "expected_fingerprint", None):
++        if layer == MTP_LAYER:
++            validate_mtp78_manifest(layer, manifest)
++        elif manifest.get("capture_fingerprint") != getattr(self.__class__, "expected_fingerprint", None):
+             raise RuntimeError(f"layer {layer}: RAM capture fingerprint mismatch")
+         self.manifest = manifest
+         self.L = layer
+@@ -485,6 +492,36 @@
+     return tensor.to(device)
+ 
+ 
++def validate_mtp78_manifest(layer: int, manifest: dict) -> int:
++    """Fail-closed validation of the serving-time MTP layer-78 capture.
++
++    Layers 3..77 are validated against the prefill capture plan.  The MTP
++    layer's manifest (written by finalize_mtp78_capture.py) instead binds
++    tokens + payload SHAs + the owner-pinned corpus into its own fingerprint.
++    Returns the manifest token count; payload sizes derive from it.
++    """
++    if layer != MTP_LAYER or manifest.get("capture_transport") != MTP78_CAPTURE_TRANSPORT:
++        raise RuntimeError(f"layer {layer}: not a valid MTP78 serving-capture manifest")
++    if manifest.get("corpus_sha256") != CORPUS_SHA256:
++        raise RuntimeError(f"layer {layer}: MTP78 capture does not use the owner-pinned corpus")
++    tokens = int(manifest.get("tokens", -1))
++    material = {
++        "schema": MTP78_FINGERPRINT_SCHEMA,
++        "corpus_sha256": manifest.get("corpus_sha256"),
++        "target_prefix": MTP78_TARGET_PREFIX,
++        "tokens": tokens,
++        "sha256_x": manifest.get("sha256_x"),
++        "sha256_ids": manifest.get("sha256_ids"),
++    }
++    if manifest.get("capture_fingerprint") != canonical_hash(material):
++        raise RuntimeError(f"layer {layer}: MTP78 capture fingerprint is invalid")
++    if tokens < MTP78_MIN_TOKENS:
++        raise RuntimeError(
++            f"layer {layer}: MTP78 capture has {tokens} tokens, floor is {MTP78_MIN_TOKENS}"
++        )
++    return tokens
++
++
+ def check_capture(capture_dir: str, layers: list[int], plan: dict) -> None:
+     assert_ram_capture_target(Path(capture_dir))
+     tokens = int(plan["total_tokens"])
+@@ -494,13 +531,19 @@
+             manifest = json.loads((layer_dir / "layer_manifest.json").read_text())
+         except Exception as exc:
+             raise RuntimeError(f"layer {layer}: RAM capture manifest missing ({exc})") from exc
+-        if manifest.get("capture_fingerprint") != plan["capture_fingerprint"]:
+-            raise RuntimeError(f"layer {layer}: RAM capture belongs to a different plan")
+-        if int(manifest.get("tokens", -1)) != tokens:
+-            raise RuntimeError(f"layer {layer}: RAM capture token count mismatch")
+-        if (layer_dir / "x.bin").stat().st_size != tokens * BASE.HIDDEN * 2:
++        if layer == MTP_LAYER:
++            # Serving-time capture: tokens/sizes come from the manifest itself,
++            # bound to the owner corpus via the manifest's own fingerprint.
++            layer_tokens = validate_mtp78_manifest(layer, manifest)
++        else:
++            if manifest.get("capture_fingerprint") != plan["capture_fingerprint"]:
++                raise RuntimeError(f"layer {layer}: RAM capture belongs to a different plan")
++            if int(manifest.get("tokens", -1)) != tokens:
++                raise RuntimeError(f"layer {layer}: RAM capture token count mismatch")
++            layer_tokens = tokens
++        if (layer_dir / "x.bin").stat().st_size != layer_tokens * BASE.HIDDEN * 2:
+             raise RuntimeError(f"layer {layer}: x RAM payload incomplete")
+-        if (layer_dir / "ids.bin").stat().st_size != tokens * 8:
++        if (layer_dir / "ids.bin").stat().st_size != layer_tokens * 8:
+             raise RuntimeError(f"layer {layer}: ids RAM payload incomplete")
+ 
+ 
+@@ -564,8 +607,10 @@
+             "source_expert_tensor_count": ACTIVE_SOURCE_TENSORS,
+             "tensor_count": EXPECTED_LAYER_TENSORS,
+             "capture": {
+-                "fingerprint": args.capture_plan["capture_fingerprint"],
+-                "tokens": int(args.capture_plan["total_tokens"]),
++                "fingerprint": layer_manifest.get(
++                    "capture_fingerprint", args.capture_plan["capture_fingerprint"]
++                ),
++                "tokens": int(layer_manifest.get("tokens", args.capture_plan["total_tokens"])),
+                 "sha256_x": layer_manifest["sha256_x"],
+                 "sha256_ids": layer_manifest["sha256_ids"],
+             },
+@@ -683,8 +728,9 @@
+     """Compatibility metadata that selects the b12x ModelOpt interception.
+ 
+     There are zero NVFP4 payload tensors.  The ignore list leaves only routed
+-    experts in layers 3..77 on the intercepted path; MTP layer 78 is wholly
+-    ignored so its BF16 experts are loaded normally.
++    experts in layers 3..78 (incl. the MTP layer) on the intercepted path;
++    layer-78's eh_proj stays ignored (BF16), everything else non-expert is
++    covered by the generic wildcards.
+     """
+     return {
+         "config_groups": {
+@@ -714,7 +760,7 @@
+             "model.layers.2.mlp*",
+             "*shared_experts*",
+             "*mlp.gate*",
+-            "model.layers.78*",
++            "model.layers.78.eh_proj*",
+         ],
+         "quant_algo": "NVFP4",
+         "producer": {"name": "b300-exl3-modelopt-dispatch-shim", "version": ADAPTER_VERSION},
+@@ -782,7 +828,7 @@
+     from multiprocessing import get_context
+ 
+     BASE.log(
+-        "assemble: re-hashing all 57,600 routed BF16 source tensors against encode-time digests",
++        f"assemble: re-hashing all {len(layers) * 256 * 3:,} routed BF16 source tensors against encode-time digests",
+         logfile,
+     )
+     jobs = [(src_path, layer) for layer in layers]
+@@ -889,7 +935,7 @@
+         "mcg_multiplier": BASE.MCG_MULT,
+         "hessian": "ldlq-calibrated",
+         "exllamav3_version": "0.0.43",
+-        "moe_layers": [3, 77],
++        "moe_layers": [3, 78],
+         "experts_per_layer": 256,
+         "nvfp4_keep_per_layer": 0,
+         "tr3_tail_per_layer": 256,
+@@ -921,13 +967,13 @@
+             "per_layer_ids_sha256": per_ids,
+         },
+         "scope": {
+-            "quantized": "routed MoE expert gate/up/down projections, all 256 experts, layers 3..77",
++            "quantized": "routed MoE expert gate/up/down projections, all 256 experts, layers 3..78 (incl. MTP layer 78)",
+             "bf16_byte_exact": [
+                 "attention",
+                 "dense MLPs layers 0..2",
+                 "shared experts",
+                 "router/gates",
+-                "MTP layer 78",
++                "MTP layer 78 non-expert tensors (eh_proj, enorm, hnorm, attention, shared experts, router/gate, shared_head.norm)",
+                 "embeddings",
+                 "lm_head",
+             ],
+@@ -941,7 +987,7 @@
+         "tier_bitmap": "tier_bitmap.json",
+         "modelopt_dispatch_note": (
+             "quantization_config selects the b12x ModelOpt interception only; this artifact "
+-            "contains zero NVFP4 expert payloads. Layer 78 is ignored and remains BF16."
++            "contains zero NVFP4 expert payloads. Layer-78 routed experts are EXL3 trellis; only eh_proj stays on the ignore list (BF16)."
+         ),
+     }
+     atomic_json(out / "config.json", config)
+@@ -1023,7 +1069,7 @@
+     parser.add_argument("--out", default="")
+     parser.add_argument("--capture-dir", default="/dev/shm/glm52-tr3-capture")
+     parser.add_argument("--capture-manifest", default="/workspace/tr3/capture_plan.json")
+-    parser.add_argument("--layers", default="3-77")
++    parser.add_argument("--layers", default="3-78")
+     parser.add_argument("--workers", type=int, default=8)
+     parser.add_argument("--gpus", type=int, default=8)
+     parser.add_argument("--io-workers", type=int, default=8)
