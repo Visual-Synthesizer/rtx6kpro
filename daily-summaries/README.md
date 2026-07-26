@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-26](2026-07/2026-07-26.md) | - GLM-5.2 v20 image ships with DCP prefill collapse fixed — auto-policy composes query-split/CKV-g |
 | [2026-07-25](2026-07/2026-07-25.md) | DCP4 collapse root-caused & fixed: koush spotted GLM-5.2 vLLM fork was gathering topk scores/idx it  |
 | [2026-07-24](2026-07/2026-07-24.md) | - New GLM-5.2 vLLM image fixes DCP2/4/8 crashes (illegal memory access, tensor layout stride bug); u |
 | [2026-07-23](2026-07/2026-07-23.md) | - GLM-5.2 v20 Docker image ships, fixing the cuBLAS/Xid DCP read-ahead crash and adding an auto-enab |
@@ -157,6 +158,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-26](2026-07/2026-07-26.md) | - GLM-5.2 v20 image ships with DCP prefill collapse fixed — auto-policy composes query-split/CKV-g |
 | [2026-07-25](2026-07/2026-07-25.md) | DCP4 collapse root-caused & fixed: koush spotted GLM-5.2 vLLM fork was gathering topk scores/idx it  |
 | [2026-07-24](2026-07/2026-07-24.md) | - New GLM-5.2 vLLM image fixes DCP2/4/8 crashes (illegal memory access, tensor layout stride bug); u |
 | [2026-07-23](2026-07/2026-07-23.md) | - GLM-5.2 v20 Docker image ships, fixing the cuBLAS/Xid DCP read-ahead crash and adding an auto-enab |
