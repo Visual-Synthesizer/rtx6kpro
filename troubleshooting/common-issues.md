@@ -33,6 +33,7 @@
   - [Docker Build OOM / System Hang](#docker-build-oom)
   - [Custom Allreduce Breaks GLM-5](#custom-allreduce-breaks-glm-5)
 - [PCIe and Stability Issues](#pcie-and-stability-issues)
+  - [Intermittent GPU Bus Drops on Multi-PSU Frames](#intermittent-gpu-bus-drops-on-multi-psu-frames)
   - [Surprise Link Down (PCIe ASPM)](#surprise-link-down)
   - [NCCL P2P Lockups (IOMMU/UVM)](#nccl-p2p-lockups)
   - [ZFS System Freezes](#zfs-system-freezes)
@@ -437,6 +438,20 @@ Custom allreduce is optimized for NVLink or PCIe switch topologies. On dual-CPU 
 ---
 
 ## PCIe and Stability Issues
+
+### Intermittent GPU Bus Drops on Multi-PSU Frames
+
+**Symptom**: GPUs intermittently disappear from `nvidia-smi`, sometimes under
+load and sometimes at idle, across more than one PCIe-switch group.
+
+**Check**: In addition to cables, retimers, switch power, and Xid/AER logs, have
+a qualified electrician verify the protective-earth path and bonding for every
+PSU and the shared metal frame. One 16-GPU field report traced repeated drops to
+outlets that did not provide PE to four chassis-mounted PSUs.
+
+See [Intermittent GPU Bus Drops on Multi-PSU Open-Air Frames](gpu-bus-drops-multi-psu-grounding.md)
+for the evidence, safe diagnostic sequence, and important limitations. Do not
+copy improvised outlet or chassis-ground modifications.
 
 ### Surprise Link Down
 

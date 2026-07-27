@@ -64,6 +64,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.1 v8 DCP Graph Fix on 8x RTX PRO 6000 Blackwell](models/glm5.1_v8.md) - `models/glm5.1_v8.md`
 - [GLM-5.1 v9 BF16 TP16 DCP8 on 16x RTX PRO 6000 Blackwell](models/glm5.1_v9.md) - `models/glm5.1_v9.md`
 - [CUTLASS DSL 4.6 SM120 W4A16 Prefill Regression](models/glm5.2/cutlass-dsl-46-w4a16-regression-2026-07-18.md) - `models/glm5.2/cutlass-dsl-46-w4a16-regression-2026-07-18.md`
+- [GLM-5.2 BF16 to EXL3-TR3 3.0 bpw: Calibrated-LDLQ Conversion Recipe (incl. MTP layer 78)](models/glm5.2/glm52-exl3-tr3-quantization-2026-07-26.md) - `models/glm5.2/glm52-exl3-tr3-quantization-2026-07-26.md`
 - [GLM-5.2 GGUF to BF16 Dequant KLD Audit](models/glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md) - `models/glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md`
 - [GLM-5.2 Unsloth-Style Prefill KLD Reproduction](models/glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md) - `models/glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md`
 - [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) - `models/glm5.2_mxfp4.md`
@@ -77,7 +78,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 v17: Unified Serving And DCP Prefill](models/glm5.2_v17.md) - `models/glm5.2_v17.md`
 - [GLM-5.2 v18: Gilded Gnosis Fast DCP](models/glm5.2_v18.md) - `models/glm5.2_v18.md`
 - [GLM-5.2 v19: Gilded Gnosis](models/glm5.2_v19.md) - `models/glm5.2_v19.md`
-- [GLM-5.2 v20: Gilded Gnosis Safety And TP6](models/glm5.2_v20.md) - `models/glm5.2_v20.md`
+- [GLM-5.2 v20: Gilded Gnosis DCP Release](models/glm5.2_v20.md) - `models/glm5.2_v20.md`
 - [GLM-5 on RTX PRO 6000 Blackwell (SM120)](models/glm5.md) - `models/glm5.md`
 - [Kimi K2.5 on RTX PRO 6000 Blackwell](models/kimi-k25.md) - `models/kimi-k25.md`
 - [Kimi-K2.6 eagle3 MTP long-context perf — **STATUS: shippable**](models/kimi-k26-mtp-long-ctx-wip/README.md) - `models/kimi-k26-mtp-long-ctx-wip/README.md`
@@ -163,6 +164,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 
 - [ASUS ESC8000A-E13P — PEX890xx Bug Report](troubleshooting/asus-esc8000a-e13p-pex890xx-bug-report.md) - `troubleshooting/asus-esc8000a-e13p-pex890xx-bug-report.md`
 - [Troubleshooting -- Common Issues on RTX 6000 Pro Blackwell](troubleshooting/common-issues.md) - `troubleshooting/common-issues.md`
+- [Intermittent GPU Bus Drops on Multi-PSU Open-Air Frames](troubleshooting/gpu-bus-drops-multi-psu-grounding.md) - `troubleshooting/gpu-bus-drops-multi-psu-grounding.md`
 
 ## Daily Summaries
 
@@ -318,6 +320,15 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-07-15](daily-summaries/2026-07/2026-07-16.md) - `daily-summaries/2026-07/2026-07-16.md`
 - [Daily Summary — 2026-07-16](daily-summaries/2026-07/2026-07-17.md) - `daily-summaries/2026-07/2026-07-17.md`
 - [Daily Summary — 2026-07-17](daily-summaries/2026-07/2026-07-18.md) - `daily-summaries/2026-07/2026-07-18.md`
+- [Daily Summary — 2026-07-18](daily-summaries/2026-07/2026-07-19.md) - `daily-summaries/2026-07/2026-07-19.md`
+- [Daily Summary — 2026-07-19](daily-summaries/2026-07/2026-07-20.md) - `daily-summaries/2026-07/2026-07-20.md`
+- [Daily Summary — 2026-07-20](daily-summaries/2026-07/2026-07-21.md) - `daily-summaries/2026-07/2026-07-21.md`
+- [Daily Summary — 2026-07-21](daily-summaries/2026-07/2026-07-22.md) - `daily-summaries/2026-07/2026-07-22.md`
+- [Daily Summary — 2026-07-22](daily-summaries/2026-07/2026-07-23.md) - `daily-summaries/2026-07/2026-07-23.md`
+- [Daily Summary — 2026-07-23](daily-summaries/2026-07/2026-07-24.md) - `daily-summaries/2026-07/2026-07-24.md`
+- [Daily Summary — 2026-07-24](daily-summaries/2026-07/2026-07-25.md) - `daily-summaries/2026-07/2026-07-25.md`
+- [Daily Summary — 2026-07-25](daily-summaries/2026-07/2026-07-26.md) - `daily-summaries/2026-07/2026-07-26.md`
+- [Daily Summary — 2026-07-26](daily-summaries/2026-07/2026-07-27.md) - `daily-summaries/2026-07/2026-07-27.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
