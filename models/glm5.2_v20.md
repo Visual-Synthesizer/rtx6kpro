@@ -13,7 +13,10 @@ measured DCP prefill topology:
   one-layer CKV prefetch improve DCP prefill without lossy transport;
 - a pre-model lossless PCIe probe now measures DMA, query-split, and CKV
   overlap crossovers for the selected GPU/NUMA topology instead of assuming
-  that the development host's overlap policy is portable.
+  that the development host's overlap policy is portable;
+- the launcher preserves an intentional `CUDA_VISIBLE_DEVICES` order when
+  Compose leaves `GPUS` empty, allows 600 seconds for a cold probe, and
+  terminates the complete probe process group if calibration times out.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -29,13 +32,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
-Docker manifest: sha256:131481b0f12c455a8fbad72c5909eb3a2c3accd96815743fdcfa134396e548c0
-Local image ID: sha256:08e5401dfa1cbe08011b9ed64607fd1de5b31621bee3959e9a02e7271d2584be
+voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727-r4
+Docker manifest: sha256:000d803130fe0e9ee45568835868c051ad9764a9c8650fec0e31885c8fc364bc
+Local image ID: sha256:6d42148768818bb5919ad7c960a18d13ba2e9508636c0d4f413d6aa2323e941f
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-24,834,259,181-byte local image used for the serialized release gates below;
+24,834,261,803-byte local image used for the serialized release gates below;
 there was no rebuild between testing and push. The final source tree is a
 conflict-free merge of the public PR heads and contains no private patch.
 
@@ -57,8 +60,8 @@ Pinned source stack:
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
-| Launcher source | `local-inference-lab/blackwell-llm-docker` @ `05626808ebdf9e0be89657d49bebbaae03ef0933` |
-| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `42b7ed135f06037881cc52519acdbac30acf5c6b` |
+| Launcher source | `local-inference-lab/blackwell-llm-docker` @ `5a73c6790ba0aea041c1fe43144fcba28a606021` |
+| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `a6211fa7992f2b4b7f1478e600e92c3d4ddbad4c` |
 
 The image contains no `VLLM_PATCH_URL`, `VLLM_PATCH_FILE`, source bind mount,
 or private source overlay. Image labels expose every source pin and a cache
@@ -67,14 +70,14 @@ fingerprint derived from the vLLM and SparkInfer commits.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/42b7ed135f06037881cc52519acdbac30acf5c6b/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/a6211fa7992f2b4b7f1478e600e92c3d4ddbad4c/build-gilded-gnosis-v20-final-cu132.sh).
 It builds with the exact commits above, validates runtime symbols and source
 contracts, verifies the image labels, and only then allows an optional push.
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 42b7ed135f06037881cc52519acdbac30acf5c6b
+git checkout a6211fa7992f2b4b7f1478e600e92c3d4ddbad4c
 PUSH_IMAGE=1 ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -146,7 +149,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727-r4
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -159,7 +162,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727-r4
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -179,6 +182,7 @@ services:
       - MODEL_REVISION
       - SERVED_MODEL_NAME
       - GPUS
+      - CUDA_VISIBLE_DEVICES
       - PORT
       - TP
       - DCP
@@ -322,7 +326,7 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `MODEL` | Luke NVFP4 for `glm52`; the madeby561 NF3 checkpoint for `glm52-hybrid`; local paths are supported. |
 | `MODEL_REVISION` | Immutable tested Hugging Face revision. Set the correct revision when changing a remote `MODEL`. |
 | `SERVED_MODEL_NAME` | API model name; defaults to the selected checkpoint preset. |
-| `GPUS` | Physical GPU list. Standard default is `0,1,2,3,4,5,6,7`; NF3 default is `0,1,2,3`. |
+| `GPUS` | Ordered physical GPU list. Resolution is explicit `GPUS`, then existing `CUDA_VISIBLE_DEVICES`, then the preset default. Standard default is `0,1,2,3,4,5,6,7`; NF3 default is `0,1,2,3`. |
 | `PORT` | `8000`. Host networking exposes it directly. |
 | `TP` | Standard `8`, virtual-sharded `6`, or NF3 `4`. |
 | `DCP` | Decode context parallel size. `1` disables DCP communication; validated values are topology-dependent. |
@@ -339,6 +343,7 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `F8_DMA` | Default `0` (lossless BF16 wire). `ag`, `ring`, `a2a`, `i8*`, and `mx*` are explicit compressed-wire experiments and are never auto-selected. |
 | `PCIE_CALIBRATION` | `auto` uses a matching cached result or measures before model loading; `force` remeasures; `off` uses the conservative static/topology policy. |
 | `PCIE_CALIBRATION_ONLY` | `1` prints the effective policy and exits without loading the model. |
+| `PCIE_CALIBRATION_TIMEOUT` | Cold-probe limit in seconds; default `600`. A timeout terminates `torchrun` and every probe worker before serving can start. |
 | `PCIE_CALIBRATION_CACHE_DIR` | Defaults below the active fingerprinted XDG cache, normally `/cache/jit/<fingerprint>/pcie-calibration`. |
 | `PCIE_DMA_MIN_BYTES` | `auto`, `off`, or an explicit byte/KiB/MiB threshold for lossless BF16 PCIe DMA dispatch. |
 | `DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS` | `auto` uses the measured crossover; an integer is an explicit minimum context. |
@@ -505,6 +510,72 @@ DRY_RUN=1 TP=8 DCP=4 docker compose run --rm --no-deps glm52
 Use `PCIE_CALIBRATION=force` after changing hardware placement or when auditing
 a cached result. `PCIE_CALIBRATION=off` disables the probe but not the eligible
 DCP features. Individual explicit overrides remain available for A/B tests.
+
+#### GPU order and timeout recovery
+
+Calibration and serving must use the same ordered physical GPU list. The
+helper resolves that list in this order:
+
+1. non-empty `GPUS`;
+2. existing `CUDA_VISIBLE_DEVICES`;
+3. the model-family preset.
+
+This matters on dual-socket systems. For TP8/DCP4, an interleaved order such as
+`0,2,4,6,1,3,5,7` maps the query-split rank pairs `{0,4}`, `{1,5}`, `{2,6}`,
+and `{3,7}` to adjacent physical pairs `(0,1)`, `(2,3)`, `(4,5)`, and `(6,7)`.
+Replacing it with natural rank order makes those same logical pairs cross root
+complexes and invalidates the calibration result.
+
+A cold probe may compile kernels. v20 `r4` therefore raises the default timeout
+from 180 to 600 seconds. If it still expires, the helper terminates the complete
+`torchrun` process group before falling back; probe workers cannot remain on the
+GPUs and contend with the vLLM NCCL initialization that follows.
+
+Audit an intentionally ordered placement without loading model weights:
+
+```bash
+GPUS= CUDA_VISIBLE_DEVICES=0,2,4,6,1,3,5,7 \
+  PCIE_CALIBRATION=force PCIE_CALIBRATION_ONLY=1 \
+  TP=8 DCP=4 docker compose run --rm --no-deps glm52
+```
+
+The first run should report `PCIE_CALIBRATION_STATUS=measured`. Preserve the
+same ordered placement for the normal start that consumes the cached result:
+
+```bash
+GPUS= CUDA_VISIBLE_DEVICES=0,2,4,6,1,3,5,7 \
+  PCIE_CALIBRATION=auto docker compose up -d
+```
+
+That start should report `cache-hit`. If an older image already timed out,
+remove and recreate that complete container before retrying. Killing only the
+frontend is insufficient because the older calibrator may have left worker
+processes in the container. Until the fixed image can be pulled, this explicit
+old-image fallback avoids running the probe while preserving the intended rank
+order:
+
+```bash
+docker compose down --remove-orphans
+GPUS=0,2,4,6,1,3,5,7 PCIE_CALIBRATION=off docker compose up -d
+```
+
+The `r4` image was validated with the analogous ordered list
+`8,10,12,14,9,11,13,15` while leaving `GPUS` empty. The cold run completed as
+`measured`, and its cache fingerprint preserved all eight physical indices and
+PCI bus IDs in that exact order. The second run was a `cache-hit` in 2.16
+seconds. A separate forced 20-second timeout returned the conservative policy;
+inspection of the still-running container showed only its supervisor process,
+no calibration workers, and 0 MiB allocated on all eight test GPUs.
+
+A final release-image E2E run used that cache hit with TP8/DCP4/MTP3, A16,
+online MXFP8, InstantTensor BUFFERED, and the same ordered GPUs. All eight NCCL
+ranks initialized, InstantTensor loaded the complete 87-shard checkpoint,
+CUDA-graph setup finished, and the API became ready on port 5668. A chat
+request returned exactly `calibration-ok`. The first cold JIT/graph setup took
+439.30 seconds and included 117 seconds of graph capture; quiet periods during
+that work are expected and are distinct from a stall at `ncclCommInitRank`.
+The run reported 2,262,784 KV-cache tokens at `GPU_MEMORY_UTILIZATION=0.96`.
+The test container was then removed and all eight test GPUs returned to 0 MiB.
 
 At runtime, full-CKV use is confirmed by
 `Using transient full-CKV gather for B12X sparse MLA prefill`. Query split
@@ -872,7 +943,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727-r4
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
@@ -931,6 +1002,7 @@ The final validation artifacts on the release host are under:
 /root/bench-results/glm52-v20-final-20260726/final-vllm0c79e41-sie603f74
 /root/bench-results/glm52-v20-dcp8-query-owner-matrix-20260727
 /root/bench-results/glm52-v20-release-auto-gate-20260727
+/root/bench-results/glm52-v20-r4-calibration-20260727
 /root/bench-results/glm52-v20-final-tp6-20260725
 /root/bench-results/glm52-v20-final-xid-transition-20260725
 /root/bench-results/glm52-v20-final2-clean-20260725
