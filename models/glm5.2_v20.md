@@ -539,12 +539,20 @@ GPUS= CUDA_VISIBLE_DEVICES=0,2,4,6,1,3,5,7 \
   TP=8 DCP=4 docker compose run --rm --no-deps glm52
 ```
 
-The first run should report `PCIE_CALIBRATION_STATUS=measured`; the next normal
-start should report `cache-hit`. If an older image already timed out, remove and
-recreate that complete container before retrying. Killing only the frontend is
-insufficient because the older calibrator may have left worker processes in
-the container. Until the fixed image can be pulled, this explicit old-image
-fallback avoids running the probe while preserving the intended rank order:
+The first run should report `PCIE_CALIBRATION_STATUS=measured`. Preserve the
+same ordered placement for the normal start that consumes the cached result:
+
+```bash
+GPUS= CUDA_VISIBLE_DEVICES=0,2,4,6,1,3,5,7 \
+  PCIE_CALIBRATION=auto docker compose up -d
+```
+
+That start should report `cache-hit`. If an older image already timed out,
+remove and recreate that complete container before retrying. Killing only the
+frontend is insufficient because the older calibrator may have left worker
+processes in the container. Until the fixed image can be pulled, this explicit
+old-image fallback avoids running the probe while preserving the intended rank
+order:
 
 ```bash
 docker compose down --remove-orphans
