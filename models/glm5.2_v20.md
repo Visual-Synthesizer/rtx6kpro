@@ -567,6 +567,16 @@ seconds. A separate forced 20-second timeout returned the conservative policy;
 inspection of the still-running container showed only its supervisor process,
 no calibration workers, and 0 MiB allocated on all eight test GPUs.
 
+A final release-image E2E run used that cache hit with TP8/DCP4/MTP3, A16,
+online MXFP8, InstantTensor BUFFERED, and the same ordered GPUs. All eight NCCL
+ranks initialized, InstantTensor loaded the complete 87-shard checkpoint,
+CUDA-graph setup finished, and the API became ready on port 5668. A chat
+request returned exactly `calibration-ok`. The first cold JIT/graph setup took
+439.30 seconds and included 117 seconds of graph capture; quiet periods during
+that work are expected and are distinct from a stall at `ncclCommInitRank`.
+The run reported 2,262,784 KV-cache tokens at `GPU_MEMORY_UTILIZATION=0.96`.
+The test container was then removed and all eight test GPUs returned to 0 MiB.
+
 At runtime, full-CKV use is confirmed by
 `Using transient full-CKV gather for B12X sparse MLA prefill`. Query split
 creates a `query_split` process group. Owner merge keeps candidate scores FP32
@@ -992,6 +1002,7 @@ The final validation artifacts on the release host are under:
 /root/bench-results/glm52-v20-final-20260726/final-vllm0c79e41-sie603f74
 /root/bench-results/glm52-v20-dcp8-query-owner-matrix-20260727
 /root/bench-results/glm52-v20-release-auto-gate-20260727
+/root/bench-results/glm52-v20-r4-calibration-20260727
 /root/bench-results/glm52-v20-final-tp6-20260725
 /root/bench-results/glm52-v20-final-xid-transition-20260725
 /root/bench-results/glm52-v20-final2-clean-20260725
