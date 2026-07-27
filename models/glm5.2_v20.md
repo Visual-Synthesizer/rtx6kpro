@@ -22,19 +22,20 @@ pages are provenance, not required setup instructions.
 
 Canonical source merging and the required post-merge rebuild are tracked in
 [rtx6kpro issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33).
-The image below is the exact measured release candidate. The listed source
-PRs remain independently reviewable and were not merged while producing it.
+The image below is the exact measured release candidate. Open source deltas
+remain independently reviewable; already-merged fixes are pinned through the
+stated GG and SparkInfer base commits.
 
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
-Docker manifest: sha256:10261c7d65101c8aba2ce1fb59eabe73aff9d35eca5043b330cc0ce76d3c98d0
-Local image ID: sha256:d3fc099dde96a5bbee3e4195df69ced0b978bcadc56b7aae26333ef46798bc37
+voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
+Docker manifest: sha256:131481b0f12c455a8fbad72c5909eb3a2c3accd96815743fdcfa134396e548c0
+Local image ID: sha256:08e5401dfa1cbe08011b9ed64607fd1de5b31621bee3959e9a02e7271d2584be
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-24,834,221,607-byte local image used for the serialized release gates below;
+24,834,259,181-byte local image used for the serialized release gates below;
 there was no rebuild between testing and push. The final source tree is a
 conflict-free merge of the public PR heads and contains no private patch.
 
@@ -47,8 +48,8 @@ Pinned source stack:
 |---|---|
 | Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `89b4a98d1ffebb2dda1e1ac5e55238e3a9cfbd58` |
 | vLLM release source | `voipmonitor/vllm build/gilded-gnosis-v20-pcie-auto-20260726` @ `0c79e41db41f250ccdfc4be92d171960a5787f73` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `c39b8062ba450c030e669d898a026d10980c9470` |
-| SparkInfer release source | `local-inference-lab/sparkinfer build/sparkinfer-v20-pcie-auto-20260726` @ `e603f74bb67d0fce547336f1fb73c3c23e8f1887` |
+| SparkInfer base | `local-inference-lab/sparkinfer master` @ `f06881a22154e9573d0627b7b1d8b1014b351690` |
+| SparkInfer release source | `local-inference-lab/sparkinfer build/sparkinfer-v20-runtime-stride-20260727` @ `c3828fd7f807ce237a9ac36ef033659e6f6b6dd3` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
@@ -57,7 +58,7 @@ Pinned source stack:
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
 | Launcher source | `local-inference-lab/blackwell-llm-docker` @ `05626808ebdf9e0be89657d49bebbaae03ef0933` |
-| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `c9d96ea75257e77b3e4a31a9f46831c7591f7dea` |
+| Build recipe | `local-inference-lab/blackwell-llm-docker` @ `42b7ed135f06037881cc52519acdbac30acf5c6b` |
 
 The image contains no `VLLM_PATCH_URL`, `VLLM_PATCH_FILE`, source bind mount,
 or private source overlay. Image labels expose every source pin and a cache
@@ -66,24 +67,25 @@ fingerprint derived from the vLLM and SparkInfer commits.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/c9d96ea75257e77b3e4a31a9f46831c7591f7dea/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/42b7ed135f06037881cc52519acdbac30acf5c6b/build-gilded-gnosis-v20-final-cu132.sh).
 It builds with the exact commits above, validates runtime symbols and source
 contracts, verifies the image labels, and only then allows an optional push.
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout c9d96ea75257e77b3e4a31a9f46831c7591f7dea
+git checkout 42b7ed135f06037881cc52519acdbac30acf5c6b
 PUSH_IMAGE=1 ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
 The review for the build, embedded helper, calibrator, and their tests is
-[blackwell-llm-docker #5](https://github.com/local-inference-lab/blackwell-llm-docker/pull/5).
+[blackwell-llm-docker #6](https://github.com/local-inference-lab/blackwell-llm-docker/pull/6).
 
 The build deliberately excludes the separate weight-lifetime experiments in
 vLLM PR #154, vLLM PR #157, and SparkInfer PR #62. It also excludes the
 experimental sparse-CKV decode stack in vLLM PRs #159-#161 and SparkInfer PRs
-#64-#65.
+#64-#65. It also excludes the later `bounded_compat` commits on build PR #5;
+that selector policy was not part of this candidate or its validation.
 
 ## Source Changes
 
@@ -103,25 +105,32 @@ The release source adds these independently reviewable deltas:
 | vLLM | [#180](https://github.com/local-inference-lab/vllm/pull/180) | Isolate the profiled MRV2 CUDA graph-pool lifecycle. |
 | vLLM | [#184](https://github.com/local-inference-lab/vllm/pull/184) | Dispatch lossless BF16 PCIe DMA above a measured byte crossover. |
 | vLLM | [#185](https://github.com/local-inference-lab/vllm/pull/185) | Gate DCP query split by a measured context crossover. |
-| SparkInfer | [#76](https://github.com/local-inference-lab/sparkinfer/pull/76) | Account persistent PCIe DMA output storage during KV profiling and release it on close. |
+| SparkInfer | [#79](https://github.com/local-inference-lab/sparkinfer/pull/79) | Exchange exact FP32 DCP top-k candidates by owner without the generic staging path. |
 | SparkInfer | [#81](https://github.com/local-inference-lab/sparkinfer/pull/81) | Measure lossless collective/overlap crossovers and derive a cached serving policy. |
+| SparkInfer | [#85](https://github.com/local-inference-lab/sparkinfer/pull/85) | Pass the runtime page-table row stride to sparse-indexer kernels and use 64-bit offsets. |
 
 The release build itself does not merge canonical branches. Its exact
 integration branches contain only the GG/SparkInfer bases and the reviews
-listed above. There is no runtime patch file or source bind mount.
+listed above. SparkInfer #76 is closed and is not an additional release delta:
+the resulting PCIe output-lifetime implementation matches current master.
+There is no runtime patch file or source bind mount.
 
 ### Canonical Merge Status
 
 [Issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33) is the
-authoritative ordered merge checklist. As of 2026-07-26, every runtime PR above
-is non-draft and mergeable against `dev/gilded-gnosis` or `sparkinfer/master`.
-Some vLLM `pre-commit` jobs remain queued without a runner; their pre-run checks
-passed. CodeRabbit reports no actionable comment on the new calibration PRs.
+authoritative ordered merge checklist. As of 2026-07-27, all listed reviews are
+non-draft. vLLM #177, #178, and #180 plus SparkInfer #79 and #85 are already
+merged into their canonical bases; the remaining deltas stay independently
+reviewable. The image still pins the tested integration commits rather than
+moving source heads.
 
 PR #145 is intentionally present in the image but is not requested for merge
 yet. The exact SparkInfer candidate-owner transport in
 [SparkInfer #79](https://github.com/local-inference-lab/sparkinfer/pull/79)
-was measured separately and is not in this release image or its default path.
+and the runtime stride correction in
+[SparkInfer #85](https://github.com/local-inference-lab/sparkinfer/pull/85)
+are both included. The helper keeps exact v20 top-k selection; the later
+`bounded_compat` experiment from the older build PR #5 is deliberately absent.
 The broader DCP design and rejected experiments are recorded in
 [research issue #35](https://github.com/local-inference-lab/rtx6kpro/issues/35).
 The subsequent remote selected-record and query-sharding POC is archived with
@@ -137,7 +146,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -150,7 +159,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -679,11 +688,44 @@ targeting must be recorded as either `estimate` for historical comparison or
 
 ## Release Gate
 
-All performance rows are MTP0 and were measured only after every paired model
-finished loading. The final 2026-07-26 image was tested serially on GPU 0-7;
-no benchmark overlapped another model load.
+Every benchmark started only after all required model instances were healthy;
+no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
+batched correctness coverage for the final runtime-stride image. The retained
+2026-07-26 comparison immediately below it is MTP0.
 
-### Final 2026-07-26 candidate
+### Final 2026-07-27 candidate
+
+| Gate | Configuration | Result |
+|---|---|---:|
+| Standard decode | Luke NVFP4 online MXFP8, TP8/DCP1/MTP3, A16, seq=32, graph=128 | CC1 `158.299 tok/s`; CC32 aggregate `1,188.087 tok/s`; `96/96` clean |
+| DCP4 | Luke NVFP4 original dense weights, TP8/DCP4/MTP3, A16, seq=32, graph=128 | CC1 `124.915 tok/s`; CC32 aggregate `939.761 tok/s`; 64k prefill `5,627 tok/s`; `64/64` clean |
+| DCP8 | Luke NVFP4 original dense weights, TP8/DCP8/MTP3, A16, seq=32, graph=128 | CC1 `113.688 tok/s`; CC32 aggregate `758.172 tok/s`; 64k prefill `5,329 tok/s`; `64/64` clean |
+
+The DCP8 query-split/owner-merge matrix was rerun on the complete source stack.
+Unlike the older transport, merged SparkInfer #79 makes exact owner exchange
+beneficial: `query_split=1` plus `owner_merge=1` was best at every tested
+length.
+
+| DCP8 mode | Prefill 8k | Prefill 64k | Prefill 128k |
+|---|---:|---:|---:|
+| query split off, owner merge off | `4,881` | `4,949.5` | `4,763` |
+| query split off, owner merge on | `4,793` | `4,870.5` | `4,688` |
+| query split on, owner merge off | `4,926.5` | `5,251` | `5,081.5` |
+| query split on, owner merge on | **`5,283.5`** | **`5,404`** | **`5,230`** |
+
+The standalone probe selected query split and retained owner merge. CKV
+prefetch remains topology-calibrated rather than hard-coded: its isolated gain
+was near the threshold on this DCP8 placement, and forcing overlap is known to
+hurt some dual-socket layouts.
+
+Raw final artifacts are under:
+
+```text
+/root/bench-results/glm52-v20-dcp8-query-owner-matrix-20260727/
+/root/bench-results/glm52-v20-release-auto-gate-20260727/
+```
+
+### Retained 2026-07-26 MTP0 gate
 
 | Gate | Configuration | Result |
 |---|---|---:|
@@ -697,7 +739,7 @@ merge, and CKV prefetch depth 1. It is within 0.3% of the preceding 5,853 tok/s
 run. DCP1 remains in the established `~87-88 tok/s` envelope and NF3 matches
 the preceding 57.2 tok/s result.
 
-Raw final artifacts are under:
+Raw artifacts for that retained gate are under:
 
 ```text
 /root/bench-results/glm52-v20-final-20260726/final-vllm0c79e41-sie603f74/
@@ -830,7 +872,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sie603f74-fi801d57a-cu132-20260726
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm0c79e41-sic3828fd-fi801d57a-cu132-20260727
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
@@ -887,6 +929,8 @@ The final validation artifacts on the release host are under:
 
 ```text
 /root/bench-results/glm52-v20-final-20260726/final-vllm0c79e41-sie603f74
+/root/bench-results/glm52-v20-dcp8-query-owner-matrix-20260727
+/root/bench-results/glm52-v20-release-auto-gate-20260727
 /root/bench-results/glm52-v20-final-tp6-20260725
 /root/bench-results/glm52-v20-final-xid-transition-20260725
 /root/bench-results/glm52-v20-final2-clean-20260725
