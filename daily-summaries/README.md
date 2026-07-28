@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-28](2026-07/2026-07-28.md) | Kimi-K3 released (753B total / 104B active params, 1.56TB weights, MXFP4-trained) — massive commun |
 | [2026-07-27](2026-07/2026-07-27.md) | Kimi-K3 released on HuggingFace; community immediately starts MoE kernel/quant work [(jump)](https:/ |
 | [2026-07-26](2026-07/2026-07-26.md) | - GLM-5.2 v20 image ships with DCP prefill collapse fixed — auto-policy composes query-split/CKV-g |
 | [2026-07-25](2026-07/2026-07-25.md) | DCP4 collapse root-caused & fixed: koush spotted GLM-5.2 vLLM fork was gathering topk scores/idx it  |
@@ -159,6 +160,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-28](2026-07/2026-07-28.md) | Kimi-K3 released (753B total / 104B active params, 1.56TB weights, MXFP4-trained) — massive commun |
 | [2026-07-27](2026-07/2026-07-27.md) | Kimi-K3 released on HuggingFace; community immediately starts MoE kernel/quant work [(jump)](https:/ |
 | [2026-07-26](2026-07/2026-07-26.md) | - GLM-5.2 v20 image ships with DCP prefill collapse fixed — auto-policy composes query-split/CKV-g |
 | [2026-07-25](2026-07/2026-07-25.md) | DCP4 collapse root-caused & fixed: koush spotted GLM-5.2 vLLM fork was gathering topk scores/idx it  |
