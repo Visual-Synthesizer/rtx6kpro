@@ -19,8 +19,9 @@ measured DCP prefill topology:
   terminates the complete probe process group if calibration times out;
 - the optional `glm52-exl3` profile builds the EXL3 extension from its pinned
   public source and exposes the Trellis MoE path without a binary ABI shim;
-- r6 adds an opt-in, DCP-aware LMCache 0.5.2 prefix-offload path with RAM-only
-  and buffered-filesystem modes while leaving ordinary serving unchanged.
+- r7 ships the opt-in, DCP-aware LMCache 0.5.2 prefix-offload path from its
+  merged public source branch, with RAM-only and buffered-filesystem modes,
+  while leaving ordinary serving unchanged.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -36,13 +37,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r6
-Docker manifest: sha256:3000c2c917ba402ae7784a6549fb458722b0f689d715ca9e5f22d18e0fa9e1bd
-Local image ID: sha256:d4bcd6185a368b1207a2c85290522ddabf9b6fa2eb5ca398b30b29addbec291d
+voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
+Docker manifest: sha256:fdc107c917f5ce7c7f78a51a2b76b171a0eb25569be58c1284809e7e6ba33482
+Local image ID: sha256:d5b386bf2fb047a4d613eadc7c8260da5436f3eb5058ee88ecdf2d1b6ac1b03c
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-25,200,908,897-byte local image used for the final helper and runtime-contract
+25,187,821,429-byte local image used for the final helper and runtime-contract
 gates below; there was no rebuild between those gates and push. Both source trees were
 composed from clean public bases plus exact public PR heads. The generated
 integration patches and lockfiles are public, immutable release artifacts;
@@ -63,25 +64,25 @@ Pinned source stack:
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
-| LMCache | upstream `v0.5.2` @ `cd2c0d6a6a982ec5e334bae7704e1029c06d3c97`, wheel `0.5.2+glm52dcp.2` |
+| LMCache | `local-inference-lab/LMCache release/v0.5.2-glm52-dcp-base` @ `9cebd405d0caf4bebe01d694b5a8bf4e3e354314`, wheel `0.5.2+glm52dcp.3` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
-| Launcher source | `local-inference-lab/blackwell-llm-docker` @ `467e41ac408ac0a37719ffdae0f7b1707f8939b5` |
-| Validated build-equivalent tree | `local-inference-lab/blackwell-llm-docker` @ `3382b26d13017112cc6c52753dddd1d0f1d07955` |
-| Immutable reproduction recipe | `local-inference-lab/blackwell-llm-docker` @ `fdca0230e5860cce0cef65a85de0737ab22f34bd` |
+| Launcher/runtime source | `local-inference-lab/blackwell-llm-docker` @ `a5791db0cf8daa4acab7d849e04fc036f1be00d5` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `265714b0b62a3e2b591dfbda4e3295ade44856b9` |
 
 The image uses no `VLLM_PATCH_URL`, private source overlay, or source bind
-mount. It does contain generated `VLLM_PATCH_FILE` and SparkInfer patch
-artifacts derived solely from the public manifests. Image labels expose both
-base commits, every PR head, both result trees, patch and lock hashes, and a
-cache fingerprint derived from the pinned sources.
+mount. It contains generated `VLLM_PATCH_FILE` and SparkInfer patch artifacts
+derived solely from the public manifests. LMCache is built directly from the
+merged commit above; its image patch label is empty. Image labels expose all
+base commits, PR heads, result trees, patch and lock hashes, and a cache
+fingerprint derived from the pinned sources.
 
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/fdca0230e5860cce0cef65a85de0737ab22f34bd/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/265714b0b62a3e2b591dfbda4e3295ade44856b9/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -90,8 +91,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout fdca0230e5860cce0cef65a85de0737ab22f34bd
-VLLM_RELEASE_COMPOSITION=reproduce-r6 \
+git checkout 265714b0b62a3e2b591dfbda4e3295ade44856b9
+VLLM_RELEASE_COMPOSITION=reproduce-r7 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -100,7 +101,8 @@ always resolves the current clean GG and SparkInfer bases, composes the exact
 versioned PR manifests, and fails if either base or any PR head moves during
 the build. The clean composer and archived source artifacts are reviewed in
 [blackwell-llm-docker #7](https://github.com/local-inference-lab/blackwell-llm-docker/pull/7);
-the r6 LMCache build, helper, tests, and reproduction mode are reviewed in
+the merged LMCache build, helper, tests, and r6/r7 reproduction modes are
+reviewed in
 [blackwell-llm-docker #8](https://github.com/local-inference-lab/blackwell-llm-docker/pull/8).
 
 The build deliberately excludes the separate weight-lifetime experiments in
@@ -134,8 +136,9 @@ on top of those bases:
 The release build itself does not merge canonical branches and does not consume
 a precomposed integration branch. It generates both build-time patches from
 the clean bases and manifests, verifies their result trees, and archives the
-exact r5 compute-stack artifacts. r6 additionally builds the hash-pinned
-LMCache source diff above into a CUDA-enabled wheel. SparkInfer #76 is closed and is not an additional release
+exact r5 compute-stack artifacts. r7 additionally builds the exact merged
+LMCache commit above into a CUDA-enabled wheel without applying a source
+patch. SparkInfer #76 is closed and is not an additional release
 delta: the resulting PCIe output-lifetime implementation matches the pinned
 master. There is no runtime source patching or source bind mount.
 
@@ -167,7 +170,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r6
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -180,7 +183,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r6
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -433,7 +436,8 @@ settings. `ram` starts one in-container LMCache MP server backed by host RAM.
 come from the Linux page cache when resident and from the underlying NVMe when
 not resident.
 
-The r6 patch is required because MLA+DCP does not have TP-only cache geometry.
+The merged LMCache GLM/DCP changes are required because MLA+DCP does not have
+TP-only cache geometry.
 For example, TP8/DCP4 stores four sequence-shard objects, each consumed by two
 query-parallel ranks. The connector now carries that exact reader count,
 mirrors replicated and partially replicated KV groups, expands manager block
@@ -453,6 +457,34 @@ prompt reports the restored token count under
 `usage.prompt_tokens_details.cached_tokens`. For multiple services, give each
 one unique model, LMCache, HTTP, and Prometheus ports; services on standard
 ports `8000+N` derive non-conflicting defaults automatically.
+
+For a service on the default port, this is a minimal cold/hit check. The first
+request must report zero cached tokens, the second must report a non-zero
+chunk-aligned count, and the generated text must be identical:
+
+```bash
+curl -fsS http://127.0.0.1:8089/healthcheck | jq
+
+PROMPT="$(printf 'LMCache r7 deterministic prefix verification. %.0s' {1..1024})"
+jq -cn --arg model GLM-5.2-NVFP4 --arg prompt "$PROMPT" \
+  '{model:$model,prompt:$prompt,max_tokens:8,temperature:0,seed:0}' \
+  >/tmp/lmcache-request.json
+
+curl -fsS http://127.0.0.1:8000/v1/completions \
+  -H 'Content-Type: application/json' -d @/tmp/lmcache-request.json \
+  >/tmp/lmcache-cold.json
+curl -fsS http://127.0.0.1:8000/v1/completions \
+  -H 'Content-Type: application/json' -d @/tmp/lmcache-request.json \
+  >/tmp/lmcache-hit.json
+
+jq '{cached_tokens:(.usage.prompt_tokens_details.cached_tokens // 0)}' \
+  /tmp/lmcache-cold.json /tmp/lmcache-hit.json
+test "$(jq -r '.choices[0].text' /tmp/lmcache-cold.json)" = \
+  "$(jq -r '.choices[0].text' /tmp/lmcache-hit.json)"
+```
+
+If `PORT` is `8000+N`, the default LMCache HTTP health port is `8089+N`.
+Explicit `LMCACHE_HTTP_PORT` overrides it.
 
 ### Checkpoint And Quantization Modes
 
@@ -889,26 +921,27 @@ no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
 
-### Final 2026-07-28 r6 LMCache gates
+### Final 2026-07-28 r7 LMCache gates
 
-The clean pushed r6 image was started through the embedded helper on both GPU
-groups. DCP1 used GPUs 0-7 and DCP4 used GPUs 8-15; both servers were healthy
-before either client ran. Cold and hit responses were greedy and produced the
-same SHA-256 output hash.
+The clean pushed r7 image was started through the embedded helper, first as
+TP8/DCP1 and then as TP8/DCP4 on GPUs 0-7. The runs were sequential, so no
+model load overlapped a measurement. Cold and hit responses were greedy and
+produced the same SHA-256 output hash (`9d3dcd66...ba37`). The LMCache HTTP
+healthcheck also returned `{"status":"healthy"}`.
 
 | Gate | Cold result | Cache-hit result |
 |---|---|---|
-| TP8/DCP1 RAM, 8,192-token prompt | `0` cached, `2.287 s` | `8,192` cached, `0.144 s` |
-| TP8/DCP4 RAM, 8,192-token prompt | `0` cached, `2.433 s` | `8,192` cached, `0.156 s` |
-| TP8/DCP1 buffered disk, cold restart | stored 12,800 tokens | restored all 12,800 tokens; identical output |
-| TP8/DCP4 buffered disk, cold restart | four DCP writers stored 12,800 tokens | restored all 12,800 tokens; identical output |
+| TP8/DCP1 RAM, 8,192-token prompt | `0` cached, `2.161 s` | `8,192` cached, `0.138 s` |
+| TP8/DCP4 RAM, 8,192-token prompt | `0` cached, `2.325 s` | `8,192` cached, `0.185 s` |
 
-Additional overlay-before-clean-image gates covered TP6/DCP3 and TP6/DCP6 at
-12,288 tokens with the 384-token chunk geometry. TP8/DCP1/MTP3 also passed
-4+4 and 8+8 concurrent cold/hit requests without malformed output. Build-time
-tests ran against the installed CUDA wheel, not an unbuilt source checkout.
-The vLLM and SparkInfer result trees are unchanged from r5, so the retained
-compute-performance tables below remain the relevant speed baseline.
+The preceding r6 gate additionally covered buffered-disk cold restarts for
+DCP1 and DCP4 at 12,800 tokens, TP6/DCP3 and TP6/DCP6 at 12,288 tokens with
+384-token chunks, and TP8/DCP1/MTP3 concurrent cold/hit requests. r7 changes
+LMCache provenance from a build patch to its merged public commit and tightens
+the physical-block strategy guard; the filesystem adapter and vLLM/SparkInfer
+result trees are unchanged. Build-time tests ran against the installed CUDA
+wheel, not an unbuilt source checkout, so the retained compute-performance
+tables below remain the relevant speed baseline.
 
 ### Final 2026-07-27 candidate
 
@@ -1135,7 +1168,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r6
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
