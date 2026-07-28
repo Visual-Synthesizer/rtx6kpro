@@ -22,6 +22,10 @@ measured DCP prefill topology:
 - r7 ships the opt-in, DCP-aware LMCache 0.5.2 prefix-offload path from its
   merged public source branch, with RAM-only and buffered-filesystem modes,
   while leaving ordinary serving unchanged.
+- r8 builds XGrammar 0.2.5 from its pinned source commit and verifies GLM
+  structural-tag handling for `tool_choice=required`: at least one tool call
+  is required, while multiple calls and normal completion after a call remain
+  valid.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -37,13 +41,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
-Docker manifest: sha256:fdc107c917f5ce7c7f78a51a2b76b171a0eb25569be58c1284809e7e6ba33482
-Local image ID: sha256:d5b386bf2fb047a4d613eadc7c8260da5436f3eb5058ee88ecdf2d1b6ac1b03c
+voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r8
+Docker manifest: sha256:547269db0f9cdb1982432f9b3436eac371d21a3c0daadec7718d81f07739a51e
+Local image ID: sha256:31fc16c7e01b3c0ec64b2bafb196118c3f5eb576b84357d2ad6cc7d9e9dd74af
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-25,187,821,429-byte local image used for the final helper and runtime-contract
+25,181,400,832-byte local image used for the final helper and runtime-contract
 gates below; there was no rebuild between those gates and push. Both source trees were
 composed from clean public bases plus exact public PR heads. The generated
 integration patches and lockfiles are public, immutable release artifacts;
@@ -65,12 +69,13 @@ Pinned source stack:
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
 | InstantTensor | `85e7c5f5539d9c006ee0c26bc1b5233c65251b6b` |
 | LMCache | `local-inference-lab/LMCache release/v0.5.2-glm52-dcp-base` @ `9cebd405d0caf4bebe01d694b5a8bf4e3e354314`, wheel `0.5.2+glm52dcp.3` |
+| XGrammar | `mlc-ai/xgrammar v0.2.5` @ `2ea71da4ccb997a06928c9fb69b99f330da56697`, wheel `0.2.5` |
 | DeepGEMM | `a6b593d2826719dcf4892609af7b84ee23aaf32a` |
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
 | Launcher/runtime source | `local-inference-lab/blackwell-llm-docker` @ `a5791db0cf8daa4acab7d849e04fc036f1be00d5` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `265714b0b62a3e2b591dfbda4e3295ade44856b9` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `0ab408490ebc9394c6e1616e9b2773ca08ca43a0` |
 
 The image uses no `VLLM_PATCH_URL`, private source overlay, or source bind
 mount. It contains generated `VLLM_PATCH_FILE` and SparkInfer patch artifacts
@@ -82,7 +87,7 @@ fingerprint derived from the pinned sources.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/265714b0b62a3e2b591dfbda4e3295ade44856b9/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/0ab408490ebc9394c6e1616e9b2773ca08ca43a0/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -91,8 +96,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 265714b0b62a3e2b591dfbda4e3295ade44856b9
-VLLM_RELEASE_COMPOSITION=reproduce-r7 \
+git checkout 0ab408490ebc9394c6e1616e9b2773ca08ca43a0
+VLLM_RELEASE_COMPOSITION=reproduce-r8 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -104,6 +109,15 @@ the build. The clean composer and archived source artifacts are reviewed in
 the merged LMCache build, helper, tests, and r6/r7 reproduction modes are
 reviewed in
 [blackwell-llm-docker #8](https://github.com/local-inference-lab/blackwell-llm-docker/pull/8).
+
+The r8 source build is intentionally narrower than a compute-stack update.
+It pins XGrammar 0.2.5 and runs its required-tool semantics test plus a real
+GLM-5.2 tokenizer initialization under this image's Transformers 5 runtime.
+XGrammar upstream caps Transformers below 5 because of tokenizer regressions
+in other model families; r8 removes only that wheel metadata cap and records
+the compatibility override in image labels. vLLM, SparkInfer, FlashInfer,
+quantization, attention, communication, and LMCache sources are unchanged from
+r7, so r8 does not change the established speed or KLD results.
 
 The build deliberately excludes the separate weight-lifetime experiments in
 vLLM PR #154, vLLM PR #157, and SparkInfer PR #62. It also excludes the
@@ -170,7 +184,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r8
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -183,7 +197,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r7
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm936ed48-sif532ec9-fi801d57a-cu132-20260728-r8
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
