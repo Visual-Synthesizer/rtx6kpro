@@ -33,6 +33,10 @@ measured DCP prefill topology:
   handling, the GLM `tool_choice=required` single-call fix, opt-in CUDA-clean
   forkserver startup, and the complete DCP-aware LMCache durability stack.
   LMCache now also works through the unified `glm52-exl3` / `exl3` presets.
+- r12 stabilizes EXL3/Trellis memory profiling around the repeatable
+  post-warmup peak, uses the consolidated SparkInfer fused-MoE API, and fixes
+  small-row planning for both target and MTP draft execution. Clean-image
+  TP4/DCP4 MTP0 and MTP3 validation remains at r11 performance.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -48,13 +52,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm9502cc7-side7739a-fi801d57a-cu132-20260729-r11
-Docker manifest: sha256:eb4ece3757c03e10764f0900a1366ba4ef63c33560052c976d9ae08457482ff2
-Pulled image ID: sha256:2d68887b1dcd42c62ad90596fcaef0c65496108a8dccdb72be67b699276a12c5
+voipmonitor/vllm:gilded-gnosis-v20-vllmb46c3aa-si35aebc6-fi801d57a-cu132-20260730-r12
+Docker manifest: sha256:bcd65c13076b00cf7804001ce70085453de958b082897b9674a26d9fab4d436a
+Pulled image ID: sha256:f1643d902c93b05fd81c868f8f4a49f53e4c959e0e082a85e1637fa0498fc600
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-25,184,754,956-byte local image used for the final helper and runtime-contract
+25,184,222,262-byte local image used for the final helper and runtime-contract
 gates below; there was no rebuild between those gates and push. All three
 source trees were composed from clean public bases plus exact public PR heads.
 The generated integration patches and lockfiles are public, immutable release artifacts;
@@ -67,10 +71,10 @@ Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `4247d6765398fd42de3c108a8d991b2634fe88d1` |
-| Composed vLLM tree | `9502cc7ee9dbc060899a2b1d30fac6916d3a4a95` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `f9be2724953a5b412d19c20482aeb0a64fbd5d2a` |
-| Composed SparkInfer tree | `de7739aa7ebc8a52eb1f1997367eee1d0a6bab79` |
+| Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `f978d009fab996617f9a3cadef36ce727bcd83cd` |
+| Composed vLLM tree | `b46c3aac9421ec6c03b9dfcb5aacc8c1eb11f09b` |
+| SparkInfer base | `local-inference-lab/sparkinfer master` @ `36cade0bd8d87a26b7eb2fc8cc46188496465a06` |
+| Composed SparkInfer tree | `35aebc6d46a0d3d4f7275b81251211864f410269` |
 | EXL3 extension | `brandonmmusic-max/exllamav3 a1-retile-sm120` @ `704aefd743b390af4bd0fb429d1906f9b964c7d8` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
@@ -81,8 +85,8 @@ Pinned source stack:
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
-| Launcher/runtime source | `local-inference-lab/blackwell-llm-docker` @ `62c94d42b36601007ecb8931bbf103fd502668fb` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `54887a1c3751d9fd2ba5e4c9e184ad0dddc87256` |
+| Launcher/runtime source | `local-inference-lab/blackwell-llm-docker` @ `513bd84a1d8f4b834ca343abb4189e82acb1df52` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `a0c4a464a71a10b89d08607978c435f0f4b8b64f` |
 
 The image uses no `VLLM_PATCH_URL`, private source overlay, or source bind
 mount. It contains generated `VLLM_PATCH_FILE` and SparkInfer patch artifacts
@@ -94,7 +98,7 @@ from the pinned sources.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/54887a1c3751d9fd2ba5e4c9e184ad0dddc87256/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/a0c4a464a71a10b89d08607978c435f0f4b8b64f/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -103,8 +107,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 54887a1c3751d9fd2ba5e4c9e184ad0dddc87256
-VLLM_RELEASE_COMPOSITION=reproduce-r11 \
+git checkout a0c4a464a71a10b89d08607978c435f0f4b8b64f
+VLLM_RELEASE_COMPOSITION=reproduce-r12 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -116,11 +120,13 @@ the build. The clean composer and archived source artifacts are reviewed in
 the merged LMCache build, helper, tests, and r6/r7 reproduction modes are
 reviewed in
 [blackwell-llm-docker #8](https://github.com/local-inference-lab/blackwell-llm-docker/pull/8).
-The exact r11 composition, fail-fast manifest checks, helper changes, and
-archived reproduction mode are reviewed in
+The exact r11 composition is reviewed in
 [blackwell-llm-docker #10](https://github.com/local-inference-lab/blackwell-llm-docker/pull/10).
+The r12 locks, reduced current-base manifests, EXL3/Trellis runtime gate, and
+archived reproduction mode are reviewed in
+[blackwell-llm-docker #11](https://github.com/local-inference-lab/blackwell-llm-docker/pull/11).
 
-The r11 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
+The r12 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
 test plus a real
 GLM-5.2 tokenizer initialization under this image's Transformers 5 runtime.
 XGrammar upstream caps Transformers below 5 because of tokenizer regressions
@@ -141,42 +147,30 @@ that selector policy was not part of this candidate or its validation.
 The cuBLAS/Xid correction is already in the pinned GG base through
 [vLLM PR #147](https://github.com/local-inference-lab/vllm/pull/147) and
 [SparkInfer PR #54](https://github.com/local-inference-lab/sparkinfer/pull/54).
-The pinned bases also already contain vLLM #177, #178, and #180 and
-SparkInfer #79 and #85. The clean r11 manifests apply only these exact PR heads
-on top of those bases:
+The current bases contain the previously reviewed DCP, dynamic-NVFP4,
+forkserver, XGrammar, and runtime-lifetime foundations. The clean r12 manifests
+apply only the following deltas that are still absent from those exact bases:
 
 | Project | Review | Purpose |
 |---|---|---|
 | vLLM | [#145](https://github.com/local-inference-lab/vllm/pull/145) | Calibrated NVFP4 MLA KV outer-scale wiring. |
-| vLLM | [#172](https://github.com/local-inference-lab/vllm/pull/172) | Profile persistent kernel resources before allocating KV cache. |
 | vLLM | [#175](https://github.com/local-inference-lab/vllm/pull/175) | Split sparse prefill queries and reduce gathered result traffic. |
-| vLLM | [#179](https://github.com/local-inference-lab/vllm/pull/179) | Add partial replicated-indexer topology and mixed target/draft grouping. |
-| vLLM | [#184](https://github.com/local-inference-lab/vllm/pull/184) | Dispatch lossless BF16 PCIe DMA above a measured byte crossover. |
-| vLLM | [#185](https://github.com/local-inference-lab/vllm/pull/185) | Gate DCP query split by a measured context crossover. |
-| vLLM | [#190](https://github.com/local-inference-lab/vllm/pull/190) | Add the EXL3 rank-sliced MoE integration and prefill planner. |
-| vLLM | [#189](https://github.com/local-inference-lab/vllm/pull/189) | Select the dynamic per-token NVFP4 MLA cache ABI and pass its record scales through vLLM. |
-| vLLM | [#194](https://github.com/local-inference-lab/vllm/pull/194) | Add opt-in CUDA-clean forkserver startup while preserving `spawn` as default. |
-| vLLM | [#195](https://github.com/local-inference-lab/vllm/pull/195) | Accept an empty tools array with `tool_choice=required`. |
-| vLLM | [#196](https://github.com/local-inference-lab/vllm/pull/196) | Recover when KV-transfer completion arrives after the scheduler request was removed. |
-| SparkInfer | [#81](https://github.com/local-inference-lab/sparkinfer/pull/81) | Measure lossless collective/overlap crossovers and derive a cached serving policy. |
-| SparkInfer | [#49](https://github.com/local-inference-lab/sparkinfer/pull/49) | Add the planned Trellis execution path used by EXL3. |
-| SparkInfer | [#86](https://github.com/local-inference-lab/sparkinfer/pull/86) | Store and consume per-token outer scales in the 368-byte NVFP4 MLA record. |
-| SparkInfer | [#87](https://github.com/local-inference-lab/sparkinfer/pull/87) | Use exact two-level indexer folding only within a configurable workspace budget, with an exact streaming-carry fallback. |
+| vLLM | [#190](https://github.com/local-inference-lab/vllm/pull/190) | Integrate EXL3 rank-sliced MoE with the consolidated SparkInfer fused-MoE API. |
+| vLLM | [#198](https://github.com/local-inference-lab/vllm/pull/198) | Profile repeatable post-warmup activation peaks before assigning KV capacity. |
+| SparkInfer | [#92](https://github.com/local-inference-lab/sparkinfer/pull/92) | Stabilize Trellis arena profiling, scratch binding, and small-row target/draft plans. |
 | LMCache | [#7-#17](https://github.com/local-inference-lab/LMCache/pulls) | Compose recoverable MP retrieval, prefix retention, eviction/lookup synchronization, native-FS durability and accounting, bounded diagnostics, and durable L1 writeback/prefetch. |
 
 The release build itself does not merge canonical branches and does not consume
 a precomposed integration branch. It generates both build-time patches from
 the clean bases and manifests, verifies their result trees, and archives the
-exact r11 vLLM, SparkInfer, and LMCache artifacts. SparkInfer #76 is closed and
-is not an additional release
-delta: the resulting PCIe output-lifetime implementation matches the pinned
-master. There is no runtime source patching or source bind mount.
+exact r12 vLLM, SparkInfer, and LMCache artifacts. There is no runtime source
+patching or source bind mount.
 
-At publication time, the additional PRs remain open and non-draft. r11 includes
+At publication time, the additional PRs remain open and non-draft. r12 includes
 their exact recorded heads only through immutable release locks; it does not
 imply that they were merged into GG, SparkInfer master, or LMCache. vLLM #189's
-repository pre-run check still requires a maintainer's `ready` or `verified`
-label before that repository will schedule pre-commit.
+runtime path is already present in the pinned GG base. The current merge state,
+dependency order, and deliberate #145 hold are maintained in issue #33.
 
 ### Canonical Merge Status
 
@@ -206,7 +200,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm9502cc7-side7739a-fi801d57a-cu132-20260729-r11
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmb46c3aa-si35aebc6-fi801d57a-cu132-20260730-r12
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -219,7 +213,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm9502cc7-side7739a-fi801d57a-cu132-20260729-r11
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllmb46c3aa-si35aebc6-fi801d57a-cu132-20260730-r12
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -398,7 +392,7 @@ LMCACHE_MODE=disk LMCACHE_L1_GB=8 LMCACHE_L2_GB=512 \
 MODEL_FAMILY=glm52-hybrid DCP=4 MTP=3 docker compose up -d
 
 # Community EXL3 profile. The helper pins its tested checkpoint revision and
-# TP4/DCP4 defaults; full model performance validation remains community-run.
+# TP4/DCP4 defaults; r12 validates both MTP0 and MTP3 from the clean image.
 MODEL_FAMILY=glm52-exl3 docker compose up -d
 
 # EXL3 with the same DCP-aware LMCache RAM connector.
@@ -503,7 +497,7 @@ options are preserved. Recheck the desired long-context memory budget when
 enabling LMCache rather than assuming the ordinary-serving KV number is
 unchanged.
 
-The r11 helper accepts LMCache for `glm52`, `glm52-hybrid`, `nf3`,
+The r12 helper accepts LMCache for `glm52`, `glm52-hybrid`, `nf3`,
 `glm52-exl3`, and `exl3`. Release validation covers TP8/DCP1, DCP2, and DCP4,
 plus virtual TP6/DCP3 and DCP6. Revalidate a new checkpoint or topology before
 production deployment.
@@ -1039,6 +1033,35 @@ no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
 
+### Final 2026-07-30 r12 gates
+
+The published image was validated without source mounts using its embedded
+helper. Package/ABI assertions, release composition checks, and the complete
+build gate passed before push. The registry digest and pulled image ID match
+the values in the release section above.
+
+The EXL3 gate used the pinned
+`brandonmusic/GLM-5.2-EXL3-TR3-3.0bpw` snapshot on GPUs 0-3, TP4/DCP4,
+seq=1, graph=6, max model length 131,072, and GMU 0.90:
+
+| Case | CC1 ctx0 | Acceptance | KV capacity | r11 reference |
+|---|---:|---:|---:|---:|
+| MTP0 | `48.52` tok/s | - | `834,560` | `48.58` tok/s |
+| MTP3 | `100.82` tok/s | `0.64865` | `485,888` | `101.02` tok/s |
+
+Both cases returned the expected correctness answer with zero request errors.
+The small deltas are measurement noise, so r12 does not introduce an EXL3
+decode regression. The MTP3 capacity is intentionally lower because the
+repeatable target and draft scratch peaks are now both profiled before KV
+allocation instead of relying on a one-time allocator observation.
+
+The SparkInfer scratch/fused/W4A16 suites passed 121 tests. The installed
+LMCache suite passed 218 tests with 131 skips. r12 retains the already
+validated r11 DCP, long-prefill, concurrency, and LMCache behavior; the r12
+delta changes EXL3/Trellis planning and memory accounting, not those paths.
+The exact archive is reproducible with
+`VLLM_RELEASE_COMPOSITION=reproduce-r12`.
+
 ### Final 2026-07-29 r11 gates
 
 The pushed tag was removed locally and pulled back from Docker Hub. The pull
@@ -1354,7 +1377,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm9502cc7-side7739a-fi801d57a-cu132-20260729-r11
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmb46c3aa-si35aebc6-fi801d57a-cu132-20260730-r12
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
