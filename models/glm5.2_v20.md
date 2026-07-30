@@ -43,6 +43,11 @@ measured DCP prefill topology:
   runner, Trellis arena accounting, and LMCache deadline handling. It also
   archives all three exact integration trees and verifies their launcher and
   dependency pins in the release gate. It retains r12's MTP0 decode uplift.
+- r14 adds native mixed K3/K4 EXL3 expert execution for the 3.25 bpw
+  checkpoint. Routes are packed once, activations are rotated once, and both
+  packed bitrates execute in one cooperative Trellis grid without reconstructing
+  or requantizing the checkpoint weights. The release also hardens all
+  row-derived element extents and launch-capacity contracts around that path.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -58,13 +63,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm69ba80b-sia2ea608-fi801d57a-cu132-20260730-r13
-Docker manifest: sha256:02796036c96a52fda0919aa260c45c70bc97d8e662a6ae5e614b5f987c20851b
-Pulled image ID: sha256:62b1d98873b728609d6d3d74f907ddd5f2ad1f125209d70e964dac43d93b6e46
+voipmonitor/vllm:gilded-gnosis-v20-vllm749050e-si8110e3e-fi801d57a-cu132-20260730-r14
+Docker manifest: sha256:cb03f2079d8a74915f01cda15f6bdf505762d13cc3fff192f7ebdaaf6e318bf2
+Pulled image ID: sha256:bdf8fe02d0d44f1d4704149363e86aa2265d42ac739b3200c4f58788586614c0
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-25,184,227,014-byte local image used for the final helper and runtime-contract
+25,184,332,296-byte local image used for the final helper and runtime-contract
 gates below; there was no rebuild between those gates and push. All three
 source trees were composed from clean public bases plus exact public PR heads.
 The generated integration patches and lockfiles are public, immutable release artifacts;
@@ -78,9 +83,9 @@ Pinned source stack:
 | Component | Ref / commit |
 |---|---|
 | Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `f978d009fab996617f9a3cadef36ce727bcd83cd` |
-| Composed vLLM tree | `69ba80b9e49b5ad6740f8b3d5d0e592213b25959` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `36cade0bd8d87a26b7eb2fc8cc46188496465a06` |
-| Composed SparkInfer tree | `a2ea6083713c15dcf7e2d2bcc74fbece837ff84d` |
+| Composed vLLM tree | `749050edab1b6664937c52fa1b0be360be632c1e` |
+| SparkInfer base | `local-inference-lab/sparkinfer master` @ `9b852b281250123fe323f63ccb1df3cac0f3bbca` |
+| Composed SparkInfer tree | `8110e3ea417794bfb08aff1fba20135102e5536b` |
 | EXL3 extension | `brandonmmusic-max/exllamav3 a1-retile-sm120` @ `704aefd743b390af4bd0fb429d1906f9b964c7d8` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
@@ -92,7 +97,7 @@ Pinned source stack:
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
 | Launcher/runtime source | `local-inference-lab/blackwell-llm-docker` @ `513bd84a1d8f4b834ca343abb4189e82acb1df52` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `97c83c30ff4474a8cb0095f6d5f9cdc4cce46ab8` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `2464cc0dbe6f77a0779ed30e082386837d2cf7fb` |
 
 The image uses no `VLLM_PATCH_URL`, private source overlay, or source bind
 mount. It contains generated `VLLM_PATCH_FILE` and SparkInfer patch artifacts
@@ -104,7 +109,7 @@ from the pinned sources.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/97c83c30ff4474a8cb0095f6d5f9cdc4cce46ab8/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/2464cc0dbe6f77a0779ed30e082386837d2cf7fb/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -113,8 +118,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 97c83c30ff4474a8cb0095f6d5f9cdc4cce46ab8
-VLLM_RELEASE_COMPOSITION=reproduce-r13 \
+git checkout 2464cc0dbe6f77a0779ed30e082386837d2cf7fb
+VLLM_RELEASE_COMPOSITION=reproduce-r14 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -131,6 +136,9 @@ The exact r11 composition is reviewed in
 The r13 locks, reduced current-base manifests, EXL3/Trellis runtime gate, and
 archived reproduction mode are reviewed in
 [blackwell-llm-docker #11](https://github.com/local-inference-lab/blackwell-llm-docker/pull/11).
+The r14 mixed-K3/K4 manifests, exact integration artifacts, and
+`reproduce-r14` mode are archived in
+[blackwell-llm-docker commit 2464cc0](https://github.com/local-inference-lab/blackwell-llm-docker/commit/2464cc0dbe6f77a0779ed30e082386837d2cf7fb).
 
 The r13 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
 test plus a real
@@ -154,7 +162,7 @@ The cuBLAS/Xid correction is already in the pinned GG base through
 [vLLM PR #147](https://github.com/local-inference-lab/vllm/pull/147) and
 [SparkInfer PR #54](https://github.com/local-inference-lab/sparkinfer/pull/54).
 The current bases contain the previously reviewed DCP, dynamic-NVFP4,
-forkserver, XGrammar, and runtime-lifetime foundations. The clean r13 manifests
+forkserver, XGrammar, and runtime-lifetime foundations. The clean r14 manifests
 apply only the following deltas that are still absent from those exact bases:
 
 | Project | Review | Purpose |
@@ -164,15 +172,16 @@ apply only the following deltas that are still absent from those exact bases:
 | vLLM | [#190](https://github.com/local-inference-lab/vllm/pull/190) | Integrate EXL3 rank-sliced MoE with the consolidated SparkInfer fused-MoE API. |
 | vLLM | [#198](https://github.com/local-inference-lab/vllm/pull/198) | Profile repeatable post-warmup activation peaks before assigning KV capacity. |
 | SparkInfer | [#92](https://github.com/local-inference-lab/sparkinfer/pull/92) | Stabilize Trellis arena profiling, scratch binding, and small-row target/draft plans. |
+| SparkInfer | [#104](https://github.com/local-inference-lab/sparkinfer/pull/104) | Execute native mixed K3/K4 experts in one Trellis grid with one route pack and activation rotation. |
 | LMCache | [#7-#17](https://github.com/local-inference-lab/LMCache/pulls) | Compose recoverable MP retrieval, prefix retention, eviction/lookup synchronization, native-FS durability and accounting, bounded diagnostics, and durable L1 writeback/prefetch. |
 
 The release build itself does not merge canonical branches and does not consume
 a precomposed integration branch. It generates all three integration patches from
 the clean bases and manifests, verifies their result trees, and archives the
-exact r13 vLLM, SparkInfer, and LMCache artifacts. There is no runtime source
+exact r14 vLLM, SparkInfer, and LMCache artifacts. There is no runtime source
 patching or source bind mount.
 
-At publication time, the additional PRs remain open and non-draft. r13 includes
+At publication time, the additional PRs remain open and non-draft. r14 includes
 their exact recorded heads only through immutable release locks; it does not
 imply that they were merged into GG, SparkInfer master, or LMCache. vLLM #189's
 runtime path is already present in the pinned GG base. The current merge state,
@@ -206,7 +215,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm69ba80b-sia2ea608-fi801d57a-cu132-20260730-r13
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm749050e-si8110e3e-fi801d57a-cu132-20260730-r14
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -219,7 +228,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm69ba80b-sia2ea608-fi801d57a-cu132-20260730-r13
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm749050e-si8110e3e-fi801d57a-cu132-20260730-r14
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -401,6 +410,15 @@ MODEL_FAMILY=glm52-hybrid DCP=4 MTP=3 docker compose up -d
 # TP4/DCP4 defaults; r13 validates both MTP0 and MTP3 from the clean image.
 MODEL_FAMILY=glm52-exl3 docker compose up -d
 
+# Mixed K3/K4 EXL3 checkpoint. The helper discovers its per-expert bitrates;
+# no conversion or online quantization flag is required.
+MODEL_FAMILY=glm52-exl3 \
+  MODEL=willfalco/GLM-5.2-EXL3-TR3-3.25bpw \
+  MODEL_REVISION=d7d79c2d14599dfce7a5d12b85f7ad73f40e623d \
+  SERVED_MODEL_NAME=GLM-5.2-EXL3-TR3-3.25bpw \
+  TP=4 DCP=4 MTP=3 MAX_NUM_SEQS=8 GRAPH=32 \
+  VLLM_EXL3_TRELLIS_MAX_M=32 docker compose up -d
+
 # EXL3 with the same DCP-aware LMCache RAM connector.
 MODEL_FAMILY=glm52-exl3 LMCACHE_MODE=ram DCP=2 docker compose up -d
 ```
@@ -425,6 +443,7 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `MTP` | `0` disables speculation. `3` is the principal validated speculative mode; the helper accepts an integer token count. |
 | `MAX_NUM_SEQS` | Standard `64`; scheduler concurrency and the input to automatic graph sizing. |
 | `GRAPH` | When unset, standard GLM uses `4 * MAX_NUM_SEQS`; the NF3 preset uses `64`. |
+| `VLLM_EXL3_TRELLIS_MAX_M` | Optional EXL3 routed-row/scratch capacity. It must cover the selected graph plan; use `6` for the validated CC1 MTP3/graph-6 profile or `32` for the validated seq-8/graph-32 profile. Execution fails closed above the planned arena. |
 | `MAX_MODEL_LEN` | Recommended standard and NF3 default: `262144`. TP6 remains `128000`. Raise only within the KV capacity reported at startup. |
 | `MAX_BATCHED_TOKENS` | Standard `8192`; NF3 `2048`. The validated virtual-TP6 profile uses `4096`. |
 | `GPU_MEMORY_UTILIZATION` | Recommended TP8 and NF3 default: `0.96`; TP6 at most `0.95`. TP8 `0.98` boots but is unsafe for long-prefill runtime allocations. |
@@ -1039,6 +1058,40 @@ no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
 
+### Final 2026-07-30 r14 mixed-EXL3 gates
+
+The r14 image was booted through its embedded helper with no source mounts or
+runtime patches. The gate used
+`willfalco/GLM-5.2-EXL3-TR3-3.25bpw` revision
+`d7d79c2d14599dfce7a5d12b85f7ad73f40e623d`, GPUs 0-3, TP4/DCP4,
+NVFP4 MLA KV, graph cap 6, and GMU 0.95. Startup identified every routed layer
+as `tiers=((3, 192), (4, 64))`, completed compilation and CUDA graph capture,
+and exposed 747,776 KV tokens.
+
+| Clean r14 case | Aggregate decode |
+|---|---:|
+| MTP0 CC1, context 0 | `48.3` tok/s |
+| MTP0 CC1, context 65,536 | `46.0` tok/s |
+
+The same PR heads were validated before image assembly with MTP3 and a larger
+graph plan:
+
+| Mixed K3/K4 case | Aggregate decode |
+|---|---:|
+| MTP3 CC1 | `105.23` tok/s |
+| MTP3 CC4 | `260.6` tok/s |
+| MTP3 CC8 | `390.9` tok/s |
+
+Eight concurrent requests returned 8/8 correct responses, and a 65,536-token
+prompt followed by 256 generated tokens completed cleanly. Rank-0 Torch traces
+showed the mixed decode kernel falling from `82.38` to `54.11 us/layer`
+(`-34.3%`) and mixed prefill from `6.764` to `6.528 ms/layer` (`-3.5%`), with
+no added host synchronization or copy. The final clean-image server and both
+decode gates reported no traceback or GPU error.
+
+The exact archive is reproducible with
+`VLLM_RELEASE_COMPOSITION=reproduce-r14`.
+
 ### Final 2026-07-30 r13 gates
 
 The published image was validated without source mounts using its embedded
@@ -1388,7 +1441,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm69ba80b-sia2ea608-fi801d57a-cu132-20260730-r13
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm749050e-si8110e3e-fi801d57a-cu132-20260730-r14
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
