@@ -35,13 +35,14 @@ measured DCP prefill topology:
   LMCache now also works through the unified `glm52-exl3` / `exl3` presets.
 - r12 stabilizes EXL3/Trellis memory profiling around the repeatable
   post-warmup peak, uses the consolidated SparkInfer fused-MoE API, and fixes
-  small-row planning for both target and MTP draft execution. Clean-image
-  TP4/DCP4 MTP0 and MTP3 validation remains at r11 performance.
+  small-row planning for both target and MTP draft execution. The consolidated
+  path raises matched TP4/DCP4 MTP0 decode from the stock r11 mean of 44.66 to
+  48.48 tok/s (+8.56%) without a measurable prefill regression. MTP3 remains
+  within acceptance-rate and run-to-run variance.
 - r13 incorporates the final review corrections for EXL3's direct validation
   runner, Trellis arena accounting, and LMCache deadline handling. It also
   archives all three exact integration trees and verifies their launcher and
-  dependency pins in the release gate. Runtime performance remains at r11/r12
-  parity.
+  dependency pins in the release gate. It retains r12's MTP0 decode uplift.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -1049,16 +1050,21 @@ The EXL3 gate used the pinned
 `brandonmusic/GLM-5.2-EXL3-TR3-3.0bpw` snapshot on GPUs 0-3, TP4/DCP4,
 seq=1, graph=6, max model length 131,072, and GMU 0.90:
 
-| Case | CC1 ctx0 | Acceptance | KV capacity | r11 reference |
-|---|---:|---:|---:|---:|
-| MTP0 | `48.61` tok/s | - | `834,560` | `48.58` tok/s |
-| MTP3 | `101.92` tok/s | `0.7117` | `485,888` | `101.02` tok/s |
+| Case | Stock r11 | r12 | r13 | r13 acceptance | r13 KV capacity |
+|---|---:|---:|---:|---:|---:|
+| MTP0 CC1 | `44.66` tok/s | `48.48` tok/s (`+8.56%`) | `48.61` tok/s (`+8.85%`) | - | `834,560` |
+| MTP3 CC1 | `99.77` tok/s | `100.82` tok/s | `101.92` tok/s | `0.7117` | `485,888` |
 
 Both cases returned the expected correctness answer with zero request errors.
-The small deltas are measurement noise, so r13 does not introduce an EXL3
-decode regression. The MTP3 capacity is intentionally lower because the
-repeatable target and draft scratch peaks are now both profiled before KV
-allocation instead of relying on a one-time allocator observation.
+The four matched MTP0 runs, including a GPU-group swap, show that the
+consolidated r12 path provides a reproducible 8.56% decode improvement over
+the actual stock r11 path; r13 retains it. An earlier r11-labelled development
+run already had the consolidated code applied and must not be used as the
+stock baseline. MTP3 differences are not claimed as a speedup because its
+acceptance rate and run-to-run variance changed. The MTP3 capacity is
+intentionally lower because the repeatable target and draft scratch peaks are
+now both profiled before KV allocation instead of relying on a one-time
+allocator observation.
 
 The SparkInfer scratch/fused/W4A16 gates and the installed LMCache build and
 integration suite passed. r13 retains the already validated
