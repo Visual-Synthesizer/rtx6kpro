@@ -8,7 +8,8 @@ exact measurements and are intentionally preserved.
 
 | Need | Page |
 |---|---|
-| Start TP2 standard or DSpark quickly | [DeepSeek-V4-Flash v10 Fathomless Validation](ds4dspark-v10.md) |
+| Start the current 0731 DSpark TP2 release | [DeepSeek-V4-Flash-0731 Gilded Gnosis r15](ds4dspark-v20-r15.md) |
+| Historical standard-MTP and DSpark deployment | [DeepSeek-V4-Flash v10 Fathomless Validation](ds4dspark-v10.md) |
 | Full DSpark and standard-MTP reference sweep | [DeepSeek-V4-Flash and DSpark v9](ds4dspark-v9.md) |
 | Eldritch standard checkpoint reference | [DeepSeek-V4-Flash v6](ds4-flash-v6.md) |
 | Tool-call empty-think failure mode | [DS4 empty think troubleshooting](ds4f-empty-think/README.md) |
@@ -17,10 +18,10 @@ exact measurements and are intentionally preserved.
 
 | Area | Current guidance |
 |---|---|
-| Current image line | Fathomless Firmament for v10; Eldritch pages remain historical baselines |
+| Current image line | Gilded Gnosis r15 for 0731 DSpark; Fathomless and Eldritch pages remain historical baselines |
 | Standard checkpoint | `deepseek-ai/DeepSeek-V4-Flash` |
-| DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-DSpark` |
-| Recommended TP2 defaults | `MAX_NUM_SEQS=16`, graph = `16 * (1 + speculative_tokens)`, `MAX_BATCHED=4096`, `GPU_MEM=0.95`, retention `4096` |
+| DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-0731` for the current release |
+| Current 0731 TP2 defaults | `MAX_NUM_SEQS=16`, graph = `16 * (K7 + 1) = 128`, `MAX_BATCHED=8192`, `GPU_MEM=0.975`, retention `4096` |
 | Backend families | B12X, Lucifer default, Lucifer CUTLASS |
 | Spec decode | Standard MTP2/MTP3 and native DSpark checkpoint paths are separate modes |
 
@@ -28,7 +29,8 @@ exact measurements and are intentionally preserved.
 
 | Page | Status | Why keep it |
 |---|---|---|
-| [DS4 DSpark v10](ds4dspark-v10.md) | Current Fathomless entry | Recommended TP2 launch defaults and reduced validation. |
+| [DS4 DSpark Gilded Gnosis r15](ds4dspark-v20-r15.md) | Current | Pinned 0731 DSpark helper, image, and regression canary. |
+| [DS4 DSpark v10](ds4dspark-v10.md) | Historical Fathomless entry | Full TP2/TP4 standard-MTP and DSpark sweep. |
 | [DS4 DSpark v9](ds4dspark-v9.md) | Full reference | Full standard-MTP and DSpark sweep on the prior line. |
 | [DS4 Flash v6](ds4-flash-v6.md) | Historical Eldritch reference | Shared Eldritch image, B12X/Lucifer variants, TP2/TP4 backend comparisons. |
 | [DS4 Flash v5](ds4-flash-v5.md) | Historical fix checkpoint | Eldritch DS4Fix validation. |

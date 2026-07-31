@@ -1,5 +1,9 @@
 # DeepSeek-V4-Flash and DSpark v10
 
+**Successor:** New deployments using `deepseek-ai/DeepSeek-V4-Flash-0731`
+should use the [Gilded Gnosis r15 runbook](ds4dspark-v20-r15.md). This v10 page
+remains the historical full standard-MTP and DSpark sweep.
+
 This page documents the DS4 standard-checkpoint and DSpark v10 release on the
 `dev/fathomless-firmament` line. It is a reproducible successor to
 [v9](ds4dspark-v9.md): the image is built from reviewed source refs, the launch
