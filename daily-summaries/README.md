@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-31](2026-07/2026-07-31.md) | DeepSeek V4 Flash-0731 dropped (API-only, weights pending) with post-trained-only update — claims  |
 | [2026-07-30](2026-07/2026-07-30.md) | MMLU-Pro accuracy showdown: NF3/EXL3 quants match or beat NVFP4 in several categories (business, bio |
 | [2026-07-29](2026-07/2026-07-29.md) | - GLM-5.2 "Gilded Gnosis" v20 saw rapid-fire docker releases (r5→r9) adding forked LMCache 0.5.2 w |
 | [2026-07-28](2026-07/2026-07-28.md) | Kimi-K3 released (753B total / 104B active params, 1.56TB weights, MXFP4-trained) — massive commun |
@@ -162,6 +163,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-07-31](2026-07/2026-07-31.md) | DeepSeek V4 Flash-0731 dropped (API-only, weights pending) with post-trained-only update — claims  |
 | [2026-07-30](2026-07/2026-07-30.md) | MMLU-Pro accuracy showdown: NF3/EXL3 quants match or beat NVFP4 in several categories (business, bio |
 | [2026-07-29](2026-07/2026-07-29.md) | - GLM-5.2 "Gilded Gnosis" v20 saw rapid-fire docker releases (r5→r9) adding forked LMCache 0.5.2 w |
 | [2026-07-28](2026-07/2026-07-28.md) | Kimi-K3 released (753B total / 104B active params, 1.56TB weights, MXFP4-trained) — massive commun |
