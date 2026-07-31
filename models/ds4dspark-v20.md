@@ -110,6 +110,11 @@ The final release gate proved all of the following on the exact release image:
 Do not enable `LMCACHE_MODE` in the same test. Native offload and LMCache are
 separate cache implementations and should be qualified independently.
 
+Normal connector teardown closes and unlinks the shared mmap. A forced
+`SIGKILL` cannot run that cleanup and can leave an orphaned
+`/dev/shm/vllm_offload_*.mmap`. After a crashed or forcibly removed container,
+confirm that no vLLM process still references the file before deleting it.
+
 ## Context Length
 
 `131072` is a conservative release default, not a model limit. Community runs
