@@ -33,6 +33,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
 - [DeepSeek-V4-Flash and DSpark v10](models/ds4dspark-v10.md) - `models/ds4dspark-v10.md`
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
+- [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20.md) - `models/ds4dspark-v20.md`
 - [DeepSeek-V4-Flash-DSpark v7](models/ds4dspark-v7.md) - `models/ds4dspark-v7.md`
 - [DeepSeek-V4-Flash and DSpark v8](models/ds4dspark-v8.md) - `models/ds4dspark-v8.md`
 - [DeepSeek-V4-Flash and DSpark v9](models/ds4dspark-v9.md) - `models/ds4dspark-v9.md`
@@ -330,6 +331,10 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-07-24](daily-summaries/2026-07/2026-07-25.md) - `daily-summaries/2026-07/2026-07-25.md`
 - [Daily Summary — 2026-07-25](daily-summaries/2026-07/2026-07-26.md) - `daily-summaries/2026-07/2026-07-26.md`
 - [Daily Summary — 2026-07-26](daily-summaries/2026-07/2026-07-27.md) - `daily-summaries/2026-07/2026-07-27.md`
+- [Daily Summary — 2026-07-27](daily-summaries/2026-07/2026-07-28.md) - `daily-summaries/2026-07/2026-07-28.md`
+- [Daily Summary — 2026-07-28](daily-summaries/2026-07/2026-07-29.md) - `daily-summaries/2026-07/2026-07-29.md`
+- [Daily Summary — 2026-07-29](daily-summaries/2026-07/2026-07-30.md) - `daily-summaries/2026-07/2026-07-30.md`
+- [Daily Summary — 2026-07-30](daily-summaries/2026-07/2026-07-31.md) - `daily-summaries/2026-07/2026-07-31.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
