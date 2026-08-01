@@ -61,6 +61,16 @@ measured DCP prefill topology:
   in EXL3 checkpoints. Serialized EXL3 routed experts remain unchanged; the
   default EXL3 mode remains native (`ONLINE_QUANT=none`). The validated default
   ignore list keeps `q_a_proj`, `kv_a_proj_with_mqa`, and `lm_head` in BF16.
+- r19 consolidates the mixed K3/K4 execution, online-MXFP8 overlay, and EXL3
+  rotation loader into one reviewable change. It remains backward compatible
+  with legacy `per_expert_v1` checkpoints and adds the explicit `shared_h_v1`
+  artifact contract. A calibrated shared-H encode stores gate/up `SUH` and
+  down `SVH` once per layer and TP rank instead of once per expert, saving
+  672.36 MiB/GPU at GLM-5.2 dimensions without expanding the rows during load.
+  The full shared-H checkpoint still requires its final KLD and E2E release
+  gates; the current evidence is a real-layer POC plus loader tests. The exact
+  encoder procedure is documented in
+  [GLM-5.2 EXL3 shared-H quantization](glm5.2_exl3_shared_h_quantization.md).
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -76,9 +86,9 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllmab358b1-sib2bff71-fi801d57a-cu132-20260801-r18
-Docker manifest: sha256:a9babed55cb11dccef1eba4ee39516f0fbbd6a69969bfdf58ab4dac9beff57d8
-Pulled image ID: sha256:9525ffca386e01e7d7e097f69b54b59dc9eb23ec49d475525bb0b4bc036739ab
+voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
+Docker manifest: sha256:7535197b20128d9a30d6e73d0c878c4b95f2350918126350bf328f156c8b3241
+Local image ID: sha256:01de59d45432fb3fe169abf6ef10293712a4dc262d2a16c0e3d56b0b6bcf2ab7
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
@@ -95,7 +105,7 @@ Pinned source stack:
 | Component | Ref / commit |
 |---|---|
 | Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `30038602b71395f481ef4a6edfe4fcf8551d9c15` |
-| Composed vLLM tree | `ab358b11844ab626ca227be455165e336d5f855a` |
+| Composed vLLM tree | `6634ec930a746753441d2244bc8c0c7003f0143d` |
 | SparkInfer base | `local-inference-lab/sparkinfer master` @ `b0976b7fd46b5d34357a5f615822b86792676feb` |
 | Composed SparkInfer tree | `b2bff719ba1be0a5d30cb39cba795f0812db0f3d` |
 | EXL3 extension | `brandonmmusic-max/exllamav3 a1-retile-sm120` @ `704aefd743b390af4bd0fb429d1906f9b964c7d8` |
@@ -109,7 +119,7 @@ Pinned source stack:
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
 | Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `8f07269878d4bd7c3f541f42fa8a6c6a80927329` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `37333c54eb8344a9b8e014f14cd74a013a4ef278` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `c12011b4c5edffceb350ba9d39d48ac0b2562452` |
 
 Image labels expose all base commits, PR heads, result trees, patch and lock
 hashes, and a cache fingerprint derived from the pinned sources.
@@ -126,8 +136,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 37333c54eb8344a9b8e014f14cd74a013a4ef278
-VLLM_RELEASE_COMPOSITION=reproduce-r18 \
+git checkout c12011b4c5edffceb350ba9d39d48ac0b2562452
+VLLM_RELEASE_COMPOSITION=reproduce-r19 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -150,8 +160,12 @@ are reviewed in
 The r18 EXL3 online-MXFP8 helper policy, immutable source composition, and
 `reproduce-r18` mode are reviewed in
 [blackwell-llm-docker PR #15](https://github.com/local-inference-lab/blackwell-llm-docker/pull/15).
+The r19 release is committed directly to Docker `main` at `c12011b`. Its
+immutable `reproduce-r19` archive composes the consolidated
+[vLLM PR #225](https://github.com/local-inference-lab/vllm/pull/225) instead
+of the superseded #222 and #223 heads.
 
-The r18 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
+The r19 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
 test plus a real
 GLM-5.2 tokenizer initialization under this image's Transformers 5 runtime.
 XGrammar upstream caps Transformers below 5 because of tokenizer regressions
@@ -173,7 +187,7 @@ The cuBLAS/Xid correction is already in the pinned GG base through
 [vLLM PR #147](https://github.com/local-inference-lab/vllm/pull/147) and
 [SparkInfer PR #54](https://github.com/local-inference-lab/sparkinfer/pull/54).
 The current bases contain the previously reviewed DCP, dynamic-NVFP4,
-forkserver, XGrammar, EXL3, and runtime-lifetime foundations. The clean r18
+forkserver, XGrammar, EXL3, and runtime-lifetime foundations. The clean r19
 manifests apply the following exact PR heads on top of those bases:
 
 | Project | Review | Purpose |
@@ -185,8 +199,7 @@ manifests apply the following exact PR heads on top of those bases:
 | vLLM | [#217](https://github.com/local-inference-lab/vllm/pull/217) | Allocate native CPU KV offload from one process-shared region. |
 | vLLM | [#218](https://github.com/local-inference-lab/vllm/pull/218) | Align SWA/MTP retention and shared-prefix tails under native offload. |
 | vLLM | [#216](https://github.com/local-inference-lab/vllm/pull/216) | Isolate target, draft, profiling, production, and eager PCIe graph channels. |
-| vLLM | [#222](https://github.com/local-inference-lab/vllm/pull/222) | Use shape-aware mixed EXL3 decode and bounded serial prefill. |
-| vLLM | [#223](https://github.com/local-inference-lab/vllm/pull/223) | Allow online MXFP8 on eligible BF16 dense projections while preserving EXL3 tensors and ignored sensitive projections. |
+| vLLM | [#225](https://github.com/local-inference-lab/vllm/pull/225) | Consolidate shape-aware mixed EXL3 execution, online MXFP8 for eligible BF16 projections, and legacy/shared-H rotation loading. |
 | SparkInfer | [#106](https://github.com/local-inference-lab/sparkinfer/pull/106) | Honor compressed MLA physical page stride in the backend. |
 | SparkInfer | [#105](https://github.com/local-inference-lab/sparkinfer/pull/105) | Harden PCIe replay/IPC lifetime and package local runtime-JIT headers. |
 | SparkInfer | [#110](https://github.com/local-inference-lab/sparkinfer/pull/110) | Harden W4A16 planning, tail handling, and capture resolution. |
@@ -195,9 +208,9 @@ manifests apply the following exact PR heads on top of those bases:
 The release build itself does not merge canonical branches and does not consume
 a precomposed integration branch. It generates all three integration patches from
 the clean bases and manifests, verifies their result trees, and archives the
-exact r18 vLLM, SparkInfer, and LMCache artifacts.
+exact r19 vLLM, SparkInfer, and LMCache artifacts.
 
-At publication time, r18 includes the recorded heads through immutable release
+At publication time, r19 includes the recorded heads through immutable release
 locks; it does not imply that they were merged into GG, SparkInfer master, or
 LMCache. vLLM #216 remains an intentional draft pending human review. vLLM
 #145 is closed but deliberately retained in the image and remains on hold for
@@ -232,7 +245,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmab358b1-sib2bff71-fi801d57a-cu132-20260801-r18
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -245,7 +258,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllmab358b1-sib2bff71-fi801d57a-cu132-20260801-r18
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -1085,6 +1098,33 @@ no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
 
+### Final 2026-08-01 r19 legacy-EXL3 compatibility gate
+
+The exact pushed r19 image was pulled by registry digest on a separate
+eight-GPU host. Docker exposed only physical GPUs 4-7 by UUID; the test used
+TP4/DCP1/MTP0, `MAX_NUM_SEQS=1`, graph cap 6, batch 2,048, 131,072 maximum
+model length, GMU 0.95, FP8 KV, and the standard in-image helper. The unchanged
+legacy checkpoint was `willfalco/GLM-5.2-EXL3-TR3-3.25bpw` revision
+`d7d79c2d14599dfce7a5d12b85f7ad73f40e623d`.
+
+| Gate | Result |
+|---|---:|
+| Legacy layout | `per_expert_v1` (metadata absent) |
+| Mixed expert tiers | 192 K3 + 64 K4 per MoE layer |
+| Model load | 80.9 GiB/GPU, 25.9-27.8 s |
+| Available KV memory | 7.57 GiB/GPU |
+| Logical KV capacity | 150,720 tokens |
+| CUDA graph capture | full + piecewise pass |
+| Correctness response | exact `R19 EXL3 LEGACY OK` |
+| Chunked-prefill smoke | 8,823 prompt tokens, pass |
+| Runtime error scan | clean |
+
+This proves that r19 does not require existing EXL3 checkpoints to be
+rewritten. The `shared_h_v1` loader additionally passed 47 installed-package
+unit tests, including legacy/shared-H mixed-tier parameterization. A complete
+newly encoded shared-H checkpoint is not yet available, so its full-model KLD
+and E2E gates remain explicitly pending.
+
 ### Final 2026-08-01 r18 EXL3 online-MXFP8 gate
 
 The published r18 image was booted through its embedded helper with
@@ -1531,7 +1571,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmab358b1-sib2bff71-fi801d57a-cu132-20260801-r18
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
