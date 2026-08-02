@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-02](2026-08/2026-08-02.md) | DeepSeek-V4-Flash-0731 (GA) ships with a serious quality regression: multiple users (ormandj, RelayM |
 | [2026-08-01](2026-08/2026-08-01.md) | DeepSeek-V4-Flash-0731 officially released (successor to preview), same DSpark speculative-decode ar |
 | [2026-07-31](2026-07/2026-07-31.md) | DeepSeek V4 Flash-0731 dropped (API-only, weights pending) with post-trained-only update — claims  |
 | [2026-07-30](2026-07/2026-07-30.md) | MMLU-Pro accuracy showdown: NF3/EXL3 quants match or beat NVFP4 in several categories (business, bio |
@@ -164,6 +165,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-02](2026-08/2026-08-02.md) | DeepSeek-V4-Flash-0731 (GA) ships with a serious quality regression: multiple users (ormandj, RelayM |
 | [2026-08-01](2026-08/2026-08-01.md) | DeepSeek-V4-Flash-0731 officially released (successor to preview), same DSpark speculative-decode ar |
 | [2026-07-31](2026-07/2026-07-31.md) | DeepSeek V4 Flash-0731 dropped (API-only, weights pending) with post-trained-only update — claims  |
 | [2026-07-30](2026-07/2026-07-30.md) | MMLU-Pro accuracy showdown: NF3/EXL3 quants match or beat NVFP4 in several categories (business, bio |
