@@ -320,6 +320,7 @@ services:
       - QUANTIZATION
       - ONLINE_QUANT
       - QUANTIZATION_CONFIG_JSON
+      - VLLM_EXL3_PREFILL_CAPACITY
       - VLLM_EXL3_ONLINE_TRELLIS_BITS
       - VLLM_EXL3_ONLINE_CACHE_DIR
       - VLLM_EXL3_ONLINE_CACHE_MODE
@@ -477,6 +478,15 @@ MODEL_FAMILY=glm52-exl3 \
   TP=4 DCP=4 MTP=3 MAX_NUM_SEQS=8 GRAPH=32 \
   VLLM_EXL3_TRELLIS_MAX_M=32 docker compose up -d
 
+# Capacity-first EXL3 profile. This preserves MAX_BATCHED_TOKENS=2048 but
+# reuses a 1024-row prefill arena in slices, returning VRAM to the KV cache.
+# Expect roughly 7-12% lower prefill throughput than unrestricted capacity.
+MODEL_FAMILY=glm52-exl3 \
+  MODEL=willfalco/GLM-5.2-EXL3-TR3-3.25bpw \
+  MODEL_REVISION=d7d79c2d14599dfce7a5d12b85f7ad73f40e623d \
+  TP=4 DCP=4 MTP=3 MAX_BATCHED_TOKENS=2048 \
+  VLLM_EXL3_PREFILL_CAPACITY=1024 docker compose up -d
+
 # EXL3 with the same DCP-aware LMCache RAM connector.
 MODEL_FAMILY=glm52-exl3 LMCACHE_MODE=ram DCP=2 docker compose up -d
 ```
@@ -502,6 +512,7 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `MAX_NUM_SEQS` | Standard `64`; scheduler concurrency and the input to automatic graph sizing. |
 | `GRAPH` | When unset, standard GLM uses `4 * MAX_NUM_SEQS`; the NF3 preset uses `64`. |
 | `VLLM_EXL3_TRELLIS_MAX_M` | Optional EXL3 routed-row/scratch capacity. It must cover the selected graph plan; use `6` for the validated CC1 MTP3/graph-6 profile or `32` for the validated seq-8/graph-32 profile. Execution fails closed above the planned arena. |
+| `VLLM_EXL3_PREFILL_CAPACITY` | Optional EXL3 routed-expert prefill-arena bound. Unset/blank equals `MAX_BATCHED_TOKENS` and is the fastest default. `1024` is the measured capacity-first setting: larger scheduler batches are processed as contiguous slices through the same smaller persistent arena, typically trading 7-12% prefill throughput for more KV capacity. It does not cap prompt length, context length, or scheduler batch size. |
 | `MAX_MODEL_LEN` | Recommended standard and NF3 default: `262144`. TP6 remains `128000`. Raise only within the KV capacity reported at startup. |
 | `MAX_BATCHED_TOKENS` | Standard `8192`; NF3 `2048`. The validated virtual-TP6 profile uses `4096`. |
 | `GPU_MEMORY_UTILIZATION` | Recommended TP8 and NF3 default: `0.96`; TP6 at most `0.95`. TP8 `0.98` boots but is unsafe for long-prefill runtime allocations. |
@@ -1127,6 +1138,78 @@ transport experiments and do not belong in the main decode table. Acceptance
 statistics come from the exact post-decode server-log window. Prefill token
 targeting must be recorded as either `estimate` for historical comparison or
 `exact` for an exact 65,536-token prompt; never combine the two silently.
+
+### EXL3 Prefill Capacity
+
+`VLLM_EXL3_PREFILL_CAPACITY` is a memory/performance policy for the EXL3
+Trellis routed-expert prefill runtime. It is not a model-context limit and is
+unrelated to `MAX_NUM_SEQS`. The value selects the maximum number of token rows
+for which each persistent prefill plan and scratch arena is sized.
+
+When the variable is unset or blank, capacity resolves to
+`MAX_BATCHED_TOKENS`. A 2,048-row scheduler batch therefore uses a 2,048-row
+arena and one prefill dispatch. With capacity 1,024, the scheduler contract
+remains 2,048 rows, but the EXL3 integration dispatches the batch as two
+contiguous 1,024-row slices. A 2,500-row batch would use `1024 + 1024 + 452`.
+Inputs, route IDs, route weights, and output row placement are sliced together;
+the same persistent plan and accumulator are reused for the exact short tail.
+
+The setting changes neither serialized weights nor quantization. It does not
+change the dense online-K6 path, the small-M/decode Trellis plan, prompt length,
+`MAX_MODEL_LEN`, or the scheduler's `MAX_BATCHED_TOKENS` limit. Its only direct
+cost is extra prefill dispatch and setup work when a live batch exceeds the
+selected capacity. Decode does not directly use this arena. Tests cover exact
+capacity boundaries, short tails, mixed and homogeneous expert layouts,
+route/output preservation, invalid values, and CUDA-capture rejection.
+
+The arena is persistent and reused across MoE layers, so its size is not
+multiplied by the layer count. Target and MTP draft runtimes own separate
+mutable arenas, however, which is why MTP profiles can recover substantially
+more memory than MTP0 when the bound is reduced.
+
+Original TP4 target-plus-MTP evidence for the capacity feature:
+
+| Persistent arena | Unrestricted | Capacity 1024 | Recovered |
+|---|---:|---:|---:|
+| Target | 759.8 MiB | 279.7 MiB | 480.1 MiB |
+| MTP draft | 1,054.2 MiB | 414.1 MiB | 640.1 MiB |
+| **Total per rank/GPU** | **1,814.0 MiB** | **693.8 MiB** | **1,120.2 MiB** |
+
+That profile increased exposed KV capacity from an estimated 110,080 tokens
+to 257,024 tokens and passed an exact 126k retrieval test. The 1.1 GiB figure
+is specific to this target-plus-draft geometry; it must not be generalized to
+MTP0 or a different scheduler capacity.
+
+A later matched TP4/DCP4/MTP0 shape-aware comparison used
+`MAX_BATCHED_TOKENS=2048`:
+
+| Mode | Persistent prefill buffers | KV tokens | Prefill 3k | Prefill 32k | Prefill 128k |
+|---|---:|---:|---:|---:|---:|
+| Default capacity 2048 | 783.3 MiB | 856,320 | 3,792 | 3,690 | 3,324 |
+| Capacity 1024 | 438.7 MiB | 896,000 | 3,335 | 3,277 | 2,932 |
+
+In that MTP0 profile, capacity 1024 recovered 344.6 MiB/GPU and exposed
+39,680 additional KV tokens (`+4.6%`) while reducing prefill throughput by
+`11.2-12.1%`. A separate combined MTP5 profile measured a `7-10%` prefill
+cost and approximately `1-2%` generation-throughput variation. The supported
+operator expectation is therefore a configuration-dependent **7-12% prefill
+trade-off**, not 1-2%.
+
+Operational guidance:
+
+- leave the variable unset for maximum prefill throughput and lowest TTFT;
+- use `1024` when KV capacity or successful long-context startup matters more;
+- values must be positive and no greater than `MAX_BATCHED_TOKENS`; invalid
+  values fail startup rather than being silently clamped;
+- lower values create more slices and have not been qualified as release
+  defaults;
+- compare the startup-reported KV capacity and matched uncached prefill on the
+  target topology before adopting a non-default value.
+
+Do not confuse this setting with `VLLM_EXL3_TRELLIS_MAX_M`, which controls the
+small-row/decode Trellis window and must cover the selected CUDA graph plan.
+The final r20 release gate below left `VLLM_EXL3_PREFILL_CAPACITY` unset, so its
+published 8k/64k prefill numbers represent the unrestricted, fastest path.
 
 ## Release Gate
 
