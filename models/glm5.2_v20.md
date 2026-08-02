@@ -71,6 +71,12 @@ measured DCP prefill topology:
   gates; the current evidence is a real-layer POC plus loader tests. The exact
   encoder procedure is documented in
   [GLM-5.2 EXL3 shared-H quantization](glm5.2_exl3_shared_h_quantization.md).
+- r20 is a strict r19 superset. It qualifies block-32 mixed K3/K4 Trellis
+  prefill and adds opt-in online K6 conversion for eligible BF16 dense EXL3
+  matrices. Converted K6 tensors are cached as atomic, per-rank safetensors
+  under `/cache/exl3-online`; serialized K3/K4 expert weights are never
+  rewritten. The exact r20 image passed cold-create, warm-cache, correctness,
+  CUDA-graph, capacity, decode, and 8k/64k prefill gates on TP4.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -86,13 +92,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
-Docker manifest: sha256:7535197b20128d9a30d6e73d0c878c4b95f2350918126350bf328f156c8b3241
-Local image ID: sha256:01de59d45432fb3fe169abf6ef10293712a4dc262d2a16c0e3d56b0b6bcf2ab7
+voipmonitor/vllm:gilded-gnosis-v20-vllm72c35f1-si2b9bf2a-fi801d57a-cu132-20260802-r20
+Docker manifest: sha256:40c891fd3fd573a92708e8a4bfa028ec91127a92491504c59006cf9735b20560
+Local image ID: sha256:088dcc81983d887471ddf9f84209ec0fff0a93d18c52cfd052a187f5f04d85cc
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-25,185,070,635-byte local image used for the final helper and runtime-contract
+25,193,824,208-byte local image used for the final helper and runtime-contract
 gates below; there was no rebuild between those gates and push. All three
 source trees were composed from clean public bases plus exact public PR heads.
 The generated integration patches and lockfiles are immutable release artifacts.
@@ -105,9 +111,9 @@ Pinned source stack:
 | Component | Ref / commit |
 |---|---|
 | Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `30038602b71395f481ef4a6edfe4fcf8551d9c15` |
-| Composed vLLM tree | `6634ec930a746753441d2244bc8c0c7003f0143d` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `b0976b7fd46b5d34357a5f615822b86792676feb` |
-| Composed SparkInfer tree | `b2bff719ba1be0a5d30cb39cba795f0812db0f3d` |
+| Composed vLLM tree | `72c35f14b65857110a7434e9243ca18b8cabd032` |
+| SparkInfer base | `local-inference-lab/sparkinfer master` @ `59216fa25f3d5fc9d4df2d052e02d05f763906e9` |
+| Composed SparkInfer tree | `2b9bf2a4d15770c0c23e19cc13a75843f2f0a995` |
 | EXL3 extension | `brandonmmusic-max/exllamav3 a1-retile-sm120` @ `704aefd743b390af4bd0fb429d1906f9b964c7d8` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
@@ -118,8 +124,8 @@ Pinned source stack:
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
-| Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `8f07269878d4bd7c3f541f42fa8a6c6a80927329` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `c12011b4c5edffceb350ba9d39d48ac0b2562452` |
+| Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `76b1cf0350709910208e61285adc955e34655136` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `8376fe35add980d028c9a12b5c6d5e48e40e836d` |
 
 Image labels expose all base commits, PR heads, result trees, patch and lock
 hashes, and a cache fingerprint derived from the pinned sources.
@@ -127,7 +133,7 @@ hashes, and a cache fingerprint derived from the pinned sources.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/37333c54eb8344a9b8e014f14cd74a013a4ef278/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/8376fe35add980d028c9a12b5c6d5e48e40e836d/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -136,8 +142,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout c12011b4c5edffceb350ba9d39d48ac0b2562452
-VLLM_RELEASE_COMPOSITION=reproduce-r19 \
+git checkout 8376fe35add980d028c9a12b5c6d5e48e40e836d
+VLLM_RELEASE_COMPOSITION=reproduce-r20 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -160,12 +166,15 @@ are reviewed in
 The r18 EXL3 online-MXFP8 helper policy, immutable source composition, and
 `reproduce-r18` mode are reviewed in
 [blackwell-llm-docker PR #15](https://github.com/local-inference-lab/blackwell-llm-docker/pull/15).
-The r19 release is committed directly to Docker `main` at `c12011b`. Its
-immutable `reproduce-r19` archive composes the consolidated
-[vLLM PR #225](https://github.com/local-inference-lab/vllm/pull/225) instead
-of the superseded #222 and #223 heads.
+The r20 release is committed directly to Docker `main` at `8376fe35add980d028c9a12b5c6d5e48e40e836d`. Its
+immutable `reproduce-r20` archive composes
+[vLLM PR #228](https://github.com/local-inference-lab/vllm/pull/228),
+[SparkInfer PR #112](https://github.com/local-inference-lab/sparkinfer/pull/112),
+and [SparkInfer PR #113](https://github.com/local-inference-lab/sparkinfer/pull/113).
+They supersede the now-closed vLLM #225/#226 and SparkInfer #105/#110/#111
+heads without changing the retained r19 behavior.
 
-The r19 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
+The r20 build retains r8's XGrammar 0.2.5 pin and its required-tool semantics
 test plus a real
 GLM-5.2 tokenizer initialization under this image's Transformers 5 runtime.
 XGrammar upstream caps Transformers below 5 because of tokenizer regressions
@@ -187,7 +196,7 @@ The cuBLAS/Xid correction is already in the pinned GG base through
 [vLLM PR #147](https://github.com/local-inference-lab/vllm/pull/147) and
 [SparkInfer PR #54](https://github.com/local-inference-lab/sparkinfer/pull/54).
 The current bases contain the previously reviewed DCP, dynamic-NVFP4,
-forkserver, XGrammar, EXL3, and runtime-lifetime foundations. The clean r19
+forkserver, XGrammar, EXL3, and runtime-lifetime foundations. The clean r20
 manifests apply the following exact PR heads on top of those bases:
 
 | Project | Review | Purpose |
@@ -199,18 +208,18 @@ manifests apply the following exact PR heads on top of those bases:
 | vLLM | [#217](https://github.com/local-inference-lab/vllm/pull/217) | Allocate native CPU KV offload from one process-shared region. |
 | vLLM | [#218](https://github.com/local-inference-lab/vllm/pull/218) | Align SWA/MTP retention and shared-prefix tails under native offload. |
 | vLLM | [#216](https://github.com/local-inference-lab/vllm/pull/216) | Isolate target, draft, profiling, production, and eager PCIe graph channels. |
-| vLLM | [#225](https://github.com/local-inference-lab/vllm/pull/225) | Consolidate shape-aware mixed EXL3 execution, online MXFP8 for eligible BF16 projections, and legacy/shared-H rotation loading. |
+| vLLM | [#228](https://github.com/local-inference-lab/vllm/pull/228) | Consolidate shape-aware mixed EXL3 execution, qualified block-32 prefill, legacy/shared-H rotation loading, and cached online K6 for eligible dense matrices. |
 | SparkInfer | [#106](https://github.com/local-inference-lab/sparkinfer/pull/106) | Honor compressed MLA physical page stride in the backend. |
-| SparkInfer | [#105](https://github.com/local-inference-lab/sparkinfer/pull/105) | Harden PCIe replay/IPC lifetime and package local runtime-JIT headers. |
-| SparkInfer | [#110](https://github.com/local-inference-lab/sparkinfer/pull/110) | Harden W4A16 planning, tail handling, and capture resolution. |
+| SparkInfer | [#113](https://github.com/local-inference-lab/sparkinfer/pull/113) | Rebase PCIe replay/IPC lifetime hardening and packaged runtime-JIT headers directly onto current master. |
+| SparkInfer | [#112](https://github.com/local-inference-lab/sparkinfer/pull/112) | Consolidate W4A16 planning, qualified block-32 mixed B3/B4 prefill, and native dense K6 execution. The measured slower TMA experiment is not shipped. |
 | LMCache | [#7-#17](https://github.com/local-inference-lab/LMCache/pulls) | Compose recoverable MP retrieval, prefix retention, eviction/lookup synchronization, native-FS durability and accounting, bounded diagnostics, and durable L1 writeback/prefetch. |
 
 The release build itself does not merge canonical branches and does not consume
 a precomposed integration branch. It generates all three integration patches from
 the clean bases and manifests, verifies their result trees, and archives the
-exact r19 vLLM, SparkInfer, and LMCache artifacts.
+exact r20 vLLM, SparkInfer, and LMCache artifacts.
 
-At publication time, r19 includes the recorded heads through immutable release
+At publication time, r20 includes the recorded heads through immutable release
 locks; it does not imply that they were merged into GG, SparkInfer master, or
 LMCache. vLLM #216 remains an intentional draft pending human review. vLLM
 #145 is closed but deliberately retained in the image and remains on hold for
@@ -245,7 +254,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm72c35f1-si2b9bf2a-fi801d57a-cu132-20260802-r20
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -258,7 +267,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllm72c35f1-si2b9bf2a-fi801d57a-cu132-20260802-r20
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -311,6 +320,9 @@ services:
       - QUANTIZATION
       - ONLINE_QUANT
       - QUANTIZATION_CONFIG_JSON
+      - VLLM_EXL3_ONLINE_TRELLIS_BITS
+      - VLLM_EXL3_ONLINE_CACHE_DIR
+      - VLLM_EXL3_ONLINE_CACHE_MODE
       - KV_CACHE_DTYPE
       - KV_FP8_ROPE
       - VLLM_NVFP4_MLA_DYNAMIC_SCALE
@@ -445,6 +457,17 @@ MODEL_FAMILY=glm52-exl3 docker compose up -d
 MODEL_FAMILY=glm52-exl3 QUANTIZATION=exl3 ONLINE_QUANT=mxfp8 \
   TP=4 DCP=1 MTP=0 docker compose up -d
 
+# Mixed K3/K4 experts plus cached online K6 for eligible BF16 dense matrices.
+# Keep JIT_CACHE mounted at the same path across restarts and image updates.
+MODEL_FAMILY=glm52-exl3 \
+  MODEL=/root/models/GLM-5.2-EXL3-TR3-3.25bpw \
+  SERVED_MODEL_NAME=GLM-5.2-EXL3-TR3-3.25bpw \
+  QUANTIZATION=exl3 ONLINE_QUANT=exl3-b6 \
+  GPUS=4,5,6,7 TP=4 DCP=1 MTP=0 \
+  MAX_NUM_SEQS=1 GRAPH=6 MAX_MODEL_LEN=131072 \
+  MAX_BATCHED_TOKENS=4096 GPU_MEMORY_UTILIZATION=0.95 \
+  docker compose up -d
+
 # Mixed K3/K4 EXL3 checkpoint. The helper discovers its per-expert bitrates;
 # no conversion or online quantization flag is required.
 MODEL_FAMILY=glm52-exl3 \
@@ -483,8 +506,11 @@ revision `8a1f4a13204acf2b7ac840375efaed64c231c522`.
 | `MAX_BATCHED_TOKENS` | Standard `8192`; NF3 `2048`. The validated virtual-TP6 profile uses `4096`. |
 | `GPU_MEMORY_UTILIZATION` | Recommended TP8 and NF3 default: `0.96`; TP6 at most `0.95`. TP8 `0.98` boots but is unsafe for long-prefill runtime allocations. |
 | `MOE_MODE` | `a4`, `a16`, or `force-a8-experimental`. |
-| `ONLINE_QUANT` | `none`, `mxfp8`, `fp8`, `nf3-mxfp8`, or `custom`. |
+| `ONLINE_QUANT` | `none`, `mxfp8`, `fp8`, `nf3-mxfp8`, `exl3-b6`, or `custom`. `exl3-b6` is valid only with `QUANTIZATION=exl3`. |
 | `QUANTIZATION_CONFIG_JSON` | Explicit online quantization policy; overrides the helper preset. |
+| `VLLM_EXL3_ONLINE_TRELLIS_BITS` | Fixed to `6` by the `exl3-b6` preset. Other values fail closed. |
+| `VLLM_EXL3_ONLINE_CACHE_DIR` | `/cache/exl3-online`; persistent per-rank safetensors for online K6 conversion. |
+| `VLLM_EXL3_ONLINE_CACHE_MODE` | `readwrite`; accepts explicit `readonly` or `off` diagnostic policies. Keep `readwrite` for normal serving. |
 | `KV_CACHE_DTYPE` | Standard `fp8`; NF3 uses `nvfp4_ds_mla`. |
 | `KV_FP8_ROPE` | `0`; set to `1` only with the r9 dynamic NVFP4 MLA cache mode below. |
 | `VLLM_NVFP4_MLA_DYNAMIC_SCALE` | `0`; opt-in per-token NVFP4 outer scales. Requires `KV_CACHE_DTYPE=nvfp4_ds_mla`, `KV_FP8_ROPE=1`, and an empty static scales file. |
@@ -644,6 +670,7 @@ sha256:8246024490670e43af6ccdc3df9c6dd0a084119f4507b7ac35a86f5a1c6c33c3
 | `festr2/GLM-5.2-BF16-AMDMXFP4experts` | `mxfp4` | `force-a8-experimental` | `none`, `mxfp8`, or `fp8` |
 | `madeby561/GLM-5.2-MXFP8-NVFP4-NF3-Hybrid` | `nvfp4_nf3_hybrid` | `a16` | `nf3-mxfp8` |
 | `brandonmusic/GLM-5.2-EXL3-TR3-3.0bpw` | `exl3` | `a16` / Trellis | `none` or `mxfp8` |
+| `willfalco/GLM-5.2-EXL3-TR3-3.25bpw` | `exl3` | mixed K3/K4 Trellis | `none`, `mxfp8`, or `exl3-b6` |
 
 For Luke NVFP4, A4 and A16 select the routed-expert activation path; they do
 not rewrite the NVFP4 checkpoint weights. A16 uses BF16 expert activations and
@@ -656,6 +683,16 @@ For EXL3, `ONLINE_QUANT=mxfp8` converts only eligible BF16 dense projections.
 It does not reinterpret, reconstruct, or requantize serialized EXL3 routed
 expert weights. Native EXL3 remains the default. The helper's validated ignore
 list is `q_a_proj`, `kv_a_proj_with_mqa`, and `lm_head`.
+
+`ONLINE_QUANT=exl3-b6` instead encodes eligible aligned BF16 dense matrices as
+native Trellis K6. Non-eligible or unaligned dense tensors retain the MXFP8
+fallback selected by the preset, while serialized K3/K4 routed experts remain
+bit-for-bit unchanged. The cache key covers checkpoint identity and revision,
+source fingerprint, encoder identity, TP rank and geometry, tensor shape,
+codebook/scales schema, K bits, and seed. Writes use a file lock and atomic
+rename; an incomplete or invalid entry is ignored and rebuilt. The Compose
+`JIT_CACHE` volume mounts `/cache`, so reuse that same host directory to avoid
+re-encoding approximately 11.90 GB of artifacts on each cold start.
 
 With `MTP>0`, the helper creates a same-checkpoint MTP draft using the same MoE
 backend and probabilistic draft sampling. The target and draft share the
@@ -1097,6 +1134,42 @@ Every benchmark started only after all required model instances were healthy;
 no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
+
+### Final 2026-08-02 r20 mixed-EXL3 and online-K6 gate
+
+The exact pushed r20 image was tested on a separate four-GPU root-port host.
+Only physical GPUs 4-7 were exposed. The profile was TP4/DCP1/MTP0,
+`MAX_NUM_SEQS=1`, graph cap 6, batch 4,096, maximum model length 131,072,
+GMU 0.95, dynamic NVFP4 MLA KV, and the standard in-image helper. The local
+checkpoint was `/root/models/GLM-5.2-EXL3-TR3-3.25bpw`; its serialized routed
+experts remained 192 K3 plus 64 K4 tensors per MoE layer.
+
+`ONLINE_QUANT=exl3-b6` selected block-32 mixed-expert prefill and native K6
+for eligible dense matrices. The first start created 1,644 cache files totaling
+11,897,961,792 bytes under `/cache/exl3-online`. The identical warm restart
+reported 1,644 cache hits, no encode operations, and an unchanged cache
+manifest SHA-256 of
+`562715a08e1fea3aae0437e022d84ff424062ceba1f0d9ec32d0cf91b3a0a07a`.
+
+| Gate | Result |
+|---|---:|
+| Cold create to `/health` | 827.04 s with both EXL3 and JIT caches empty |
+| Warm cache restart to `/health` | 113.94 s |
+| Warm model-loading phase | 26.05-27.17 s |
+| Weight memory | 76.54 GiB/GPU cold; 76.38 GiB/GPU warm |
+| Available KV memory | 11.25 GiB/GPU cold; 11.38 GiB/GPU warm |
+| Logical KV capacity | 331,136 tokens cold; 334,848 warm |
+| CUDA graph capture | full + piecewise pass |
+| Correctness sanity | coherent, repeated answer 42 |
+| MTP0 CC1 decode | 53.23 / 53.08 tok/s |
+| Uncached prefill 8k | 3,635.67 tok/s |
+| Uncached prefill 64k | 3,512.62 tok/s |
+
+The preceding K6 POC measured 53.079/53.157 tok/s decode, 3,604.39 tok/s at
+8k, and 3,490.25 tok/s at 64k on the same host class. The final r20 path is
+therefore within run-to-run noise or 0.1-0.9% faster; no release regression was
+observed. These root-port-host values are not interchangeable with the TP8
+switch-host GLM tables elsewhere on this page.
 
 ### Final 2026-08-01 r19 legacy-EXL3 compatibility gate
 
@@ -1571,7 +1644,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm6634ec9-sib2bff71-fi801d57a-cu132-20260801-r19
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllm72c35f1-si2b9bf2a-fi801d57a-cu132-20260802-r20
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
