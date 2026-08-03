@@ -83,6 +83,12 @@ measured DCP prefill topology:
   state, so one cached kernel is correct for both partitions. The exact r25
   image passed TP4/DCP4/MTP3 startup, correctness, CUDA graphs, CC1/CC8
   decode, 8k/64k prefill, and source/runtime-contract gates.
+- r26 corrects the automatic TP4/DCP4 prefill policy. Because TP4/DCP4 has
+  only one query partition, exact owner exchange adds transport without
+  removing duplicate work. Auto mode now uses query split, full CKV gather,
+  two indexer shards, no owner exchange, and measured depth-1 CKV prefetch.
+  The exact release image passed lossless PCIe calibration, CUDA graphs,
+  coherent MTP3 decode, and uncached 8k/64k prefill on a root-port host.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -98,13 +104,13 @@ stated GG and SparkInfer base commits.
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-si978cdb3-fi801d57a-cu132-20260803-r25
-Docker manifest: sha256:042936fd8d9e4c2aa579ab9b736dd0a2faf2678c6ba36bf4dfce7db566c6fd11
-Local image ID: sha256:7b2cdb7cb0e4298a5c0907d53c5bca25287ba10ca6707cb21ede1fb65076dea0
+voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-sibbbdccc-fi801d57a-cu132-20260803-r26
+Docker manifest: sha256:c7a202cf3ccd155973a151235acb9677aa98f61765372f839bb0c193ff594ec4
+Local image ID: sha256:30a752f0b490a3841610dfbea8f5758eab66924537feaeb1cd06b8e6ac92cce4
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
-25,194,005,143-byte local image used for the final helper and runtime-contract
+25,194,008,259-byte local image used for the final helper and runtime-contract
 gates below; there was no rebuild between those gates and push. All three
 source trees were composed from clean public bases plus exact public PR heads.
 The generated integration patches and lockfiles are immutable release artifacts.
@@ -118,8 +124,8 @@ Pinned source stack:
 |---|---|
 | Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `30038602b71395f481ef4a6edfe4fcf8551d9c15` |
 | Composed vLLM tree | `f5981f14b4d39979bc0d799c020d42002b707257` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `77154c105f441777355df1817ab660a8151fb294` |
-| Composed SparkInfer tree | `978cdb3593367469abd16bc8bdbc4ed0ea2787da` |
+| SparkInfer base | `local-inference-lab/sparkinfer master` @ `272a84bd97ce791a1e92d1f3a0da3dd5f3c6565f` |
+| Composed SparkInfer tree | `bbbdccc338a2691d780ed160db54ef121c3a61c9` |
 | EXL3 extension | `brandonmmusic-max/exllamav3 a1-retile-sm120` @ `704aefd743b390af4bd0fb429d1906f9b964c7d8` |
 | FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
@@ -130,8 +136,8 @@ Pinned source stack:
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
-| Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `76b1cf0350709910208e61285adc955e34655136` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `65c88fbef1bc9ac8f8fd8601431d2aef8fc17517` |
+| Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `6a61804c378cc8d5d666ab381c3d56b4f812b52f` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `fb58f5cb1df82dab841f6e73dd0995cbb20cd0f0` |
 
 Image labels expose all base commits, PR heads, result trees, patch and lock
 hashes, and a cache fingerprint derived from the pinned sources.
@@ -139,7 +145,7 @@ hashes, and a cache fingerprint derived from the pinned sources.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/65c88fbef1bc9ac8f8fd8601431d2aef8fc17517/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/fb58f5cb1df82dab841f6e73dd0995cbb20cd0f0/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -148,8 +154,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 65c88fbef1bc9ac8f8fd8601431d2aef8fc17517
-VLLM_RELEASE_COMPOSITION=reproduce-r25 \
+git checkout fb58f5cb1df82dab841f6e73dd0995cbb20cd0f0
+VLLM_RELEASE_COMPOSITION=reproduce-r26 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -180,12 +186,13 @@ and [SparkInfer PR #113](https://github.com/local-inference-lab/sparkinfer/pull/
 They supersede the now-closed vLLM #225/#226 and SparkInfer #105/#110/#111
 heads without changing the retained r19 behavior.
 
-The current r25 release is committed directly to Docker `main` at
-[`65c88fb`](https://github.com/local-inference-lab/blackwell-llm-docker/commit/65c88fbef1bc9ac8f8fd8601431d2aef8fc17517).
-Its `reproduce-r25` archive pins all three composed source trees and adds
-[SparkInfer PR #117](https://github.com/local-inference-lab/sparkinfer/pull/117).
+The current r26 release is committed directly to Docker `main` at
+[`fb58f5c`](https://github.com/local-inference-lab/blackwell-llm-docker/commit/fb58f5cb1df82dab841f6e73dd0995cbb20cd0f0).
+Its `reproduce-r26` archive pins all three composed source trees, retains
+[SparkInfer PR #117](https://github.com/local-inference-lab/sparkinfer/pull/117),
+and embeds the reviewed TP4/DCP4 policy from launcher commit `6a61804`.
 Remote validation is bound to the exact Docker image ID by
-`validation/gilded-gnosis-v20-r25-remote-gpu.json`. Python wheel archives are
+`validation/gilded-gnosis-v20-r26-remote-gpu.json`. Python wheel archives are
 not bit-reproducible, so the release tool has an explicit
 `USE_EXISTING_VALIDATED_IMAGE=1` path that rechecks source labels, runtime
 contracts, helper expansion, and the receipt without rebuilding the validated
@@ -213,7 +220,7 @@ The cuBLAS/Xid correction is already in the pinned GG base through
 [vLLM PR #147](https://github.com/local-inference-lab/vllm/pull/147) and
 [SparkInfer PR #54](https://github.com/local-inference-lab/sparkinfer/pull/54).
 The current bases contain the previously reviewed DCP, dynamic-NVFP4,
-forkserver, XGrammar, EXL3, and runtime-lifetime foundations. The clean r25
+forkserver, XGrammar, EXL3, and runtime-lifetime foundations. The clean r26
 manifests apply the following exact PR heads on top of those bases:
 
 | Project | Review | Purpose |
@@ -234,9 +241,9 @@ manifests apply the following exact PR heads on top of those bases:
 The release build itself does not merge canonical branches and does not consume
 a precomposed integration branch. It generates all three integration patches
 from the clean bases and manifests, verifies their result trees, and archives
-the exact r25 vLLM, SparkInfer, and LMCache artifacts.
+the exact r26 vLLM, SparkInfer, and LMCache artifacts.
 
-At publication time, r25 includes the recorded heads through immutable release
+At publication time, r26 includes the recorded heads through immutable release
 locks; it does not imply that they were merged into GG, SparkInfer master, or
 LMCache. vLLM #216 remains an intentional draft pending human review. vLLM
 #145 is closed but deliberately retained in the image and remains on hold for
@@ -272,7 +279,7 @@ script. Docker with NVIDIA Container Toolkit, host IPC, and at least four
 Blackwell GPUs is required. Pull the immutable image first:
 
 ```bash
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-si978cdb3-fi801d57a-cu132-20260803-r25
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-sibbbdccc-fi801d57a-cu132-20260803-r26
 ```
 
 Save the following as `compose.yml`. Bare environment entries pass a host
@@ -285,7 +292,7 @@ limit.
 ```yaml
 services:
   glm52:
-    image: voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-si978cdb3-fi801d57a-cu132-20260803-r25
+    image: voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-sibbbdccc-fi801d57a-cu132-20260803-r26
     entrypoint: ["/usr/local/bin/serve-gilded-gnosis.sh"]
     network_mode: host
     ipc: host
@@ -496,7 +503,7 @@ MODEL_FAMILY=glm52-exl3 \
   TP=4 DCP=4 MTP=3 MAX_NUM_SEQS=8 GRAPH=32 \
   VLLM_EXL3_TRELLIS_MAX_M=32 docker compose up -d
 
-# Exact r25 mixed-partition validation profile. Layer 3 has 206 K3 + 50 K4
+# Exact r26 mixed-partition validation profile. Layer 3 has 206 K3 + 50 K4
 # experts; later layers have 160 K3 + 96 K4. SparkInfer #117 discovers and
 # passes both partitions at runtime.
 MODEL_FAMILY=glm52-exl3 \
@@ -508,7 +515,7 @@ MODEL_FAMILY=glm52-exl3 \
   MTP_MOE_BACKEND=triton MTP_DRAFT_SAMPLE_METHOD=greedy \
   MAX_NUM_SEQS=8 GRAPH=32 MAX_MODEL_LEN=524288 \
   MAX_BATCHED_TOKENS=2048 GPU_MEMORY_UTILIZATION=0.96 \
-  PCIE_CALIBRATION=off docker compose up -d
+  PCIE_CALIBRATION=auto docker compose up -d
 
 # Capacity-first EXL3 profile. This preserves MAX_BATCHED_TOKENS=2048 but
 # reuses a 1024-row prefill arena in slices, returning VRAM to the KV cache.
@@ -523,8 +530,8 @@ MODEL_FAMILY=glm52-exl3 \
 MODEL_FAMILY=glm52-exl3 LMCACHE_MODE=ram DCP=2 docker compose up -d
 ```
 
-The standalone r25 recipe is also available as
-[`docker-compose-glm52-exl3-v20-r25.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/65c88fbef1bc9ac8f8fd8601431d2aef8fc17517/examples/docker-compose-glm52-exl3-v20-r25.yml).
+The standalone r26 recipe is also available as
+[`docker-compose-glm52-exl3-v20-r26.yml`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/fb58f5cb1df82dab841f6e73dd0995cbb20cd0f0/examples/docker-compose-glm52-exl3-v20-r26.yml).
 
 For a local checkpoint, `MODEL` must use its in-container path below
 `/root/models`. For another Hugging Face repository, set both `MODEL` and its
@@ -804,14 +811,18 @@ integers. The static eligibility mapping is:
 | TP8 / DCP4 | eligible | on | on | `2` | measured `0/1` |
 | TP8 / DCP8 | eligible | on | on | `4` | measured `0/1` |
 | TP4 / DCP1 | eligible | off | off | `0` | `0` |
-| TP4 / DCP2, DCP4 | eligible | on | on | `0` | measured `0/1` |
+| TP4 / DCP2 | eligible | on | on | `0` | measured `0/1` |
+| TP4 / DCP4 | eligible | on | **off** | `2` | measured `0/1` |
 | virtual TP6 / DCP1 | off | off | off | `0` | `0` |
 | virtual TP6 / DCP2, DCP3, DCP6 | off | off | on | `0` | `0` |
 
 `DCP_INDEXER_SHARDS=0` means the ordinary fully sharded indexer. At TP8/DCP4,
 `2` creates a measured partial `2x2` topology; at TP8/DCP8, `4` creates `2x4`.
 The CKV cache remains sharded by the full DCP size. The query-split flag at
-DCP1 does not create inter-rank DCP traffic.
+DCP1 does not create inter-rank DCP traffic. TP4/DCP4 has one query partition;
+owner exchange therefore cannot remove duplicate query work and is disabled
+by default. The local exact merge uses one collective, whereas owner exchange
+would add row routing plus an output all-gather.
 
 #### Full-CKV gather capacity
 
@@ -890,6 +901,22 @@ the probe retained beneficial query split but selected prefetch depth 0 because
 the overlap contended with TP traffic. This is the dual-socket/PCIe topology
 failure mode that a hard-coded depth 1 could not handle.
 
+The r26 root-port TP4/DCP4 release gate selected:
+
+```text
+VLLM_PCIE_DMA_MIN_BYTES=25165824
+VLLM_DCP_QUERY_SPLIT=1
+VLLM_DCP_QUERY_SPLIT_MIN_CONTEXT_TOKENS=8192
+VLLM_B12X_MLA_CKV_GATHER=1
+VLLM_DCP_TOPK_OWNER_MERGE=0
+VLLM_DCP_INDEXER_SHARDS=2
+VLLM_B12X_MLA_CKV_PREFETCH_DEPTH=1
+```
+
+Its full-phase query-split gain was 15.5% at 8k, 42.7% at 64k, and 43.7% at
+131k. Depth-1 prefetch overlap won by 3.1-4.0%. Owner exchange is disabled by
+the topology-independent TP4/DCP4 work-geometry rule, not by the PCIe probe.
+
 Calibration never changes numerical wire format. `F8_DMA=ag`, `ring`, `i8*`,
 or `mx*` is an explicit compressed-wire choice and causes the BF16 calibrator
 to be skipped. DMA compression remains user opt-in even when a lossless probe
@@ -904,6 +931,9 @@ For normal serving, this is sufficient; no low-level flags are required:
 
 ```bash
 TP=8 DCP=4 docker compose up -d
+# Mixed EXL3 TP4/DCP4 uses the same automatic policy interface.
+MODEL_FAMILY=glm52-exl3 TP=4 DCP=4 PCIE_CALIBRATION=auto \
+  docker compose up -d
 ```
 
 To run the real probe, print its effective policy, and exit before loading
@@ -1244,7 +1274,7 @@ Operational guidance:
 
 Do not confuse this setting with `VLLM_EXL3_TRELLIS_MAX_M`, which controls the
 small-row/decode Trellis window and must cover the selected CUDA graph plan.
-The final r20 and r25 release gates below left
+The final r20, r25, and r26 release gates below left
 `VLLM_EXL3_PREFILL_CAPACITY` unset, so their published 8k/64k prefill numbers
 represent the unrestricted, fastest path.
 
@@ -1255,11 +1285,59 @@ no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
 
+### Final 2026-08-03 r26 TP4/DCP4 policy gate
+
+The exact r26 image listed at the top of this page was copied to the separate
+root-port host and tested on physical GPUs 4-7. No source mount or runtime
+overlay was present. The first start ran the packaged lossless PCIe probe and
+selected query split, full CKV gather, two indexer shards, no owner exchange,
+and depth-1 CKV prefetch.
+
+The matched MTP0 policy POC used the 3.25 bpw checkpoint. Values are median
+uncached client prefill tok/s:
+
+| Profile | 8k | 64k | 128k | Global KV budget |
+|---|---:|---:|---:|---:|
+| DCP1 reference | 3,642 | 3,517 | 3,475 | 331,136 |
+| DCP4 old auto policy | 2,561 | 2,449 | 2,374 | - |
+| DCP4 r26 auto policy | **3,533** | **3,384** | **3,286** | 1,216,000 |
+| r26 uplift over old DCP4 | +37.9% | +38.2% | +38.4% | - |
+| r26 gap to DCP1 | -3.0% | -3.8% | -5.4% | 3.67x DCP1 |
+
+The release-image gate then used
+`willfalco/GLM-5.2-EXL3-TR3-3.36bpw` revision
+`8d9aa923a17502675ca23737349b67f2e66bb69d`, TP4/DCP4/MTP3, greedy draft
+sampling, Triton draft MoE, graph cap 32, `MAX_NUM_SEQS=8`, batch 2,048,
+GMU 0.94, dynamic NVFP4 MLA KV, and cached online K6 for eligible BF16 dense
+matrices.
+
+| Gate | Result |
+|---|---:|
+| Source and runtime contracts | pass |
+| Automatic lossless PCIe calibration | pass; 24 MiB DMA crossover |
+| Full and piecewise CUDA graphs | pass |
+| Coherent decode | pass; 256 tokens |
+| MTP draft acceptance | 164 / 276 = 59.4% |
+| Logical KV capacity | 498,176 tokens |
+| Uncached prefill 8k | **3,125 tok/s** |
+| Uncached prefill 64k | **2,988 tok/s** |
+| Gain over matched r25 release gate | **+29.8% / +48.1%** |
+
+The first 3.36 bpw start created its online K6 cache and took 589 seconds to
+load the model. This is one-time work when the Compose `/cache` volume is kept
+persistent. The machine-readable receipt is
+[`gilded-gnosis-v20-r26-remote-gpu.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/fb58f5cb1df82dab841f6e73dd0995cbb20cd0f0/validation/gilded-gnosis-v20-r26-remote-gpu.json).
+It binds all gates to image ID
+`sha256:30a752f0b490a3841610dfbea8f5758eab66924537feaeb1cd06b8e6ac92cce4`.
+
 ### Final 2026-08-03 r25 dynamic mixed-Trellis gate
 
-The exact Docker image and image ID listed at the top of this page were tested
-on physical GPUs 4-7 of the separate four-GPU root-port host. No source mount
-or runtime overlay was present. The checkpoint was
+The r25 Docker image
+`voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-si978cdb3-fi801d57a-cu132-20260803-r25`
+with image ID
+`sha256:7b2cdb7cb0e4298a5c0907d53c5bca25287ba10ca6707cb21ede1fb65076dea0`
+was tested on physical GPUs 4-7 of the separate four-GPU root-port host. No
+source mount or runtime overlay was present. The checkpoint was
 `willfalco/GLM-5.2-EXL3-TR3-3.36bpw` at revision
 `8d9aa923a17502675ca23737349b67f2e66bb69d`. Layer 3 contains 206 K3 + 50 K4
 experts; layers 4-77 contain 160 K3 + 96 K4. SparkInfer #117 passes those
@@ -1805,7 +1883,7 @@ resumable v18/v19 runner. Install the benchmark client at
 ```bash
 git clone https://github.com/local-inference-lab/rtx6kpro.git
 cd rtx6kpro
-docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-si978cdb3-fi801d57a-cu132-20260803-r25
+docker pull voipmonitor/vllm:gilded-gnosis-v20-vllmf5981f1-sibbbdccc-fi801d57a-cu132-20260803-r26
 
 # Complete 40-case historical-compatible campaign. Existing completed cases
 # under RESULT_ROOT are skipped only when both summary.json and complete exist.
