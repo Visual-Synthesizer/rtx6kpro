@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-04](2026-08/2026-08-04.md) | Critical DS4-Flash encoder bugs found: reasoning_effort MAX was mislabeled as HIGH (HIGH was a no-op |
 | [2026-08-03](2026-08/2026-08-03.md) | DS4-Flash-0731 "Gilded Gnosis" r24 published — fixes the long-standing "Workspace is locked" b12x  |
 | [2026-08-02](2026-08/2026-08-02.md) | DeepSeek-V4-Flash-0731 (GA) ships with a serious quality regression: multiple users (ormandj, RelayM |
 | [2026-08-01](2026-08/2026-08-01.md) | DeepSeek-V4-Flash-0731 officially released (successor to preview), same DSpark speculative-decode ar |
@@ -166,6 +167,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-04](2026-08/2026-08-04.md) | Critical DS4-Flash encoder bugs found: reasoning_effort MAX was mislabeled as HIGH (HIGH was a no-op |
 | [2026-08-03](2026-08/2026-08-03.md) | DS4-Flash-0731 "Gilded Gnosis" r24 published — fixes the long-standing "Workspace is locked" b12x  |
 | [2026-08-02](2026-08/2026-08-02.md) | DeepSeek-V4-Flash-0731 (GA) ships with a serious quality regression: multiple users (ormandj, RelayM |
 | [2026-08-01](2026-08/2026-08-01.md) | DeepSeek-V4-Flash-0731 officially released (successor to preview), same DSpark speculative-decode ar |
