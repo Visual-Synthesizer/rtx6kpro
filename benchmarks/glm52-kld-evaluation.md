@@ -203,16 +203,19 @@ The fixed token input is
 Their SHA-256 values are:
 
 ```text
+a4f4532c6687372e71471c3df24c3ba7fb05e03648d89a479d1197e8f4bf9e3e  scripts/bench-glm52-exl3-shared-h-kld.sh
 cb618edbf5bc863d7561c87e9f781c5e743de8c9fd9587cf7a0008836427c0d1  scripts/glm52_exl3_shared_h_kld.py
 d0be87a4909ad00c311e36fc5c81c7d6942216c16a8fbbbf77778edb273346f1  benchmarks/data/glm52-kld-tokens-2048.json
 ```
 
 Lower KLD is better:
 
-| Profile | Online quantization | KV format | Mean KLD | Run SD | Position SD |
-|---|---|---|---:|---:|---:|
-| Checkpoint only | none | FP8, matched to reference | **0.074145973** | 0 | 0.292925745 |
-| Release default | cached online K6 | NVFP4 MLA | **0.108828284** | 0 | 0.424119890 |
+| Profile | Online quantization | KV format | Runs | Mean KLD | Run SD | Position SD |
+|---|---|---|---:|---:|---:|---:|
+| Checkpoint only | none | FP8, matched to reference | 3 | **0.074145973** | 0 | 0.292925745 |
+| K6 isolation | cached online K6 | FP8, matched to reference | 3 | **0.077949159** | 0 | 0.331558079 |
+| KV isolation | none | NVFP4 MLA | 1 | **0.107971445** | - | 0.432494372 |
+| Release default | cached online K6 | NVFP4 MLA | 3 | **0.108828284** | 0 | 0.424119890 |
 
 `checkpoint only` means the serialized K3/K4 expert weights are evaluated as
 published and all remaining BF16 layers stay BF16; no online weight conversion
@@ -221,19 +224,40 @@ making this the closest checkpoint-quality comparison available from that
 reference.
 
 The release-default row intentionally measures the deployed path, including
-online K6 and NVFP4 MLA KV. A no-online control with the same NVFP4 KV measured
-0.107971445. Therefore K6 itself contributes 0.000856839 mean KLD, about 0.79%
-relative; most of the difference between the two headline rows is the KV
-format. The KLD process loaded 84.08 GiB/GPU in checkpoint-only mode and
-79.47 GiB/GPU in release-default mode.
+online K6 and NVFP4 MLA KV. With FP8 KV held constant, K6 adds 0.003803186 mean
+KLD, about 5.13% relative. With NVFP4 KV held constant, it adds 0.000856839,
+about 0.79% relative. KLD is not additive, so these two interaction-dependent
+deltas must not be summed. The KLD process loaded 84.08 GiB/GPU without online
+quantization and 79.47 GiB/GPU with K6.
+
+Serving capacity was measured separately because the KLD runner deliberately
+caps its own cache at 0.5 GiB. These values use TP4/DCP1/MTP0, GMU 0.95,
+`MAX_NUM_SEQS=1`, graph cap 6, and otherwise identical r28 settings:
+
+| Online mode | KV format | Model load/GPU | KV budget/GPU | Logical KV tokens | 131k request fits |
+|---|---|---:|---:|---:|---|
+| none | FP8 | 83.85 GiB | 3.64 GiB | **72,448** | no |
+| K6 | FP8 | 79.25 GiB | 8.19 GiB | **163,072** | yes |
+| none | NVFP4 MLA | 83.85 GiB | 3.64 GiB | **107,136** | no |
+| K6 | NVFP4 MLA | 79.25 GiB | 8.19 GiB | **241,216** | yes |
+
+The no-online rows were booted with `MAX_MODEL_LEN=65536` to expose their exact
+allocated block count. An otherwise identical 131k FP8 run was rejected after
+profiling and reported the same 72,448-token maximum. `Logical KV tokens` is
+total serving capacity, not a per-request context guarantee when requests run
+concurrently.
 
 After restoring the reference data as shown above and downloading the pinned
-checkpoint under `/root/models`, reproduce both rows with:
+checkpoint under `/root/models`, reproduce the three repeated rows with:
 
 ```bash
 cd /root/rtx6kpro
 
 MODE=checkpoint GPUS=0,1,2,3 REPEATS=3 \
+  MODEL=/root/models/GLM-5.2-EXL3-TR3-3.42bpw \
+  ./scripts/bench-glm52-exl3-shared-h-kld.sh
+
+MODE=runtime-fp8 GPUS=0,1,2,3 REPEATS=3 \
   MODEL=/root/models/GLM-5.2-EXL3-TR3-3.42bpw \
   ./scripts/bench-glm52-exl3-shared-h-kld.sh
 

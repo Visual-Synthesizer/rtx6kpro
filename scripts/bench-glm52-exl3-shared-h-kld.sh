@@ -9,6 +9,7 @@ model="${MODEL:-/root/models/GLM-5.2-EXL3-TR3-3.42bpw}"
 reference_root="${REFERENCE_ROOT:-/root/kld/glm52_current_bf16_returnlogits_ref_20260708T000424Z/ref}"
 output_root="${OUTPUT_ROOT:-/root/kld/glm52-exl3-shared-h-r28}"
 gpus="${GPUS:-0,1,2,3}"
+docker_gpus="\"device=${gpus}\""
 repeats="${REPEATS:-3}"
 cache_root="${CACHE_ROOT:-/root/cache/glm52-exl3-shared-h-kld}"
 tokens_file="${TOKENS_FILE:-${repo_root}/benchmarks/data/glm52-kld-tokens-2048.json}"
@@ -20,6 +21,12 @@ case "${mode}" in
     quantization_config=null
     extra_env=()
     ;;
+  runtime-fp8)
+    label="runtime-k6-matched-fp8-kv"
+    kv_cache_dtype=fp8
+    quantization_config='{"linear":{"weight":"mxfp8"},"shared_experts":{"weight":"mxfp8"},"ignore":["re:.*\\.fused_qkv_a_proj$","re:.*\\.q_a_proj$","re:.*kv_a_proj_with_mqa","re:.*\\.mlp\\.gate$","model.layers.78.eh_proj","lm_head"]}'
+    extra_env=(-e VLLM_EXL3_ONLINE_TRELLIS_BITS=6)
+    ;;
   runtime)
     label="runtime-k6-nvfp4-kv"
     kv_cache_dtype=nvfp4_ds_mla
@@ -27,7 +34,7 @@ case "${mode}" in
     extra_env=(-e VLLM_EXL3_ONLINE_TRELLIS_BITS=6)
     ;;
   *)
-    printf 'MODE must be checkpoint or runtime; got %s\n' "${mode}" >&2
+    printf 'MODE must be checkpoint, runtime-fp8, or runtime; got %s\n' "${mode}" >&2
     exit 2
     ;;
 esac
@@ -38,7 +45,7 @@ docker rm -f glm52-exl3-shared-h-kld >/dev/null 2>&1 || true
 
 docker run --rm \
   --name glm52-exl3-shared-h-kld \
-  --gpus "device=${gpus}" \
+  --gpus "${docker_gpus}" \
   --network host \
   --ipc host \
   --init \

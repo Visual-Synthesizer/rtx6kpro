@@ -1320,7 +1320,7 @@ routed-expert layer and rank. No tensor is expanded back to per-expert H rows.
 |---|---:|---:|---:|---:|
 | TP4/DCP1/MTP0, default K6 | 53.25 / 53.33 tok/s | 3,586.81 | 3,386.11 | 241,216 |
 | TP4/DCP1/MTP3, default K6 | 113.40 tok/s | - | - | 158,720 |
-| TP4/DCP4/MTP3, default K6 | 93.76 tok/s | 3,488.76 | 3,337.05 | 372,992 |
+| TP4/DCP4/MTP3, default K6 | 93.76 tok/s | 3,488.76 | 3,337.05 | 163,840 |
 
 The DCP4 profile used `MAX_NUM_SEQS=16`, graph 16, batch 4,096, and GMU 0.95.
 Its aggregate decode was 240.17 tok/s at CC4 and 336.35 at CC8. Repeated batch
@@ -1330,21 +1330,38 @@ default. The legacy 3.25 bpw checkpoint also booted, selected its 192/64 path,
 captured CUDA graphs, and returned the correct chat answer.
 
 The KLD gate uses 2,047 teacher-forced positions from the published 2026-07-08
-BF16 reference, TP4/DCP1/MTP0, eager execution, and three repeats. Lower is
-better. Run-to-run SD was zero for both deterministic profiles.
+BF16 reference, TP4/DCP1/MTP0, eager execution, and three repeats for each
+published profile. Lower is better. Run-to-run SD was zero for all three
+repeated profiles; the no-online NVFP4 isolation row is a one-run control.
 
 | Profile | KV format | Mean KLD | SD across positions |
 |---|---|---:|---:|
 | Checkpoint only; no online quantization | FP8, matched to BF16 reference capture | **0.074145973** | 0.292925745 |
+| Online K6 isolation | FP8, matched to BF16 reference capture | **0.077949159** | 0.331558079 |
+| No-online KV isolation | NVFP4 MLA | **0.107971445** | 0.432494372 |
 | Release default; online K6 | NVFP4 MLA | **0.108828284** | 0.424119890 |
 
-These two headline rows intentionally represent best matched checkpoint
-quality and the actual release runtime. They therefore differ in both online
-quantization and KV format. A same-NVFP4-KV control measured 0.107971445
-without online quantization, so K6 itself added only 0.000856839 mean KLD
-(about 0.79% relative); the larger headline delta is predominantly the KV
-format. The KLD run loaded 84.08 GiB/GPU without online quantization and
+The first and last rows represent best matched checkpoint quality and the
+actual release runtime. With FP8 KV held constant, K6 adds 0.003803186 mean
+KLD (about 5.13% relative). With NVFP4 KV held constant, K6 adds 0.000856839
+(about 0.79% relative). These interaction-dependent KLD deltas are not
+additive. The KLD run loaded 84.08 GiB/GPU without online quantization and
 79.47 GiB/GPU with K6, a further 4.61 GiB/GPU runtime saving.
+
+The matched TP4/DCP1/MTP0 serving-capacity matrix at GMU 0.95, max sequences
+1, and graph cap 6 is:
+
+| Online mode | KV format | Model load/GPU | Logical KV tokens |
+|---|---|---:|---:|
+| none | FP8 | 83.85 GiB | **72,448** |
+| K6 | FP8 | 79.25 GiB | **163,072** |
+| none | NVFP4 MLA | 83.85 GiB | **107,136** |
+| K6 | NVFP4 MLA | 79.25 GiB | **241,216** |
+
+The no-online profiles cannot satisfy a 131,072-token request at GMU 0.95;
+their exact block counts were therefore exposed with a 65,536 model limit.
+The DCP4 value above is aggregate logical capacity: 40,960 local tokens per
+CP rank multiplied by DCP4 equals 163,840.
 
 The exact source trees, image ID, checkpoint audit, results, and KLD reference
 are bound in

@@ -166,14 +166,20 @@ by +0.00175% relative, and activation NMSE by -0.057% relative. The complete
 | TP4/DCP1/MTP3 decode | 113.40 tok/s |
 | TP4/DCP4/MTP3 correctness | 24/24 at c8; 32/32 at c16 |
 | Checkpoint-only KLD | 0.074145973 |
+| Online K6 + FP8 KV KLD | 0.077949159 |
 | Default K6 + NVFP4 KV KLD | 0.108828284 |
 
-The two KLD rows use the same BF16 reference and 2,047 positions. The
-checkpoint-only row uses FP8 KV to match the reference capture. A same-NVFP4
-control shows that online K6 itself adds only 0.000856839 mean KLD; most of the
-headline difference is the production NVFP4 KV format. Full commands and the
-exact token input are on the
+The KLD rows use the same BF16 reference and 2,047 positions. The
+checkpoint-only and K6-isolation rows both use FP8 KV to match the reference
+capture; K6 changes mean KLD by 0.003803186 in that matched comparison. A
+same-NVFP4 control changes it by 0.000856839. The deltas are interaction
+dependent and are not additive. Full commands and the exact token input are on
+the
 [KLD evaluation page](../benchmarks/glm52-kld-evaluation.md).
+
+At TP4/DCP1/MTP0, GMU 0.95, max sequences 1, and graph cap 6, the exact
+serving capacities are 72,448 tokens for no-online + FP8 KV, 163,072 for K6 +
+FP8 KV, 107,136 for no-online + NVFP4 KV, and 241,216 for K6 + NVFP4 KV.
 
 Audit a downloaded checkpoint before serving:
 
