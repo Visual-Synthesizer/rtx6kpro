@@ -1365,7 +1365,7 @@ CP rank multiplied by DCP4 equals 163,840.
 
 The exact source trees, image ID, checkpoint audit, results, and KLD reference
 are bound in
-[`gilded-gnosis-v20-r28-remote-gpu.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/d780c393677eb0dd9dc5d2e09b98230313ec50cf/validation/gilded-gnosis-v20-r28-remote-gpu.json).
+[`gilded-gnosis-v20-r28-remote-gpu.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/32ebb47f564eb7085959b47293d794d92f14d9e3/validation/gilded-gnosis-v20-r28-remote-gpu.json).
 The fully reproducible KLD commands are on the
 [GLM-5.2 KLD page](../benchmarks/glm52-kld-evaluation.md).
 
