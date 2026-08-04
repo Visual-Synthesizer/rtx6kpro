@@ -178,6 +178,75 @@ summary.md
 aggregate_summary.json
 ```
 
+## r28 shared-H EXL3 results
+
+The 2026-08-04 release gate evaluates the complete shared-H checkpoint, not a
+single-layer POC:
+
+| Field | Value |
+|---|---|
+| Checkpoint | `willfalco/GLM-5.2-EXL3-TR3-3.42bpw` |
+| Revision | `ae68c65947efa90bea37308e15421872f124c46d` |
+| Image | `voipmonitor/vllm:gilded-gnosis-v20-vllme1e9426-si200c1db-fi801d57a-cu132-20260804-r28` |
+| Reference | `festr2/GLM-5.2-BF16-KLD-Reference-Logits-20260708@a8fbe8a277394e838c75190a0ab376625dfb1393` |
+| KLD direction | `KL(BF16 reference || candidate)` |
+| Geometry | TP4, DCP1, MTP off, eager |
+| Input | fixed 2,048-token WikiText2 window; 2,047 scored positions |
+| Repeats | 3 per profile |
+
+The exact runner is
+[`scripts/glm52_exl3_shared_h_kld.py`](../scripts/glm52_exl3_shared_h_kld.py),
+invoked by
+[`scripts/bench-glm52-exl3-shared-h-kld.sh`](../scripts/bench-glm52-exl3-shared-h-kld.sh).
+The fixed token input is
+[`benchmarks/data/glm52-kld-tokens-2048.json`](data/glm52-kld-tokens-2048.json).
+Their SHA-256 values are:
+
+```text
+cb618edbf5bc863d7561c87e9f781c5e743de8c9fd9587cf7a0008836427c0d1  scripts/glm52_exl3_shared_h_kld.py
+d0be87a4909ad00c311e36fc5c81c7d6942216c16a8fbbbf77778edb273346f1  benchmarks/data/glm52-kld-tokens-2048.json
+```
+
+Lower KLD is better:
+
+| Profile | Online quantization | KV format | Mean KLD | Run SD | Position SD |
+|---|---|---|---:|---:|---:|
+| Checkpoint only | none | FP8, matched to reference | **0.074145973** | 0 | 0.292925745 |
+| Release default | cached online K6 | NVFP4 MLA | **0.108828284** | 0 | 0.424119890 |
+
+`checkpoint only` means the serialized K3/K4 expert weights are evaluated as
+published and all remaining BF16 layers stay BF16; no online weight conversion
+is applied. FP8 KV is used because the BF16 reference was captured with FP8 KV,
+making this the closest checkpoint-quality comparison available from that
+reference.
+
+The release-default row intentionally measures the deployed path, including
+online K6 and NVFP4 MLA KV. A no-online control with the same NVFP4 KV measured
+0.107971445. Therefore K6 itself contributes 0.000856839 mean KLD, about 0.79%
+relative; most of the difference between the two headline rows is the KV
+format. The KLD process loaded 84.08 GiB/GPU in checkpoint-only mode and
+79.47 GiB/GPU in release-default mode.
+
+After restoring the reference data as shown above and downloading the pinned
+checkpoint under `/root/models`, reproduce both rows with:
+
+```bash
+cd /root/rtx6kpro
+
+MODE=checkpoint GPUS=0,1,2,3 REPEATS=3 \
+  MODEL=/root/models/GLM-5.2-EXL3-TR3-3.42bpw \
+  ./scripts/bench-glm52-exl3-shared-h-kld.sh
+
+MODE=runtime GPUS=0,1,2,3 REPEATS=3 \
+  MODEL=/root/models/GLM-5.2-EXL3-TR3-3.42bpw \
+  ./scripts/bench-glm52-exl3-shared-h-kld.sh
+```
+
+Each output directory contains `summary.json`, a run log, and one
+`kld_positions_runN.safetensors` file per repeat. The runner fails on token
+identity mismatches, missing full-vocabulary logits, or any non-finite value;
+it does not silently publish a partial comparison.
+
 ## Current v14 Keypoint Results
 
 Latest local run against the 2026-07-08 BF16 reference:

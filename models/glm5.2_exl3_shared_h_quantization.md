@@ -1,7 +1,7 @@
 # GLM-5.2 EXL3 shared-H quantization
 
 This page documents the reproducible procedure for creating the calibrated
-`shared_h_v1` EXL3 artifact supported by Gilded Gnosis r19. It is a new encode
+`shared_h_v1` EXL3 artifact qualified by Gilded Gnosis r28. It is a new encode
 from the BF16 model, not a post-processing pass over an existing EXL3 model.
 
 ## Purpose
@@ -16,8 +16,9 @@ per MoE layer and TP rank:
 
 The intermediate-side vectors remain expert-local. For 75 GLM-5.2 MoE layers
 this removes exactly 705,024,000 persistent bytes, or 672.36 MiB, from every
-GPU. The r19 loader keeps each shared row physically shaped `[1, H]`; it does
-not expand it back to 256 rows.
+GPU at MTP0. Loading the MTP layer raises the exact saving to 714,424,320 bytes,
+or 681.33 MiB/GPU. The loader keeps each shared row physically shaped `[1, H]`;
+it does not expand it back to 256 rows.
 
 ## Compatibility contract
 
@@ -36,13 +37,30 @@ A checkpoint without `rotation_layout` is interpreted as legacy
 deduplicated losslessly because their expert-local H-side vectors are not
 identical.
 
+## Published checkpoint
+
+The complete qualified artifact is:
+
+```text
+willfalco/GLM-5.2-EXL3-TR3-3.42bpw
+revision: ae68c65947efa90bea37308e15421872f124c46d
+```
+
+All 79 model shard hashes were verified against that immutable revision. Its
+MoE partitions are 206 K3 + 50 K4 in layer 3, 148 K3 + 108 K4 in layers 4-77,
+and 256 K3 in layer 78. Gilded Gnosis r28 detects `shared_h_v1` automatically;
+there is no serving-time layout switch.
+
 ## Reviewed implementation
 
 The complete recipe, exact patches, input hashes, and tests are in
 [local-inference-lab/kquant PR #1](https://github.com/local-inference-lab/kquant/pull/1).
 The matching backward-compatible runtime is
-[local-inference-lab/vllm PR #225](https://github.com/local-inference-lab/vllm/pull/225)
-and is included in Gilded Gnosis r19.
+[local-inference-lab/vllm PR #228](https://github.com/local-inference-lab/vllm/pull/228),
+with the dynamic mixed-Trellis ABI in
+[SparkInfer PR #117](https://github.com/local-inference-lab/sparkinfer/pull/117).
+Both are included in the immutable r28 composition. PR #228 supersedes the
+earlier integration role of #225/#226.
 
 The preparation script accepts only the published `calibration_encoder` bundle
 from
@@ -134,7 +152,37 @@ Before publishing a full checkpoint, require all of the following:
 4. Both legacy and shared-H checkpoints boot in the release image.
 5. TP4 decode, prefill, CUDA-graph replay, and tool-call checks pass.
 
-The current layer-40 POC measured 672.36 MiB/GPU saved, no CUDA-graph latency
-regression, weight NMSE changing by +0.00175% relative, and activation NMSE by
--0.057% relative. These results validate the representation and loader, but do
-not replace the full-checkpoint KLD and E2E gates.
+The layer-40 POC measured no CUDA-graph latency regression, weight NMSE changing
+by +0.00175% relative, and activation NMSE by -0.057% relative. The complete
+3.42 checkpoint then passed all five gates in r28:
+
+| Gate | Result |
+|---|---:|
+| Shard integrity | 79/79 |
+| MTP0 shared-H saving | 672.36 MiB/GPU |
+| MTP3 shared-H saving | 681.33 MiB/GPU |
+| TP4/DCP1/MTP0 decode | 53.25 / 53.33 tok/s |
+| TP4/DCP1/MTP0 prefill | 3,586.81 / 3,386.11 tok/s at 8k / 64k |
+| TP4/DCP1/MTP3 decode | 113.40 tok/s |
+| TP4/DCP4/MTP3 correctness | 24/24 at c8; 32/32 at c16 |
+| Checkpoint-only KLD | 0.074145973 |
+| Default K6 + NVFP4 KV KLD | 0.108828284 |
+
+The two KLD rows use the same BF16 reference and 2,047 positions. The
+checkpoint-only row uses FP8 KV to match the reference capture. A same-NVFP4
+control shows that online K6 itself adds only 0.000856839 mean KLD; most of the
+headline difference is the production NVFP4 KV format. Full commands and the
+exact token input are on the
+[KLD evaluation page](../benchmarks/glm52-kld-evaluation.md).
+
+Audit a downloaded checkpoint before serving:
+
+```bash
+git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
+cd blackwell-llm-docker
+python3 scripts/audit_glm52_exl3_shared_h.py \
+  /root/models/GLM-5.2-EXL3-TR3-3.42bpw
+```
+
+The audit fails closed on missing metadata, malformed one-row H tensors,
+unexpected tier counts, or a mismatch between declared and physical savings.
