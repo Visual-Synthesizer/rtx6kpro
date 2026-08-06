@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-06](2026-08/2026-08-06.md) | - ormandj found & patched a major SGLang bug causing SWA/KV-cache retract loops on long generations  |
 | [2026-08-05](2026-08/2026-08-05.md) | DS4-Flash reasoning bug fixed: HIGH was silently rendering as MAX; r27 fix confirmed — LOW or MAX  |
 | [2026-08-04](2026-08/2026-08-04.md) | Critical DS4-Flash encoder bugs found: reasoning_effort MAX was mislabeled as HIGH (HIGH was a no-op |
 | [2026-08-03](2026-08/2026-08-03.md) | DS4-Flash-0731 "Gilded Gnosis" r24 published — fixes the long-standing "Workspace is locked" b12x  |
@@ -168,6 +169,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-06](2026-08/2026-08-06.md) | - ormandj found & patched a major SGLang bug causing SWA/KV-cache retract loops on long generations  |
 | [2026-08-05](2026-08/2026-08-05.md) | DS4-Flash reasoning bug fixed: HIGH was silently rendering as MAX; r27 fix confirmed — LOW or MAX  |
 | [2026-08-04](2026-08/2026-08-04.md) | Critical DS4-Flash encoder bugs found: reasoning_effort MAX was mislabeled as HIGH (HIGH was a no-op |
 | [2026-08-03](2026-08/2026-08-03.md) | DS4-Flash-0731 "Gilded Gnosis" r24 published — fixes the long-standing "Workspace is locked" b12x  |
