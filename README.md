@@ -49,7 +49,7 @@ Need the complete map of every Markdown page?
 |---|---|---|
 | GLM-5.2 current stack | [GLM-5.2 v20](models/glm5.2_v20.md) | Current Gilded Gnosis/SparkInfer image, source pins, TP6 fixes, Xid validation, and release gate. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
-| DS4 current quick start | [DS4 DSpark Gilded Gnosis r30](models/ds4dspark-v20-r30.md) | 0731 checkpoint, fixed K5, FULL-graph context-KV, and qualified native tiered offload. |
+| DS4 current quick start | [DS4 DSpark Gilded Gnosis r31](models/ds4dspark-v20-r31.md) | 0731 checkpoint, fixed K5, FULL-graph context-KV, qualified FlashInfer/B12X all-reduce, and native tiered offload. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
 | Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
 | MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | Current MiMo DFlash validation and fix notes. |

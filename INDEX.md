@@ -13,7 +13,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [INDEX](INDEX.md) - `INDEX.md`
+- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
@@ -33,9 +33,11 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
 - [DeepSeek-V4-Flash and DSpark v10](models/ds4dspark-v10.md) - `models/ds4dspark-v10.md`
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
-- [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20.md) - `models/ds4dspark-v20.md`
+- [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20-r16.md) - `models/ds4dspark-v20-r16.md`
 - [DeepSeek-V4-Flash-0731 DSpark r29](models/ds4dspark-v20-r29.md) - `models/ds4dspark-v20-r29.md`
 - [DeepSeek-V4-Flash-0731 DSpark r30](models/ds4dspark-v20-r30.md) - `models/ds4dspark-v20-r30.md`
+- [DeepSeek-V4-Flash-0731 DSpark r31](models/ds4dspark-v20-r31.md) - `models/ds4dspark-v20-r31.md`
+- [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r27](models/ds4dspark-v20.md) - `models/ds4dspark-v20.md`
 - [DeepSeek-V4-Flash-DSpark v7](models/ds4dspark-v7.md) - `models/ds4dspark-v7.md`
 - [DeepSeek-V4-Flash and DSpark v8](models/ds4dspark-v8.md) - `models/ds4dspark-v8.md`
 - [DeepSeek-V4-Flash and DSpark v9](models/ds4dspark-v9.md) - `models/ds4dspark-v9.md`
@@ -71,6 +73,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 BF16 to EXL3-TR3 3.0 bpw: Calibrated-LDLQ Conversion Recipe (incl. MTP layer 78)](models/glm5.2/glm52-exl3-tr3-quantization-2026-07-26.md) - `models/glm5.2/glm52-exl3-tr3-quantization-2026-07-26.md`
 - [GLM-5.2 GGUF to BF16 Dequant KLD Audit](models/glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md) - `models/glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md`
 - [GLM-5.2 Unsloth-Style Prefill KLD Reproduction](models/glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md) - `models/glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md`
+- [GLM-5.2 EXL3 shared-H quantization](models/glm5.2_exl3_shared_h_quantization.md) - `models/glm5.2_exl3_shared_h_quantization.md`
 - [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) - `models/glm5.2_mxfp4.md`
 - [GLM-5.2 v11 NVFP4 / FP8 / MXFP8 on Dark Devotion](models/glm5.2_v11.md) - `models/glm5.2_v11.md`
 - [GLM-5.2 v12 NVFP4 / B12X Dark Devotion](models/glm5.2_v12.md) - `models/glm5.2_v12.md`
@@ -337,6 +340,13 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-07-28](daily-summaries/2026-07/2026-07-29.md) - `daily-summaries/2026-07/2026-07-29.md`
 - [Daily Summary — 2026-07-29](daily-summaries/2026-07/2026-07-30.md) - `daily-summaries/2026-07/2026-07-30.md`
 - [Daily Summary — 2026-07-30](daily-summaries/2026-07/2026-07-31.md) - `daily-summaries/2026-07/2026-07-31.md`
+- [Daily Summary — 2026-07-31](daily-summaries/2026-08/2026-08-01.md) - `daily-summaries/2026-08/2026-08-01.md`
+- [Daily Summary — 2026-08-01](daily-summaries/2026-08/2026-08-02.md) - `daily-summaries/2026-08/2026-08-02.md`
+- [Daily Summary — 2026-08-02](daily-summaries/2026-08/2026-08-03.md) - `daily-summaries/2026-08/2026-08-03.md`
+- [Daily Summary — 2026-08-03](daily-summaries/2026-08/2026-08-04.md) - `daily-summaries/2026-08/2026-08-04.md`
+- [Daily Summary — 2026-08-04](daily-summaries/2026-08/2026-08-05.md) - `daily-summaries/2026-08/2026-08-05.md`
+- [Daily Summary — 2026-08-05](daily-summaries/2026-08/2026-08-06.md) - `daily-summaries/2026-08/2026-08-06.md`
+- [Daily Summary — 2026-08-06](daily-summaries/2026-08/2026-08-07.md) - `daily-summaries/2026-08/2026-08-07.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
