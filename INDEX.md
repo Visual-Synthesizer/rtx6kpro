@@ -35,6 +35,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
 - [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20.md) - `models/ds4dspark-v20.md`
 - [DeepSeek-V4-Flash-0731 DSpark r29](models/ds4dspark-v20-r29.md) - `models/ds4dspark-v20-r29.md`
+- [DeepSeek-V4-Flash-0731 DSpark r30](models/ds4dspark-v20-r30.md) - `models/ds4dspark-v20-r30.md`
 - [DeepSeek-V4-Flash-DSpark v7](models/ds4dspark-v7.md) - `models/ds4dspark-v7.md`
 - [DeepSeek-V4-Flash and DSpark v8](models/ds4dspark-v8.md) - `models/ds4dspark-v8.md`
 - [DeepSeek-V4-Flash and DSpark v9](models/ds4dspark-v9.md) - `models/ds4dspark-v9.md`

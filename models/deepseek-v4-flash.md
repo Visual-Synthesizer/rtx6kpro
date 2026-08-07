@@ -8,7 +8,7 @@ intentionally preserved.
 
 | Need | Page |
 |---|---|
-| Start the current 0731 DSpark checkpoint | [DeepSeek-V4-Flash-0731 Gilded Gnosis r29](ds4dspark-v20-r29.md) |
+| Start the current 0731 DSpark checkpoint | [DeepSeek-V4-Flash-0731 Gilded Gnosis r30](ds4dspark-v20-r30.md) |
 | Previous 0731 DSpark releases | [r24](ds4dspark-v20.md), [r16](ds4dspark-v20-r16.md), [r15](ds4dspark-v20-r15.md) |
 | Historical standard-MTP and DSpark deployment | [DeepSeek-V4-Flash v10 Fathomless Validation](ds4dspark-v10.md) |
 | Full DSpark and standard-MTP reference sweep | [DeepSeek-V4-Flash and DSpark v9](ds4dspark-v9.md) |
@@ -19,7 +19,7 @@ intentionally preserved.
 
 | Area | Current guidance |
 |---|---|
-| Current image line | Gilded Gnosis r29 for the 0731 checkpoint; Fathomless and Eldritch pages remain historical baselines |
+| Current image line | Gilded Gnosis r30 for the 0731 checkpoint; Fathomless and Eldritch pages remain historical baselines |
 | Current DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | Standard checkpoint | `deepseek-ai/DeepSeek-V4-Flash` |
 | Historical DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-DSpark` |
@@ -32,7 +32,8 @@ intentionally preserved.
 
 | Page | Status | Why keep it |
 |---|---|---|
-| [DS4 DSpark Gilded Gnosis r29](ds4dspark-v20-r29.md) | Current release | Fixed K5, scheduler-reachable verifier capacity, and FULL-graph DSpark context-KV. |
+| [DS4 DSpark Gilded Gnosis r30](ds4dspark-v20-r30.md) | Current release | Fixed K5, FULL-graph context-KV, and qualified native tiered-offload finalization. |
+| [DS4 DSpark Gilded Gnosis r29](ds4dspark-v20-r29.md) | Previous release | Verifier-capacity fix and FULL-graph DSpark context-KV. |
 | [DS4 DSpark Gilded Gnosis r24](ds4dspark-v20.md) | Historical Gilded Gnosis release | Fixed K5, compressed-MLA sizing, InstantTensor segmentation, and qualified native CPU KV offload. |
 | [DS4 DSpark Gilded Gnosis r16](ds4dspark-v20-r16.md) | Historical Gilded Gnosis release | First fixed-K5 and shared native-offload release. |
 | [DS4 DSpark Gilded Gnosis r15](ds4dspark-v20-r15.md) | Previous Gilded Gnosis release | Pinned 0731 K7 helper, image, and regression canary. |
