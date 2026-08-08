@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
 | [2026-08-07](2026-08/2026-08-07.md) | ormandj's SGLang DS4-Flash build fixes looping/garbage-output bug that plagued DSpark; GSM8K bench n |
 | [2026-08-06](2026-08/2026-08-06.md) | - ormandj found & patched a major SGLang bug causing SWA/KV-cache retract loops on long generations  |
 | [2026-08-05](2026-08/2026-08-05.md) | DS4-Flash reasoning bug fixed: HIGH was silently rendering as MAX; r27 fix confirmed — LOW or MAX  |
@@ -170,6 +171,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
 | [2026-08-07](2026-08/2026-08-07.md) | ormandj's SGLang DS4-Flash build fixes looping/garbage-output bug that plagued DSpark; GSM8K bench n |
 | [2026-08-06](2026-08/2026-08-06.md) | - ormandj found & patched a major SGLang bug causing SWA/KV-cache retract loops on long generations  |
 | [2026-08-05](2026-08/2026-08-05.md) | DS4-Flash reasoning bug fixed: HIGH was silently rendering as MAX; r27 fix confirmed — LOW or MAX  |
