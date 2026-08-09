@@ -94,6 +94,10 @@ measured DCP prefill topology:
   measured block-32 prefill path only for known partitions. The exact image
   passed shard-integrity, CUDA-graph, DCP1/DCP4, MTP0/MTP3, c8/c16 correctness,
   8k/64k prefill, and three-run KLD gates.
+- r33 restores the capture-safe K6 small-M dispatch with an explicit SM120
+  capability gate and realigns mixed-Trellis execution with the QSRT ABI. The
+  exact image passed the standard TP4/DCP1/MTP3 decode regression gate on the
+  3.36 bpw checkpoint.
 
 Historical comparison data remains on [v18](glm5.2_v18.md), while the DCP
 optimization background remains on [v19](glm5.2_v19.md). This page is
@@ -104,14 +108,14 @@ Canonical source merging and the required post-merge rebuild are tracked in
 [rtx6kpro issue #33](https://github.com/local-inference-lab/rtx6kpro/issues/33).
 The image below is the exact measured release candidate. Open source deltas
 remain independently reviewable; already-merged fixes are pinned through the
-stated GG and SparkInfer base commits.
+stated GG and B12X base commits.
 
 ## Release Image
 
 ```text
-voipmonitor/vllm:gilded-gnosis-v20-vllme1e9426-si200c1db-fi801d57a-cu132-20260804-r28
-Docker manifest: sha256:501e10e79b4bc854237804d215e454c531ac9c2d354a8fa1a93e450fe7ba6ce0
-Local image ID: sha256:c874a39ea1283b090aa9cafd3668d2bb197a227812dd4b238660aca2b937837a
+voipmonitor/vllm:gilded-gnosis-v20-vllmfa13d33-b12x06db0f4-fi1ac6942-cu132-20260809-r33
+Docker manifest: sha256:fdde59fed7f9fc12f9fd5ef1b3b3ea8d5097bf10ebad54b348497102c3a83f82
+Local image ID: sha256:60944a4ea1fbb2d1f35d7972f685d8fb0b91e77dd5aeca1dcafa3bcc29846d12
 ```
 
 This supersedes all earlier v20 candidates. The registry manifest is the exact
@@ -120,19 +124,19 @@ gates below; there was no rebuild between those gates and push. All three
 source trees were composed from clean public bases plus exact public PR heads.
 The generated integration patches and lockfiles are immutable release artifacts.
 
-`si` identifies SparkInfer, the renamed B12X project. Legacy B12X environment
-variable names remain accepted for compatibility.
+`b12x` identifies the current B12X project name. Image labels retain legacy
+SparkInfer aliases for compatibility with older tooling.
 
 Pinned source stack:
 
 | Component | Ref / commit |
 |---|---|
-| Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `30038602b71395f481ef4a6edfe4fcf8551d9c15` |
-| Composed vLLM tree | `e1e94267f014eeace6d40337611046d567f6cd83` |
-| SparkInfer base | `local-inference-lab/sparkinfer master` @ `272a84bd97ce791a1e92d1f3a0da3dd5f3c6565f` |
-| Composed SparkInfer tree | `200c1db7ef98ff8bbfd4f621555326e20f42282e` |
+| Canonical GG base | `local-inference-lab/vllm dev/gilded-gnosis` @ `e2666d9a65f41fc376607531453cbd57c4c71016` |
+| Composed vLLM tree | `fa13d334a2962756f9f7e9b562deb85387359f42` |
+| B12X base | `local-inference-lab/b12x master` @ `9bbae67841e4818e7472e1edcdca8ebcbda68611` |
+| Composed B12X tree | `06db0f4b27dbd19eb934da0da27eff7a7c49d8c4` |
 | EXL3 extension | `brandonmmusic-max/exllamav3 a1-retile-sm120` @ `704aefd743b390af4bd0fb429d1906f9b964c7d8` |
-| FlashInfer | `801d57a08958c13d375ddbb6be3be4808f48a708` |
+| FlashInfer | `1ac6942776b383c6b03c7a5805a22e72a3e3349f` |
 | CUTLASS C++ / DSL | `e6233cbac5d7c7a865c19c91cd684ceece19513c` / `4.6.0` |
 | InstantTensor | `49b4010afc1cae0441e71fe0b0bffc24fa05e932` |
 | LMCache | `local-inference-lab/LMCache release/v0.5.2-glm52-dcp-base` @ `9cebd405d0caf4bebe01d694b5a8bf4e3e354314`, composed tree `9a05c8818bae48d15b79c7e876418bb813c08cd0`, wheel `0.5.2+glm52dcp.4` |
@@ -141,8 +145,8 @@ Pinned source stack:
 | NCCL | local-inference `2.30.4` |
 | PyTorch / CUDA / loaded cuDNN | `2.12.0+cu132` / `13.2.1` / `9.20.0.48` |
 | CUDA system-base cuDNN packages | `9.22.0.52` |
-| Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `6a61804c378cc8d5d666ab381c3d56b4f812b52f` |
-| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `d780c393677eb0dd9dc5d2e09b98230313ec50cf` |
+| Launcher/runtime source embedded in the image | `local-inference-lab/blackwell-llm-docker` @ `47ac813334e094090d5fd85b317d13b2e932ef09` |
+| Build and immutable reproduction tree | `local-inference-lab/blackwell-llm-docker` @ `426da51285d0666508003b03a75a442139fb7979` |
 
 Image labels expose all base commits, PR heads, result trees, patch and lock
 hashes, and a cache fingerprint derived from the pinned sources.
@@ -150,7 +154,7 @@ hashes, and a cache fingerprint derived from the pinned sources.
 ## Build It Exactly
 
 The canonical build entry point is
-[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/d780c393677eb0dd9dc5d2e09b98230313ec50cf/build-gilded-gnosis-v20-final-cu132.sh).
+[`build-gilded-gnosis-v20-final-cu132.sh`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/426da51285d0666508003b03a75a442139fb7979/build-gilded-gnosis-v20-final-cu132.sh).
 The explicit reproduction mode uses archived, hash-verified locks and patches,
 then verifies that applying them to the pinned bases produces the exact trees
 above. It validates runtime symbols, helper contracts, and image labels before
@@ -159,8 +163,8 @@ allowing an optional push.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout d780c393677eb0dd9dc5d2e09b98230313ec50cf
-VLLM_RELEASE_COMPOSITION=reproduce-r28 \
+git checkout 426da51285d0666508003b03a75a442139fb7979
+VLLM_RELEASE_COMPOSITION=reproduce-r33 \
   ./build-gilded-gnosis-v20-final-cu132.sh
 ```
 
@@ -1301,6 +1305,38 @@ Every benchmark started only after all required model instances were healthy;
 no benchmark overlapped another model load. The 2026-07-27 gate adds MTP3 and
 batched correctness coverage for the final runtime-stride image. The retained
 2026-07-26 comparison immediately below it is MTP0.
+
+### Final 2026-08-09 r33 K6 and mixed-Trellis contract gate
+
+The exact r33 image at the top of this page was tested without source mounts
+on physical GPUs 4-7 of `192.168.0.69`. The checkpoint was
+`willfalco/GLM-5.2-EXL3-TR3-3.36bpw` revision
+`8d9aa923a17502675ca23737349b67f2e66bb69d`. The profile used TP4/DCP1/MTP3,
+online EXL3 K6, NVFP4 DS-MLA KV, `MAX_NUM_SEQS=1`, graph cap 6, model length
+131,072, GMU 0.95, greedy draft sampling, and InstantTensor BUFFERED.
+
+| Gate | Result |
+|---|---:|
+| Source, image-label, launcher-hash, and helper contracts | pass |
+| Focused SM120 K6 dispatch tests | 9 passed, 59 deselected |
+| Full and piecewise CUDA graphs | pass |
+| Model load | 80.11 GiB/GPU |
+| Logical KV capacity | 202,304 tokens |
+| Standard CC1 decode run 1 | 116.21 tok/s |
+| Standard CC1 decode run 2 | 112.03 tok/s |
+| Two-run median | **114.12 tok/s** |
+| Historical matched profile | 113.40 tok/s |
+
+The standard gate uses the default `llm_decode_bench` encyclopedia prompt and
+temperature 1.0. A separate synthetic integer-sequence prompt reached about
+144 tok/s because it is substantially more MTP-friendly. That result is not a
+standard headline and is excluded from the regression comparison.
+
+B12X #136 restores the K6 small-M path during CUDA graph replay and now checks
+for exact SM120 capability before selecting it. B12X #137 fixes the mixed
+Trellis QSRT argument contract. The full source identity and artifact hashes
+are bound to the exact image in the
+[r33 remote validation receipt](https://github.com/local-inference-lab/blackwell-llm-docker/blob/main/validation/gilded-gnosis-v20-r33-remote-gpu.json).
 
 ### Final 2026-08-04 r28 shared-H gate
 

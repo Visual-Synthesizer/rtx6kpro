@@ -13,7 +13,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
+- [INDEX](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
@@ -37,6 +37,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash-0731 DSpark r29](models/ds4dspark-v20-r29.md) - `models/ds4dspark-v20-r29.md`
 - [DeepSeek-V4-Flash-0731 DSpark r30](models/ds4dspark-v20-r30.md) - `models/ds4dspark-v20-r30.md`
 - [DeepSeek-V4-Flash-0731 DSpark r31](models/ds4dspark-v20-r31.md) - `models/ds4dspark-v20-r31.md`
+- [DeepSeek-V4-Flash-0731 DSpark r33](models/ds4dspark-v20-r33.md) - `models/ds4dspark-v20-r33.md`
 - [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r27](models/ds4dspark-v20.md) - `models/ds4dspark-v20.md`
 - [DeepSeek-V4-Flash-DSpark v7](models/ds4dspark-v7.md) - `models/ds4dspark-v7.md`
 - [DeepSeek-V4-Flash and DSpark v8](models/ds4dspark-v8.md) - `models/ds4dspark-v8.md`
@@ -347,6 +348,8 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-04](daily-summaries/2026-08/2026-08-05.md) - `daily-summaries/2026-08/2026-08-05.md`
 - [Daily Summary — 2026-08-05](daily-summaries/2026-08/2026-08-06.md) - `daily-summaries/2026-08/2026-08-06.md`
 - [Daily Summary — 2026-08-06](daily-summaries/2026-08/2026-08-07.md) - `daily-summaries/2026-08/2026-08-07.md`
+- [Daily Summary — 2026-08-07](daily-summaries/2026-08/2026-08-08.md) - `daily-summaries/2026-08/2026-08-08.md`
+- [Daily Summary — 2026-08-08](daily-summaries/2026-08/2026-08-09.md) - `daily-summaries/2026-08/2026-08-09.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
