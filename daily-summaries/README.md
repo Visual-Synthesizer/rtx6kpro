@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-10](2026-08/2026-08-10.md) | B12X owner-reduce patch for GLM-5.2 TP8: John's 3-level PCIe topology-aware all-reduce cut cross-swi |
 | [2026-08-09](2026-08/2026-08-09.md) | - New PCIe custom communication (ported from GLM tp8 work) pushes GLM-5.2 nvfp4 to 205 tok/s sustain |
 | [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
 | [2026-08-07](2026-08/2026-08-07.md) | ormandj's SGLang DS4-Flash build fixes looping/garbage-output bug that plagued DSpark; GSM8K bench n |
@@ -172,6 +173,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-10](2026-08/2026-08-10.md) | B12X owner-reduce patch for GLM-5.2 TP8: John's 3-level PCIe topology-aware all-reduce cut cross-swi |
 | [2026-08-09](2026-08/2026-08-09.md) | - New PCIe custom communication (ported from GLM tp8 work) pushes GLM-5.2 nvfp4 to 205 tok/s sustain |
 | [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
 | [2026-08-07](2026-08/2026-08-07.md) | ormandj's SGLang DS4-Flash build fixes looping/garbage-output bug that plagued DSpark; GSM8K bench n |
