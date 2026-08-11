@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-11](2026-08/2026-08-11.md) | B12X kernels heading upstream: Luke opened an official vLLM PR for native B12X support on SM120 —  |
 | [2026-08-10](2026-08/2026-08-10.md) | B12X owner-reduce patch for GLM-5.2 TP8: John's 3-level PCIe topology-aware all-reduce cut cross-swi |
 | [2026-08-09](2026-08/2026-08-09.md) | - New PCIe custom communication (ported from GLM tp8 work) pushes GLM-5.2 nvfp4 to 205 tok/s sustain |
 | [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
@@ -173,6 +174,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-11](2026-08/2026-08-11.md) | B12X kernels heading upstream: Luke opened an official vLLM PR for native B12X support on SM120 —  |
 | [2026-08-10](2026-08/2026-08-10.md) | B12X owner-reduce patch for GLM-5.2 TP8: John's 3-level PCIe topology-aware all-reduce cut cross-swi |
 | [2026-08-09](2026-08/2026-08-09.md) | - New PCIe custom communication (ported from GLM tp8 work) pushes GLM-5.2 nvfp4 to 205 tok/s sustain |
 | [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
