@@ -58,10 +58,10 @@ quantization. None of the three profiles uses the discontinued NF3 checkpoint.
 
 ## Cache Isolation
 
-Use a separate host directory for each `/cache/jit` mount. The image namespaces
-generated artifacts with source fingerprint
-`vllm138eccd127-b12x76170059b9`, while profile-level isolation prevents
-target-only, DSpark, and DFlash CUDA-graph state from being mixed.
+Use a separate host directory for each `/cache/jit` mount. The vLLM, Triton,
+CuTe DSL, and B12X caches use source fingerprint
+`vllm138eccd127-b12x76170059b9`. Profile-level isolation prevents target-only,
+DSpark, and DFlash CUDA-graph state from being mixed.
 
 ```bash
 mkdir -p /mnt/luke/kimi-k3-cache/hh-runtime-nospec
