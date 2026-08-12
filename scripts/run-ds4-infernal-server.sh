@@ -5,7 +5,7 @@ set -euo pipefail
 # the public benchmark identity; MODE, DSpark depth, and draft count are the
 # corresponding serve-ds4-flash.sh interfaces.
 
-IMAGE=${IMAGE:-voipmonitor/vllm:infernal-invocation-vllm6c50b0a-b12x1584743-fi1ac6942-cu133-torch213-20260812-r3}
+IMAGE=${IMAGE:-voipmonitor/vllm:infernal-invocation-vllm3226eb7-b12x1584743-fi1ac6942-cu133-torch213-20260812-r4}
 NAME=${NAME:-ds4-infernal-benchmark}
 PORT=${PORT:-5000}
 GPUS=${GPUS:-0,1}

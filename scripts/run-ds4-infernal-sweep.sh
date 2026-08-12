@@ -9,14 +9,14 @@ set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 GENERIC_SWEEP_SCRIPT=${GENERIC_SWEEP_SCRIPT:-${SCRIPT_DIR}/run-ds4-v9-sweep.sh}
 
-export IMAGE="${IMAGE:-voipmonitor/vllm:infernal-invocation-vllm6c50b0a-b12x1584743-fi1ac6942-cu133-torch213-20260812-r3}"
-export OUT="${OUT:-/root/bench-results/ds4-infernal-invocation-r3-$(date -u +%Y%m%d-%H%M%S)}"
+export IMAGE="${IMAGE:-voipmonitor/vllm:infernal-invocation-vllm3226eb7-b12x1584743-fi1ac6942-cu133-torch213-20260812-r4}"
+export OUT="${OUT:-/root/bench-results/ds4-infernal-invocation-r4-$(date -u +%Y%m%d-%H%M%S)}"
 export PROGRESS_FILE="${PROGRESS_FILE:-${OUT}/progress.log}"
 export LAUNCHER="${LAUNCHER:-${SCRIPT_DIR}/run-ds4-infernal-server.sh}"
 export SWEEP_SCRIPT="${SWEEP_SCRIPT:-${SCRIPT_DIR}/run-ds4-infernal-sweep.sh}"
 export RESULT_RENDERER="${RESULT_RENDERER:-${SCRIPT_DIR}/render-ds4-infernal-results.py}"
 export VLLM_PATCH_FILE="${VLLM_PATCH_FILE:-/root/rtx6kpro/.source-lock-has-no-runtime-overlay}"
-export CONTAINER_PREFIX="${CONTAINER_PREFIX:-ds4-infernal-invocation-r3}"
+export CONTAINER_PREFIX="${CONTAINER_PREFIX:-ds4-infernal-invocation-r4}"
 export STANDARD_SERVED_MODEL_NAME=DeepSeek-V4-Flash-0731
 export DSPARK_SERVED_MODEL_NAME=DeepSeek-V4-Flash-0731
 

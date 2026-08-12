@@ -44,7 +44,9 @@ empty = {
     "replacement_characters": 0,
     "non_printable_characters": 0,
     "non_ascii_fraction": 0.0,
+    "cjk_characters": 0,
     "cjk_fraction": 0.0,
+    "max_cjk_run": 0,
     "forbidden_marker_count": 0,
     "raw_token_pattern_counts": {"token_id": 0},
 }
@@ -113,9 +115,9 @@ grep -Fq -- '--shm-size "${SHM_SIZE}"' \
   "${SCRIPT_DIR}/run-ds4-infernal-server.sh"
 grep -Fq '/usr/local/bin/serve-ds4-flash.sh' \
   "${SCRIPT_DIR}/run-ds4-infernal-server.sh"
-grep -Fq 'infernal-invocation-vllm6c50b0a-b12x1584743-fi1ac6942-cu133-torch213-20260812-r3' \
+grep -Fq 'infernal-invocation-vllm3226eb7-b12x1584743-fi1ac6942-cu133-torch213-20260812-r4' \
   "${SCRIPT_DIR}/run-ds4-infernal-server.sh"
-grep -Fq 'ds4-infernal-invocation-r3-' \
+grep -Fq 'ds4-infernal-invocation-r4-' \
   "${SCRIPT_DIR}/run-ds4-infernal-sweep.sh"
 
 PYTHONDONTWRITEBYTECODE=1 python3 - "${SCRIPT_DIR}" <<'PY'
