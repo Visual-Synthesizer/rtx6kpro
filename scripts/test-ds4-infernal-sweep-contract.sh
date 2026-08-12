@@ -115,9 +115,9 @@ grep -Fq -- '--shm-size "${SHM_SIZE}"' \
   "${SCRIPT_DIR}/run-ds4-infernal-server.sh"
 grep -Fq '/usr/local/bin/serve-ds4-flash.sh' \
   "${SCRIPT_DIR}/run-ds4-infernal-server.sh"
-grep -Fq 'infernal-invocation-vllm3226eb7-b12x1584743-fi1ac6942-cu133-torch213-20260812-r4' \
+grep -Fq 'infernal-invocation-vllm7ed814e-b12x1bea00c-fi1ac6942-cu133-torch213-20260812-r5' \
   "${SCRIPT_DIR}/run-ds4-infernal-server.sh"
-grep -Fq 'ds4-infernal-invocation-r4-' \
+grep -Fq 'ds4-infernal-invocation-r5-' \
   "${SCRIPT_DIR}/run-ds4-infernal-sweep.sh"
 
 PYTHONDONTWRITEBYTECODE=1 python3 - "${SCRIPT_DIR}" <<'PY'
