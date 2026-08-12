@@ -190,6 +190,82 @@ took 161.42 seconds for target-only, 165.29 seconds for DSpark, and 164.01
 seconds for DFlash. Complete model loading took 185.96, 186.99, and 190.56
 seconds, respectively.
 
+## Sieve Coding Acceptance
+
+Status: **qualified** for DSpark K7 and DFlash K7.
+
+The Sieve coding acceptance protocol sends one streamed chat request with the
+exact user prompt:
+
+```text
+Write a Python script that implements the Sieve of Eratosthenes.
+```
+
+Each profile received one discarded warm-up request followed by three measured
+requests. Every request used one active sequence, no synthetic input context,
+and `max_tokens=2000`. The request omitted both `temperature` and `seed`.
+Reasoning and final-content deltas were both included in the output integrity
+scan. The harness computed generation rate from the server-reported completion
+token count divided by elapsed time from the first streamed token through
+stream completion.
+
+The qualification harness was `llm_cjk_watchdog 0.1.0` at `/mnt/test.py`, with
+SHA-256
+`5246883eaaada9bd93a361eaffcfb0ee0e2c3a331230c523967f3c36acabdc11`.
+Its request protocol and throughput calculation match
+[`llm_cjk_watchdog.py@86cf05c`](https://github.com/local-inference-lab/llm-inference-bench/blob/86cf05c2f42f4d21b909b6e684424ca1aab89fd5/llm_cjk_watchdog.py);
+the qualification copy also records reasoning, final content, finish reason,
+usage, and timing in JSON.
+
+| Profile | Run | Completion tokens | Generation tok/s | TTFT | Finish reason | Han ideographs | Python validation |
+|---|---:|---:|---:|---:|---|---:|---|
+| DSpark K7 | 1 | 2,000 | 124.72 | 0.292 s | `length` | 0 | pass |
+| DSpark K7 | 2 | 1,885 | 134.26 | 0.293 s | `stop` | 0 | pass |
+| DSpark K7 | 3 | 1,612 | 138.73 | 0.294 s | `stop` | 0 | pass |
+| DFlash K7 | 1 | 1,190 | 146.95 | 0.301 s | `stop` | 0 | pass |
+| DFlash K7 | 2 | 1,116 | 150.09 | 0.301 s | `stop` | 0 | pass |
+| DFlash K7 | 3 | 1,893 | 127.56 | 0.300 s | `stop` | 0 | pass |
+
+Median generation rate was **134.26 tok/s for DSpark K7** and **146.95 tok/s
+for DFlash K7**. All six final answers contained a syntactically valid first
+fenced Python block. Executing each block and asserting
+`sieve_of_eratosthenes(30) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]` passed.
+No CJK Unified Ideographs, extensions A-E, or Compatibility Ideographs appeared
+in reasoning or final content. DSpark run 1 completed its Python program before
+the 2,000-token limit truncated the explanatory prose.
+
+Sieve generation rate is output-dependent because speculative acceptance and
+completion length vary with generated tokens. It does not replace the
+fixed-token normalized throughput table above. In particular, DFlash was
+faster by median generation rate across its three Sieve responses, while
+DSpark was faster under the normalized 1,024-token protocol.
+
+The machine-readable per-run results and evidence hashes are stored in
+[`validation/sieve-speculative-decode-20260812.json`](validation/sieve-speculative-decode-20260812.json).
+Raw JSON summaries and streamed output are stored on the qualification host
+under:
+
+```text
+/mnt/luke/kimi-k3-runs/infernal-release-20260812/dspark/sieve
+/mnt/luke/kimi-k3-runs/infernal-release-20260812/dflash/sieve
+```
+
+To reproduce the request protocol with the repository harness, set `MODEL` to
+the served name for the selected profile and run the command three times after
+one unrecorded warm-up:
+
+```bash
+git clone https://github.com/local-inference-lab/llm-inference-bench.git
+git -C llm-inference-bench checkout 86cf05c2f42f4d21b909b6e684424ca1aab89fd5
+
+python3 llm-inference-bench/llm_cjk_watchdog.py \
+  --host 127.0.0.1 \
+  --port 8000 \
+  --model "$MODEL" \
+  --max-tokens 2000 \
+  --no-overlay
+```
+
 ## Build the Image
 
 Pull the byte-identical qualified runtime by digest:
