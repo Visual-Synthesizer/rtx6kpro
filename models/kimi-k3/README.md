@@ -21,6 +21,7 @@ seven-token DFlash speculative decode.
 | Base image recipe | [`3775a0b`](https://github.com/local-inference-lab/blackwell-llm-docker/tree/3775a0b6bcf30350c329f69ab55df7f3ecc8764b) |
 | vLLM integration | [`integration/kimi-k3-ii-cu133-torch213-20260811@881ac39`](https://github.com/local-inference-lab/vllm/tree/881ac39a4fb6c5bbfa14f3944db560e0a27f3ffe) |
 | vLLM review | [`local-inference-lab/vllm#284`](https://github.com/local-inference-lab/vllm/pull/284) |
+| B12X review | [`local-inference-lab/b12x#147`](https://github.com/local-inference-lab/b12x/pull/147) |
 | Target checkpoint | `moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970` |
 | Runtime topology | TP16, DCP16, A2A DCP communication |
 | Target KV dtype | FP8 |
@@ -37,6 +38,10 @@ The image composes the following immutable source trees:
 |---|---|---|---|
 | `local-inference-lab/vllm` | `dev/infernal-invocation@c8d04a543e0e8b0896e60b8b11bec0bb2d780860` | Kimi-K3 TP16/DCP16 serving commit `881ac39a4fb6c5bbfa14f3944db560e0a27f3ffe` | `de04f08beb6ff0ef05189c31927f3a3320b1a6f1` |
 | `local-inference-lab/b12x` | `master@184d7d52ad630841d0c6caf962f8b9d36f38992a` | PR [#124](https://github.com/local-inference-lab/b12x/pull/124), [#138](https://github.com/local-inference-lab/b12x/pull/138), and [#139](https://github.com/local-inference-lab/b12x/pull/139) | `2e6092a74d2449b8f8fa65d0c980533002db76cb` |
+
+The B12X integration review [#147](https://github.com/local-inference-lab/b12x/pull/147)
+has resulting tree `2e6092a74d2449b8f8fa65d0c980533002db76cb`, identical
+to the B12X tree embedded in the qualified image.
 
 The Docker recipe stores integration locks and verified patches under
 `patches/releases/kimi-k3-infernal-invocation-runtime-r1/` and
