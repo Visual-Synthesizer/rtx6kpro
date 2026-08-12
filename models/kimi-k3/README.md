@@ -3,10 +3,10 @@
 Status: **qualified**.
 
 This page specifies the containerized vLLM runtime for `moonshotai/Kimi-K3`
-on 16 NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs. The target checkpoint
-retains its MXFP4 expert weights and uses FP8 KV cache. One image provides
-target-only decode, seven-token DSpark speculative decode, and seven-token
-DFlash speculative decode.
+on 16 NVIDIA RTX PRO 6000 Blackwell Workstation Edition GPUs. The target
+checkpoint retains its MXFP4 expert weights and uses FP8 KV cache. One image
+provides target-only decode, seven-token DSpark speculative decode, and
+seven-token DFlash speculative decode.
 
 ## Qualified Artifact
 
@@ -164,7 +164,7 @@ curl -fsS http://127.0.0.1:8000/v1/completions \
 
 ## Qualified Capacity and Decode Throughput
 
-Measurements used 16 RTX PRO 6000 Blackwell Server Edition GPUs, TP16/DCP16,
+Measurements used 16 RTX PRO 6000 Blackwell Workstation Edition GPUs, TP16/DCP16,
 one active request, a 256-token prompt, and 1,024 generated tokens. The
 target-only protocol constrained generation to token ID 13 so model output did
 not affect per-token timing. Speculative measurements used greedy sampling.
