@@ -16,6 +16,9 @@ seven-token DFlash speculative decode.
 | Registry digest | `sha256:974edc237f27a4eaa83a53ce4927dd176a5ad8ce4fbb8d3d689fce82348531a5` |
 | Local image ID used for qualification | `sha256:4be1d706e29cc5d53fc2891378ba185538d5a35e69793062a8f973f1886217f0` |
 | Docker recipe | [`build/kimi-k3-ii-cu133-torch213-20260811@697f50f`](https://github.com/local-inference-lab/blackwell-llm-docker/tree/697f50ff644f2c418645c64a50828dccce597d38) |
+| Base image | `voipmonitor/vllm:kimi-k3-cu133-torch213-nccl2312-20260811-r2` |
+| Base image ID used for qualification | `sha256:651f0d37bc3da8469a2b9257bcff060f5509cc0d97c18f2bf340a6e5ce68d532` |
+| Base image recipe | [`3775a0b`](https://github.com/local-inference-lab/blackwell-llm-docker/tree/3775a0b6bcf30350c329f69ab55df7f3ecc8764b) |
 | vLLM integration | [`integration/kimi-k3-ii-cu133-torch213-20260811@881ac39`](https://github.com/local-inference-lab/vllm/tree/881ac39a4fb6c5bbfa14f3944db560e0a27f3ffe) |
 | Target checkpoint | `moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970` |
 | Runtime topology | TP16, DCP16, A2A DCP communication |
@@ -183,24 +186,53 @@ seconds, respectively.
 
 ## Build the Image
 
-Commit `697f50ff644f2c418645c64a50828dccce597d38` is the exact Docker recipe
-embedded in the qualified image:
+Pull the byte-identical qualified runtime by digest:
+
+```bash
+docker pull \
+  voipmonitor/vllm@sha256:974edc237f27a4eaa83a53ce4927dd176a5ad8ce4fbb8d3d689fce82348531a5
+```
+
+The following commands rebuild the pinned base and runtime source
+compositions. Native compiler metadata can make the rebuilt image digest
+differ even when all pinned source trees and runtime interfaces match.
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
+
+git checkout 3775a0b6bcf30350c329f69ab55df7f3ecc8764b
+IMAGE=voipmonitor/vllm:kimi-k3-cu133-torch213-nccl2312-20260811-r2 \
+RELEASE_DATE=20260811 \
+REVISION=r2 \
+./build-kimi-k3-cu133-torch213-base.sh
+
 git checkout 697f50ff644f2c418645c64a50828dccce597d38
+BASE_IMAGE=voipmonitor/vllm:kimi-k3-cu133-torch213-nccl2312-20260811-r2 \
+IMAGE=voipmonitor/vllm:kimi-k3-infernal-vllmde04f08-b12x2e6092a-cu133-torch213-20260812-r1 \
+RELEASE_DATE=20260812 \
+REVISION=r1 \
 ./build-kimi-k3-infernal-invocation-cu133-torch213.sh
 ```
 
-Set `PUSH_IMAGE=1` to push the resulting image after build and smoke checks.
-The builder verifies source patch hashes, resulting Git trees, image labels,
-the Python runtime, native extension imports, and a 16-rank NCCL collective.
+The base builder starts from
+`nvcr.io/nvidia/pytorch:26.07-py3@sha256:2140e699b3beaf7f96a0081fd9c9406bc3832b435cdb60dfa2d261f7d2f34a1c`.
+It builds PyTorch 2.13.0 from
+`cf30153c4c131c8164ee7798e5022d810682e2cb`, Torchvision 0.28.0 from
+`8fb87713a24951e639c494b0f2a8a81b5f8e33a6`, patched NCCL 2.31.2 from
+`fb6f40999a2a9e63104d4ae4a84118bce61528f8`, and XGrammar 0.2.5 from
+`2ea71da4ccb997a06928c9fb69b99f330da56697`.
+
+The base builder runs CUDA, Torchvision, and 16-rank NCCL smoke tests. The
+runtime builder verifies the vLLM and B12X integration patch hashes and Git
+trees, builds the native extensions, verifies installed package versions and
+imports, and repeats the 16-rank NCCL smoke test. Set `PUSH_IMAGE=1` on either
+builder to publish its output after validation.
 
 ## Evidence
 
 The machine-readable qualification receipt is
-[`validation/kimi-k3-infernal-invocation-runtime-20260812.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/f05633234d99a300f259ec427052d54b0a55c17e/validation/kimi-k3-infernal-invocation-runtime-20260812.json).
+[`validation/kimi-k3-infernal-invocation-runtime-20260812.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/7ae7b4ef40ed0b7c3c4cd6551ecb3dfc81578f3e/validation/kimi-k3-infernal-invocation-runtime-20260812.json).
 Server logs, container inspections, and normalized benchmark summaries from
 the qualified host are stored under:
 
