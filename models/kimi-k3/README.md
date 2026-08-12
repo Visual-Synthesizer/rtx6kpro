@@ -20,6 +20,7 @@ seven-token DFlash speculative decode.
 | Base image ID used for qualification | `sha256:651f0d37bc3da8469a2b9257bcff060f5509cc0d97c18f2bf340a6e5ce68d532` |
 | Base image recipe | [`3775a0b`](https://github.com/local-inference-lab/blackwell-llm-docker/tree/3775a0b6bcf30350c329f69ab55df7f3ecc8764b) |
 | vLLM integration | [`integration/kimi-k3-ii-cu133-torch213-20260811@881ac39`](https://github.com/local-inference-lab/vllm/tree/881ac39a4fb6c5bbfa14f3944db560e0a27f3ffe) |
+| vLLM review | [`local-inference-lab/vllm#284`](https://github.com/local-inference-lab/vllm/pull/284) |
 | Target checkpoint | `moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970` |
 | Runtime topology | TP16, DCP16, A2A DCP communication |
 | Target KV dtype | FP8 |
