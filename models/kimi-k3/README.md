@@ -200,7 +200,7 @@ the Python runtime, native extension imports, and a 16-rank NCCL collective.
 ## Evidence
 
 The machine-readable qualification receipt is
-[`validation/kimi-k3-infernal-invocation-runtime-20260812.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/2229e9e331eaa4f6a809aabb20f76ca384016cb2/validation/kimi-k3-infernal-invocation-runtime-20260812.json).
+[`validation/kimi-k3-infernal-invocation-runtime-20260812.json`](https://github.com/local-inference-lab/blackwell-llm-docker/blob/f05633234d99a300f259ec427052d54b0a55c17e/validation/kimi-k3-infernal-invocation-runtime-20260812.json).
 Server logs, container inspections, and normalized benchmark summaries from
 the qualified host are stored under:
 
