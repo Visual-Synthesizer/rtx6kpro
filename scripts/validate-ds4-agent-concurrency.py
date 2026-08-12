@@ -83,6 +83,10 @@ RAW_TOKEN_PATTERNS = (
     re.compile(r"(?:^|\s)\d{5,}(?:\s+\d{5,}){3,}(?:$|\s)"),
 )
 
+CJK_BURST_THRESHOLD = 4
+CJK_CHARACTER_THRESHOLD = 16
+CJK_FRACTION_THRESHOLD = 0.002
+
 
 @dataclass(frozen=True)
 class RequestSpec:
@@ -194,21 +198,42 @@ def calibrate_messages(
     return messages, measured
 
 
+def is_cjk(character: str) -> bool:
+    return any(
+        lower <= character <= upper
+        for lower, upper in (
+            ("\u3040", "\u30ff"),
+            ("\u3400", "\u4dbf"),
+            ("\u4e00", "\u9fff"),
+            ("\uac00", "\ud7af"),
+            ("\uf900", "\ufaff"),
+        )
+    )
+
+
 def count_text_indicators(text: str, forbidden_marker: str) -> dict[str, Any]:
     printable = sum(
         character.isprintable() or character in "\n\r\t" for character in text
     )
     non_ascii = sum(ord(character) > 127 for character in text)
-    cjk = sum(
-        "\u3400" <= character <= "\u4dbf" or "\u4e00" <= character <= "\u9fff"
-        for character in text
-    )
+    cjk = 0
+    cjk_run = 0
+    max_cjk_run = 0
+    for character in text:
+        if is_cjk(character):
+            cjk += 1
+            cjk_run += 1
+            max_cjk_run = max(max_cjk_run, cjk_run)
+        else:
+            cjk_run = 0
     return {
         "characters": len(text),
         "replacement_characters": text.count("\ufffd"),
         "non_printable_characters": len(text) - printable,
         "non_ascii_fraction": non_ascii / max(1, len(text)),
+        "cjk_characters": cjk,
         "cjk_fraction": cjk / max(1, len(text)),
+        "max_cjk_run": max_cjk_run,
         "forbidden_marker_count": text.count(forbidden_marker),
         "raw_token_pattern_counts": {
             pattern.pattern: len(pattern.findall(text))
@@ -232,6 +257,15 @@ def integrity_violations(result: dict[str, Any]) -> list[str]:
         for pattern, count in indicators["raw_token_pattern_counts"].items():
             if count:
                 violations.append(f"{stream_name}.raw_token[{pattern}]={count}")
+        if indicators["max_cjk_run"] >= CJK_BURST_THRESHOLD:
+            violations.append(f"{stream_name}.max_cjk_run={indicators['max_cjk_run']}")
+        elif (
+            indicators["cjk_characters"] >= CJK_CHARACTER_THRESHOLD
+            and indicators["cjk_fraction"] >= CJK_FRACTION_THRESHOLD
+        ):
+            violations.append(
+                f"{stream_name}.cjk_fraction={indicators['cjk_fraction']:.6f}"
+            )
     if not result["content_prefix"] and not result["tool_call_delta_count"]:
         violations.append("response contains neither content nor a tool call")
     return violations
