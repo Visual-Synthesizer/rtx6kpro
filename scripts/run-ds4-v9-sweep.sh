@@ -6,6 +6,7 @@ SWEEP_SCRIPT=${SWEEP_SCRIPT:-$SCRIPT_DIR/$(basename -- "${BASH_SOURCE[0]}")}
 LAUNCHER=${LAUNCHER:-$SCRIPT_DIR/run-ds4-v9-server.sh}
 BENCH=${BENCH:-/root/llm-inference-bench/llm_decode_bench.py}
 RESULT_RENDERER=${RESULT_RENDERER:-}
+LAYOUT_PLANNER=${LAYOUT_PLANNER:-$SCRIPT_DIR/plan-ds4-sweep-layout.py}
 OUT=${OUT:-/root/bench-results/ds4-v9-$(date -u +%Y%m%d-%H%M%S)}
 IMAGE=${IMAGE:-voipmonitor/vllm:eldritch-enlightenment-v45c1582-b12xf3686b5-pc1441b5-cu132-20260704}
 PROGRESS_FILE=${PROGRESS_FILE:-/root/vllm/prubezne_vysledky}
@@ -65,6 +66,10 @@ record_repro_artifacts() {
     cp "$SCRIPT_DIR/validate-ds4-sweep-case.py" \
       "$OUT/repro/validate-ds4-sweep-case.py"
     script_hash_inputs+=("$SCRIPT_DIR/validate-ds4-sweep-case.py")
+  fi
+  if [[ -f "$LAYOUT_PLANNER" ]]; then
+    cp "$LAYOUT_PLANNER" "$OUT/repro/$(basename "$LAYOUT_PLANNER")"
+    script_hash_inputs+=("$LAYOUT_PLANNER")
   fi
   if [[ -n "$RESULT_RENDERER" && -f "$RESULT_RENDERER" ]]; then
     cp "$RESULT_RENDERER" "$OUT/repro/$(basename "$RESULT_RENDERER")"
@@ -454,49 +459,60 @@ run_case_guarded() {
 
 run_tp_matrix() {
   local tp=$1
-  local -a groups cases wave_pids
-  mapfile -t groups < <(gpu_groups_for_tp "$tp")
+  local -a cases planned wave_pids
+  local gpu_groups
+  gpu_groups="$(gpu_groups_for_tp "$tp" | paste -sd' ' -)"
+  mapfile -t planned < <(
+    python3 "$LAYOUT_PLANNER" \
+      --tp "$tp" --backends "$BACKENDS" --modes "$MODES" \
+      --gpu-groups "$gpu_groups" --port-base "$PORT_BASE"
+  )
   cases=()
-  for backend in $(split_csv "$BACKENDS"); do
-    for mode in $(split_csv "$MODES"); do
-      local label="tp${tp}-${backend}-${mode}"
-      if [[ "$RESUME" == "1" ]] \
-        && validate_reusable_case "$OUT/$label"; then
-        append_case_summary REUSED "$label" "$OUT/$label"
-      else
-        cases+=("$tp:$backend:$mode")
-      fi
-    done
+  local planned_case
+  for planned_case in "${planned[@]}"; do
+    local c_tp backend mode ordinal wave slot gpus port
+    IFS=$'\t' read -r c_tp backend mode ordinal wave slot gpus port \
+      <<<"$planned_case"
+    local label="tp${c_tp}-${backend}-${mode}"
+    if [[ "$RESUME" == "1" ]] \
+      && validate_reusable_case "$OUT/$label"; then
+      append_case_summary REUSED "$label" "$OUT/$label"
+    else
+      cases+=("$planned_case")
+    fi
   done
 
-  local idx=0 wave=0 failures=0
+  local idx=0 failures=0
   while (( idx < ${#cases[@]} )); do
     wave_pids=()
     local -a ready_cases bench_pids
     ready_cases=()
     bench_pids=()
-    local slot=0
-    while (( slot < ${#groups[@]} && idx < ${#cases[@]} )); do
-      IFS=: read -r c_tp c_backend c_mode <<<"${cases[$idx]}"
-      local port=$((PORT_BASE + tp * 100 + wave * 20 + slot))
+    local c_tp c_backend c_mode c_ordinal c_wave c_slot c_gpus c_port
+    IFS=$'\t' read -r c_tp c_backend c_mode c_ordinal c_wave c_slot c_gpus c_port \
+      <<<"${cases[$idx]}"
+    local active_wave=$c_wave
+    while (( idx < ${#cases[@]} )); do
+      IFS=$'\t' read -r c_tp c_backend c_mode c_ordinal c_wave c_slot c_gpus c_port \
+        <<<"${cases[$idx]}"
+      [[ "$c_wave" == "$active_wave" ]] || break
       if [[ "$SYNC_WAVE_READY" == "1" ]]; then
-        local spec="$c_tp:$c_backend:$c_mode:${groups[$slot]}:$port"
-        if launch_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port" \
+        local spec="$c_tp:$c_backend:$c_mode:$c_gpus:$c_port"
+        if launch_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port" \
           && wait_for_server \
-            "${CONTAINER_PREFIX}-tp${c_tp}-${c_backend}-${c_mode}" "$port"; then
+            "${CONTAINER_PREFIX}-tp${c_tp}-${c_backend}-${c_mode}" "$c_port"; then
           # Load and fully initialize each server before starting the next one.
           # Benchmark clients are launched only after this whole wave is ready.
           ready_cases+=("$spec")
         else
-          fail_case "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port"
+          fail_case "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port"
           failures=$((failures + 1))
         fi
       else
-        run_case_guarded "$c_tp" "$c_backend" "$c_mode" "${groups[$slot]}" "$port" &
+        run_case_guarded "$c_tp" "$c_backend" "$c_mode" "$c_gpus" "$c_port" &
         wave_pids+=("$!")
       fi
       idx=$((idx + 1))
-      slot=$((slot + 1))
     done
     if [[ "$SYNC_WAVE_READY" == "1" ]]; then
       settle_after_ready
@@ -519,7 +535,6 @@ run_tp_matrix() {
         fi
       done
     fi
-    wave=$((wave + 1))
   done
 
   if (( failures > 0 )); then
