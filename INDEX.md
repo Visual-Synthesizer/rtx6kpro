@@ -31,6 +31,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v4 Chthonic B12X](models/ds4-flash-v4.md) - `models/ds4-flash-v4.md`
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) - `models/ds4dspark-infernal-invocation-r2.md`
 - [DeepSeek-V4-Flash and DSpark v10](models/ds4dspark-v10.md) - `models/ds4dspark-v10.md`
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
 - [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20-r16.md) - `models/ds4dspark-v20-r16.md`
@@ -86,7 +87,8 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 v17: Unified Serving And DCP Prefill](models/glm5.2_v17.md) - `models/glm5.2_v17.md`
 - [GLM-5.2 v18: Gilded Gnosis Fast DCP](models/glm5.2_v18.md) - `models/glm5.2_v18.md`
 - [GLM-5.2 v19: Gilded Gnosis](models/glm5.2_v19.md) - `models/glm5.2_v19.md`
-- [GLM-5.2 v20: Gilded Gnosis DCP Release](models/glm5.2_v20.md) - `models/glm5.2_v20.md`
+- [GLM-5.2 Gilded Gnosis r34](models/glm5.2_v20.md) - `models/glm5.2_v20.md`
+- [GLM-5.2 Gilded Gnosis release history through r33](models/glm5.2_v20_history.md) - `models/glm5.2_v20_history.md`
 - [GLM-5 on RTX PRO 6000 Blackwell (SM120)](models/glm5.md) - `models/glm5.md`
 - [Kimi K2.5 on RTX PRO 6000 Blackwell](models/kimi-k25.md) - `models/kimi-k25.md`
 - [Kimi-K2.6 eagle3 MTP long-context perf — **STATUS: shippable**](models/kimi-k26-mtp-long-ctx-wip/README.md) - `models/kimi-k26-mtp-long-ctx-wip/README.md`
@@ -107,6 +109,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Kimi-K2.7-Code on Black Benediction](models/kimi-k27-code.md) - `models/kimi-k27-code.md`
 - [Kimi-K2.7-Code v2 on Eldritch](models/kimi-k27-code_v2.md) - `models/kimi-k27-code_v2.md`
 - [Kimi-K2.7-Code v3 on Fathomless](models/kimi-k27-code_v3.md) - `models/kimi-k27-code_v3.md`
+- [Kimi-K3 TP16/DCP16 Runtime on RTX PRO 6000 Blackwell](models/kimi-k3/README.md) - `models/kimi-k3/README.md`
 - [Kimi Runbook Hub](models/kimi.md) - `models/kimi.md`
 - [Legacy Model Runbooks](models/legacy.md) - `models/legacy.md`
 - [MiMo-V2.5-Pro on RTX PRO 6000 Blackwell](models/mimo-v25-pro/README.md) - `models/mimo-v25-pro/README.md`
@@ -350,6 +353,9 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-06](daily-summaries/2026-08/2026-08-07.md) - `daily-summaries/2026-08/2026-08-07.md`
 - [Daily Summary — 2026-08-07](daily-summaries/2026-08/2026-08-08.md) - `daily-summaries/2026-08/2026-08-08.md`
 - [Daily Summary — 2026-08-08](daily-summaries/2026-08/2026-08-09.md) - `daily-summaries/2026-08/2026-08-09.md`
+- [Key highlights](daily-summaries/2026-08/2026-08-10.md) - `daily-summaries/2026-08/2026-08-10.md`
+- [Daily Summary — 2026-08-10](daily-summaries/2026-08/2026-08-11.md) - `daily-summaries/2026-08/2026-08-11.md`
+- [Daily Summary — 2026-08-11](daily-summaries/2026-08/2026-08-12.md) - `daily-summaries/2026-08/2026-08-12.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

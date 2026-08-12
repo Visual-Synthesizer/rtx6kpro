@@ -13,7 +13,7 @@ PCIe topology work, and regression history.
 
 If you just want to run a model, use these stable hub pages first:
 
-| Model family | Start here | Current focus |
+| Model family | Start here | Scope |
 |---|---|---|
 | GLM-5.2 | [GLM-5.2 Runbook Hub](models/glm-5.2.md) | Fathomless vLLM, NVFP4, online FP8/MXFP8, B12X, DCP, MTP, KLD. |
 | DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Standard checkpoint, MTP, DSpark, B12X, Lucifer, CUTLASS. |
@@ -43,16 +43,16 @@ Need the complete map of every Markdown page?
 | Avoid known runtime footguns | [Common Issues](troubleshooting/common-issues.md), model caveats, and daily summaries. |
 | Understand old measurements | Historical versioned pages and [Daily Summaries](daily-summaries/). |
 
-## Current Production-Style Pages
+## Recommended Production-Style Pages
 
 | Area | Page | Why it matters |
 |---|---|---|
-| GLM-5.2 current stack | [GLM-5.2 v20](models/glm5.2_v20.md) | Current Gilded Gnosis/B12X image, source pins, TP6 fixes, Xid validation, and release gate. |
+| GLM-5.2 serving stack | [GLM-5.2 v20](models/glm5.2_v20.md) | Gilded Gnosis/B12X image, source pins, TP6 fixes, Xid validation, and release gate. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
-| DS4 current quick start | [DS4 DSpark Gilded Gnosis r33](models/ds4dspark-v20-r33.md) | 0731 checkpoint, fixed K5, FULL-graph context-KV, qualified all-reduce policy, K6/Trellis fixes, and native tiered offload. |
+| DS4 serving profile | [DS4 DSpark Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) | 0731 checkpoint, fixed and confidence-controlled DSpark, FULL target/draft graphs, LMCache, and native tiered KV offload. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
 | Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
-| MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | Current MiMo DFlash validation and fix notes. |
+| MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | MiMo DFlash validation and fix notes. |
 
 Older pages are intentionally preserved. Prefer the hub page for each model
 family unless you are reproducing a specific old result.
