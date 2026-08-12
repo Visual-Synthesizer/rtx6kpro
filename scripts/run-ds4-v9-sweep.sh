@@ -61,6 +61,11 @@ record_repro_artifacts() {
     cp "$SCRIPT_DIR/render-ds4-v9-results.py" "$OUT/repro/render-ds4-v9-results.py"
     script_hash_inputs+=("$SCRIPT_DIR/render-ds4-v9-results.py")
   fi
+  if [[ -f "$SCRIPT_DIR/validate-ds4-sweep-case.py" ]]; then
+    cp "$SCRIPT_DIR/validate-ds4-sweep-case.py" \
+      "$OUT/repro/validate-ds4-sweep-case.py"
+    script_hash_inputs+=("$SCRIPT_DIR/validate-ds4-sweep-case.py")
+  fi
   if [[ -n "$RESULT_RENDERER" && -f "$RESULT_RENDERER" ]]; then
     cp "$RESULT_RENDERER" "$OUT/repro/$(basename "$RESULT_RENDERER")"
     script_hash_inputs+=("$RESULT_RENDERER")
@@ -207,105 +212,16 @@ PY
 
 validate_case_results() {
   local case_dir=$1
-  python3 - "$case_dir" "$DECODE_CONCURRENCY" "$PREFILL_CONTEXTS" \
-    "$RUN_DECODE" "$RUN_PREFILL" <<'PY'
-import json
-import math
-import pathlib
-import sys
-
-case_dir = pathlib.Path(sys.argv[1])
-decode_concurrency = [int(x) for x in sys.argv[2].replace(",", " ").split()]
-run_decode = sys.argv[4] == "1"
-run_prefill = sys.argv[5] == "1"
-prefill_contexts = []
-for item in sys.argv[3].replace(",", " ").split():
-    item = item.lower()
-    if item.endswith("k"):
-        prefill_contexts.append(str(int(float(item[:-1]) * 1024)))
-    else:
-        prefill_contexts.append(str(int(item)))
-
-def fail(msg: str) -> None:
-    print(f"invalid benchmark results: {msg}", file=sys.stderr)
-    raise SystemExit(1)
-
-def load(name: str):
-    path = case_dir / name
-    if not path.exists():
-        fail(f"missing {name}")
-    with path.open() as f:
-        return json.load(f)
-
-def finite(value) -> bool:
-    try:
-        return math.isfinite(float(value))
-    except (TypeError, ValueError):
-        return False
-
-if run_decode:
-    decode = load("decode.json")
-    rows = {}
-    for row in decode.get("results", []):
-        try:
-            context = int(row.get("context_tokens", -1))
-            concurrency = int(row.get("concurrency", 0))
-        except (TypeError, ValueError):
-            continue
-        if context == 0 and finite(row.get("aggregate_tps")):
-            rows[concurrency] = row["aggregate_tps"]
-
-    missing_decode = [cc for cc in decode_concurrency if cc not in rows]
-    if missing_decode:
-        fail(f"missing decode aggregate_tps for concurrency {missing_decode}")
-
-    coding = decode.get("coding_peak", {})
-    coding_summary = coding.get("summary", {})
-    if int(coding.get("runs_ok", -1)) != int(coding.get("runs_requested", -2)):
-        fail(
-            "incomplete coding peak: "
-            f"{coding.get('runs_ok')}/{coding.get('runs_requested')} runs"
-        )
-    if not finite(coding_summary.get("median_generation_tok_s")):
-        fail("missing coding peak median_generation_tok_s")
-    if int(coding_summary.get("cjk_runs", -1)) != 0:
-        fail(f"coding peak produced CJK in {coding_summary.get('cjk_runs')} run(s)")
-
-def valid_prefill(row) -> bool:
-    if not isinstance(row, dict):
-        return False
-    if not finite(row.get("tok_per_sec")) or not finite(row.get("ttft_seconds")):
-        return False
-    # A failed streaming request used to be timed as an immediate TTFT and
-    # could yield multi-million tok/s. Keep resume fail-closed for those old
-    # result files as well as for empty samples.
-    return (
-        0 < float(row["tok_per_sec"]) < 1_000_000
-        and float(row["ttft_seconds"]) > 0
-        and int(row.get("samples", 0)) > 0
-    )
-
-if run_prefill:
-    prefill = load("prefill.json")
-    prefill_rows = prefill.get("prefill", {})
-
-    def matching_row(target):
-        candidates = []
-        for key, row in prefill_rows.items():
-            try:
-                actual = int(key)
-            except (TypeError, ValueError):
-                continue
-            if 0 <= target - actual <= 256 and valid_prefill(row):
-                candidates.append((actual, row))
-        return max(candidates) if candidates else None
-
-    missing_prefill = [
-        ctx for ctx in prefill_contexts if matching_row(int(ctx)) is None
-    ]
-    if missing_prefill:
-        fail(f"missing prefill tok_per_sec for contexts {missing_prefill}")
-PY
+  local -a args
+  args=(
+    "$SCRIPT_DIR/validate-ds4-sweep-case.py"
+    "$case_dir"
+    --decode-concurrency "$DECODE_CONCURRENCY"
+    --prefill-contexts "$PREFILL_CONTEXTS"
+  )
+  [[ "$RUN_DECODE" == "1" ]] && args+=(--run-decode)
+  [[ "$RUN_PREFILL" == "1" ]] && args+=(--run-prefill)
+  python3 "${args[@]}"
 }
 
 validate_runtime_log() {
