@@ -1,14 +1,14 @@
 # Kimi Runbook Hub
 
 Use this page as the stable entry point for Kimi models on RTX PRO 6000
-Blackwell. It covers the Kimi-K3 Heraldic Harbinger TP16 runtime,
+Blackwell. It covers the Kimi-K3 Infernal Invocation TP16/DCP16 runtime,
 Kimi-K2.7-Code DFlash, and Kimi-K2.6 regression/debugging references.
 
 ## Qualified Runtime Pages
 
 | Need | Page |
 |---|---|
-| Run Kimi-K3 with a full MXFP4 target, DCP16, and target-only, DSpark, or DFlash decode | [Kimi-K3 HH TP16 runtime](kimi-k3/README.md) |
+| Run Kimi-K3 with a full MXFP4 target, DCP16, and target-only, DSpark, or DFlash decode | [Kimi-K3 TP16/DCP16 runtime](kimi-k3/README.md) |
 | Run Kimi-K2.7-Code on the Fathomless runtime | [Kimi-K2.7-Code v3](kimi-k27-code_v3.md) |
 | Reproduce the Eldritch Kimi-K2.7-Code recipe | [Kimi-K2.7-Code v2](kimi-k27-code_v2.md) |
 | Reproduce Black Benediction Kimi-K2.7-Code | [Kimi-K2.7-Code](kimi-k27-code.md) |
@@ -29,7 +29,7 @@ Kimi-K2.7-Code DFlash, and Kimi-K2.6 regression/debugging references.
 
 | Page | Status | Scope |
 |---|---|---|
-| [Kimi-K3 HH TP16 runtime](kimi-k3/README.md) | Qualified | Reproducible HH/B12X Docker image and target-only, DSpark, and DFlash profiles. |
+| [Kimi-K3 TP16/DCP16 runtime](kimi-k3/README.md) | Qualified | Reproducible Infernal Invocation/B12X Docker image and target-only, DSpark, and DFlash profiles. |
 | [Kimi-K2.7-Code v3](kimi-k27-code_v3.md) | Qualified | Fathomless Kimi DFlash validation and patch overlay notes. |
 | [Kimi-K2.7-Code v2](kimi-k27-code_v2.md) | Research-only | Eldritch Kimi runtime evidence. |
 | [Kimi-K2.7-Code](kimi-k27-code.md) | Research-only | Black Benediction recipe. |
