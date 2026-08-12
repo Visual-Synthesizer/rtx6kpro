@@ -32,6 +32,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) - `models/ds4dspark-infernal-invocation-r2.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r4](models/ds4dspark-infernal-invocation-r4.md) - `models/ds4dspark-infernal-invocation-r4.md`
 - [DeepSeek-V4-Flash and DSpark v10](models/ds4dspark-v10.md) - `models/ds4dspark-v10.md`
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
 - [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20-r16.md) - `models/ds4dspark-v20-r16.md`
