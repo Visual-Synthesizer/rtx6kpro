@@ -31,8 +31,11 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v4 Chthonic B12X](models/ds4-flash-v4.md) - `models/ds4-flash-v4.md`
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) - `models/ds4dspark-infernal-invocation-r2.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r4](models/ds4dspark-infernal-invocation-r4.md) - `models/ds4dspark-infernal-invocation-r4.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r7](models/ds4dspark-infernal-invocation-r7.md) - `models/ds4dspark-infernal-invocation-r7.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r9](models/ds4dspark-infernal-invocation-r9.md) - `models/ds4dspark-infernal-invocation-r9.md`
 - [DeepSeek-V4-Flash and DSpark v10](models/ds4dspark-v10.md) - `models/ds4dspark-v10.md`
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
 - [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20-r16.md) - `models/ds4dspark-v20-r16.md`
@@ -357,6 +360,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Key highlights](daily-summaries/2026-08/2026-08-10.md) - `daily-summaries/2026-08/2026-08-10.md`
 - [Daily Summary — 2026-08-10](daily-summaries/2026-08/2026-08-11.md) - `daily-summaries/2026-08/2026-08-11.md`
 - [Daily Summary — 2026-08-11](daily-summaries/2026-08/2026-08-12.md) - `daily-summaries/2026-08/2026-08-12.md`
+- [Daily Summary — 2026-08-12](daily-summaries/2026-08/2026-08-13.md) - `daily-summaries/2026-08/2026-08-13.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
