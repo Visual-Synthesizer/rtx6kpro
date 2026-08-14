@@ -246,12 +246,20 @@ python3 models/kimi-k3/tools/run-kimi-k3-aa-lcr.py generate \
   --output-dir "$RUN_DIR" \
   --runtime-manifest "$RUN_DIR/runtime-manifest.json" \
   --repeats 3 \
+  --concurrency 16 \
   --reasoning-effort max \
   --temperature 1.0 \
   --top-p 0.95 \
   --max-tokens 200000 \
   --timeout-seconds 7200
 ```
+
+`--concurrency` controls the number of independent HTTP requests kept in
+flight. It does not change the server's `max_num_seqs` limit. The value is part
+of the generation-configuration hash, so resuming an output directory with a
+different client concurrency is rejected. Each response is written atomically
+to its own question-and-repeat receipt before another task is reported as
+complete.
 
 Each receipt preserves the full API response, final answer, reasoning content
 when returned by the server, usage counters, finish reason, elapsed time,

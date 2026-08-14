@@ -14,6 +14,7 @@ import statistics
 import time
 import unicodedata
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -52,6 +53,18 @@ class ResolvedDocument:
     path: Path
     sha256: str
     unicode_normalization_required: bool
+
+
+@dataclass(frozen=True)
+class GenerationTask:
+    """One independently writable AA-LCR generation request."""
+
+    question: Question
+    repeat: int
+    prompt: str
+    prompt_sha256: str
+    documents: tuple[dict[str, Any], ...]
+    receipt_path: Path
 
 
 def utc_now() -> str:
@@ -500,6 +513,8 @@ def command_token_counts(args: argparse.Namespace) -> None:
 def command_generate(args: argparse.Namespace) -> None:
     if args.repeats <= 0:
         raise ValueError("AA-LCR repeat count must be positive")
+    if args.concurrency <= 0:
+        raise ValueError("AA-LCR client concurrency must be positive")
     if args.max_tokens <= 0:
         raise ValueError("AA-LCR maximum output token count must be positive")
     document_root = args.document_root or (
@@ -522,6 +537,7 @@ def command_generate(args: argparse.Namespace) -> None:
         "api_url": chat_completions_url(args.base_url),
         "model": args.model,
         "repeats": args.repeats,
+        "client_concurrency": args.concurrency,
         "temperature": args.temperature,
         "top_p": args.top_p,
         "max_tokens": args.max_tokens,
@@ -558,13 +574,13 @@ def command_generate(args: argparse.Namespace) -> None:
 
     url = generation_config["api_url"]
     headers = api_headers(args.api_key_env)
-    completed = 0
     skipped = 0
+    tasks: list[GenerationTask] = []
     for question in questions:
         documents = resolver.resolve(question)
         prompt = build_prompt(documents, question.question)
         prompt_sha256 = sha256_text(prompt)
-        document_records = [
+        document_records = tuple(
             {
                 "requested_name": document.requested_name,
                 "relative_path": document.relative_path,
@@ -572,7 +588,7 @@ def command_generate(args: argparse.Namespace) -> None:
                 "unicode_normalization_required": document.unicode_normalization_required,
             }
             for document in documents
-        ]
+        )
         for repeat in range(args.repeats):
             receipt_path = question_receipt_path(
                 args.output_dir, repeat, question.question_id
@@ -591,85 +607,107 @@ def command_generate(args: argparse.Namespace) -> None:
                     f"Generation receipt is incompatible: {receipt_path}"
                 )
 
-            request = {
-                "model": args.model,
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": args.temperature,
-                "top_p": args.top_p,
-                "max_tokens": args.max_tokens,
-                "reasoning_effort": args.reasoning_effort,
-                "stream": False,
-            }
-            try:
-                response, elapsed = post_json(
-                    url=url,
-                    payload=request,
-                    headers=headers,
-                    timeout_seconds=args.timeout_seconds,
+            tasks.append(
+                GenerationTask(
+                    question=question,
+                    repeat=repeat,
+                    prompt=prompt,
+                    prompt_sha256=prompt_sha256,
+                    documents=document_records,
+                    receipt_path=receipt_path,
                 )
-                message = choice_message(response)
-                candidate_answer = message.get("content")
-                if not isinstance(candidate_answer, str):
-                    candidate_answer = ""
-                receipt = {
-                    "artifact_kind": "Kimi K3 AA-LCR generation receipt",
-                    "status": "qualified",
-                    "completed_utc": utc_now(),
-                    "question_id": question.question_id,
-                    "repeat": repeat,
-                    "document_category": question.document_category,
-                    "document_set_id": question.document_set_id,
-                    "documents": document_records,
-                    "question": question.question,
-                    "official_answer_sha256": sha256_text(question.official_answer),
-                    "reported_input_tokens_cl100k_base": question.reported_input_tokens,
-                    "prompt_chars": len(prompt),
-                    "prompt_sha256": prompt_sha256,
+            )
+
+    def generate_one(task: GenerationTask) -> dict[str, Any]:
+        request = {
+            "model": args.model,
+            "messages": [{"role": "user", "content": task.prompt}],
+            "temperature": args.temperature,
+            "top_p": args.top_p,
+            "max_tokens": args.max_tokens,
+            "reasoning_effort": args.reasoning_effort,
+            "stream": False,
+        }
+        try:
+            response, elapsed = post_json(
+                url=url,
+                payload=request,
+                headers=headers,
+                timeout_seconds=args.timeout_seconds,
+            )
+            message = choice_message(response)
+            candidate_answer = message.get("content")
+            if not isinstance(candidate_answer, str):
+                candidate_answer = ""
+            receipt = {
+                "artifact_kind": "Kimi K3 AA-LCR generation receipt",
+                "status": "qualified",
+                "completed_utc": utc_now(),
+                "question_id": task.question.question_id,
+                "repeat": task.repeat,
+                "document_category": task.question.document_category,
+                "document_set_id": task.question.document_set_id,
+                "documents": task.documents,
+                "question": task.question.question,
+                "official_answer_sha256": sha256_text(task.question.official_answer),
+                "reported_input_tokens_cl100k_base": task.question.reported_input_tokens,
+                "prompt_chars": len(task.prompt),
+                "prompt_sha256": task.prompt_sha256,
+                "generation_config_sha256": run_manifest[
+                    "generation_config_sha256"
+                ],
+                "elapsed_seconds": elapsed,
+                "candidate_answer": candidate_answer,
+                "candidate_answer_sha256": sha256_text(candidate_answer),
+                "response": response,
+            }
+            write_json(task.receipt_path, receipt)
+            usage = response.get("usage", {})
+            result = {
+                "question_id": task.question.question_id,
+                "repeat": task.repeat,
+                "elapsed_seconds": elapsed,
+                "prompt_tokens": usage.get("prompt_tokens"),
+                "completion_tokens": usage.get("completion_tokens"),
+                "finish_reason": response["choices"][0].get("finish_reason"),
+            }
+            print(json.dumps(result, sort_keys=True), flush=True)
+            return result
+        except Exception as error:
+            failure_path = task.receipt_path.with_suffix(".error.json")
+            write_json(
+                failure_path,
+                {
+                    "artifact_kind": "Kimi K3 AA-LCR generation failure",
+                    "status": "unsupported",
+                    "failed_utc": utc_now(),
+                    "question_id": task.question.question_id,
+                    "repeat": task.repeat,
+                    "prompt_sha256": task.prompt_sha256,
                     "generation_config_sha256": run_manifest[
                         "generation_config_sha256"
                     ],
-                    "elapsed_seconds": elapsed,
-                    "candidate_answer": candidate_answer,
-                    "candidate_answer_sha256": sha256_text(candidate_answer),
-                    "response": response,
-                }
-                write_json(receipt_path, receipt)
-                completed += 1
-                usage = response.get("usage", {})
-                print(
-                    json.dumps(
-                        {
-                            "question_id": question.question_id,
-                            "repeat": repeat,
-                            "elapsed_seconds": elapsed,
-                            "prompt_tokens": usage.get("prompt_tokens"),
-                            "completion_tokens": usage.get("completion_tokens"),
-                            "finish_reason": response["choices"][0].get(
-                                "finish_reason"
-                            ),
-                        },
-                        sort_keys=True,
-                    ),
-                    flush=True,
-                )
-            except Exception as error:
-                failure_path = receipt_path.with_suffix(".error.json")
-                write_json(
-                    failure_path,
-                    {
-                        "artifact_kind": "Kimi K3 AA-LCR generation failure",
-                        "status": "unsupported",
-                        "failed_utc": utc_now(),
-                        "question_id": question.question_id,
-                        "repeat": repeat,
-                        "prompt_sha256": prompt_sha256,
-                        "generation_config_sha256": run_manifest[
-                            "generation_config_sha256"
-                        ],
-                        "error_type": type(error).__name__,
-                        "error": str(error),
-                    },
-                )
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                },
+            )
+            raise
+
+    completed = 0
+    if args.concurrency == 1:
+        for task in tasks:
+            generate_one(task)
+            completed += 1
+    else:
+        with ThreadPoolExecutor(max_workers=args.concurrency) as executor:
+            futures = [executor.submit(generate_one, task) for task in tasks]
+            try:
+                for future in as_completed(futures):
+                    future.result()
+                    completed += 1
+            except BaseException:
+                for future in futures:
+                    future.cancel()
                 raise
     print(json.dumps({"completed": completed, "skipped": skipped}, sort_keys=True))
 
@@ -935,6 +973,12 @@ def main() -> None:
     generate.add_argument("--runtime-manifest", type=Path, required=True)
     generate.add_argument("--api-key-env", default=None)
     generate.add_argument("--repeats", type=int, default=3)
+    generate.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help="Number of independent generation requests submitted concurrently.",
+    )
     generate.add_argument("--temperature", type=float, default=1.0)
     generate.add_argument("--top-p", type=float, default=0.95)
     generate.add_argument("--max-tokens", type=int, default=200000)
