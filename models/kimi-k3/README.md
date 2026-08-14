@@ -1,5 +1,7 @@
 # Kimi-K3 TP16/DCP16 Runtime on RTX PRO 6000 Blackwell
 
+[Distribution-fidelity reference: 1,024 contexts × 2,048 tokens](distribution-fidelity-1024x2048.md)
+
 Status: **qualified**.
 
 This page specifies the containerized vLLM runtime for `moonshotai/Kimi-K3`
