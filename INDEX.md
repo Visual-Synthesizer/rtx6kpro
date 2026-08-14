@@ -115,6 +115,8 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Kimi-K2.7-Code v2 on Eldritch](models/kimi-k27-code_v2.md) - `models/kimi-k27-code_v2.md`
 - [Kimi-K2.7-Code v3 on Fathomless](models/kimi-k27-code_v3.md) - `models/kimi-k27-code_v3.md`
 - [Kimi-K3 TP16/DCP16 Runtime on RTX PRO 6000 Blackwell](models/kimi-k3/README.md) - `models/kimi-k3/README.md`
+- [Kimi K3 distribution-fidelity reference](models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md) - `models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md`
+- [Kimi K3 distribution-fidelity reference: 1,024 contexts × 2,048 tokens](models/kimi-k3/distribution-fidelity-1024x2048.md) - `models/kimi-k3/distribution-fidelity-1024x2048.md`
 - [Kimi Runbook Hub](models/kimi.md) - `models/kimi.md`
 - [Legacy Model Runbooks](models/legacy.md) - `models/legacy.md`
 - [MiMo-V2.5-Pro on RTX PRO 6000 Blackwell](models/mimo-v25-pro/README.md) - `models/mimo-v25-pro/README.md`
