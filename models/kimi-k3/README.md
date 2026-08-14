@@ -2,6 +2,10 @@
 
 [Distribution-fidelity reference: 1,024 contexts × 2,048 tokens](distribution-fidelity-1024x2048.md)
 
+[AA-LCR reproduction specification](aa-lcr-reproduction.md)
+
+[RedHatAI BF16 DSpark compatibility and DCP16 qualification](redhat-dspark-dcp16.md)
+
 Status: **qualified**.
 
 This page specifies the containerized vLLM runtime for `moonshotai/Kimi-K3`
