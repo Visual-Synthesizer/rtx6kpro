@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-14](2026-08/2026-08-14.md) | Kimi-K3 2bpw QSRT quant (native MXFP4) scores 94.4–95.4% on GPQA Diamond, nearly matching the full |
 | [2026-08-13](2026-08/2026-08-13.md) | - DeepSeek-V4-Pro-0813 (GA) launched; mixed reviews — strong benchmarks but users found it slower/ |
 | [2026-08-12](2026-08/2026-08-12.md) | - RTX PRO 6000 prices spiking hard — Nvidia's own store jumped to $16K, Microcenter went $11.8K→ |
 | [2026-08-11](2026-08/2026-08-11.md) | B12X kernels heading upstream: Luke opened an official vLLM PR for native B12X support on SM120 —  |
@@ -176,6 +177,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-14](2026-08/2026-08-14.md) | Kimi-K3 2bpw QSRT quant (native MXFP4) scores 94.4–95.4% on GPQA Diamond, nearly matching the full |
 | [2026-08-13](2026-08/2026-08-13.md) | - DeepSeek-V4-Pro-0813 (GA) launched; mixed reviews — strong benchmarks but users found it slower/ |
 | [2026-08-12](2026-08/2026-08-12.md) | - RTX PRO 6000 prices spiking hard — Nvidia's own store jumped to $16K, Microcenter went $11.8K→ |
 | [2026-08-11](2026-08/2026-08-11.md) | B12X kernels heading upstream: Luke opened an official vLLM PR for native B12X support on SM120 —  |
