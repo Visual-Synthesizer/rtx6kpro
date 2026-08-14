@@ -25,6 +25,9 @@ import requests
 DATASET_REVISION = "bdae010bbce259820c0e34c1d7cce210d966fb75"
 DATASET_CSV_SHA256 = "2f90d9c30cfb4dd8df2c0f46547c384065e4c76917bd347a9a97bf797235c1ea"
 DOCUMENT_ZIP_SHA256 = "5e839249826f6b9bd5324f0d139089c9dc481ccb3f212a6dfad00c51045d9d8a"
+TOKEN_COUNT_MANIFEST_SHA256 = (
+    "ca980972df40cf1dacde770f9e2f80fe9e4c4ab74c5c72407c70669a5fcf54de"
+)
 EXPECTED_QUESTIONS = 100
 EXPECTED_DOCUMENT_SETS = 30
 EXPECTED_REFERENCED_DOCUMENTS = 229
@@ -740,6 +743,303 @@ def command_generate(args: argparse.Namespace) -> None:
     print(json.dumps({"completed": completed, "skipped": skipped}, sort_keys=True))
 
 
+def percentile(values: list[int] | list[float], probability: float) -> float:
+    """Return a linearly interpolated percentile over a non-empty sample."""
+
+    if not values:
+        raise ValueError("A percentile requires at least one value")
+    if not 0.0 <= probability <= 1.0:
+        raise ValueError("Percentile probability must be within [0, 1]")
+    ordered = sorted(values)
+    position = probability * (len(ordered) - 1)
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    fraction = position - lower
+    return ordered[lower] * (1.0 - fraction) + ordered[upper] * fraction
+
+
+def command_verify_generations(args: argparse.Namespace) -> None:
+    """Verify a complete generation artifact and seal its receipt manifest."""
+
+    document_root = args.document_root or (
+        args.dataset_root / "extracted_text" / "unpacked" / "lcr"
+    )
+    resolver = DocumentResolver(document_root)
+    dataset = dataset_identity(args.dataset_root, resolver)
+    questions = load_questions(args.dataset_root)
+
+    generation_manifest_path = args.generation_dir / "generation-manifest.json"
+    runtime_manifest_path = args.generation_dir / "runtime-manifest.json"
+    token_count_path = args.token_count_manifest or (
+        args.dataset_root / "kimi-k3-token-counts.json"
+    )
+    for required_path in (
+        generation_manifest_path,
+        runtime_manifest_path,
+        token_count_path,
+    ):
+        if not required_path.is_file():
+            raise FileNotFoundError(
+                f"AA-LCR verification input is absent: {required_path}"
+            )
+
+    generation_manifest = json.loads(
+        generation_manifest_path.read_text(encoding="utf-8")
+    )
+    runtime_manifest = validate_runtime_manifest(
+        json.loads(runtime_manifest_path.read_text(encoding="utf-8"))
+    )
+    token_count_manifest = json.loads(token_count_path.read_text(encoding="utf-8"))
+    if generation_manifest.get("dataset") != dataset:
+        raise RuntimeError(
+            "AA-LCR generation manifest does not match the pinned dataset identity"
+        )
+    if generation_manifest.get("runtime") != runtime_manifest:
+        raise RuntimeError(
+            "AA-LCR generation manifest embeds a different serving runtime manifest"
+        )
+    runtime_manifest_sha256 = sha256_file(runtime_manifest_path)
+    if generation_manifest.get("runtime_manifest_sha256") != runtime_manifest_sha256:
+        raise RuntimeError(
+            "AA-LCR generation manifest has a mismatched runtime-manifest hash"
+        )
+    generation_config = generation_manifest.get("generation")
+    if not isinstance(generation_config, dict):
+        raise TypeError("AA-LCR generation manifest has no generation configuration")
+    generation_config_sha256 = canonical_sha256(generation_config)
+    if generation_manifest.get("generation_config_sha256") != generation_config_sha256:
+        raise RuntimeError(
+            "AA-LCR generation manifest has a mismatched configuration hash"
+        )
+    repeats = generation_config.get("repeats")
+    if repeats != 3:
+        raise RuntimeError("Qualified AA-LCR generation requires exactly three repeats")
+
+    token_count_sha256 = sha256_file(token_count_path)
+    if token_count_sha256 != TOKEN_COUNT_MANIFEST_SHA256:
+        raise RuntimeError(
+            "AA-LCR Kimi K3 token-count manifest hash does not match the pinned artifact"
+        )
+    token_records = token_count_manifest.get("contexts")
+    if not isinstance(token_records, list):
+        raise TypeError("AA-LCR token-count manifest has no context list")
+    token_counts = {
+        int(record["question_id"]): int(record["kimi_chat"]) for record in token_records
+    }
+    if sorted(token_counts) != list(range(1, EXPECTED_QUESTIONS + 1)):
+        raise RuntimeError(
+            "AA-LCR token-count manifest must contain question IDs 1 through 100"
+        )
+
+    response_root = args.generation_dir / "responses"
+    expected_paths = {
+        question_receipt_path(args.generation_dir, repeat, question.question_id)
+        for question in questions
+        for repeat in range(repeats)
+    }
+    observed_paths = {
+        path
+        for path in response_root.glob("repeat-*/question-*.json")
+        if re.fullmatch(r"question-\d{4}\.json", path.name)
+    }
+    if observed_paths != expected_paths:
+        missing = sorted(
+            path.relative_to(args.generation_dir).as_posix()
+            for path in expected_paths - observed_paths
+        )
+        unexpected = sorted(
+            path.relative_to(args.generation_dir).as_posix()
+            for path in observed_paths - expected_paths
+        )
+        raise RuntimeError(
+            "AA-LCR generation receipt set is incomplete or contains unexpected files: "
+            f"missing_count={len(missing)}, missing_sample={missing[:10]}, "
+            f"unexpected_count={len(unexpected)}, "
+            f"unexpected_sample={unexpected[:10]}"
+        )
+    failure_paths = sorted(response_root.glob("repeat-*/*.error.json"))
+    if failure_paths:
+        raise RuntimeError(
+            "AA-LCR generation directory contains failure sidecars: "
+            + ", ".join(str(path) for path in failure_paths)
+        )
+
+    prompt_tokens: list[int] = []
+    completion_tokens: list[int] = []
+    elapsed_seconds: list[float] = []
+    finish_reasons: Counter[str] = Counter()
+    receipt_hashes: list[tuple[str, str]] = []
+    per_repeat: Counter[int] = Counter()
+    per_question: Counter[int] = Counter()
+    for question in questions:
+        documents = resolver.resolve(question)
+        prompt = build_prompt(documents, question.question)
+        prompt_sha256 = sha256_text(prompt)
+        expected_documents = [
+            {
+                "requested_name": document.requested_name,
+                "relative_path": document.relative_path,
+                "sha256": document.sha256,
+                "unicode_normalization_required": (
+                    document.unicode_normalization_required
+                ),
+            }
+            for document in documents
+        ]
+        for repeat in range(repeats):
+            path = question_receipt_path(
+                args.generation_dir, repeat, question.question_id
+            )
+            receipt = json.loads(path.read_text(encoding="utf-8"))
+            required_values = {
+                "artifact_kind": "Kimi K3 AA-LCR generation receipt",
+                "status": "qualified",
+                "question_id": question.question_id,
+                "repeat": repeat,
+                "document_category": question.document_category,
+                "document_set_id": question.document_set_id,
+                "documents": expected_documents,
+                "question": question.question,
+                "official_answer_sha256": sha256_text(question.official_answer),
+                "reported_input_tokens_cl100k_base": (question.reported_input_tokens),
+                "prompt_chars": len(prompt),
+                "prompt_sha256": prompt_sha256,
+                "generation_config_sha256": generation_config_sha256,
+            }
+            for key, expected in required_values.items():
+                if receipt.get(key) != expected:
+                    raise RuntimeError(
+                        f"AA-LCR generation receipt field {key!r} is invalid: {path}"
+                    )
+
+            candidate_answer = receipt.get("candidate_answer")
+            if not isinstance(candidate_answer, str) or not candidate_answer:
+                raise RuntimeError(
+                    f"AA-LCR generation receipt has no candidate answer: {path}"
+                )
+            if receipt.get("candidate_answer_sha256") != sha256_text(candidate_answer):
+                raise RuntimeError(
+                    f"AA-LCR generation receipt has a mismatched answer hash: {path}"
+                )
+            response = receipt.get("response")
+            if not isinstance(response, dict):
+                raise TypeError(
+                    f"AA-LCR generation receipt has no response object: {path}"
+                )
+            if response.get("model") != generation_config.get("model"):
+                raise RuntimeError(
+                    f"AA-LCR response model does not match the run manifest: {path}"
+                )
+            message = choice_message(response)
+            if message.get("content") != candidate_answer:
+                raise RuntimeError(
+                    f"AA-LCR response content does not match the stored answer: {path}"
+                )
+            choice = response["choices"][0]
+            finish_reason = choice.get("finish_reason")
+            if not isinstance(finish_reason, str):
+                raise TypeError(f"AA-LCR response has no finish reason: {path}")
+            finish_reasons[finish_reason] += 1
+
+            usage = response.get("usage")
+            if not isinstance(usage, dict):
+                raise TypeError(f"AA-LCR response has no usage object: {path}")
+            request_prompt_tokens = usage.get("prompt_tokens")
+            request_completion_tokens = usage.get("completion_tokens")
+            total_tokens = usage.get("total_tokens")
+            if request_prompt_tokens != token_counts[question.question_id]:
+                raise RuntimeError(
+                    f"AA-LCR response prompt-token count is invalid: {path}"
+                )
+            if (
+                not isinstance(request_completion_tokens, int)
+                or request_completion_tokens <= 0
+                or total_tokens != request_prompt_tokens + request_completion_tokens
+            ):
+                raise RuntimeError(f"AA-LCR response token usage is invalid: {path}")
+            elapsed = receipt.get("elapsed_seconds")
+            if not isinstance(elapsed, (int, float)) or elapsed <= 0:
+                raise RuntimeError(
+                    f"AA-LCR generation receipt has invalid elapsed time: {path}"
+                )
+
+            prompt_tokens.append(request_prompt_tokens)
+            completion_tokens.append(request_completion_tokens)
+            elapsed_seconds.append(float(elapsed))
+            per_repeat[repeat] += 1
+            per_question[question.question_id] += 1
+            receipt_hashes.append(
+                (path.relative_to(args.generation_dir).as_posix(), sha256_file(path))
+            )
+
+    if finish_reasons != {"stop": EXPECTED_QUESTIONS * repeats}:
+        raise RuntimeError(
+            "Qualified AA-LCR generation requires every response to finish with stop: "
+            f"{dict(finish_reasons)}"
+        )
+    if sorted(per_repeat.items()) != [(0, 100), (1, 100), (2, 100)]:
+        raise RuntimeError("AA-LCR generation repeat counts are invalid")
+    if any(count != repeats for count in per_question.values()):
+        raise RuntimeError("AA-LCR generation question counts are invalid")
+
+    def distribution(values: list[int] | list[float]) -> dict[str, int | float]:
+        return {
+            "minimum": min(values),
+            "mean": statistics.mean(values),
+            "median": statistics.median(values),
+            "p95": round(percentile(values, 0.95), 6),
+            "p99": round(percentile(values, 0.99), 6),
+            "maximum": max(values),
+            "sum": sum(values),
+        }
+
+    result = {
+        "artifact_kind": "Kimi K3 AA-LCR generation completeness receipt",
+        "status": "qualified",
+        "created_utc": utc_now(),
+        "dataset": {
+            "repository": dataset["repository"],
+            "revision": dataset["revision"],
+            "questions": EXPECTED_QUESTIONS,
+            "prompt_manifest_sha256": dataset["prompt_manifest_sha256"],
+            "token_count_manifest_sha256": token_count_sha256,
+        },
+        "generation": {
+            "model": generation_config["model"],
+            "configuration_sha256": generation_config_sha256,
+            "runtime_manifest_sha256": runtime_manifest_sha256,
+            "generation_manifest_sha256": sha256_file(generation_manifest_path),
+            "questions": EXPECTED_QUESTIONS,
+            "repeats": repeats,
+            "receipts": len(receipt_hashes),
+            "failure_sidecars": 0,
+            "finish_reasons": dict(sorted(finish_reasons.items())),
+            "per_repeat_receipts": {
+                str(repeat): per_repeat[repeat] for repeat in sorted(per_repeat)
+            },
+        },
+        "usage": {
+            "prompt_tokens": distribution(prompt_tokens),
+            "completion_tokens": distribution(completion_tokens),
+            "request_elapsed_seconds": distribution(elapsed_seconds),
+        },
+        "receipt_manifest_sha256": canonical_sha256(sorted(receipt_hashes)),
+        "qualification": {
+            "all_expected_question_repeat_pairs_present": True,
+            "all_receipts_match_dataset_prompts_and_documents": True,
+            "all_receipts_match_generation_configuration": True,
+            "all_candidate_answer_hashes_match": True,
+            "all_response_prompt_token_counts_match_pinned_tokenizer": True,
+            "all_responses_finished_with_stop": True,
+        },
+    }
+    if args.output:
+        write_json(args.output, result)
+    print(json.dumps(result, indent=2, sort_keys=True))
+
+
 def build_judge_prompt(
     question: str, official_answer: str, candidate_answer: str
 ) -> str:
@@ -1026,6 +1326,16 @@ def main() -> None:
     generate.add_argument("--start-question", type=int, default=1)
     generate.add_argument("--stop-question", type=int, default=101)
     generate.set_defaults(func=command_generate)
+
+    verify_generations = subparsers.add_parser(
+        "verify-generations",
+        help="Verify and seal a complete AA-LCR generation artifact",
+    )
+    add_dataset_arguments(verify_generations)
+    verify_generations.add_argument("--generation-dir", type=Path, required=True)
+    verify_generations.add_argument("--token-count-manifest", type=Path)
+    verify_generations.add_argument("--output", type=Path)
+    verify_generations.set_defaults(func=command_verify_generations)
 
     judge = subparsers.add_parser(
         "judge", help="Score generated answers with an equality-checker model"

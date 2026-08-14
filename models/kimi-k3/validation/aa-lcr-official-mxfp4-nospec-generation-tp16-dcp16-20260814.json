@@ -1,0 +1,68 @@
+{
+  "artifact_kind": "Kimi K3 AA-LCR generation completeness receipt",
+  "created_utc": "2026-08-14T22:30:07.381747Z",
+  "dataset": {
+    "prompt_manifest_sha256": "13f8fdc097679d5ead0c4bba6044b254a1fcd80f8e5afb9555c68bd3d0abd09d",
+    "questions": 100,
+    "repository": "ArtificialAnalysis/AA-LCR",
+    "revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+    "token_count_manifest_sha256": "ca980972df40cf1dacde770f9e2f80fe9e4c4ab74c5c72407c70669a5fcf54de"
+  },
+  "generation": {
+    "configuration_sha256": "82f96e2e56e8393ff2023e998ab72c0df6b4195ec4eb57ab9b22c08061bb11c6",
+    "failure_sidecars": 0,
+    "finish_reasons": {
+      "stop": 300
+    },
+    "generation_manifest_sha256": "daea3c83c1ec421f7501fb8e4b267977fde611a7313330e1a7f53939034a5b15",
+    "model": "Kimi-K3-Official-MXFP4-NoSpec-TP16-DCP16-1M-CC8-FA2",
+    "per_repeat_receipts": {
+      "0": 100,
+      "1": 100,
+      "2": 100
+    },
+    "questions": 100,
+    "receipts": 300,
+    "repeats": 3,
+    "runtime_manifest_sha256": "80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e"
+  },
+  "qualification": {
+    "all_candidate_answer_hashes_match": true,
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_dataset_prompts_and_documents": true,
+    "all_receipts_match_generation_configuration": true,
+    "all_response_prompt_token_counts_match_pinned_tokenizer": true,
+    "all_responses_finished_with_stop": true
+  },
+  "receipt_manifest_sha256": "1e32bd3415f7279feda510061944115b0bf2560ef025bdd19757433feb7edda0",
+  "status": "qualified",
+  "usage": {
+    "completion_tokens": {
+      "maximum": 14349,
+      "mean": 1165.1066666666666,
+      "median": 646.0,
+      "minimum": 149,
+      "p95": 3378.05,
+      "p99": 8303.12,
+      "sum": 349532
+    },
+    "prompt_tokens": {
+      "maximum": 114776,
+      "mean": 95164.35,
+      "median": 95119.5,
+      "minimum": 71136,
+      "p95": 113977.4,
+      "p99": 114773.03,
+      "sum": 28549305
+    },
+    "request_elapsed_seconds": {
+      "maximum": 3021.071232612012,
+      "mean": 580.8542885207777,
+      "median": 531.264391608478,
+      "minimum": 220.75685823196545,
+      "p95": 1102.628843,
+      "p99": 1609.513675,
+      "sum": 174256.2865562333
+    }
+  }
+}

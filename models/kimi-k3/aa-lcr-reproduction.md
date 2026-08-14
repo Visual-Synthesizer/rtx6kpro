@@ -15,8 +15,9 @@ an inference configuration rather than a checkpoint property.
 |---|---|---|
 | Dataset identity and document resolution | implemented | The pinned CSV, ZIP, document paths, and generated prompts pass `run-kimi-k3-aa-lcr.py validate`. |
 | Generation and receipt harness | implemented | `models/kimi-k3/tools/run-kimi-k3-aa-lcr.py` writes one atomic raw-response receipt per question and repeat. |
-| TP16/DCP16 hybrid-cache prefix caching | unsupported | Three identical greedy 94,557-token requests produced two output hashes and two preemptions; see `validation/aa-lcr-prefix-cache-tp16-dcp16-20260814.json`. |
-| Official MXFP4 no-spec result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
+| TP16/DCP16 hybrid-cache prefix caching | unsupported | Three identical greedy 94,557-token requests produced two output hashes and two preemptions; see [prefix-cache qualification](validation/aa-lcr-prefix-cache-tp16-dcp16-20260814.json). |
+| Official MXFP4 no-spec generation | qualified | All 100 questions have three hash-verified receipts and all 300 responses finished with `stop`; see [generation completeness](validation/aa-lcr-official-mxfp4-nospec-generation-tp16-dcp16-20260814.json) and [execution evidence](validation/aa-lcr-official-mxfp4-nospec-execution-tp16-dcp16-20260814.json). |
+| Official MXFP4 no-spec equality score | unsupported | No equality-checker receipts are recorded. |
 | QSRT-K2 no-spec result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 | DSpark operational result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 
@@ -275,6 +276,68 @@ Each receipt preserves the full API response, final answer, reasoning content
 when returned by the server, usage counters, finish reason, elapsed time,
 ordered document hashes, prompt hash, and generation-configuration hash.
 
+## Verify generation completeness
+
+The `verify-generations` command reconstructs every prompt and ordered document
+list from the pinned dataset, verifies the pinned Kimi K3 prompt-token counts,
+checks the runtime and generation-configuration hashes, verifies each candidate
+answer hash, and requires exactly three `stop` receipts for every question.
+
+```bash
+uv run --no-project --with requests -- python \
+  models/kimi-k3/tools/run-kimi-k3-aa-lcr.py verify-generations \
+  --dataset-root "$AA_LCR_ROOT" \
+  --generation-dir "$RUN_DIR" \
+  --output "$RUN_DIR/generation-completeness.json"
+```
+
+The official MXFP4 no-spec generation artifact is stored at:
+
+```text
+/mnt/luke/evals/kimi-k3-aa-lcr/official-mxfp4-nospec-tp16-dcp16-aa-lcr-ws4096-20260814
+```
+
+Its serving runtime has these identities and properties:
+
+- checkpoint `moonshotai/Kimi-K3` revision
+  `2496450e92e425c886db095102a52a6682ca3970`;
+- full official MXFP4 routed experts, BF16 dense tensors and activations, and no
+  speculative decoder;
+- TP16, DCP16, FP8 KV cache, 1,060,357 reported physical KV tokens, and
+  `max_model_len=1,048,576`;
+- B12X MLA attention, FlashAttention 2 MLA prefill, Triton KDA prefill, B12X
+  MoE and linear backends, and InstantTensor weight loading;
+- prefix caching disabled, server `max_num_seqs=8`, client concurrency 16, and
+  prefill workspace 4,096 tokens;
+- container image ID
+  `sha256:f226a6fd788bb4af345a17b768654f1e5a7487a812746ccb117aa9b040a82294`
+  and registry digest
+  `voipmonitor/vllm@sha256:01b973d1ae132882bcc1bf62ea232f6aabe649dd4a89b961d81f3c41cc53f971`;
+- vLLM revision `c203914d1b146032ed8a788f37037c3d835fc684` with working-tree
+  patch SHA-256
+  `54f5d2fb6692e65d61cf05b6c086c40bc383f4e6d568d168f4586fc63fe6a363`;
+- B12X revision `f9f6fd4ad4d82ed7bf3a3523689f0b230a46eb0d`.
+
+The qualified generation evidence contains 300 receipts, 100 for each repeat,
+with zero failure sidecars and 300 `stop` finish reasons. The model consumed
+28,549,305 prompt tokens and produced 349,532 completion tokens. Completion
+length was 149 to 14,349 tokens, with median 646, p95 3,378.05, and p99
+8,303.12. Per-request elapsed time was 220.76 to 3,021.07 seconds; elapsed
+times overlap because requests were concurrent and must not be summed as wall
+time or used as a throughput measurement.
+
+The serving process recorded one request preemption, zero container restarts,
+no CUDA out-of-memory failure, and zero failure receipts. The resumed client
+execution wrote 285 receipts, preserved 15 compatible receipts, and exited with
+status 0. The generation completeness receipt has SHA-256
+`fc3f0a27d36d61934755a012cb46b2f70217af5b6eb4126d488a40e11528afd9`;
+the canonical manifest over all response paths and file hashes is
+`1e32bd3415f7279feda510061944115b0bf2560ef025bdd19757433feb7edda0`.
+
+This evidence qualifies generation integrity only. AA-LCR correctness remains
+unsupported until all 300 equality-checker receipts are present and the
+pass@1 summary is sealed.
+
 ## Equality checker
 
 Set `OPENAI_API_KEY` in the process environment without placing it in shell
@@ -326,8 +389,13 @@ question. Partial summaries are marked `research-only`.
 ```text
 <run-id>/
   runtime-manifest.json
-  docker-inspect.json
   generation-manifest.json
+  generation-completeness.json
+  generation-execution-receipt.json
+  runtime-artifacts/
+    docker-inspect.json
+    launch-server.sh
+    vllm-working-tree.patch
   judge-manifest.json
   responses/
     repeat-00/question-0001.json
@@ -346,7 +414,7 @@ question. Partial summaries are marked `research-only`.
 
 | Checkpoint | Speculation | TP/DCP | Pass@1 | Correct / attempts | Generation receipt hash | Judge receipt hash | Status |
 |---|---:|---:|---:|---:|---|---|---|
-| Official MXFP4 `2496450e…` | disabled | unrecorded | — | — | — | — | unsupported |
+| Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | — | — | `1e32bd3415…` | — | unsupported |
 | QSRT-K2 `3b981141…` | disabled | unrecorded | — | — | — | — | unsupported |
 | QSRT-K2 `3b981141…` | Inferact DSpark | unrecorded | — | — | — | — | unsupported |
 
