@@ -547,6 +547,10 @@ def command_generate(args: argparse.Namespace) -> None:
         "stream": False,
         "runtime_manifest_sha256": runtime_manifest_sha256,
     }
+    if args.repeat_scheduling != "independent":
+        # Absence denotes independently scheduled tasks in the generation
+        # manifest schema. Explicit modes identify additional ordering rules.
+        generation_config["repeat_scheduling"] = args.repeat_scheduling
     run_manifest = {
         "artifact_kind": "Kimi K3 AA-LCR generation run",
         "status": "implemented",
@@ -576,6 +580,7 @@ def command_generate(args: argparse.Namespace) -> None:
     headers = api_headers(args.api_key_env)
     skipped = 0
     tasks: list[GenerationTask] = []
+    task_groups: list[tuple[GenerationTask, ...]] = []
     for question in questions:
         documents = resolver.resolve(question)
         prompt = build_prompt(documents, question.question)
@@ -589,6 +594,7 @@ def command_generate(args: argparse.Namespace) -> None:
             }
             for document in documents
         )
+        question_tasks: list[GenerationTask] = []
         for repeat in range(args.repeats):
             receipt_path = question_receipt_path(
                 args.output_dir, repeat, question.question_id
@@ -601,24 +607,28 @@ def command_generate(args: argparse.Namespace) -> None:
                     and receipt.get("generation_config_sha256")
                     == run_manifest["generation_config_sha256"]
                 ):
+                    receipt_path.with_suffix(".error.json").unlink(missing_ok=True)
                     skipped += 1
                     continue
                 raise RuntimeError(
                     f"Generation receipt is incompatible: {receipt_path}"
                 )
 
-            tasks.append(
-                GenerationTask(
-                    question=question,
-                    repeat=repeat,
-                    prompt=prompt,
-                    prompt_sha256=prompt_sha256,
-                    documents=document_records,
-                    receipt_path=receipt_path,
-                )
+            task = GenerationTask(
+                question=question,
+                repeat=repeat,
+                prompt=prompt,
+                prompt_sha256=prompt_sha256,
+                documents=document_records,
+                receipt_path=receipt_path,
             )
+            tasks.append(task)
+            question_tasks.append(task)
+        if question_tasks:
+            task_groups.append(tuple(question_tasks))
 
     def generate_one(task: GenerationTask) -> dict[str, Any]:
+        failure_path = task.receipt_path.with_suffix(".error.json")
         request = {
             "model": args.model,
             "messages": [{"role": "user", "content": task.prompt}],
@@ -653,15 +663,16 @@ def command_generate(args: argparse.Namespace) -> None:
                 "reported_input_tokens_cl100k_base": task.question.reported_input_tokens,
                 "prompt_chars": len(task.prompt),
                 "prompt_sha256": task.prompt_sha256,
-                "generation_config_sha256": run_manifest[
-                    "generation_config_sha256"
-                ],
+                "generation_config_sha256": run_manifest["generation_config_sha256"],
                 "elapsed_seconds": elapsed,
                 "candidate_answer": candidate_answer,
                 "candidate_answer_sha256": sha256_text(candidate_answer),
                 "response": response,
             }
             write_json(task.receipt_path, receipt)
+            # A successful retry supersedes its failure sidecar. The qualified
+            # response receipt remains the authoritative task outcome.
+            failure_path.unlink(missing_ok=True)
             usage = response.get("usage", {})
             result = {
                 "question_id": task.question.question_id,
@@ -671,10 +682,7 @@ def command_generate(args: argparse.Namespace) -> None:
                 "completion_tokens": usage.get("completion_tokens"),
                 "finish_reason": response["choices"][0].get("finish_reason"),
             }
-            print(json.dumps(result, sort_keys=True), flush=True)
-            return result
         except Exception as error:
-            failure_path = task.receipt_path.with_suffix(".error.json")
             write_json(
                 failure_path,
                 {
@@ -692,12 +700,32 @@ def command_generate(args: argparse.Namespace) -> None:
                 },
             )
             raise
+        print(json.dumps(result, sort_keys=True), flush=True)
+        return result
 
     completed = 0
     if args.concurrency == 1:
         for task in tasks:
             generate_one(task)
             completed += 1
+    elif args.repeat_scheduling == "question_serial":
+
+        def generate_question(group: tuple[GenerationTask, ...]) -> int:
+            for task in group:
+                generate_one(task)
+            return len(group)
+
+        with ThreadPoolExecutor(max_workers=args.concurrency) as executor:
+            futures = [
+                executor.submit(generate_question, group) for group in task_groups
+            ]
+            try:
+                for future in as_completed(futures):
+                    completed += future.result()
+            except BaseException:
+                for future in futures:
+                    future.cancel()
+                raise
     else:
         with ThreadPoolExecutor(max_workers=args.concurrency) as executor:
             futures = [executor.submit(generate_one, task) for task in tasks]
@@ -978,6 +1006,15 @@ def main() -> None:
         type=int,
         default=1,
         help="Number of independent generation requests submitted concurrently.",
+    )
+    generate.add_argument(
+        "--repeat-scheduling",
+        choices=("independent", "question_serial"),
+        default="independent",
+        help=(
+            "Submit every attempt independently, or keep each question's repeats "
+            "sequential within one client worker."
+        ),
     )
     generate.add_argument("--temperature", type=float, default=1.0)
     generate.add_argument("--top-p", type=float, default=0.95)

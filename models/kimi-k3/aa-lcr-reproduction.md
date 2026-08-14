@@ -15,6 +15,7 @@ an inference configuration rather than a checkpoint property.
 |---|---|---|
 | Dataset identity and document resolution | implemented | The pinned CSV, ZIP, document paths, and generated prompts pass `run-kimi-k3-aa-lcr.py validate`. |
 | Generation and receipt harness | implemented | `models/kimi-k3/tools/run-kimi-k3-aa-lcr.py` writes one atomic raw-response receipt per question and repeat. |
+| TP16/DCP16 hybrid-cache prefix caching | unsupported | Three identical greedy 94,557-token requests produced two output hashes and two preemptions; see `validation/aa-lcr-prefix-cache-tp16-dcp16-20260814.json`. |
 | Official MXFP4 no-spec result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 | QSRT-K2 no-spec result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 | DSpark operational result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
@@ -167,9 +168,12 @@ The official MXFP4 and QSRT-K2 no-spec servers must use identical values for:
 - request order and sampling parameters.
 
 Checkpoint identity and checkpoint-required quantization kernels are the only
-intended differences. Prefix caching may be enabled because questions sharing
-a document set have an identical document prefix. Requests remain in CSV order
-so both checkpoints receive the same cache opportunity.
+intended differences. Prefix caching must be disabled for the qualified
+TP16/DCP16 hybrid MLA-Mamba server profile. The qualification in
+`validation/aa-lcr-prefix-cache-tp16-dcp16-20260814.json` reduced cached-request
+latency from 40.85 seconds to approximately 4.63 seconds, but identical greedy
+requests produced different output hashes and the server recorded two
+preemptions. The latency reduction is therefore not valid evaluation evidence.
 
 DSpark uses a separate run identifier and result table. It must not replace a
 no-spec checkpoint result.
@@ -202,7 +206,7 @@ information to reconstruct the server without relying on a mutable image tag:
   },
   "topology": {
     "tensor_parallel_size": 16,
-    "decode_context_parallel_size": 8
+    "decode_context_parallel_size": 16
   },
   "serving": {
     "activation_dtype": "bfloat16",
@@ -214,12 +218,12 @@ information to reconstruct the server without relying on a mutable image tag:
     "weight_loader": "instanttensor",
     "max_model_len": 1048576,
     "max_num_batched_tokens": 2048,
-    "max_num_seqs": 1,
-    "kv_cache_memory_bytes": 1860000000,
-    "prefix_caching": true,
+    "max_num_seqs": 8,
+    "kv_cache_memory_bytes": 960000000,
+    "prefix_caching": false,
     "compilation_config": {
-      "cudagraph_mode": "PIECEWISE",
-      "cudagraph_capture_sizes": [1]
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [1, 8]
     }
   },
   "server_arguments": ["vllm", "serve", "..."],
@@ -260,6 +264,12 @@ of the generation-configuration hash, so resuming an output directory with a
 different client concurrency is rejected. Each response is written atomically
 to its own question-and-repeat receipt before another task is reported as
 complete.
+
+`--repeat-scheduling question_serial` is implemented for server profiles that
+have independently qualified prefix caching. It assigns all repeats of one
+question to one client worker and submits them in repeat order. The qualified
+TP16/DCP16 Kimi K3 profile omits this option and independently schedules every
+question-repeat pair because its prefix-caching path is unsupported.
 
 Each receipt preserves the full API response, final answer, reasoning content
 when returned by the server, usage counters, finish reason, elapsed time,
