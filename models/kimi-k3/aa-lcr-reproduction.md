@@ -17,13 +17,17 @@ an inference configuration rather than a checkpoint property.
 | Generation and receipt harness | implemented | `models/kimi-k3/tools/run-kimi-k3-aa-lcr.py` writes one atomic raw-response receipt per question and repeat. |
 | TP16/DCP16 hybrid-cache prefix caching | unsupported | Three identical greedy 94,557-token requests produced two output hashes and two preemptions; see [prefix-cache qualification](validation/aa-lcr-prefix-cache-tp16-dcp16-20260814.json). |
 | Official MXFP4 no-spec generation | qualified | All 100 questions have three hash-verified receipts and all 300 responses finished with `stop`; see [generation completeness](validation/aa-lcr-official-mxfp4-nospec-generation-tp16-dcp16-20260814.json) and [execution evidence](validation/aa-lcr-official-mxfp4-nospec-execution-tp16-dcp16-20260814.json). |
-| Official MXFP4 no-spec equality score | unsupported | No equality-checker receipts are recorded. |
+| Frozen official Kimi-K3 equality-checker protocol | qualified | Two independent executions agreed on 100 of 100 fixed-answer labels; see [repeatability evidence](validation/aa-lcr-k3-judge-repeatability-20260814.json). |
+| Official MXFP4 no-spec score with the frozen Kimi-K3 judge | qualified | The judge marked 254 of 300 attempts correct, or 84.67%; see [score evidence](validation/aa-lcr-official-mxfp4-nospec-k3-judge-tp16-dcp16-20260814.json). |
+| Official MXFP4 no-spec score with the Artificial Analysis GPT-5.6 Luna judge | unsupported | No GPT-5.6 Luna equality-checker receipts are recorded. |
 | QSRT-K2 no-spec result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 | DSpark operational result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 
-The word *qualified* on this page means that all 100 questions have three
-generation receipts, all 300 answers have equality-checker receipts, and every
-artifact hash closes against the pinned manifests.
+The word *qualified* for a generation artifact means that all 100 questions
+have three receipts and every artifact hash closes against the pinned
+manifests. A qualified score additionally requires 300 valid equality-checker
+receipts under one explicitly named judge protocol. Judge protocols define
+different result families and their absolute scores are not interchangeable.
 
 ## Immutable inputs
 
@@ -72,8 +76,10 @@ published in August 2026:
 
 The pinned dataset README names Qwen3 235B A22B 2507 Non-reasoning as the
 equality checker. That statement identifies the dataset-card scoring
-configuration. Results on this page use the version 4.1.1 equality checker and
-must not be compared as though the two graders were identical.
+configuration. The frozen Kimi-K3 result recorded on this page uses neither
+Qwen3 nor GPT-5.6 Luna and is not an official Artificial Analysis result.
+Scores produced by different equality checkers must not be compared as though
+the graders were identical.
 
 Kimi K3 is a reasoning model. Its pinned model card overrides the generic
 Artificial Analysis reasoning-model temperature:
@@ -91,6 +97,42 @@ The same sampling parameters apply to official MXFP4 and QSRT-K2. The
 `max_tokens` value is a ceiling, not a forced output length. Each server must
 expose at least 128K context; the qualified server profiles use the native
 1,048,576-token Kimi K3 limit.
+
+## Frozen official Kimi-K3 judge protocol
+
+The internal paired-comparison protocol uses the official
+`moonshotai/Kimi-K3` checkpoint at revision
+`2496450e92e425c886db095102a52a6682ca3970` as one common equality checker for
+every candidate checkpoint and inference configuration. The serving-runtime
+manifest has SHA-256
+`80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e`.
+The judge request configuration is:
+
+```text
+reasoning_effort = max
+temperature = 0
+max_tokens = 32768
+system message = absent
+request seed = omitted
+```
+
+The judge receives only the question, official answer, and candidate answer.
+It does not receive the candidate checkpoint identity. The protocol is useful
+for paired checkpoint comparisons because every candidate is evaluated by the
+same frozen model and prompt. It does not provide an externally independent
+absolute score: an official Kimi-K3 judge can share error preferences with
+Kimi-K3 candidates.
+
+The qualified 300-attempt execution consumed 33 to 5,519 completion tokens per
+judge request. A 4,096-token judge limit would have truncated at least one
+request, so 32,768 is the required ceiling for this protocol.
+
+Repeatability was measured by judging the same 100 fixed candidate answers in
+two independent executions. Binary labels and final answer text agreed on
+100 of 100 pairs. Internal reasoning text agreed bit-for-bit on 29 pairs and
+completion-token counts agreed on 34 pairs. The classification was stable;
+the reasoning trace was not deterministic. The durable measurements are in
+[the repeatability receipt](validation/aa-lcr-k3-judge-repeatability-20260814.json).
 
 ## Dataset preparation
 
@@ -334,27 +376,59 @@ status 0. The generation completeness receipt has SHA-256
 the canonical manifest over all response paths and file hashes is
 `1e32bd3415f7279feda510061944115b0bf2560ef025bdd19757433feb7edda0`.
 
-This evidence qualifies generation integrity only. AA-LCR correctness remains
-unsupported until all 300 equality-checker receipts are present and the
-pass@1 summary is sealed.
+This evidence qualifies generation integrity. Correctness under the frozen
+official Kimi-K3 judge is qualified by a separate set of 300 equality-checker
+receipts. Correctness under the Artificial Analysis GPT-5.6 Luna judge remains
+unsupported.
 
 ## Equality checker
 
-Set `OPENAI_API_KEY` in the process environment without placing it in shell
-history or an artifact. The judge uses no explicit temperature unless the
-provider requires one.
+The frozen Kimi-K3 judge writes receipts below a dedicated judge directory so
+that its result cannot be confused with an Artificial Analysis judge result:
 
 ```bash
+GENERATION_DIR=/mnt/luke/evals/kimi-k3-aa-lcr/official-mxfp4-nospec-tp16-dcp16-aa-lcr-ws4096-20260814
+JUDGE_DIR="$GENERATION_DIR/judges/frozen-official-kimi-k3-max-temp0-20260814"
+
 python3 models/kimi-k3/tools/run-kimi-k3-aa-lcr.py judge \
   --dataset-root "$AA_LCR_ROOT" \
-  --generation-dir "$RUN_DIR" \
-  --output-dir "$RUN_DIR" \
+  --generation-dir "$GENERATION_DIR" \
+  --output-dir "$JUDGE_DIR" \
+  --base-url http://127.0.0.1:8001/v1 \
+  --model Kimi-K3-Official-MXFP4-NoSpec-TP16-DCP16-1M-CC8-FA2 \
+  --judge-protocol frozen-official-kimi-k3 \
+  --judge-runtime-manifest "$GENERATION_DIR/runtime-manifest.json" \
+  --reasoning-effort max \
+  --temperature 0 \
+  --max-tokens 32768 \
+  --timeout-seconds 1800 \
+  --concurrency 16
+```
+
+Compatible receipts are skipped on a resumed execution. A failure writes an
+atomic `question-NNNN.error.json` sidecar without replacing a qualified
+receipt. `--start-question`, `--stop-question`, and `--repeat` select bounded
+subsets for diagnostics without changing judge identity.
+
+The Artificial Analysis version 4.1.1 judge requires a separate output
+directory and an OpenAI API credential. Set `OPENAI_API_KEY` in the process
+environment without placing it in shell history or an artifact:
+
+```bash
+AA_JUDGE_DIR="$GENERATION_DIR/judges/artificial-analysis-v4.1.1-gpt-5.6-luna"
+
+python3 models/kimi-k3/tools/run-kimi-k3-aa-lcr.py judge \
+  --dataset-root "$AA_LCR_ROOT" \
+  --generation-dir "$GENERATION_DIR" \
+  --output-dir "$AA_JUDGE_DIR" \
   --base-url https://api.openai.com/v1 \
   --model gpt-5.6-luna \
+  --judge-protocol artificial-analysis-v4.1.1 \
   --api-key-env OPENAI_API_KEY \
   --reasoning-effort medium \
-  --max-tokens 4096 \
-  --timeout-seconds 600
+  --max-tokens 32768 \
+  --timeout-seconds 1800 \
+  --concurrency 16
 ```
 
 The equality-checker prompt is:
@@ -376,13 +450,16 @@ Any other judge label is an error and is not coerced into a score.
 
 ```bash
 python3 models/kimi-k3/tools/run-kimi-k3-aa-lcr.py summarize \
-  --judge-dir "$RUN_DIR" \
-  --output "$RUN_DIR/summary.json"
+  --dataset-root "$AA_LCR_ROOT" \
+  --generation-dir "$GENERATION_DIR" \
+  --judge-dir "$JUDGE_DIR" \
+  --output "$JUDGE_DIR/pass-at-1-summary.json"
 ```
 
-`summary.json` is marked `qualified` only when it contains 300 judge receipts,
-question IDs 1 through 100, repeats 0 through 2, and three receipts per
-question. Partial summaries are marked `research-only`.
+The summary is marked `qualified` only after revalidating all 300
+question-repeat pairs, generation-receipt hashes, judge-prompt hashes, response
+model identities, labels, correctness flags, and `stop` finish reasons. Any
+failure sidecar or partial receipt set produces `research-only` status.
 
 ## Artifact layout
 
@@ -396,27 +473,36 @@ question. Partial summaries are marked `research-only`.
     docker-inspect.json
     launch-server.sh
     vllm-working-tree.patch
-  judge-manifest.json
   responses/
     repeat-00/question-0001.json
     repeat-01/question-0001.json
     repeat-02/question-0001.json
     ...
-  judgements/
-    repeat-00/question-0001.json
-    repeat-01/question-0001.json
-    repeat-02/question-0001.json
-    ...
-  summary.json
+  judges/
+    <judge-protocol-id>/
+      judge-manifest.json
+      judgements/
+        repeat-00/question-0001.json
+        repeat-01/question-0001.json
+        repeat-02/question-0001.json
+        ...
+      pass-at-1-summary.json
 ```
 
 ## Result table
 
-| Checkpoint | Speculation | TP/DCP | Pass@1 | Correct / attempts | Generation receipt hash | Judge receipt hash | Status |
-|---|---:|---:|---:|---:|---|---|---|
-| Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | — | — | `1e32bd3415…` | — | unsupported |
-| QSRT-K2 `3b981141…` | disabled | unrecorded | — | — | — | — | unsupported |
-| QSRT-K2 `3b981141…` | Inferact DSpark | unrecorded | — | — | — | — | unsupported |
+| Checkpoint | Speculation | TP/DCP | Judge | Pass@1 | Correct / attempts | Generation receipt hash | Judge receipt hash | Status |
+|---|---:|---:|---|---:|---:|---|---|---|
+| Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | Frozen official Kimi-K3 `2496450e…` | 84.67% | 254 / 300 | `1e32bd3415…` | `ba4b2d2e28…` | qualified |
+| Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | GPT-5.6 Luna, AA v4.1.1 | — | — | `1e32bd3415…` | — | unsupported |
+| QSRT-K2 `3b981141…` | disabled | unrecorded | Frozen official Kimi-K3 `2496450e…` | — | — | — | — | unsupported |
+| QSRT-K2 `3b981141…` | Inferact DSpark | unrecorded | Frozen official Kimi-K3 `2496450e…` | — | — | — | — | unsupported |
+
+The qualified Kimi-K3-judged summary has SHA-256
+`113399528496ab1964904fb7b5acd5815455db406a25d29142b376d316e2282e`.
+Its Wilson 95% interval is 80.15% to 88.30%. Per-repeat scores are 86%, 84%,
+and 84%. Seventy-seven questions were correct in all three generations, nine
+were incorrect in all three, and fourteen had mixed labels.
 
 ## Interpretation limits
 

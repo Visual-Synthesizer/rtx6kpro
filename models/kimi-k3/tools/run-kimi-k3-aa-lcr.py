@@ -32,6 +32,14 @@ EXPECTED_QUESTIONS = 100
 EXPECTED_DOCUMENT_SETS = 30
 EXPECTED_REFERENCED_DOCUMENTS = 229
 JUDGE_OUTPUT_RE = re.compile(r"^(CORRECT|INCORRECT)[.!]?$", re.IGNORECASE)
+JUDGE_PROTOCOLS = {
+    "artificial-analysis-v4.1.1": (
+        "Artificial Analysis AA-LCR v4.1.1 equality checker"
+    ),
+    "frozen-official-kimi-k3": (
+        "Frozen official Kimi-K3 checkpoint used as a common equality checker"
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -68,6 +76,18 @@ class GenerationTask:
     prompt_sha256: str
     documents: tuple[dict[str, Any], ...]
     receipt_path: Path
+
+
+@dataclass(frozen=True)
+class JudgementTask:
+    """One independently writable AA-LCR equality-checker request."""
+
+    question: Question
+    repeat: int
+    generation_path: Path
+    generation_sha256: str
+    prompt: str
+    output_path: Path
 
 
 def utc_now() -> str:
@@ -1054,20 +1074,66 @@ Reply only with CORRECT or INCORRECT."""
 
 
 def command_judge(args: argparse.Namespace) -> None:
+    if args.concurrency <= 0:
+        raise ValueError("AA-LCR equality-checker concurrency must be positive")
+    if not 1 <= args.start_question < args.stop_question <= EXPECTED_QUESTIONS + 1:
+        raise ValueError(
+            "AA-LCR equality-checker question range must satisfy "
+            f"1 <= start < stop <= {EXPECTED_QUESTIONS + 1}"
+        )
     questions = {
         question.question_id: question for question in load_questions(args.dataset_root)
     }
     generation_manifest_path = args.generation_dir / "generation-manifest.json"
+    if not generation_manifest_path.is_file():
+        raise FileNotFoundError(
+            f"AA-LCR generation manifest is absent: {generation_manifest_path}"
+        )
     generation_manifest = json.loads(
         generation_manifest_path.read_text(encoding="utf-8")
     )
+    generation_config_sha256 = generation_manifest.get("generation_config_sha256")
+    if not isinstance(generation_config_sha256, str):
+        raise TypeError(
+            "AA-LCR generation manifest has no generation-configuration hash"
+        )
+    judge_runtime: dict[str, Any] | None = None
+    judge_runtime_manifest_sha256: str | None = None
+    if args.judge_runtime_manifest is not None:
+        judge_runtime = json.loads(
+            args.judge_runtime_manifest.read_text(encoding="utf-8")
+        )
+        if judge_runtime.get("status") != "qualified":
+            raise RuntimeError(
+                "Equality-checker runtime manifest is not qualified: "
+                f"{args.judge_runtime_manifest}"
+            )
+        runtime_model = judge_runtime.get("serving", {}).get("served_model_name")
+        if runtime_model != args.model:
+            raise RuntimeError(
+                "Equality-checker runtime model does not match --model: "
+                f"{runtime_model!r} != {args.model!r}"
+            )
+        judge_runtime_manifest_sha256 = sha256_file(args.judge_runtime_manifest)
+    elif args.judge_protocol == "frozen-official-kimi-k3":
+        raise ValueError(
+            "--judge-runtime-manifest is required for the frozen official "
+            "Kimi-K3 judge protocol"
+        )
+
     judge_config = {
+        "protocol": args.judge_protocol,
+        "protocol_description": JUDGE_PROTOCOLS[args.judge_protocol],
         "api_url": chat_completions_url(args.base_url),
         "model": args.model,
         "reasoning_effort": args.reasoning_effort,
         "temperature": args.temperature,
         "max_tokens": args.max_tokens,
-        "prompt": "AA-LCR equality checker from Artificial Analysis methodology v4.1.1",
+        "prompt_contract": (
+            "Compare the candidate answer with the official answer and emit only "
+            "CORRECT or INCORRECT."
+        ),
+        "runtime_manifest_sha256": judge_runtime_manifest_sha256,
     }
     judge_manifest = {
         "artifact_kind": "AA-LCR equality-checker run",
@@ -1075,10 +1141,28 @@ def command_judge(args: argparse.Namespace) -> None:
         "created_utc": utc_now(),
         "dataset_revision": DATASET_REVISION,
         "generation_manifest_sha256": sha256_file(generation_manifest_path),
-        "generation_config_sha256": generation_manifest["generation_config_sha256"],
+        "generation_config_sha256": generation_config_sha256,
         "judge": judge_config,
         "judge_config_sha256": canonical_sha256(judge_config),
+        "execution": {
+            "client_concurrency": args.concurrency,
+            "timeout_seconds": args.timeout_seconds,
+        },
     }
+    if judge_runtime is not None:
+        judge_manifest["judge_runtime"] = {
+            "checkpoint": judge_runtime.get("checkpoint"),
+            "container": {
+                "image": judge_runtime.get("container", {}).get("image"),
+                "image_id": judge_runtime.get("container", {}).get("image_id"),
+                "registry_digest": judge_runtime.get("container", {}).get(
+                    "registry_digest"
+                ),
+            },
+            "source": judge_runtime.get("source"),
+            "topology": judge_runtime.get("topology"),
+            "serving": judge_runtime.get("serving"),
+        }
     manifest_path = args.output_dir / "judge-manifest.json"
     if manifest_path.exists():
         existing = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -1096,17 +1180,51 @@ def command_judge(args: argparse.Namespace) -> None:
     headers = api_headers(args.api_key_env)
     url = judge_config["api_url"]
     generation_receipts = sorted(
-        (args.generation_dir / "responses").glob("repeat-*/question-*.json")
+        path
+        for path in (args.generation_dir / "responses").glob("repeat-*/question-*.json")
+        if re.fullmatch(r"question-\d{4}\.json", path.name)
     )
     if not generation_receipts:
         raise RuntimeError(
             f"No generation receipts were found in {args.generation_dir / 'responses'}"
         )
+    skipped = 0
+    tasks: list[JudgementTask] = []
     for generation_path in generation_receipts:
         generation = json.loads(generation_path.read_text(encoding="utf-8"))
+        if generation.get("status") != "qualified":
+            raise RuntimeError(
+                f"AA-LCR generation receipt is not qualified: {generation_path}"
+            )
+        if generation.get("generation_config_sha256") != generation_config_sha256:
+            raise RuntimeError(
+                "AA-LCR generation receipt has a mismatched generation-configuration "
+                f"hash: {generation_path}"
+            )
         question_id = int(generation["question_id"])
         repeat = int(generation["repeat"])
+        if not args.start_question <= question_id < args.stop_question:
+            continue
+        if args.repeat is not None and repeat != args.repeat:
+            continue
+        if question_id not in questions:
+            raise RuntimeError(
+                f"AA-LCR generation receipt has an unknown question ID: {generation_path}"
+            )
         question = questions[question_id]
+        expected_generation_path = question_receipt_path(
+            args.generation_dir, repeat, question_id
+        )
+        if generation_path != expected_generation_path:
+            raise RuntimeError(
+                "AA-LCR generation receipt path does not match its question and repeat: "
+                f"{generation_path}"
+            )
+        candidate_answer = generation.get("candidate_answer")
+        if not isinstance(candidate_answer, str) or not candidate_answer:
+            raise RuntimeError(
+                f"AA-LCR generation receipt has no candidate answer: {generation_path}"
+            )
         output_path = judgement_receipt_path(args.output_dir, repeat, question_id)
         generation_sha256 = sha256_file(generation_path)
         if output_path.exists():
@@ -1117,67 +1235,121 @@ def command_judge(args: argparse.Namespace) -> None:
                 and existing.get("judge_config_sha256")
                 == judge_manifest["judge_config_sha256"]
             ):
+                output_path.with_suffix(".error.json").unlink(missing_ok=True)
+                skipped += 1
                 continue
             raise RuntimeError(f"Judge receipt is incompatible: {output_path}")
 
         prompt = build_judge_prompt(
             question.question,
             question.official_answer,
-            generation["candidate_answer"],
+            candidate_answer,
         )
+        tasks.append(
+            JudgementTask(
+                question=question,
+                repeat=repeat,
+                generation_path=generation_path,
+                generation_sha256=generation_sha256,
+                prompt=prompt,
+                output_path=output_path,
+            )
+        )
+
+    def judge_one(task: JudgementTask) -> dict[str, Any]:
+        failure_path = task.output_path.with_suffix(".error.json")
         request = {
             "model": args.model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [{"role": "user", "content": task.prompt}],
             "max_tokens": args.max_tokens,
             "reasoning_effort": args.reasoning_effort,
             "stream": False,
         }
         if args.temperature is not None:
             request["temperature"] = args.temperature
-        response, elapsed = post_json(
-            url=url,
-            payload=request,
-            headers=headers,
-            timeout_seconds=args.timeout_seconds,
-        )
-        answer = choice_message(response).get("content")
-        if not isinstance(answer, str):
-            answer = ""
-        match = JUDGE_OUTPUT_RE.fullmatch(answer.strip())
-        if match is None:
-            raise RuntimeError(
-                f"Equality checker returned an invalid label for question {question_id}, "
-                f"repeat {repeat}: {answer!r}"
+        try:
+            response, elapsed = post_json(
+                url=url,
+                payload=request,
+                headers=headers,
+                timeout_seconds=args.timeout_seconds,
             )
-        label = match.group(1).upper()
-        write_json(
-            output_path,
-            {
-                "artifact_kind": "AA-LCR equality-checker receipt",
-                "status": "qualified",
-                "completed_utc": utc_now(),
-                "question_id": question_id,
-                "repeat": repeat,
-                "document_category": question.document_category,
-                "generation_receipt": generation_path.relative_to(
-                    args.generation_dir
-                ).as_posix(),
-                "generation_receipt_sha256": generation_sha256,
-                "judge_config_sha256": judge_manifest["judge_config_sha256"],
-                "judge_prompt_sha256": sha256_text(prompt),
-                "elapsed_seconds": elapsed,
+            answer = choice_message(response).get("content")
+            if not isinstance(answer, str):
+                answer = ""
+            match = JUDGE_OUTPUT_RE.fullmatch(answer.strip())
+            if match is None:
+                raise RuntimeError(
+                    "Equality checker returned an invalid label for question "
+                    f"{task.question.question_id}, repeat {task.repeat}: {answer!r}"
+                )
+            label = match.group(1).upper()
+            write_json(
+                task.output_path,
+                {
+                    "artifact_kind": "AA-LCR equality-checker receipt",
+                    "status": "qualified",
+                    "completed_utc": utc_now(),
+                    "question_id": task.question.question_id,
+                    "repeat": task.repeat,
+                    "document_category": task.question.document_category,
+                    "generation_receipt": task.generation_path.relative_to(
+                        args.generation_dir
+                    ).as_posix(),
+                    "generation_receipt_sha256": task.generation_sha256,
+                    "judge_protocol": args.judge_protocol,
+                    "judge_config_sha256": judge_manifest["judge_config_sha256"],
+                    "judge_prompt_sha256": sha256_text(task.prompt),
+                    "elapsed_seconds": elapsed,
+                    "label": label,
+                    "correct": label == "CORRECT",
+                    "response": response,
+                },
+            )
+            failure_path.unlink(missing_ok=True)
+            result = {
+                "question_id": task.question.question_id,
+                "repeat": task.repeat,
                 "label": label,
-                "correct": label == "CORRECT",
-                "response": response,
-            },
-        )
-        print(
-            json.dumps(
-                {"question_id": question_id, "repeat": repeat, "label": label},
-                sort_keys=True,
-            ),
-            flush=True,
-        )
+            }
+        except Exception as error:
+            write_json(
+                failure_path,
+                {
+                    "artifact_kind": "AA-LCR equality-checker failure",
+                    "status": "unsupported",
+                    "failed_utc": utc_now(),
+                    "question_id": task.question.question_id,
+                    "repeat": task.repeat,
+                    "generation_receipt_sha256": task.generation_sha256,
+                    "judge_protocol": args.judge_protocol,
+                    "judge_config_sha256": judge_manifest["judge_config_sha256"],
+                    "judge_prompt_sha256": sha256_text(task.prompt),
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                },
+            )
+            raise
+        print(json.dumps(result, sort_keys=True), flush=True)
+        return result
+
+    completed = 0
+    if args.concurrency == 1:
+        for task in tasks:
+            judge_one(task)
+            completed += 1
+    else:
+        with ThreadPoolExecutor(max_workers=args.concurrency) as executor:
+            futures = [executor.submit(judge_one, task) for task in tasks]
+            try:
+                for future in as_completed(futures):
+                    future.result()
+                    completed += 1
+            except BaseException:
+                for future in futures:
+                    future.cancel()
+                raise
+    print(json.dumps({"completed": completed, "skipped": skipped}, sort_keys=True))
 
 
 def wilson_interval(
@@ -1197,12 +1369,150 @@ def wilson_interval(
 
 
 def command_summarize(args: argparse.Namespace) -> None:
-    receipts = sorted((args.judge_dir / "judgements").glob("repeat-*/question-*.json"))
+    judge_manifest_path = args.judge_dir / "judge-manifest.json"
+    if not judge_manifest_path.is_file():
+        raise FileNotFoundError(
+            f"Equality-checker manifest is absent: {judge_manifest_path}"
+        )
+    judge_manifest = json.loads(judge_manifest_path.read_text(encoding="utf-8"))
+    judge_config = judge_manifest.get("judge")
+    if not isinstance(judge_config, dict):
+        raise TypeError("Equality-checker manifest has no judge configuration")
+    judge_config_sha256 = judge_manifest.get("judge_config_sha256")
+    if judge_config_sha256 != canonical_sha256(judge_config):
+        raise RuntimeError("Equality-checker manifest configuration hash is invalid")
+    generation_manifest_path = args.generation_dir / "generation-manifest.json"
+    if not generation_manifest_path.is_file():
+        raise FileNotFoundError(
+            f"AA-LCR generation manifest is absent: {generation_manifest_path}"
+        )
+    if sha256_file(generation_manifest_path) != judge_manifest.get(
+        "generation_manifest_sha256"
+    ):
+        raise RuntimeError(
+            "AA-LCR generation manifest does not match the equality-checker manifest"
+        )
+    generation_manifest = json.loads(
+        generation_manifest_path.read_text(encoding="utf-8")
+    )
+    if generation_manifest.get("generation_config_sha256") != judge_manifest.get(
+        "generation_config_sha256"
+    ):
+        raise RuntimeError(
+            "AA-LCR generation-configuration identity does not match the "
+            "equality-checker manifest"
+        )
+    questions = {
+        question.question_id: question for question in load_questions(args.dataset_root)
+    }
+    receipts = sorted(
+        path
+        for path in (args.judge_dir / "judgements").glob("repeat-*/question-*.json")
+        if re.fullmatch(r"question-\d{4}\.json", path.name)
+    )
     if not receipts:
         raise RuntimeError(
             f"No equality-checker receipts were found in {args.judge_dir / 'judgements'}"
         )
     records = [json.loads(path.read_text(encoding="utf-8")) for path in receipts]
+    attempt_pairs: set[tuple[int, int]] = set()
+    completion_tokens: list[int] = []
+    elapsed_seconds: list[float] = []
+    for path, record in zip(receipts, records, strict=True):
+        if record.get("status") != "qualified":
+            raise RuntimeError(f"Equality-checker receipt is not qualified: {path}")
+        if record.get("judge_config_sha256") != judge_config_sha256:
+            raise RuntimeError(
+                f"Equality-checker receipt has a mismatched configuration hash: {path}"
+            )
+        if record.get("judge_protocol") != judge_config.get("protocol"):
+            raise RuntimeError(
+                f"Equality-checker receipt has a mismatched judge protocol: {path}"
+            )
+        question_id = int(record["question_id"])
+        repeat = int(record["repeat"])
+        pair = (question_id, repeat)
+        if pair in attempt_pairs:
+            raise RuntimeError(
+                "Equality-checker receipts contain a duplicate question-repeat pair: "
+                f"{pair}"
+            )
+        attempt_pairs.add(pair)
+        if question_id not in questions or repeat not in (0, 1, 2):
+            raise RuntimeError(
+                f"Equality-checker receipt has an invalid question-repeat pair: {path}"
+            )
+        if path != judgement_receipt_path(args.judge_dir, repeat, question_id):
+            raise RuntimeError(
+                "Equality-checker receipt path does not match its question and repeat: "
+                f"{path}"
+            )
+        expected_generation_path = question_receipt_path(
+            args.generation_dir, repeat, question_id
+        )
+        expected_generation_relative = expected_generation_path.relative_to(
+            args.generation_dir
+        ).as_posix()
+        if record.get("generation_receipt") != expected_generation_relative:
+            raise RuntimeError(
+                f"Equality-checker receipt names the wrong generation receipt: {path}"
+            )
+        if not expected_generation_path.is_file():
+            raise FileNotFoundError(
+                f"AA-LCR generation receipt is absent: {expected_generation_path}"
+            )
+        if sha256_file(expected_generation_path) != record.get(
+            "generation_receipt_sha256"
+        ):
+            raise RuntimeError(f"AA-LCR generation receipt hash does not match: {path}")
+        generation = json.loads(expected_generation_path.read_text(encoding="utf-8"))
+        candidate_answer = generation.get("candidate_answer")
+        if not isinstance(candidate_answer, str) or not candidate_answer:
+            raise RuntimeError(
+                f"AA-LCR generation receipt has no candidate answer: {path}"
+            )
+        question = questions[question_id]
+        prompt = build_judge_prompt(
+            question.question,
+            question.official_answer,
+            candidate_answer,
+        )
+        if sha256_text(prompt) != record.get("judge_prompt_sha256"):
+            raise RuntimeError(f"Equality-checker prompt hash does not match: {path}")
+        response = record.get("response")
+        if not isinstance(response, dict):
+            raise TypeError(f"Equality-checker receipt has no API response: {path}")
+        if response.get("model") != judge_config.get("model"):
+            raise RuntimeError(
+                f"Equality-checker response has a mismatched model: {path}"
+            )
+        message = choice_message(response)
+        response_label = message.get("content")
+        if not isinstance(response_label, str):
+            raise TypeError(f"Equality-checker response has no textual label: {path}")
+        match = JUDGE_OUTPUT_RE.fullmatch(response_label.strip())
+        if match is None or match.group(1).upper() != record.get("label"):
+            raise RuntimeError(
+                f"Equality-checker response label does not match its receipt: {path}"
+            )
+        if bool(record.get("correct")) != (record.get("label") == "CORRECT"):
+            raise RuntimeError(
+                f"Equality-checker correctness flag does not match its label: {path}"
+            )
+        choices = response["choices"]
+        if choices[0].get("finish_reason") != "stop":
+            raise RuntimeError(
+                f"Equality-checker response did not finish with stop: {path}"
+            )
+        usage = response.get("usage")
+        if not isinstance(usage, dict) or not isinstance(
+            usage.get("completion_tokens"), int
+        ):
+            raise TypeError(
+                f"Equality-checker response has invalid completion-token usage: {path}"
+            )
+        completion_tokens.append(usage["completion_tokens"])
+        elapsed_seconds.append(float(record["elapsed_seconds"]))
     correct = sum(bool(record["correct"]) for record in records)
     low, high = wilson_interval(correct, len(records))
     by_repeat: dict[int, list[bool]] = defaultdict(list)
@@ -1212,16 +1522,55 @@ def command_summarize(args: argparse.Namespace) -> None:
         by_repeat[int(record["repeat"])].append(bool(record["correct"]))
         by_category[str(record["document_category"])].append(bool(record["correct"]))
         by_question[int(record["question_id"])].append(bool(record["correct"]))
+    expected_pairs = {
+        (question_id, repeat)
+        for question_id in range(1, EXPECTED_QUESTIONS + 1)
+        for repeat in range(3)
+    }
+    all_expected_pairs_present = attempt_pairs == expected_pairs
+    failure_sidecars = sorted(
+        (args.judge_dir / "judgements").glob("repeat-*/question-*.error.json")
+    )
     complete = (
         len(records) == EXPECTED_QUESTIONS * 3
         and len(by_question) == EXPECTED_QUESTIONS
         and sorted(by_repeat) == [0, 1, 2]
         and all(len(values) == 3 for values in by_question.values())
+        and all_expected_pairs_present
+        and not failure_sidecars
+    )
+
+    def numeric_distribution(values: list[int] | list[float]) -> dict[str, int | float]:
+        return {
+            "minimum": min(values),
+            "mean": statistics.mean(values),
+            "median": statistics.median(values),
+            "p95": round(percentile(values, 0.95), 6),
+            "p99": round(percentile(values, 0.99), 6),
+            "maximum": max(values),
+            "sum": sum(values),
+        }
+
+    protocol = str(judge_config["protocol"])
+    comparison_scope = (
+        "Artificial Analysis AA-LCR v4.1.1 equality-checker result"
+        if protocol == "artificial-analysis-v4.1.1"
+        else (
+            "Internal paired-comparison result produced by a frozen official "
+            "Kimi-K3 judge; it is not an official Artificial Analysis result"
+        )
     )
     summary = {
-        "artifact_kind": "AA-LCR pass@1 summary",
+        "artifact_kind": "AA-LCR equality-checker pass@1 summary",
         "status": "qualified" if complete else "research-only",
         "created_utc": utc_now(),
+        "comparison_scope": comparison_scope,
+        "judge": {
+            "protocol": protocol,
+            "protocol_description": judge_config["protocol_description"],
+            "model": judge_config["model"],
+            "runtime_manifest_sha256": judge_config.get("runtime_manifest_sha256"),
+        },
         "scoring": "mean correctness across all question-repeat attempts",
         "attempts": len(records),
         "correct": correct,
@@ -1253,13 +1602,38 @@ def command_summarize(args: argparse.Namespace) -> None:
                 ).items()
             )
         ),
-        "judge_manifest_sha256": sha256_file(args.judge_dir / "judge-manifest.json"),
+        "generation_repeat_agreement": {
+            "unanimous_questions": sum(
+                len(set(values)) == 1 for values in by_question.values()
+            ),
+            "mixed-label_questions": sum(
+                len(set(values)) > 1 for values in by_question.values()
+            ),
+            "interpretation": (
+                "Agreement includes candidate-generation variation and does not "
+                "isolate equality-checker repeatability."
+            ),
+        },
+        "judge_usage": {
+            "completion_tokens": numeric_distribution(completion_tokens),
+            "request_elapsed_seconds": numeric_distribution(elapsed_seconds),
+        },
+        "judge_manifest_sha256": sha256_file(judge_manifest_path),
         "receipt_manifest_sha256": canonical_sha256(
             [
                 (path.relative_to(args.judge_dir).as_posix(), sha256_file(path))
                 for path in receipts
             ]
         ),
+        "qualification": {
+            "all_expected_question_repeat_pairs_present": all_expected_pairs_present,
+            "all_generation_receipt_hashes_match": True,
+            "all_judge_prompt_hashes_match": True,
+            "all_response_models_match": True,
+            "all_response_labels_match_receipts": True,
+            "all_responses_finished_with_stop": True,
+            "failure_sidecars": len(failure_sidecars),
+        },
     }
     if args.output:
         write_json(args.output, summary)
@@ -1345,16 +1719,41 @@ def main() -> None:
     judge.add_argument("--output-dir", type=Path, required=True)
     judge.add_argument("--base-url", required=True)
     judge.add_argument("--model", default="gpt-5.6-luna")
+    judge.add_argument(
+        "--judge-protocol",
+        choices=tuple(JUDGE_PROTOCOLS),
+        default="artificial-analysis-v4.1.1",
+        help="Identity and interpretation boundary for the equality checker.",
+    )
+    judge.add_argument(
+        "--judge-runtime-manifest",
+        type=Path,
+        help=(
+            "Qualified serving-runtime manifest. Required when the frozen "
+            "official Kimi-K3 checkpoint is the equality checker."
+        ),
+    )
     judge.add_argument("--api-key-env", default="OPENAI_API_KEY")
     judge.add_argument("--reasoning-effort", default="medium")
     judge.add_argument("--temperature", type=float)
     judge.add_argument("--max-tokens", type=int, default=4096)
     judge.add_argument("--timeout-seconds", type=float, default=600)
+    judge.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help="Number of independent equality-checker requests submitted concurrently.",
+    )
+    judge.add_argument("--repeat", type=int, choices=(0, 1, 2))
+    judge.add_argument("--start-question", type=int, default=1)
+    judge.add_argument("--stop-question", type=int, default=101)
     judge.set_defaults(func=command_judge)
 
     summarize = subparsers.add_parser(
         "summarize", help="Aggregate equality-checker receipts"
     )
+    summarize.add_argument("--dataset-root", type=Path, required=True)
+    summarize.add_argument("--generation-dir", type=Path, required=True)
     summarize.add_argument("--judge-dir", type=Path, required=True)
     summarize.add_argument("--output", type=Path)
     summarize.set_defaults(func=command_summarize)

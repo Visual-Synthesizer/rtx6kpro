@@ -1,0 +1,122 @@
+{
+  "artifact_kind": "AA-LCR equality-checker pass@1 summary",
+  "attempts": 300,
+  "comparison_scope": "Internal paired-comparison result produced by a frozen official Kimi-K3 judge; it is not an official Artificial Analysis result",
+  "correct": 254,
+  "created_utc": "2026-08-14T22:52:21.885603Z",
+  "generation_repeat_agreement": {
+    "interpretation": "Agreement includes candidate-generation variation and does not isolate equality-checker repeatability.",
+    "mixed-label_questions": 14,
+    "unanimous_questions": 86
+  },
+  "judge": {
+    "model": "Kimi-K3-Official-MXFP4-NoSpec-TP16-DCP16-1M-CC8-FA2",
+    "protocol": "frozen-official-kimi-k3",
+    "protocol_description": "Frozen official Kimi-K3 checkpoint used as a common equality checker",
+    "runtime_manifest_sha256": "80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e"
+  },
+  "judge_manifest_sha256": "b3038ab264cefdb816fd616f01639345f27266e3fc397d9ed6eddc31d844c828",
+  "judge_usage": {
+    "completion_tokens": {
+      "maximum": 5519,
+      "mean": 194.00333333333333,
+      "median": 104.5,
+      "minimum": 33,
+      "p95": 466.95,
+      "p99": 1791.75,
+      "sum": 58201
+    },
+    "request_elapsed_seconds": {
+      "maximum": 259.00161045702407,
+      "mean": 16.64136864271151,
+      "median": 13.365699612011667,
+      "minimum": 2.7713141820277087,
+      "p95": 30.673874,
+      "p99": 91.821232,
+      "sum": 4992.410592813452
+    }
+  },
+  "pass_at_1": 0.8466666666666667,
+  "per_document_category": {
+    "Academia": {
+      "attempts": 15,
+      "correct": 15,
+      "pass_at_1": 1.0
+    },
+    "Company_Documents": {
+      "attempts": 189,
+      "correct": 158,
+      "pass_at_1": 0.8359788359788359
+    },
+    "Government_Consultations": {
+      "attempts": 33,
+      "correct": 27,
+      "pass_at_1": 0.8181818181818182
+    },
+    "Industry_Reports": {
+      "attempts": 24,
+      "correct": 22,
+      "pass_at_1": 0.9166666666666666
+    },
+    "Legal": {
+      "attempts": 18,
+      "correct": 13,
+      "pass_at_1": 0.7222222222222222
+    },
+    "Marketing": {
+      "attempts": 18,
+      "correct": 16,
+      "pass_at_1": 0.8888888888888888
+    },
+    "Survey_Reports": {
+      "attempts": 3,
+      "correct": 3,
+      "pass_at_1": 1.0
+    }
+  },
+  "per_repeat": {
+    "0": {
+      "attempts": 100,
+      "correct": 86,
+      "pass_at_1": 0.86
+    },
+    "1": {
+      "attempts": 100,
+      "correct": 84,
+      "pass_at_1": 0.84
+    },
+    "2": {
+      "attempts": 100,
+      "correct": 84,
+      "pass_at_1": 0.84
+    }
+  },
+  "qualification": {
+    "all_expected_question_repeat_pairs_present": true,
+    "all_generation_receipt_hashes_match": true,
+    "all_judge_prompt_hashes_match": true,
+    "all_response_labels_match_receipts": true,
+    "all_response_models_match": true,
+    "all_responses_finished_with_stop": true,
+    "failure_sidecars": 0
+  },
+  "question_mean_distribution": {
+    "0.000000": 9,
+    "0.333333": 5,
+    "0.666667": 9,
+    "1.000000": 77
+  },
+  "questions": 100,
+  "receipt_manifest_sha256": "ba4b2d2e28e143a4499a60b598c9d6568f60b0fd93cf0d1fb8d43155708cdaf8",
+  "repeats_observed": [
+    0,
+    1,
+    2
+  ],
+  "scoring": "mean correctness across all question-repeat attempts",
+  "status": "qualified",
+  "wilson_95": {
+    "high": 0.8830335970090831,
+    "low": 0.8015339429418983
+  }
+}
