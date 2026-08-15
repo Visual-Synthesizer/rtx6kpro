@@ -4,6 +4,10 @@
 
 [AA-LCR reproduction specification](aa-lcr-reproduction.md)
 
+[Qualified AA-LCR official MXFP4 versus QSRT K2 comparison](aa-lcr-official-mxfp4-vs-qsrt-k2.md)
+
+[QSRT K2 TP16/DCP8 target-only and DSpark serving](qsrt-k2-tp16-dcp8.md)
+
 [RedHatAI BF16 DSpark compatibility and DCP16 qualification](redhat-dspark-dcp16.md)
 
 Status: **qualified**.

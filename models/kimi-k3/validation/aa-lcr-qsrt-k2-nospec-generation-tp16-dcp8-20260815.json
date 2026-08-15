@@ -1,0 +1,68 @@
+{
+  "artifact_kind": "Kimi K3 AA-LCR generation completeness receipt",
+  "created_utc": "2026-08-15T04:40:26.026583Z",
+  "dataset": {
+    "prompt_manifest_sha256": "13f8fdc097679d5ead0c4bba6044b254a1fcd80f8e5afb9555c68bd3d0abd09d",
+    "questions": 100,
+    "repository": "ArtificialAnalysis/AA-LCR",
+    "revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+    "token_count_manifest_sha256": "ca980972df40cf1dacde770f9e2f80fe9e4c4ab74c5c72407c70669a5fcf54de"
+  },
+  "generation": {
+    "configuration_sha256": "b77e4cd6e38f48f96a715f87104cc2cc0128fb62caecc106895a58357df98c6a",
+    "failure_sidecars": 0,
+    "finish_reasons": {
+      "stop": 300
+    },
+    "generation_manifest_sha256": "5e65d03f737f017e73ea5adbaaa67a8a632e99520f4c9a9d4515ab599f70b2be",
+    "model": "Kimi-K3-QSRT-K2-NoSpec-TP16-DCP8-1M-CC8-MBT4096",
+    "per_repeat_receipts": {
+      "0": 100,
+      "1": 100,
+      "2": 100
+    },
+    "questions": 100,
+    "receipts": 300,
+    "repeats": 3,
+    "runtime_manifest_sha256": "5de71f080b3e363cd42ebcc7f113e1d36fb5a78a50fa111234fd786cd8a4cc80"
+  },
+  "qualification": {
+    "all_candidate_answer_hashes_match": true,
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_dataset_prompts_and_documents": true,
+    "all_receipts_match_generation_configuration": true,
+    "all_response_prompt_token_counts_match_pinned_tokenizer": true,
+    "all_responses_finished_with_stop": true
+  },
+  "receipt_manifest_sha256": "e3c4002728c1a99b88dd1a8d995e87792c3c229b3e2086743a38e7e5dba8b154",
+  "status": "qualified",
+  "usage": {
+    "completion_tokens": {
+      "maximum": 13062,
+      "mean": 1146.4433333333334,
+      "median": 665.0,
+      "minimum": 125,
+      "p95": 3357.95,
+      "p99": 4778.19,
+      "sum": 343933
+    },
+    "prompt_tokens": {
+      "maximum": 114776,
+      "mean": 95164.35,
+      "median": 95119.5,
+      "minimum": 71136,
+      "p95": 113977.4,
+      "p99": 114773.03,
+      "sum": 28549305
+    },
+    "request_elapsed_seconds": {
+      "maximum": 4370.01821838296,
+      "mean": 927.569269721829,
+      "median": 806.980029527971,
+      "minimum": 163.51792828104226,
+      "p95": 1767.202776,
+      "p99": 2494.090468,
+      "sum": 278270.7809165487
+    }
+  }
+}

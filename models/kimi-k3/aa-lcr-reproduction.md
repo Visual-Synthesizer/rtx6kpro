@@ -19,8 +19,11 @@ an inference configuration rather than a checkpoint property.
 | Official MXFP4 no-spec generation | qualified | All 100 questions have three hash-verified receipts and all 300 responses finished with `stop`; see [generation completeness](validation/aa-lcr-official-mxfp4-nospec-generation-tp16-dcp16-20260814.json) and [execution evidence](validation/aa-lcr-official-mxfp4-nospec-execution-tp16-dcp16-20260814.json). |
 | Frozen official Kimi-K3 equality-checker protocol | qualified | Two independent executions agreed on 100 of 100 fixed-answer labels; see [repeatability evidence](validation/aa-lcr-k3-judge-repeatability-20260814.json). |
 | Official MXFP4 no-spec score with the frozen Kimi-K3 judge | qualified | The judge marked 254 of 300 attempts correct, or 84.67%; see [score evidence](validation/aa-lcr-official-mxfp4-nospec-k3-judge-tp16-dcp16-20260814.json). |
+| Official MXFP4 no-spec score with GPT-5.6 Sol maximum reasoning | qualified | The independent control marked 249 of 300 attempts correct, or 83.00%; complete receipts are in the [paired evidence artifact](aa-lcr-official-mxfp4-vs-qsrt-k2.md). |
 | Official MXFP4 no-spec score with the Artificial Analysis GPT-5.6 Luna judge | unsupported | No GPT-5.6 Luna equality-checker receipts are recorded. |
-| QSRT-K2 no-spec result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
+| QSRT-K2 no-spec generation | qualified | All 100 questions have three hash-verified receipts and all 300 responses finished with `stop`; see [generation completeness](validation/aa-lcr-qsrt-k2-nospec-generation-tp16-dcp8-20260815.json). |
+| QSRT-K2 no-spec score with the frozen Kimi-K3 judge | qualified | The judge marked 245 of 300 attempts correct, or 81.67%; complete receipts are in the [paired evidence artifact](aa-lcr-official-mxfp4-vs-qsrt-k2.md). |
+| QSRT-K2 no-spec score with GPT-5.6 Sol maximum reasoning | qualified | The independent control marked 237 of 300 attempts correct, or 79.00%; complete receipts are in the [paired evidence artifact](aa-lcr-official-mxfp4-vs-qsrt-k2.md). |
 | DSpark operational result | unsupported | A complete set of 300 generation and equality-checker receipts is not recorded on this page. |
 
 The word *qualified* for a generation artifact means that all 100 questions
@@ -198,21 +201,23 @@ listed under **Immutable inputs** identifies all 100 prompts and their order.
 
 ## Server comparison contract
 
-The official MXFP4 and QSRT-K2 no-spec servers must use identical values for:
+AA-LCR qualifies a complete checkpoint-and-serving configuration. Compared
+configurations must use identical dataset inputs, prompt construction,
+tokenizer and chat template, generation sampling, repeat count, and equality
+checker. The serving topology, cache dtype, kernel selection, scheduler budget,
+and source revisions may differ when a checkpoint requires or benefits from a
+different runtime. Every such difference must be present in the runtime
+manifest and result table.
 
-- vLLM and B12X source revisions;
-- TP and DCP topology;
-- activation and KV-cache dtypes;
-- attention and KDA backends;
-- maximum model length and prefill chunk size;
-- prefix-caching policy;
-- CUDA graph policy;
-- tokenizer and chat template;
-- request order and sampling parameters.
+Consequently, an AA-LCR score can establish operational quality for the named
+runtime but cannot isolate checkpoint quantization error. The distribution-
+fidelity suite in `distribution-fidelity-1024x2048.md` provides the controlled
+checkpoint comparison: it uses matched model code, topology, activation dtype,
+attention backend, batching, and one shared LM head for the reference and
+candidate captures.
 
-Checkpoint identity and checkpoint-required quantization kernels are the only
-intended differences. Prefix caching must be disabled for the qualified
-TP16/DCP16 hybrid MLA-Mamba server profile. The qualification in
+Prefix caching must be disabled for the qualified TP16/DCP16 hybrid MLA-Mamba
+server profile. The qualification in
 `validation/aa-lcr-prefix-cache-tp16-dcp16-20260814.json` reduced cached-request
 latency from 40.85 seconds to approximately 4.63 seconds, but identical greedy
 requests produced different output hashes and the server recorded two
@@ -381,6 +386,27 @@ official Kimi-K3 judge is qualified by a separate set of 300 equality-checker
 receipts. Correctness under the Artificial Analysis GPT-5.6 Luna judge remains
 unsupported.
 
+The QSRT-K2 target-only generation artifact is stored at:
+
+```text
+/mnt/luke/evals/kimi-k3-aa-lcr/qsrt-k2-nospec-tp16-dcp8-aa-lcr-cc8-mbt4096-20260814
+```
+
+It uses TP16/DCP8, FP8 KV cache, 1,102,812 reported physical KV tokens,
+`max_model_len=1,048,576`, a 4,096-token scheduler budget, eight active
+sequences, B12X MLA/MoE/linear kernels, Triton KDA prefill, and InstantTensor.
+The runtime manifest has SHA-256
+`5de71f080b3e363cd42ebcc7f113e1d36fb5a78a50fa111234fd786cd8a4cc80`.
+
+The qualified generation evidence contains 300 `stop` receipts, zero failure
+sidecars, and 28,549,305 prompt tokens. The model produced 343,933 completion
+tokens: 125 to 13,062 tokens per request, with median 665, p95 3,357.95, and
+p99 4,778.19. Per-request elapsed time was 163.52 to 4,370.02 seconds. The
+canonical response-file manifest has SHA-256
+`e3c4002728c1a99b88dd1a8d995e87792c3c229b3e2086743a38e7e5dba8b154`.
+These values qualify generation integrity, not answer correctness or serving
+throughput.
+
 ## Equality checker
 
 The frozen Kimi-K3 judge writes receipts below a dedicated judge directory so
@@ -494,8 +520,10 @@ failure sidecar or partial receipt set produces `research-only` status.
 | Checkpoint | Speculation | TP/DCP | Judge | Pass@1 | Correct / attempts | Generation receipt hash | Judge receipt hash | Status |
 |---|---:|---:|---|---:|---:|---|---|---|
 | Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | Frozen official Kimi-K3 `2496450e…` | 84.67% | 254 / 300 | `1e32bd3415…` | `ba4b2d2e28…` | qualified |
+| Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | GPT-5.6 Sol, maximum reasoning | 83.00% | 249 / 300 | `1e32bd3415…` | `64c590f772…` | qualified |
 | Official MXFP4 `2496450e…` | disabled | TP16/DCP16 | GPT-5.6 Luna, AA v4.1.1 | — | — | `1e32bd3415…` | — | unsupported |
-| QSRT-K2 `3b981141…` | disabled | unrecorded | Frozen official Kimi-K3 `2496450e…` | — | — | — | — | unsupported |
+| QSRT-K2 `3b981141…` | disabled | TP16/DCP8 | Frozen official Kimi-K3 `2496450e…` | 81.67% | 245 / 300 | `e3c4002728…` | `e5f3b68c40…` | qualified |
+| QSRT-K2 `3b981141…` | disabled | TP16/DCP8 | GPT-5.6 Sol, maximum reasoning | 79.00% | 237 / 300 | `e3c4002728…` | `bcb178eaac…` | qualified |
 | QSRT-K2 `3b981141…` | Inferact DSpark | unrecorded | Frozen official Kimi-K3 `2496450e…` | — | — | — | — | unsupported |
 
 The qualified Kimi-K3-judged summary has SHA-256
@@ -503,6 +531,10 @@ The qualified Kimi-K3-judged summary has SHA-256
 Its Wilson 95% interval is 80.15% to 88.30%. Per-repeat scores are 86%, 84%,
 and 84%. Seventy-seven questions were correct in all three generations, nine
 were incorrect in all three, and fourteen had mixed labels.
+
+The complete paired statistics, both judge families, exact runtime identities,
+downloadable receipts, and reproduction commands are specified on the
+[official MXFP4 versus QSRT K2 comparison page](aa-lcr-official-mxfp4-vs-qsrt-k2.md).
 
 ## Interpretation limits
 
