@@ -8,7 +8,7 @@
 | Hidden-state LM-head replay | qualified | The 32-context live-logit suite was reproduced with mean replay KLD `1.229325e-6` and top-1 agreement `0.999954` |
 | Official MXFP4 reference hidden states | implemented | 1,024 BF16 tensors with shape `[2047, 7168]`; file hashes are recorded in `reference-hidden/manifest.json` |
 | Runtime-repeat sentinels | implemented | 64 stratified contexts captured three times as hidden states and live BF16 logits |
-| Candidate comparison | implemented | Full-vocabulary two-pass KLD, Jensen–Shannon divergence, top-1 agreement, stratified context bootstrap, depth buckets, and paired candidate reports |
+| Candidate comparison | qualified | QSRT K2 routed experts with official BF16 non-expert tensors: micro KLD `0.06538554`, top-1 agreement `0.934222`; full-vocabulary and paired receipts are published at immutable dataset revision `402919ae70d61396087571b63fe9185d95491afb` |
 | Capability and long-context evaluation | unsupported | The artifact measures teacher-forced distribution fidelity at a 2,048-token context only |
 
 The downloadable artifact is
@@ -259,6 +259,37 @@ Negative `difference_a_minus_b` values favor candidate A. The paired receipt
 reports mean and median context differences, source-cluster bootstrap
 confidence intervals stratified by allocation, per-stratum differences, win
 counts, and the largest context-level disagreements.
+
+## Qualified QSRT K2 routed-expert comparison
+
+This comparison isolates the QSRT K2 routed-expert payload from non-expert
+quantization. The candidate combines routed experts from
+`lukealonso/Kimi-K3-QSRT-K2@3b98114115f1d41ce7963ba346c3fca19918b0bd`
+with BF16 embeddings, attention and KDA projections, normalization weights,
+routers, shared experts, and LM-head tensors from
+`moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970`.
+
+The matched control uses the same QSRT K2 routed experts and converts the
+non-expert linear tensors to MXFP8. Both captures use the same token IDs,
+model code, TP16 topology, BF16 activation and KV-cache dtypes, B12X MLA and
+MoE kernels, Triton KDA prefill, InstantTensor loader, and offline LM-head
+comparator.
+
+| Candidate | Non-expert storage | Micro KLD | Macro-stratum KLD | Top-1 agreement |
+|---|---|---:|---:|---:|
+| QSRT K2 routed experts | Official BF16 | `0.06538554` | `0.06617214` | `93.4222%` |
+| QSRT K2 routed experts | MXFP8 | `0.06702088` | `0.06780095` | `93.2957%` |
+
+Official BF16 non-expert tensors reduce micro KLD by `0.00163534`. The paired
+allocation-stratified source-cluster bootstrap 95% interval is
+`[-0.00177143, -0.00151198]` with 10,000 resamples. Official BF16 non-expert
+tensors have lower per-context KLD in 884 of 1,024 contexts; MXFP8 non-expert
+tensors have lower KLD in 140 contexts.
+
+The complete reports, runtime identity, and file hashes are published at
+[`festr2/kimi-k3-distribution-fidelity-1024x2048-v1@402919ae`](https://huggingface.co/datasets/festr2/kimi-k3-distribution-fidelity-1024x2048-v1/tree/402919ae70d61396087571b63fe9185d95491afb/results/qsrt-k2-routed-experts-official-bf16-nonexpert).
+The repository receipt is
+[`validation/qsrt-k2-routed-experts-official-bf16-nonexpert-kld-20260815.json`](validation/qsrt-k2-routed-experts-official-bf16-nonexpert-kld-20260815.json).
 
 ## Hidden-state replay qualification
 
