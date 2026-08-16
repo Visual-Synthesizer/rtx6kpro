@@ -47,18 +47,48 @@ with decode throughput.
 
 | Target and topology | Entrypoint | Physical target KV tokens | Decode tok/s median | Target cycles/s median | Acceptance median |
 |---|---|---:|---:|---:|---:|
-| Official MXFP4, TP16/DCP16, no speculation | `/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii` | 1,460,937 | 52.95 | n/a | n/a |
+| Official MXFP4, TP16/DCP16, no speculation | `/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii` | 1,460,937 | 55.28 | n/a | n/a |
 | Official MXFP4, TP16/DCP16, DSpark K7 | `/usr/local/bin/serve-kimi-k3-full-mxfp4-dspark-ii` | 1,057,049 | 104.21 | 29.676 | 0.357 |
 | Official MXFP4, TP16/DCP16, DFlash K7 | `/usr/local/bin/serve-kimi-k3-full-mxfp4-dflash-ii` | 1,048,576 | 91.10 | 28.664 | 0.311 |
 | QSRT K2, TP8/DCP8, no speculation, one active sequence | `/usr/local/bin/serve-kimi-k3-qsrt-nospec` | 1,072,139 | 43.68 | n/a | n/a |
+
+The no-speculation value is the median from an eight-run recheck of the exact
+published image digest after all 16 GPUs had entered idle P8 before the first
+request. The original qualification receipt recorded 52.95 tok/s and a
+same-window control recorded 52.97 tok/s. The same image, input tokens, output
+hash, and benchmark protocol later produced 55.275 tok/s. The difference is
+execution-state dependent; its hardware or driver cause has not been isolated.
+The 52.95 tok/s result remains part of the immutable functional qualification
+record but is not the representative no-speculation throughput.
+
+The no-speculation recheck is recorded in
+[`validation/nospec-p8-recheck-20260816.json`](validation/nospec-p8-recheck-20260816.json).
 
 The coding acceptance prompt `Write a Python script that implements the Sieve
 of Eratosthenes.` produced median rates of 126.78 tok/s with DSpark and 149.36
 tok/s with DFlash. All six measured outputs contained valid Python and no CJK
 ideographs.
 
-The consolidated machine-readable receipt is
+The consolidated machine-readable qualification receipt is
 [`validation/source-locked-runtime-20260816.json`](validation/source-locked-runtime-20260816.json).
+
+## Unpublished merge-candidate qualification
+
+Status: **qualified as a source overlay; not present in the published Docker
+image**.
+
+[vLLM #387](https://github.com/local-inference-lab/vllm/pull/387) commit
+`fe2416a7f9bc562c33fc35607d99c4febf895b0c` removes the generic empty-row mask
+when B12X dense MLA and its DCP reduction provide the required neutral
+empty-shard semantics. This removes 192 redundant CUDA kernel launches per
+Kimi-K3 decode token across 24 dense-MLA layers.
+
+With the published Docker runtime and source overlays, the no-speculation
+profile retained 1,460,937 physical target KV tokens and measured 55.925 tok/s.
+An Infernal-vLLM source control under the same runtime and B12X source measured
+56.034 tok/s. The patched, unpatched, and control runs produced the same output
+hash. These measurements qualify the pull-request source composition, not the
+published Docker image by itself.
 
 ## Runtime invariants
 
@@ -259,6 +289,12 @@ The token file SHA-256 is
 ## Source composition
 
 The Docker recipe composes hash-verified patches from minimal review units.
+The pull-request links below identify the review units, while the immutable
+source revisions embedded in the image are defined by the linked Docker recipe
+and its integration lock files. Mutable pull-request heads may contain commits
+that are not present in the image. In particular, the image does not contain
+vLLM #387 commit `fe2416a7f9bc562c33fc35607d99c4febf895b0c`, B12X #224, or
+vLLM #400.
 
 | Repository | Pull requests | Resulting behavior |
 |---|---|---|
