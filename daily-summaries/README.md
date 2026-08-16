@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-16](2026-08/2026-08-16.md) | - RTX PRO 6000 prices spiking hard — WS edition $13k→$16k in a week, MC raising prices overnight |
 | [2026-08-15](2026-08/2026-08-15.md) | Qwen3.8-27B released — dense (not MoE) 27B model with vision, built-in MTP, 3 reasoning-effort lev |
 | [2026-08-14](2026-08/2026-08-14.md) | Kimi-K3 2bpw QSRT quant (native MXFP4) scores 94.4–95.4% on GPQA Diamond, nearly matching the full |
 | [2026-08-13](2026-08/2026-08-13.md) | - DeepSeek-V4-Pro-0813 (GA) launched; mixed reviews — strong benchmarks but users found it slower/ |
@@ -178,6 +179,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-16](2026-08/2026-08-16.md) | - RTX PRO 6000 prices spiking hard — WS edition $13k→$16k in a week, MC raising prices overnight |
 | [2026-08-15](2026-08/2026-08-15.md) | Qwen3.8-27B released — dense (not MoE) 27B model with vision, built-in MTP, 3 reasoning-effort lev |
 | [2026-08-14](2026-08/2026-08-14.md) | Kimi-K3 2bpw QSRT quant (native MXFP4) scores 94.4–95.4% on GPQA Diamond, nearly matching the full |
 | [2026-08-13](2026-08/2026-08-13.md) | - DeepSeek-V4-Pro-0813 (GA) launched; mixed reviews — strong benchmarks but users found it slower/ |
