@@ -8,10 +8,10 @@ Edition GPUs. The checkpoint stores all 82,432 routed experts in QSRT K2 and
 stores nonexpert linear tensors in MXFP8. Its canonical expert payload is
 tensor-parallel independent.
 
-Status: **implemented**. The source-locked image passes build-time source,
-import, and CPU regression checks. GPU qualification results are recorded only
-after a clean load and fixed-token decode execution of the image identified on
-this page.
+Status: **implemented** for TP16/DCP8 target-only and DSpark serving. The
+source-locked image passes source, import, and CPU regression checks. The
+source-locked runtime receipt qualifies QSRT K2 target-only decode on TP8/DCP8
+with one active sequence; it does not qualify TP16/DCP8 throughput.
 
 ## Artifact identities
 
@@ -20,21 +20,19 @@ this page.
 | Target checkpoint | `lukealonso/Kimi-K3-QSRT-K2@3b98114115f1d41ce7963ba346c3fca19918b0bd` |
 | Official weight source | `moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970` |
 | DSpark checkpoint | `Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6` |
-| Docker image | `voipmonitor/vllm:kimi-k3-qsrt-ii-vllm735952b-b12x180ccab-cu133-torch213-20260815-r3` |
-| Local image ID | `sha256:a8ab762d6173da22470170b842b81fccd8603017114a79abead5d516d26ff16c` |
-| Docker recipe | [`build/kimi-k3-qsrt-ii-20260815@09753a3`](https://github.com/local-inference-lab/blackwell-llm-docker/tree/09753a32d2f001e033f12e4a3174219d313da30f) |
+| Docker image | `voipmonitor/vllm:kimi-k3-ii-vllmf21a391-b12x3be8bc7-cu133-torch213-20260816-r2` |
+| Registry digest | `sha256:9230c19c6b16ca6216613360619b0cca2356dba65c2297c99817750b3f9e4b83` |
+| Docker recipe | [`blackwell-llm-docker@2c469ba`](https://github.com/local-inference-lab/blackwell-llm-docker/tree/2c469ba2c54827d82b96b57450374b9c46f163ac) |
 | Runtime base image | `voipmonitor/vllm@sha256:01b973d1ae132882bcc1bf62ea232f6aabe649dd4a89b961d81f3c41cc53f971` |
-| vLLM review | [`local-inference-lab/vllm#317`](https://github.com/local-inference-lab/vllm/pull/317) |
-| vLLM PR head | `3a50cc050cf70ad3be0f862d361e5fc0a3ec730a` |
-| vLLM resulting tree | `735952bd5d9703b7fe966fe94f9e570f13169e92` |
-| B12X review | [`local-inference-lab/b12x#198`](https://github.com/local-inference-lab/b12x/pull/198) |
-| B12X PR head | `a257723e1b7d6ffde949a1f7fea1b5126c665407` |
-| B12X resulting tree | `180ccabf28eaac9c18e40c5e09a22a5a773227e5` |
+| vLLM review units | [#382](https://github.com/local-inference-lab/vllm/pull/382) through [#391](https://github.com/local-inference-lab/vllm/pull/391) |
+| vLLM resulting tree | `f21a391de0a1b127c93ac718fd7d1818f025317b` |
+| B12X review units | [#215](https://github.com/local-inference-lab/b12x/pull/215) and [#220](https://github.com/local-inference-lab/b12x/pull/220) |
+| B12X resulting tree | `3be8bc74d6813223b5be732a4c865401a693f5f5` |
 
 The image uses stable PyTorch 2.13.0, CUDA 13.3, patched NCCL 2.31.2,
 InstantTensor 0.1.9, FlashInfer 0.6.18+cu133, and XGrammar 0.2.5. The image source
-composition applies hash-verified aggregate patches to immutable vLLM and B12X
-base commits and verifies each resulting Git tree during the build.
+composition applies hash-verified minimal review units to immutable vLLM and
+B12X base commits and verifies each resulting Git tree during the build.
 
 ## Serving profiles
 
@@ -70,8 +68,8 @@ Use a separate writable JIT cache for each profile. The profiles compile
 different graph shapes and generated kernels.
 
 ```bash
-mkdir -p /mnt/kimi-k3-cache/qsrt-r3/nospec
-mkdir -p /mnt/kimi-k3-cache/qsrt-r3/dspark
+mkdir -p /mnt/kimi-k3-cache/source-locked-r2/qsrt-tp16-nospec
+mkdir -p /mnt/kimi-k3-cache/source-locked-r2/qsrt-tp16-dspark
 ```
 
 The commands below expose the API directly on host port 8001. Replace
@@ -91,9 +89,9 @@ docker run -d \
   --ulimit nofile=1048576:1048576 \
   -e PORT=8001 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
-  -v /mnt/kimi-k3-cache/qsrt-r3/nospec:/cache/jit \
+  -v /mnt/kimi-k3-cache/source-locked-r2/qsrt-tp16-nospec:/cache/jit \
   --entrypoint /usr/local/bin/serve-kimi-k3-qsrt-nospec \
-  voipmonitor/vllm:kimi-k3-qsrt-ii-vllm735952b-b12x180ccab-cu133-torch213-20260815-r3
+  voipmonitor/vllm@sha256:9230c19c6b16ca6216613360619b0cca2356dba65c2297c99817750b3f9e4b83
 ```
 
 The served model name is `Kimi-K3-QSRT-K2-NoSpec-TP16-DCP8-1M`.
@@ -112,9 +110,9 @@ docker run -d \
   --ulimit nofile=1048576:1048576 \
   -e PORT=8001 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
-  -v /mnt/kimi-k3-cache/qsrt-r3/dspark:/cache/jit \
+  -v /mnt/kimi-k3-cache/source-locked-r2/qsrt-tp16-dspark:/cache/jit \
   --entrypoint /usr/local/bin/serve-kimi-k3-qsrt-dspark \
-  voipmonitor/vllm:kimi-k3-qsrt-ii-vllm735952b-b12x180ccab-cu133-torch213-20260815-r3
+  voipmonitor/vllm@sha256:9230c19c6b16ca6216613360619b0cca2356dba65c2297c99817750b3f9e4b83
 ```
 
 The served model name is `Kimi-K3-QSRT-K2-DSpark7-TP16-DCP8-1M`.
@@ -188,15 +186,14 @@ statistics.
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 09753a32d2f001e033f12e4a3174219d313da30f
+git checkout 2c469ba2c54827d82b96b57450374b9c46f163ac
 
-./build-kimi-k3-qsrt-tp16-runtime.sh
+RELEASE_DATE=20260816 REVISION=r2 ./build-kimi-k3-qsrt-tp16-runtime.sh
 ```
 
 The builder verifies the base-image identity, integration patch hashes,
 resulting vLLM and B12X Git trees, imported source locations, launch-script
-syntax, and the FlashAttention CuTeDSL wrapper hash. Set `PUSH_IMAGE=1` only
-after GPU qualification succeeds.
+syntax, and the FlashAttention CuTeDSL wrapper hash.
 
 ## Evaluation boundaries
 

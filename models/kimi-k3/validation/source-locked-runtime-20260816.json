@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "Kimi-K3 source-locked runtime qualification",
+  "status": "qualified",
+  "published_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-ii-vllmf21a391-b12x3be8bc7-cu133-torch213-20260816-r2",
+    "registry_digest": "sha256:9230c19c6b16ca6216613360619b0cca2356dba65c2297c99817750b3f9e4b83",
+    "local_image_id": "sha256:7e8c1877b689665aca74b9cde8bfcab65634ac6be5f171a66e162e3d7ef2dd14",
+    "docker_recipe_commit": "2c469ba2c54827d82b96b57450374b9c46f163ac",
+    "vllm_tree": "f21a391de0a1b127c93ac718fd7d1818f025317b",
+    "b12x_tree": "3be8bc74d6813223b5be732a4c865401a693f5f5"
+  },
+  "runtime_equivalence": {
+    "measured_image": "voipmonitor/vllm:kimi-k3-ii-vllmf21a391-b12xbdffb86-cu133-torch213-20260816-r2",
+    "measured_image_id": "sha256:1ba75d5abacf5e79cbb25c7716d458551ff117ca32ae9d0c9a143cfeabf1972a",
+    "runtime_paths": [
+      "/opt/kimi-k3-qsrt/b12x/b12x",
+      "/opt/kimi-k3-qsrt/vllm/vllm",
+      "/usr/local/bin/serve-kimi-k3-*"
+    ],
+    "runtime_source_sha256": "53198596b96a1350fc9c150af12a8cc7d277778b4360ee3a754e732335109d63",
+    "difference": "The published B12X tree adds test isolation in tests/comm/test_pcie_hierarchical.py. Runtime source and launchers are byte-identical after excluding generated Python bytecode.",
+    "status": "qualified"
+  },
+  "hardware": {
+    "gpu_count": 16,
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "driver_version": "610.57.04",
+    "pcie": "Gen5 x16 on every GPU"
+  },
+  "protocol": {
+    "decode_prompt_tokens": 256,
+    "decode_max_tokens": 1024,
+    "decode_warmups": 2,
+    "decode_runs": 8,
+    "decode_token_file": "models/kimi-k3/tools/decode-baseline-256-token-ids.json",
+    "decode_token_file_sha256": "64c2ff11a83dda71caea12ea10b16511b0114c15973b949cde3ebd2bc4c712af",
+    "sieve_prompt": "Write a Python script that implements the Sieve of Eratosthenes.",
+    "sieve_max_tokens": 2000,
+    "sieve_warmups": 1,
+    "sieve_runs": 3
+  },
+  "profiles": [
+    {
+      "name": "official_mxfp4_nospec_tp16_dcp16",
+      "status": "qualified",
+      "served_model": "Kimi-K3-MXFP4-DCP16-1M",
+      "entrypoint": "/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii",
+      "physical_target_kv_tokens": 1460937,
+      "max_model_len": 1048576,
+      "max_num_seqs": 1,
+      "max_num_batched_tokens": 2048,
+      "decode_tokens_per_second_median": 52.94972850155503,
+      "same_window_control_tokens_per_second_median": 52.96561074756509,
+      "summary_sha256": "e57e6c708362ee4da35c39459b919acaa18f2b88a98b1148af0d09c71791d3a3"
+    },
+    {
+      "name": "official_mxfp4_dspark_tp16_dcp16",
+      "status": "qualified",
+      "served_model": "Kimi-K3-MXFP4-DSpark7-DCP16-1M",
+      "entrypoint": "/usr/local/bin/serve-kimi-k3-full-mxfp4-dspark-ii",
+      "physical_target_kv_tokens": 1057049,
+      "max_model_len": 1048576,
+      "max_num_seqs": 1,
+      "max_num_batched_tokens": 4096,
+      "decode_tokens_per_second_median": 104.20917586754882,
+      "target_cycles_per_second_median": 29.67567848931172,
+      "draft_acceptance_rate_median": 0.35705936378057945,
+      "mean_emitted_tokens_per_target_cycle_median": 3.499415546464056,
+      "control_target_cycles_per_second_median": 29.582841433529573,
+      "sieve_tokens_per_second_median": 126.7779300544074,
+      "sieve_python_syntax_passes": 3,
+      "sieve_unicode_cjk_count": 0,
+      "decode_summary_sha256": "fb7d1f19dbf70ddaf2a6c4a4532634174836455d74124c4a20a2038fd28a51dc",
+      "sieve_summary_sha256": "59255ff6b49ff076f02e8a492ecc94f5b1c20ebf44b04e64b06d080efc3fd1c4"
+    },
+    {
+      "name": "official_mxfp4_dflash_tp16_dcp16",
+      "status": "qualified",
+      "served_model": "Kimi-K3-MXFP4-DFlash-DCP16-1M",
+      "entrypoint": "/usr/local/bin/serve-kimi-k3-full-mxfp4-dflash-ii",
+      "physical_target_kv_tokens": 1048576,
+      "max_model_len": 1048576,
+      "max_num_seqs": 1,
+      "max_num_batched_tokens": 2048,
+      "decode_tokens_per_second_median": 91.09737876427958,
+      "target_cycles_per_second_median": 28.66350367389512,
+      "draft_acceptance_rate_median": 0.310504946766629,
+      "mean_emitted_tokens_per_target_cycle_median": 3.1735346273664033,
+      "same_window_control_target_cycles_per_second_median": 28.74747734317678,
+      "sieve_tokens_per_second_median": 149.36144847077372,
+      "sieve_python_syntax_passes": 3,
+      "sieve_unicode_cjk_count": 0,
+      "decode_summary_sha256": "8b0b42179208bbe273437633bccc744810ee11384d8df42dac61939bef1966be",
+      "sieve_summary_sha256": "bf25850c5cb560fcb500ce4f3791cc5f9e137412c06ecf43b966dda4ce677091"
+    },
+    {
+      "name": "qsrt_k2_nospec_tp8_dcp8_cc1",
+      "status": "qualified",
+      "served_model": "Kimi-K3-QSRT-K2-NoSpec-TP8-DCP8-1M",
+      "entrypoint": "/usr/local/bin/serve-kimi-k3-qsrt-nospec",
+      "physical_target_kv_tokens": 1072139,
+      "kv_cache_memory_bytes": 1950000000,
+      "max_model_len": 1048576,
+      "max_num_seqs": 1,
+      "max_num_batched_tokens": 2048,
+      "decode_tokens_per_second_median": 43.675760627922294,
+      "same_window_control_tokens_per_second_median": 43.68616598295314,
+      "summary_sha256": "6d339dcfc352bb4dee2fbd84563da607137914f0a2951a6ce67cd0df3c8777a6"
+    }
+  ],
+  "unsupported": [
+    {
+      "name": "qsrt_k2_nospec_tp8_dcp8_cc8_1m",
+      "reason": "CUDA Graph warmup exceeds available GPU memory with MAX_NUM_SEQS=8, MAX_NUM_BATCHED_TOKENS=4096, and a 1.9 or 1.95 GB target KV allocation per GPU."
+    }
+  ]
+}
