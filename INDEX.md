@@ -13,7 +13,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [INDEX](INDEX.md) - `INDEX.md`
+- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
@@ -33,6 +33,9 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r12](models/ds4dspark-infernal-invocation-r12.md) - `models/ds4dspark-infernal-invocation-r12.md`
+- [DeepSeek-V4-Flash-0731 on Infernal Invocation r14](models/ds4dspark-infernal-invocation-r14.md) - `models/ds4dspark-infernal-invocation-r14.md`
+- [DeepSeek-V4-Flash-0731 on Infernal Invocation r15](models/ds4dspark-infernal-invocation-r15.md) - `models/ds4dspark-infernal-invocation-r15.md`
+- [DeepSeek-V4-Flash-0731 on Infernal Invocation r16](models/ds4dspark-infernal-invocation-r16.md) - `models/ds4dspark-infernal-invocation-r16.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) - `models/ds4dspark-infernal-invocation-r2.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r4](models/ds4dspark-infernal-invocation-r4.md) - `models/ds4dspark-infernal-invocation-r4.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r7](models/ds4dspark-infernal-invocation-r7.md) - `models/ds4dspark-infernal-invocation-r7.md`
@@ -82,6 +85,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 Unsloth-Style Prefill KLD Reproduction](models/glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md) - `models/glm5.2/glm52-unsloth-style-prefill-kld-2026-07-07.md`
 - [GLM-5.2 Infernal Invocation r11](models/glm5.2-infernal-invocation-r11.md) - `models/glm5.2-infernal-invocation-r11.md`
 - [GLM-5.2 SQG W4A8 on Infernal Invocation r13](models/glm5.2-infernal-invocation-r13-sqg.md) - `models/glm5.2-infernal-invocation-r13-sqg.md`
+- [GLM-5.2 on Infernal Invocation r16](models/glm5.2-infernal-invocation-r16.md) - `models/glm5.2-infernal-invocation-r16.md`
 - [GLM-5.2 EXL3 shared-H quantization](models/glm5.2_exl3_shared_h_quantization.md) - `models/glm5.2_exl3_shared_h_quantization.md`
 - [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) - `models/glm5.2_mxfp4.md`
 - [GLM-5.2 v11 NVFP4 / FP8 / MXFP8 on Dark Devotion](models/glm5.2_v11.md) - `models/glm5.2_v11.md`
@@ -116,9 +120,14 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Kimi-K2.7-Code on Black Benediction](models/kimi-k27-code.md) - `models/kimi-k27-code.md`
 - [Kimi-K2.7-Code v2 on Eldritch](models/kimi-k27-code_v2.md) - `models/kimi-k27-code_v2.md`
 - [Kimi-K2.7-Code v3 on Fathomless](models/kimi-k27-code_v3.md) - `models/kimi-k27-code_v3.md`
-- [Kimi-K3 TP16/DCP16 Runtime on RTX PRO 6000 Blackwell](models/kimi-k3/README.md) - `models/kimi-k3/README.md`
+- [Kimi-K3 on RTX PRO 6000 Blackwell](models/kimi-k3/README.md) - `models/kimi-k3/README.md`
+- [Kimi-K3 AA-LCR official MXFP4 versus QSRT K2](models/kimi-k3/aa-lcr-official-mxfp4-vs-qsrt-k2.md) - `models/kimi-k3/aa-lcr-official-mxfp4-vs-qsrt-k2.md`
+- [Kimi K3 AA-LCR reproduction specification](models/kimi-k3/aa-lcr-reproduction.md) - `models/kimi-k3/aa-lcr-reproduction.md`
 - [Kimi K3 distribution-fidelity reference](models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md) - `models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md`
 - [Kimi K3 distribution-fidelity reference: 1,024 contexts × 2,048 tokens](models/kimi-k3/distribution-fidelity-1024x2048.md) - `models/kimi-k3/distribution-fidelity-1024x2048.md`
+- [Kimi-K3 Official MXFP4 Production Deployment](models/kimi-k3/production-dspark-lmcache.md) - `models/kimi-k3/production-dspark-lmcache.md`
+- [Kimi-K3 QSRT K2 TP16/DCP8 Serving](models/kimi-k3/qsrt-k2-tp16-dcp8.md) - `models/kimi-k3/qsrt-k2-tp16-dcp8.md`
+- [RedHatAI BF16 DSpark for Kimi-K3 with DCP16](models/kimi-k3/redhat-dspark-dcp16.md) - `models/kimi-k3/redhat-dspark-dcp16.md`
 - [Kimi Runbook Hub](models/kimi.md) - `models/kimi.md`
 - [Legacy Model Runbooks](models/legacy.md) - `models/legacy.md`
 - [MiMo-V2.5-Pro on RTX PRO 6000 Blackwell](models/mimo-v25-pro/README.md) - `models/mimo-v25-pro/README.md`
@@ -366,6 +375,10 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-10](daily-summaries/2026-08/2026-08-11.md) - `daily-summaries/2026-08/2026-08-11.md`
 - [Daily Summary — 2026-08-11](daily-summaries/2026-08/2026-08-12.md) - `daily-summaries/2026-08/2026-08-12.md`
 - [Daily Summary — 2026-08-12](daily-summaries/2026-08/2026-08-13.md) - `daily-summaries/2026-08/2026-08-13.md`
+- [Daily Summary — 2026-08-13](daily-summaries/2026-08/2026-08-14.md) - `daily-summaries/2026-08/2026-08-14.md`
+- [Daily Summary — 2026-08-14](daily-summaries/2026-08/2026-08-15.md) - `daily-summaries/2026-08/2026-08-15.md`
+- [Daily Summary — 2026-08-15](daily-summaries/2026-08/2026-08-16.md) - `daily-summaries/2026-08/2026-08-16.md`
+- [Daily Summary — 2026-08-16](daily-summaries/2026-08/2026-08-17.md) - `daily-summaries/2026-08/2026-08-17.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

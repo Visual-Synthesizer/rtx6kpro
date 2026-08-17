@@ -8,8 +8,7 @@ benchmark evidence.
 
 | Need | Page |
 |---|---|
-| Serve the GLM-5.2 SQG W4A8 checkpoint on four SM120 GPUs | [GLM-5.2 SQG W4A8 on Infernal Invocation r13](glm5.2-infernal-invocation-r13-sqg.md) |
-| Serve NVFP4 or projection-mixed EXL3 on CUDA 13.3 | [GLM-5.2 Infernal Invocation r11](glm5.2-infernal-invocation-r11.md) |
+| Serve NVFP4 or projection-mixed EXL3 on CUDA 13.3 | [GLM-5.2 Infernal Invocation r16](glm5.2-infernal-invocation-r16.md) |
 | Run the MXFP4 expert checkpoint | [GLM-5.2 FP8 + MXFP4 Experts](glm5.2_mxfp4.md) |
 | Compare KLD and quant quality | [GLM-5.2 KLD Evaluation](../benchmarks/glm52-kld-evaluation.md) |
 | Reproduce GGUF/BF16 dequant KLD | [GGUF to BF16 Dequant KLD Audit](glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md) |
@@ -19,19 +18,18 @@ benchmark evidence.
 
 | Area | Guidance |
 |---|---|
-| Recommended image | Select the checkpoint-specific qualified image: [SQG W4A8 r13](glm5.2-infernal-invocation-r13-sqg.md) or [NVFP4/EXL3 R7 r11](glm5.2-infernal-invocation-r11.md) |
+| Recommended image | Use the [Infernal Invocation r16 NVFP4/EXL3 profiles](glm5.2-infernal-invocation-r16.md); their exact-image status is source-qualified pending community E2E execution |
 | Main checkpoint | `lukealonso/GLM-5.2-NVFP4` |
 | Main backend | B12X sparse MLA, B12X MoE, B12X dense/FP8 path unless a page says otherwise |
-| DCP | [GLM-5.2 v18](glm5.2_v18.md) contains broad DCP1/2/4/8 measurements; Infernal Invocation r11 is qualified only for DCP1 |
-| Spec decode | Infernal Invocation r11 is qualified with MTP3 for the listed NVFP4 and EXL3 profiles |
+| DCP | [GLM-5.2 v18](glm5.2_v18.md) contains broad DCP1/2/4/8 measurements; Infernal Invocation r16 provides DCP1 profile defaults |
+| Spec decode | Infernal Invocation r16 provides MTP3 defaults for NVFP4 and projection-mixed EXL3 |
 | Quality checks | KLD, long-context decode, coding probes, acceptance rates |
 
 ## Version Map
 
 | Page | Status | Why keep it |
 |---|---|---|
-| [GLM-5.2 SQG W4A8 on Infernal Invocation r13](glm5.2-infernal-invocation-r13-sqg.md) | Qualified | Native SQG K3/K4/K6 execution for the pinned TP4/DCP1/MTP0 profile. |
-| [GLM-5.2 Infernal Invocation r11](glm5.2-infernal-invocation-r11.md) | Qualified | CUDA 13.3 NVFP4 TP8 and projection-mixed EXL3 R7 TP4 serving contracts. |
+| [GLM-5.2 Infernal Invocation r16](glm5.2-infernal-invocation-r16.md) | Source-qualified | CUDA 13.3 NVFP4 TP8 and projection-mixed EXL3 TP4 serving contracts. |
 | [GLM-5.2 v20](glm5.2_v20.md) | Historical Gilded Gnosis reference | Gilded Gnosis/SparkInfer image, cuBLAS-safe DCP output, and TP6 release evidence. |
 | [GLM-5.2 v19](glm5.2_v19.md) | Historical Gilded Gnosis predecessor | Canonical GG migration, deterministic CuTe cache keys, and DCP optimization background. |
 | [GLM-5.2 v18](glm5.2_v18.md) | Broad benchmark reference | Complete Gilded Gnosis DCP, TP6, MTP3, NF3, KLD, and checkpoint tables. |
