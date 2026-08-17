@@ -49,6 +49,7 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 | vLLM source tree | `df13924cb12279f8144019800fad7e27640acaea` |
 | B12X source tree | `ec6edd9da4687f83519fd37bd7322ea0800f0ace` |
 | LMCache source tree | `e045d729bc5c4c63a40e13d032f42923de97812f` |
+| Docker image recipe revision | `2cbc2e58e094ffbbd517afeec1619b391b998438` |
 | Docker recipe merge revision | `26642da52049a41a25e425c630f94de113ea9e6a` |
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3` |
 | LLMConduit digest | `sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d` |

@@ -26,6 +26,7 @@
     "vllm_tree": "df13924cb12279f8144019800fad7e27640acaea",
     "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
     "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+    "docker_image_recipe_commit": "2cbc2e58e094ffbbd517afeec1619b391b998438",
     "docker_merge_commit": "26642da52049a41a25e425c630f94de113ea9e6a"
   },
   "llmconduit_image": {
