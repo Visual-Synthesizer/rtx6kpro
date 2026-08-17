@@ -47,7 +47,7 @@ Need the complete map of every Markdown page?
 
 | Area | Page | Why it matters |
 |---|---|---|
-| GLM-5.2 serving stack | [GLM-5.2 v20](models/glm5.2_v20.md) | Gilded Gnosis/B12X image, source pins, TP6 fixes, Xid validation, and release gate. |
+| GLM-5.2 serving stack | [GLM-5.2 Infernal Invocation r17](models/glm5.2-infernal-invocation-r17.md) | CUDA 13.3 image, projection-mixed EXL3 TP4 qualification, online MCG K6, and NVFP4 TP8 profile. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
 | DS4 serving profile | [DS4 DSpark Infernal Invocation r16](models/ds4dspark-infernal-invocation-r16.md) | 0731 checkpoint, complete inactive-route masking, fixed K5, FULL graph dispatch, strict-tool concurrency, and native filesystem KV replay. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |

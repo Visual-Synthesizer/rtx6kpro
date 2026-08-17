@@ -86,6 +86,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 Infernal Invocation r11](models/glm5.2-infernal-invocation-r11.md) - `models/glm5.2-infernal-invocation-r11.md`
 - [GLM-5.2 SQG W4A8 on Infernal Invocation r13](models/glm5.2-infernal-invocation-r13-sqg.md) - `models/glm5.2-infernal-invocation-r13-sqg.md`
 - [GLM-5.2 on Infernal Invocation r16](models/glm5.2-infernal-invocation-r16.md) - `models/glm5.2-infernal-invocation-r16.md`
+- [GLM-5.2 on Infernal Invocation r17](models/glm5.2-infernal-invocation-r17.md) - `models/glm5.2-infernal-invocation-r17.md`
 - [GLM-5.2 EXL3 shared-H quantization](models/glm5.2_exl3_shared_h_quantization.md) - `models/glm5.2_exl3_shared_h_quantization.md`
 - [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) - `models/glm5.2_mxfp4.md`
 - [GLM-5.2 v11 NVFP4 / FP8 / MXFP8 on Dark Devotion](models/glm5.2_v11.md) - `models/glm5.2_v11.md`
