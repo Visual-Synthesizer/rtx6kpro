@@ -1,0 +1,31 @@
+providers:
+  kimi-k3-conduit-chat:
+    baseUrl: http://127.0.0.1:8003/v1
+    auth: none
+    api: openai-completions
+    models:
+      - id: production-mxfp4-dspark-dcp16
+        name: Kimi K3 MXFP4 DSpark DCP16 via LLMConduit Chat
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [minimal, low, medium, high, xhigh, max]
+          defaultLevel: high
+        input: [text, image]
+        supportsTools: true
+        contextWindow: 1000000
+        maxTokens: 200000
+        cost:
+          input: 0
+          output: 0
+          cacheRead: 0
+          cacheWrite: 0
+        compat:
+          supportsReasoningEffort: true
+          thinkingFormat: zai
+          reasoningContentField: reasoning_content
+          requiresReasoningContentForToolCalls: true
+          allowsSyntheticReasoningContentForToolCalls: false
+          requiresAssistantContentForToolCalls: true
+          supportsStrictMode: false
+          toolStrictMode: none

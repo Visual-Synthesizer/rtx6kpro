@@ -1,0 +1,71 @@
+{
+  "schema": "kimi-k3-production-qualification-v1",
+  "status": "qualified",
+  "hardware": {
+    "gpu_count": 16,
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "topology": "TP16/DCP16"
+  },
+  "target": {
+    "checkpoint": "moonshotai/Kimi-K3",
+    "revision": "2496450e92e425c886db095102a52a6682ca3970",
+    "routed_expert_format": "MXFP4",
+    "activation_dtype": "BF16",
+    "kv_cache_dtype": "FP8",
+    "max_model_len": 1000000,
+    "physical_kv_tokens": 1033126
+  },
+  "draft": {
+    "checkpoint": "Inferact/Kimi-K3-DSpark",
+    "revision": "cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "speculative_tokens": 7
+  },
+  "runtime_image": {
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm60141a0-b12x6b49020-cu133-torch213-20260817-r1",
+    "digest": "sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6",
+    "vllm_tree": "60141a0a953e787bcecc6b69d5d15a1af1a50eee",
+    "b12x_tree": "6b49020b7645f6e425ef7f838f1069b0e87f381c",
+    "lmcache_tree": "7641f795bae0d01dcff97dd7a7325bd05209b8cb"
+  },
+  "llmconduit_image": {
+    "name": "voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3",
+    "digest": "sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d",
+    "source_commit": "5e07aec44f48d8ac5ac64749ce1884083631fb5f"
+  },
+  "startup": {
+    "target_weight_load_seconds": 153.97,
+    "complete_model_load_seconds": 168.04,
+    "model_allocation_gib_per_gpu": 90.48,
+    "graph_capture_seconds": 48,
+    "graph_allocation_gib_per_gpu": 0.29
+  },
+  "decode": {
+    "prompt_tokens": 256,
+    "completion_tokens": 1024,
+    "measured_runs": 5,
+    "median_tokens_per_second": 121.05981503360982,
+    "median_target_cycles_per_second": 31.029038483696837,
+    "median_emitted_tokens_per_target_cycle": 3.9122137404580153,
+    "median_acceptance_rate": 0.41603053435114506
+  },
+  "lmcache": {
+    "process_has_cuda_visibility": false,
+    "transfer_mode": "engine_driven",
+    "chunk_tokens": 12288,
+    "prompt_24576_restored_tokens": 12288,
+    "prompt_49152_restored_tokens": 36864
+  },
+  "interfaces": {
+    "vllm_reasoning": "qualified",
+    "vllm_required_tool_call": "qualified",
+    "vllm_native_vision": "qualified",
+    "llmconduit_chat": "qualified",
+    "llmconduit_responses": "qualified",
+    "llmconduit_anthropic": "qualified",
+    "llmconduit_streaming": "qualified",
+    "omp_version": "17.3.5",
+    "omp_reasoning_controls": "qualified",
+    "omp_tool_loop": "qualified",
+    "omp_native_vision": "qualified"
+  }
+}

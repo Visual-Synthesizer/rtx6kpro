@@ -1,0 +1,286 @@
+# Kimi-K3 Official MXFP4 Production Deployment
+
+Status: **qualified**.
+
+This document specifies a reproducible Kimi-K3 service on 16 NVIDIA RTX PRO
+6000 Blackwell Workstation Edition GPUs. The service combines the official
+`moonshotai/Kimi-K3` checkpoint, Inferact DSpark speculative decoding,
+TP16/DCP16, native image input, structured tool calls, CPU-only LMCache,
+LLMConduit, and Oh My Pi.
+
+The machine-readable result is
+[`validation/production-dspark-lmcache-20260817.json`](validation/production-dspark-lmcache-20260817.json).
+
+## Deployment Contract
+
+| Property | Qualified value |
+|---|---|
+| Target checkpoint | `moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970` |
+| Draft checkpoint | `Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6` |
+| Topology | TP16/DCP16 on 16 GPUs |
+| Served model | `Kimi-K3-MXFP4-DSpark7-DCP16-1M` |
+| Target KV cache | FP8, 1,033,126 physical tokens |
+| Maximum request length | 1,000,000 tokens |
+| Speculative depth | 7 draft tokens |
+| vLLM endpoint | `http://127.0.0.1:8001/v1` |
+| LMCache control and metrics | `http://127.0.0.1:8100` |
+| LLMConduit endpoint | `http://127.0.0.1:8003` |
+| CUDA / PyTorch / NCCL | 13.3 / 2.13.0 / 2.31.2 |
+| Weight loader | InstantTensor 0.1.9 |
+
+The target is not a three-bit hybrid checkpoint. Routed experts remain in the
+official checkpoint's MXFP4 representation. At load time, weight-only MXFP8 is
+applied to the target KDA `q_proj`, `k_proj`, `v_proj`, `b_proj`, and `f_a_proj`
+linears and to vision-tower and multimodal-projector linears. Activations remain
+BF16. The DSpark draft uses weight-only MXFP8 except for
+`fused_qkv_a_proj`, which remains BF16. The target and draft KV caches use FP8.
+
+Native vision is part of the qualified allocation. Vision and projector
+weights are loaded before deferred target tensors and remain resident on the
+GPUs after online MXFP8 conversion. The physical KV-cache measurement of
+1,033,126 tokens therefore already includes vision memory.
+
+## Immutable Artifacts
+
+| Artifact | Identifier |
+|---|---|
+| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm60141a0-b12x6b49020-cu133-torch213-20260817-r1` |
+| vLLM runtime digest | `sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6` |
+| vLLM source tree | `60141a0a953e787bcecc6b69d5d15a1af1a50eee` |
+| B12X source tree | `6b49020b7645f6e425ef7f838f1069b0e87f381c` |
+| LMCache source tree | `7641f795bae0d01dcff97dd7a7325bd05209b8cb` |
+| Docker recipe revision used by the registry image | `90997a77b8e0c831bc8ec86f61c5a14b9d4279ae` |
+| Docker review revision with qualification tests | `9db7bd5dbb645e29e69fdfc7a0684da45f61d8e6` |
+| LLMConduit image | `voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3` |
+| LLMConduit digest | `sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d` |
+| LLMConduit source revision | `5e07aec44f48d8ac5ac64749ce1884083631fb5f` |
+
+The source locks are stored in
+[`blackwell-llm-docker#22`](https://github.com/local-inference-lab/blackwell-llm-docker/pull/22)
+under `patches/releases/kimi-k3-production-lmcache-r2/`. Each lock records the
+repository base, pull-request revisions, patch hash, and resulting Git tree.
+The LLMConduit reasoning-control change is
+[`llmconduit#37`](https://github.com/local-inference-lab/llmconduit/pull/37).
+The maintainer merge map is
+[`rtx6kpro#66`](https://github.com/local-inference-lab/rtx6kpro/issues/66).
+
+## Start vLLM, DSpark, Vision, and LMCache
+
+The Hugging Face cache must contain both pinned checkpoint snapshots at the
+paths used by the launcher. Pulling by digest provides the byte-identical
+qualified image.
+
+```bash
+docker pull \
+  voipmonitor/vllm@sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6
+
+mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-60141a0
+
+docker run -d \
+  --name kimi-k3-production-dspark-lmcache-60141a0 \
+  --restart unless-stopped \
+  --gpus all \
+  --network host \
+  --ipc=host \
+  --ulimit memlock=-1 \
+  --security-opt label=disable \
+  -e LMCACHE_L1_INIT_GB=0 \
+  -e VLLM_DISABLED_KERNELS=MarlinFP8ScaledMMLinearKernel \
+  -e HOST=127.0.0.1 \
+  -e PORT=8001 \
+  -e VLLM_SERVER_DEV_MODE=1 \
+  -e INSTANTTENSOR_BUFFER_SIZE=8388608 \
+  -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
+  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-60141a0:/cache/jit:rw \
+  voipmonitor/vllm@sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6
+```
+
+The image entrypoint is
+`/usr/local/bin/serve-kimi-k3-production-dspark-ii`. It starts one LMCache
+server without CUDA visibility and then starts the 16 vLLM workers. LMCache
+uses engine-driven GPU transfers: the existing vLLM workers gather and scatter
+cache pages, while the standalone cache process owns only CPU memory. The
+qualified RAM tier has a 32 GiB limit, zero initial allocation, 12,288-token
+objects, and no disk tier.
+
+Wait for readiness and verify the reported model:
+
+```bash
+docker logs -f kimi-k3-production-dspark-lmcache-60141a0
+curl -fsS http://127.0.0.1:8001/v1/models | jq .
+curl -fsS http://127.0.0.1:8100/healthcheck
+```
+
+Startup on the qualification host read the target weights in 153.97 seconds.
+Complete model loading took approximately 168.04 seconds and allocated
+90.48 GiB per GPU. CUDA graph capture took 48 seconds and 0.29 GiB per GPU.
+
+## Start LLMConduit
+
+Copy [`configs/llmconduit-production.yaml`](configs/llmconduit-production.yaml)
+to a stable host path. The qualified host uses
+`/root/vllm/kimi/llmconduit-kimi-k3-production.yaml`.
+
+```bash
+docker pull \
+  voipmonitor/llmconduit@sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d
+
+docker run -d \
+  --name llmconduit-kimi-k3-production \
+  --restart unless-stopped \
+  --network host \
+  -e LLMCONDUIT_BIND_ADDR=0.0.0.0:8003 \
+  -e RUST_LOG=info \
+  -v /root/vllm/kimi/llmconduit-kimi-k3-production.yaml:/config/config.yaml:ro \
+  voipmonitor/llmconduit@sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d \
+  start --config /config/config.yaml
+
+curl -fsS http://127.0.0.1:8003/health
+curl -fsS http://127.0.0.1:8003/v1/models | jq .
+```
+
+LLMConduit preserves Kimi reasoning internally for parser correctness. Client
+controls determine whether parsed reasoning is returned:
+
+| Requested level | Kimi backend level | Returned reasoning |
+|---|---|---|
+| `none` | internal thinking remains enabled | suppressed |
+| `minimal`, `low`, `medium`, `high` | `high` | preserved |
+| `xhigh`, `max` | `max` | preserved |
+| omitted | `high` | preserved |
+
+The mapping is qualified for OpenAI Chat Completions, OpenAI Responses,
+Anthropic Messages, and streaming responses. Required tool calls and native
+image payloads pass through without flattening.
+
+An OpenAI Chat Completions request can select the returned reasoning channel:
+
+```bash
+curl -fsS http://127.0.0.1:8003/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "Kimi-K3-MXFP4-DSpark7-DCP16-1M",
+    "messages": [{"role": "user", "content": "Return the number after 41."}],
+    "reasoning_effort": "none",
+    "max_tokens": 64
+  }' | jq .
+```
+
+Replace `none` with `high` or `max` to preserve `reasoning_content` in the
+response.
+
+## Configure Oh My Pi
+
+Status: **qualified** with `omp/17.3.5`.
+
+Install the two repository configurations as the Oh My Pi agent configuration:
+
+```bash
+mkdir -p /root/.omp/agent
+cp models/kimi-k3/configs/omp-models.yml /root/.omp/agent/models.yml
+cp models/kimi-k3/configs/omp-config.yml /root/.omp/agent/config.yml
+
+omp models --json
+```
+
+The alias `production-mxfp4-dspark-dcp16` intentionally uses OMP's Z.AI
+thinking wire format. It sends an explicit disabled-thinking object for
+`--thinking off` and sends `reasoning_effort` for enabled levels.
+
+```bash
+omp --thinking off --no-session --no-tools --no-extensions --no-skills \
+  --no-rules -p 'Reply with exactly READY.'
+
+omp --thinking high --print-thoughts --no-session --no-tools \
+  --no-extensions --no-skills --no-rules \
+  -p 'Explain why 2 + 2 equals 4.'
+
+omp --thinking high --print-thoughts --no-session --no-tools \
+  --no-extensions --no-skills --no-rules \
+  -p @/path/to/image.png 'Describe the supplied image.'
+```
+
+Qualification verified model discovery, hidden reasoning at `off`, preserved
+reasoning at `high` and `max`, a two-turn file-read tool loop, native PNG
+vision, and the exact wire controls emitted by OMP.
+
+## Measured Behavior
+
+The normalized decode protocol used one request, 256 stored input tokens,
+1,024 generated tokens, greedy sampling, one seed, two unrecorded warmups, and
+five measured runs.
+
+| Metric | Median |
+|---|---:|
+| Emitted decode throughput | 121.06 tok/s |
+| Target cycles | 31.03 cycles/s |
+| Emitted tokens per target cycle | 3.912 |
+| Draft acceptance | 0.4160 |
+
+External LMCache restore was tested after clearing the vLLM-local prefix cache.
+A 24,576-token prompt restored 12,288 tokens from LMCache. A 49,152-token
+prompt restored 36,864 tokens. Both restored requests produced the same output
+token as their cold controls. The live process inventory contained the 16 vLLM
+GPU workers and no LMCache GPU process.
+
+The direct vLLM API passed Kimi reasoning parsing, a required calculator tool
+call, and native vision. LLMConduit passed Chat, Responses, Anthropic,
+streaming, tool, and vision qualification. Oh My Pi passed reasoning, tool, and
+vision qualification through LLMConduit.
+
+Host-local raw receipts are stored under:
+
+```text
+/mnt/luke/kimi-k3-runs/kimi-k3-production-lmcache-immutable-20260817
+```
+
+## Comparison Entry Points
+
+The runtime image also contains these entrypoints:
+
+| Entrypoint | Behavior | Status in the immutable production image |
+|---|---|---|
+| `/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii` | Official target without speculative decoding | implemented; language-only and without LMCache |
+| `/usr/local/bin/serve-kimi-k3-full-mxfp4-dspark-ii` | Official target with Inferact DSpark | implemented; production wrapper adds vision and LMCache |
+| `/usr/local/bin/serve-kimi-k3-full-mxfp4-dflash-ii` | Official target with modal-labs DFlash | implemented; language-only and without LMCache |
+
+Only `/usr/local/bin/serve-kimi-k3-production-dspark-ii` has the complete
+vision, LMCache, LLMConduit, and Oh My Pi qualification described by this
+document. The comparison entrypoints must use separate writable `/cache/jit`
+directories because their CUDA graph shapes differ.
+
+## Rebuild the Runtime Image
+
+Pulling by digest is required for byte identity. Rebuilding uses the release
+locks and verifies the resulting source trees before compiling:
+
+```bash
+git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
+cd blackwell-llm-docker
+git checkout 9db7bd5dbb645e29e69fdfc7a0684da45f61d8e6
+
+IMAGE=voipmonitor/vllm:kimi-k3-production-local \
+RELEASE_DATE=20260817 \
+REVISION=r1 \
+./build-kimi-k3-qsrt-tp16-runtime.sh
+```
+
+The builder starts from the pinned CUDA 13.3 and PyTorch 2.13 base image,
+checks all three integration locks, builds native extensions against the same
+ABI, validates required launchers and imports, and runs source-composition
+tests. Compiler metadata can produce a different Docker digest even when the
+verified source trees match.
+
+## Operational Limits
+
+- The qualified topology is TP16/DCP16 on 16 RTX PRO 6000 Blackwell GPUs.
+- The scheduler permits one active sequence. Parallel request throughput has
+  not been qualified for the vision-and-LMCache allocation.
+- One image is permitted per request. Image preprocessing is bounded to
+  40,960 input patches and 512 patches on one side.
+- The qualified LMCache tier is CPU RAM only. The launcher implements a
+  filesystem tier, but that tier is not part of this qualification.
+- A host-local proxy exposes port 8000 on the qualification machine. The vLLM
+  container binds port 8001; port 8000 is not created by the image.
+- LLMConduit rewrites a `developer` role to `system` for the Kimi template and
+  rejects unrecognized roles.
