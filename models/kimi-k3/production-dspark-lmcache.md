@@ -1,6 +1,7 @@
 # Kimi-K3 Official MXFP4 Production Deployment
 
-Status: **qualified**.
+Status: **qualified for short-context behavior in the immutable image;
+long-context use requires vLLM #418**.
 
 This document specifies a reproducible Kimi-K3 service on 16 NVIDIA RTX PRO
 6000 Blackwell Workstation Edition GPUs. The service combines the official
@@ -20,7 +21,8 @@ The machine-readable result is
 | Topology | TP16/DCP16 on 16 GPUs |
 | Served model | `Kimi-K3-MXFP4-DSpark7-DCP16-1M` |
 | Target KV cache | FP8, 1,033,126 physical tokens |
-| Maximum request length | 1,000,000 tokens |
+| Configured maximum request length | 1,000,000 tokens |
+| Longest qualified prompt with vLLM #418 | 500,224 tokens |
 | Speculative depth | 7 draft tokens |
 | vLLM endpoint | `http://127.0.0.1:8001/v1` |
 | LMCache control and metrics | `http://127.0.0.1:8100` |
@@ -54,6 +56,7 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3` |
 | LLMConduit digest | `sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d` |
 | LLMConduit source revision | `5e07aec44f48d8ac5ac64749ce1884083631fb5f` |
+| Long-context cache correction | [`vLLM#418`](https://github.com/local-inference-lab/vllm/pull/418), commit `6b18a8a767f406f08a519757ca6d5ef118b18296` |
 
 The source locks are stored in
 [`blackwell-llm-docker#22`](https://github.com/local-inference-lab/blackwell-llm-docker/pull/22)
@@ -64,11 +67,41 @@ The LLMConduit reasoning-control change is
 The maintainer merge map is
 [`rtx6kpro#75`](https://github.com/local-inference-lab/rtx6kpro/issues/75).
 
+## Long-Context Cache Requirement
+
+The immutable runtime digest in this document does not contain vLLM #418.
+Under DCP16 it sizes recurrent KDA block tables as if token positions were
+sharded across 16 ranks, while `MambaManager` indexes recurrent state at
+absolute 768-token boundaries. A no-weight cache-topology reproducer reaches
+the first invalid table column at 63,744 tokens. The resulting invalid physical
+block ID can address an MLA cache page and make target logits nonfinite.
+
+vLLM #418 defines recurrent state as one DCP token-position shard. TP may still
+partition state feature dimensions. The correction does not change attention
+DCP sharding, model weights, physical KV-cache allocation, or checkpoint
+quantization. It adds approximately 58.6 KiB of worker block-table storage per
+rank for a 1,000,000-token profile.
+
+Qualification with the vLLM #418 source overlay produced these results:
+
+- the no-weight 17-group cache reproducer completed 1,000,000 tokens in 1,302
+  allocation steps with unique physical-page ownership;
+- official Kimi-K3 MXFP4 with Inferact DSpark K7 on TP16/DCP16 completed a
+  500,224-token prefill in 1,258.884 seconds with finite output;
+- a subsequent 128-token decode on the same process produced 640 finite
+  top-logprob values and zero nonfinite values.
+
+Do not use the immutable image by digest for prompts of 63,744 tokens or more.
+The running qualification container uses the vLLM #418 source overlay. A
+replacement immutable image must incorporate #418 before it can claim the
+configured 1,000,000-token request length.
+
 ## Start vLLM, DSpark, Vision, and LMCache
 
 The Hugging Face cache must contain both pinned checkpoint snapshots at the
 paths used by the launcher. Pulling by digest provides the byte-identical
-qualified image.
+short-context image; it does not include the long-context correction described
+above.
 
 ```bash
 docker pull \
@@ -273,11 +306,15 @@ The builder starts from the pinned CUDA 13.3 and PyTorch 2.13 base image,
 checks all three integration locks, builds native extensions against the same
 ABI, validates required launchers and imports, and runs source-composition
 tests. Compiler metadata can produce a different Docker digest even when the
-verified source trees match.
+verified source trees match. Revision `26642da52049a41a25e425c630f94de113ea9e6a`
+reproduces the immutable short-context image and does not include vLLM #418.
 
 ## Operational Limits
 
 - The qualified topology is TP16/DCP16 on 16 RTX PRO 6000 Blackwell GPUs.
+- The immutable image is unsupported at prompt lengths of 63,744 tokens or
+  more. vLLM #418 is required for long-context operation; 500,224 input tokens
+  are model-qualified and 1,000,000 token positions are allocation-qualified.
 - The scheduler permits one active sequence. Parallel request throughput has
   not been qualified for the vision-and-LMCache allocation.
 - One image is permitted per request. Image preprocessing is bounded to
