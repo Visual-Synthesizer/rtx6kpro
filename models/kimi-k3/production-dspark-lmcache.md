@@ -44,25 +44,24 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 
 | Artifact | Identifier |
 |---|---|
-| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm60141a0-b12x6b49020-cu133-torch213-20260817-r1` |
-| vLLM runtime digest | `sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6` |
-| vLLM source tree | `60141a0a953e787bcecc6b69d5d15a1af1a50eee` |
-| B12X source tree | `6b49020b7645f6e425ef7f838f1069b0e87f381c` |
-| LMCache source tree | `7641f795bae0d01dcff97dd7a7325bd05209b8cb` |
-| Docker recipe revision used by the registry image | `90997a77b8e0c831bc8ec86f61c5a14b9d4279ae` |
-| Docker review revision with qualification tests | `9db7bd5dbb645e29e69fdfc7a0684da45f61d8e6` |
+| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllmdf13924-b12xec6edd9-cu133-torch213-20260817-r6` |
+| vLLM runtime digest | `sha256:ffb25774eaa90850b4cacfb88ed9e55072818e99bad977f1315c7118e7a730b2` |
+| vLLM source tree | `df13924cb12279f8144019800fad7e27640acaea` |
+| B12X source tree | `ec6edd9da4687f83519fd37bd7322ea0800f0ace` |
+| LMCache source tree | `e045d729bc5c4c63a40e13d032f42923de97812f` |
+| Docker recipe merge revision | `26642da52049a41a25e425c630f94de113ea9e6a` |
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3` |
 | LLMConduit digest | `sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d` |
 | LLMConduit source revision | `5e07aec44f48d8ac5ac64749ce1884083631fb5f` |
 
 The source locks are stored in
 [`blackwell-llm-docker#22`](https://github.com/local-inference-lab/blackwell-llm-docker/pull/22)
-under `patches/releases/kimi-k3-production-lmcache-r2/`. Each lock records the
+under `patches/releases/kimi-k3-production-lmcache-r6/`. Each lock records the
 repository base, pull-request revisions, patch hash, and resulting Git tree.
 The LLMConduit reasoning-control change is
 [`llmconduit#37`](https://github.com/local-inference-lab/llmconduit/pull/37).
 The maintainer merge map is
-[`rtx6kpro#66`](https://github.com/local-inference-lab/rtx6kpro/issues/66).
+[`rtx6kpro#75`](https://github.com/local-inference-lab/rtx6kpro/issues/75).
 
 ## Start vLLM, DSpark, Vision, and LMCache
 
@@ -72,12 +71,12 @@ qualified image.
 
 ```bash
 docker pull \
-  voipmonitor/vllm@sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6
+  voipmonitor/vllm@sha256:ffb25774eaa90850b4cacfb88ed9e55072818e99bad977f1315c7118e7a730b2
 
-mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-60141a0
+mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-df13924
 
 docker run -d \
-  --name kimi-k3-production-dspark-lmcache-60141a0 \
+  --name kimi-k3-production-dspark-lmcache-df13924 \
   --restart unless-stopped \
   --gpus all \
   --network host \
@@ -91,8 +90,8 @@ docker run -d \
   -e VLLM_SERVER_DEV_MODE=1 \
   -e INSTANTTENSOR_BUFFER_SIZE=8388608 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
-  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-60141a0:/cache/jit:rw \
-  voipmonitor/vllm@sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6
+  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-df13924:/cache/jit:rw \
+  voipmonitor/vllm@sha256:ffb25774eaa90850b4cacfb88ed9e55072818e99bad977f1315c7118e7a730b2
 ```
 
 The image entrypoint is
@@ -106,13 +105,13 @@ objects, and no disk tier.
 Wait for readiness and verify the reported model:
 
 ```bash
-docker logs -f kimi-k3-production-dspark-lmcache-60141a0
+docker logs -f kimi-k3-production-dspark-lmcache-df13924
 curl -fsS http://127.0.0.1:8001/v1/models | jq .
 curl -fsS http://127.0.0.1:8100/healthcheck
 ```
 
-Startup on the qualification host read the target weights in 153.97 seconds.
-Complete model loading took approximately 168.04 seconds and allocated
+Startup on the qualification host read the target weights in 154.33 seconds.
+Complete model loading took approximately 168.5 seconds and allocated
 90.48 GiB per GPU. CUDA graph capture took 48 seconds and 0.29 GiB per GPU.
 
 ## Start LLMConduit
@@ -208,14 +207,18 @@ vision, and the exact wire controls emitted by OMP.
 
 The normalized decode protocol used one request, 256 stored input tokens,
 1,024 generated tokens, greedy sampling, one seed, two unrecorded warmups, and
-five measured runs.
+eight measured runs.
 
 | Metric | Median |
 |---|---:|
-| Emitted decode throughput | 121.06 tok/s |
-| Target cycles | 31.03 cycles/s |
-| Emitted tokens per target cycle | 3.912 |
-| Draft acceptance | 0.4160 |
+| Emitted decode throughput | 118.77 tok/s |
+| Target cycles | 31.43 cycles/s |
+| Emitted tokens per target cycle | 3.781 |
+| Draft acceptance | 0.3973 |
+
+Emitted throughput varies with draft acceptance. Target-cycle throughput is
+the acceptance-independent runtime regression control; the qualified image
+measures 31.43 target cycles/s.
 
 External LMCache restore was tested after clearing the vLLM-local prefix cache.
 A 24,576-token prompt restored 12,288 tokens from LMCache. A 49,152-token
@@ -231,7 +234,7 @@ vision qualification through LLMConduit.
 Host-local raw receipts are stored under:
 
 ```text
-/mnt/luke/kimi-k3-runs/kimi-k3-production-lmcache-immutable-20260817
+/mnt/luke/kimi-k3-runs/qualification-df13924-ec6edd9-20260817
 ```
 
 ## Comparison Entry Points
@@ -240,9 +243,9 @@ The runtime image also contains these entrypoints:
 
 | Entrypoint | Behavior | Status in the immutable production image |
 |---|---|---|
-| `/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii` | Official target without speculative decoding | implemented; language-only and without LMCache |
-| `/usr/local/bin/serve-kimi-k3-full-mxfp4-dspark-ii` | Official target with Inferact DSpark | implemented; production wrapper adds vision and LMCache |
-| `/usr/local/bin/serve-kimi-k3-full-mxfp4-dflash-ii` | Official target with modal-labs DFlash | implemented; language-only and without LMCache |
+| `/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii` | Official target without speculative decoding | qualified at 56.149 tok/s with 1,460,937 physical KV tokens; language-only and without LMCache |
+| `/usr/local/bin/serve-kimi-k3-full-mxfp4-dspark-ii` | Official target with Inferact DSpark | qualified at 118.773 emitted tok/s; the production wrapper adds vision and LMCache |
+| `/usr/local/bin/serve-kimi-k3-full-mxfp4-dflash-ii` | Official target with modal-labs DFlash | qualified at 90.962 emitted tok/s with 1,048,576 physical KV tokens; language-only and without LMCache |
 
 Only `/usr/local/bin/serve-kimi-k3-production-dspark-ii` has the complete
 vision, LMCache, LLMConduit, and Oh My Pi qualification described by this
@@ -257,11 +260,11 @@ locks and verifies the resulting source trees before compiling:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 9db7bd5dbb645e29e69fdfc7a0684da45f61d8e6
+git checkout 26642da52049a41a25e425c630f94de113ea9e6a
 
 IMAGE=voipmonitor/vllm:kimi-k3-production-local \
 RELEASE_DATE=20260817 \
-REVISION=r1 \
+REVISION=r6 \
 ./build-kimi-k3-qsrt-tp16-runtime.sh
 ```
 

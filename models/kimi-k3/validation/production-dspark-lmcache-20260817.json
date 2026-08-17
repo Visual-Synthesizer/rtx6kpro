@@ -1,5 +1,5 @@
 {
-  "schema": "kimi-k3-production-qualification-v1",
+  "schema": "kimi-k3-production-qualification-v2",
   "status": "qualified",
   "hardware": {
     "gpu_count": 16,
@@ -21,11 +21,12 @@
     "speculative_tokens": 7
   },
   "runtime_image": {
-    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm60141a0-b12x6b49020-cu133-torch213-20260817-r1",
-    "digest": "sha256:ffd7e36318bd3beb0b219a08b5f06e05404167883ffef775eb5298ea627e7de6",
-    "vllm_tree": "60141a0a953e787bcecc6b69d5d15a1af1a50eee",
-    "b12x_tree": "6b49020b7645f6e425ef7f838f1069b0e87f381c",
-    "lmcache_tree": "7641f795bae0d01dcff97dd7a7325bd05209b8cb"
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllmdf13924-b12xec6edd9-cu133-torch213-20260817-r6",
+    "digest": "sha256:ffb25774eaa90850b4cacfb88ed9e55072818e99bad977f1315c7118e7a730b2",
+    "vllm_tree": "df13924cb12279f8144019800fad7e27640acaea",
+    "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
+    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+    "docker_merge_commit": "26642da52049a41a25e425c630f94de113ea9e6a"
   },
   "llmconduit_image": {
     "name": "voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3",
@@ -33,27 +34,54 @@
     "source_commit": "5e07aec44f48d8ac5ac64749ce1884083631fb5f"
   },
   "startup": {
-    "target_weight_load_seconds": 153.97,
-    "complete_model_load_seconds": 168.04,
+    "target_weight_load_seconds": 154.33,
+    "complete_model_load_seconds": 168.5,
     "model_allocation_gib_per_gpu": 90.48,
     "graph_capture_seconds": 48,
     "graph_allocation_gib_per_gpu": 0.29
   },
-  "decode": {
+  "decode_protocol": {
     "prompt_tokens": 256,
     "completion_tokens": 1024,
-    "measured_runs": 5,
-    "median_tokens_per_second": 121.05981503360982,
-    "median_target_cycles_per_second": 31.029038483696837,
-    "median_emitted_tokens_per_target_cycle": 3.9122137404580153,
-    "median_acceptance_rate": 0.41603053435114506
+    "measured_runs": 8,
+    "sampling_temperature": 0,
+    "active_requests": 1
+  },
+  "decode_profiles": {
+    "official_mxfp4_nospec": {
+      "served_model": "Kimi-K3-MXFP4-DCP16-1M",
+      "physical_kv_tokens": 1460937,
+      "median_tokens_per_second": 56.14912083764279,
+      "minimum_tokens_per_second": 56.02297342232063,
+      "maximum_tokens_per_second": 56.18418082406845
+    },
+    "official_mxfp4_inferact_dspark_k7": {
+      "served_model": "Kimi-K3-MXFP4-DSpark7-DCP16-1M",
+      "physical_kv_tokens": 1033126,
+      "median_tokens_per_second": 118.77253245776615,
+      "median_target_cycles_per_second": 31.429715523226186,
+      "median_emitted_tokens_per_target_cycle": 3.781307868023735,
+      "median_acceptance_rate": 0.39732969543196217
+    },
+    "official_mxfp4_modal_dflash_k7": {
+      "served_model": "Kimi-K3-MXFP4-DFlash-DCP16-1M",
+      "physical_kv_tokens": 1048576,
+      "median_tokens_per_second": 90.96204650828257,
+      "median_target_cycles_per_second": 27.846829959139434,
+      "median_emitted_tokens_per_target_cycle": 3.268547352995054,
+      "median_acceptance_rate": 0.32407819328500775
+    }
   },
   "lmcache": {
     "process_has_cuda_visibility": false,
     "transfer_mode": "engine_driven",
     "chunk_tokens": 12288,
     "prompt_24576_restored_tokens": 12288,
-    "prompt_49152_restored_tokens": 36864
+    "prompt_24576_cold_seconds": 14.303850864060223,
+    "prompt_24576_restored_seconds": 8.297203947906382,
+    "prompt_49152_restored_tokens": 36864,
+    "prompt_49152_cold_seconds": 28.25942098593805,
+    "prompt_49152_restored_seconds": 10.566911276080646
   },
   "interfaces": {
     "vllm_reasoning": "qualified",
@@ -67,5 +95,6 @@
     "omp_reasoning_controls": "qualified",
     "omp_tool_loop": "qualified",
     "omp_native_vision": "qualified"
-  }
+  },
+  "host_receipts": "/mnt/luke/kimi-k3-runs/qualification-df13924-ec6edd9-20260817"
 }
