@@ -151,6 +151,7 @@ def main() -> None:
     event_count = 0
     done = False
     output_text: list[str] = []
+    stream_errors: list[dict[str, Any]] = []
     raw_parts: list[bytes] = []
     for line in response.iter_lines():
         raw_parts.append(line + b"\n")
@@ -162,6 +163,8 @@ def main() -> None:
             continue
         event = json.loads(data)
         event_count += 1
+        if isinstance(event.get("error"), dict):
+            stream_errors.append(event["error"])
         output_text.extend(iter_strings(event.get("choices", [])))
 
     raw = b"".join(raw_parts)
@@ -175,6 +178,8 @@ def main() -> None:
         "http_status": response.status_code,
         "event_count": event_count,
         "done_event": done,
+        "stream_error_count": len(stream_errors),
+        "stream_errors": stream_errors,
         "stream_bytes": len(raw),
         "control_marker_counts": marker_counts,
         "control_marker_free": not any(marker_counts.values()),
@@ -189,6 +194,18 @@ def main() -> None:
         encoding="utf-8",
     )
     print(json.dumps(receipt, ensure_ascii=False), flush=True)
+    failures: list[str] = []
+    if not done:
+        failures.append("stream ended without [DONE]")
+    if stream_errors:
+        failures.append(f"stream contained {len(stream_errors)} error event(s)")
+    leaked_markers = [marker for marker, count in marker_counts.items() if count]
+    if leaked_markers:
+        failures.append(
+            "stream exposed Kimi control markers: " + ", ".join(leaked_markers)
+        )
+    if failures:
+        raise SystemExit("; ".join(failures))
 
 
 if __name__ == "__main__":

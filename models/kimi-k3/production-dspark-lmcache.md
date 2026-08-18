@@ -8,9 +8,8 @@ This document specifies a reproducible Kimi-K3 service on 16 NVIDIA RTX PRO
 TP16/DCP16, native image input, structured tool calls, CPU-only LMCache,
 LLMConduit, and Oh My Pi.
 
-The machine-readable result for the runtime that includes recurrent-cache and
-reasoning-stream corrections is
-[`validation/production-dspark-lmcache-mamba-dcp-protocol-20260818.json`](validation/production-dspark-lmcache-mamba-dcp-protocol-20260818.json).
+The machine-readable result for the source-locked runtime is
+[`validation/production-dspark-lmcache-interleaved-query-20260818.json`](validation/production-dspark-lmcache-interleaved-query-20260818.json).
 
 ## Deployment Contract
 
@@ -23,6 +22,7 @@ reasoning-stream corrections is
 | Target KV cache | FP8, 1,033,126 physical tokens |
 | Configured maximum request length | 1,000,000 tokens |
 | Longest model-qualified prompt with vLLM #418 | 500,224 tokens |
+| Long-prefill cache-index stress prompt | 520,002 tokens plus 64 generated tokens |
 | Images per prompt | 5 |
 | Speculative depth | 7 draft tokens |
 | vLLM endpoint | `http://127.0.0.1:8001/v1` |
@@ -47,12 +47,12 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 
 | Artifact | Identifier |
 |---|---|
-| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm449ee26-b12xec6edd9-cu133-torch213-20260818-hybrid-kv-failure` |
-| vLLM runtime digest | `sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a` |
-| vLLM source tree | `449ee263cf0859cc64ac3ef4e220b189c1f667eb` |
+| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllmf67105d-b12xec6edd9-cu133-torch213-20260818-interleaved-query` |
+| vLLM runtime digest | `sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab` |
+| vLLM source tree | `f67105dd807842a3c1f1fc07931e1e4dadc0b68c` |
 | B12X source tree | `ec6edd9da4687f83519fd37bd7322ea0800f0ace` |
 | LMCache source tree | `e045d729bc5c4c63a40e13d032f42923de97812f` |
-| Docker image recipe revision | `f3140c98b683dcfee0c6b8672692e3ccc2b9804e` |
+| Docker image recipe revision | `0e22e5f19c56e2dbe5adaab159db3c86b080598d` |
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-a628f0a-20260817-r4` |
 | LLMConduit digest | `sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 | LLMConduit source revision | `a628f0ae61b3362b8c3e571879d55d7ea36de5d2` |
@@ -60,9 +60,10 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 | Long-context cache correction | [`vLLM#418`](https://github.com/local-inference-lab/vllm/pull/418), commit `6b18a8a767f406f08a519757ca6d5ef118b18296` |
 | Kimi stream-parser correction | [`vLLM#419`](https://github.com/local-inference-lab/vllm/pull/419), commit `04a6acfe467f4a208c7231a18fc99faf656d016a` |
 | Hybrid KV-load failure isolation | [`vLLM#422`](https://github.com/local-inference-lab/vllm/pull/422), commit `6bafa633153a44ba1aa54eb7c5bafac248fe68e6` |
+| Interleaved MLA query materialization | [`vLLM#427`](https://github.com/local-inference-lab/vllm/pull/427), commit `0ad95065da12e45c28d585d8c758a87d3a708b1f` |
 
 The source locks are stored at Docker recipe revision
-`f3140c98b683dcfee0c6b8672692e3ccc2b9804e` under
+`0e22e5f19c56e2dbe5adaab159db3c86b080598d` under
 `patches/releases/kimi-k3-production-lmcache-mamba-dcp-protocol/`. Each lock records the
 repository base, pull-request revisions, patch hash, and resulting Git tree.
 The LLMConduit reasoning-control change is
@@ -94,6 +95,27 @@ Validation used the connector scheduler suite and a Kimi-shaped regression:
 - the same 17-group input raises `ValueError: too many values to unpack` when
   executed against the single-group implementation.
 
+## Interleaved MLA Query Contract
+
+Kimi-K3 forms the absorbed MLA NoPE query as a token-major tensor whose local
+head rows are interleaved in storage. For a 14-token TP16 request, the tensor
+has shape `(14, 6, 128)` and stride `(1152, 192, 1)`. Transposing tokens and
+heads produces a non-contiguous `(6, 14, 128)` view. Passing that view directly
+to the cuBLAS batched query-times-`W_UV` operation permits vectorized reads to
+cross the backing allocation boundary. The observed read crossed the boundary
+by 4,608 bytes and produced `CUBLAS_STATUS_INTERNAL_ERROR` when LMCache selected
+PyTorch's native CUDA allocator.
+
+vLLM #427 materializes the head-major query view before the batched matrix
+multiplication. It preserves BF16 arithmetic, output shape, and decode graph
+semantics. It does not add a CUDA extension or change the KDA projection
+quantization.
+
+The immutable image identified above completed the exact 14-token cold
+reproducer and 20 unique cold variants: 21 of 21 requests returned HTTP 200,
+each generated four tokens, and the server reported no Xid, cuBLAS, illegal
+memory access, or nonfinite-output errors.
+
 ## Long-Context Recurrent-Cache Contract
 
 Under DCP16, recurrent KDA state has one token-position shard across the DCP
@@ -123,7 +145,11 @@ these results:
 - target-only execution completed a 520,000-token cache-index stress input with
   21 of 21 finite logprob values in 464.812 seconds. That input repeats a
   captured 140,960-token sequence and validates cache indexing, not coherent
-  long-context language quality.
+  long-context language quality;
+- the source-locked DSpark and LMCache image completed a 520,002-token prompt
+  plus 64 generated tokens in 648.194 seconds with coherent repeated-text
+  output and no CUDA error markers. This validates the packaged speculative
+  runtime and cache indexing, not coherent-document language quality.
 
 One million token positions are allocation-qualified. Natural or
 model-generated inputs are qualified through 500,224 tokens; behavior from
@@ -138,12 +164,12 @@ qualified image.
 
 ```bash
 docker pull \
-  voipmonitor/vllm@sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a
+  voipmonitor/vllm@sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab
 
-mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-449ee26-ec6edd9
+mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-f67105d-ec6edd9
 
 docker run -d \
-  --name kimi-k3-production-mamba-dcp-protocol \
+  --name kimi-k3-production-dspark-lmcache-f67105d \
   --restart unless-stopped \
   --gpus all \
   --network host \
@@ -152,10 +178,9 @@ docker run -d \
   --security-opt label=disable \
   -e HOST=127.0.0.1 \
   -e PORT=8001 \
-  -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
-  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-449ee26-ec6edd9:/cache/jit:rw \
-  voipmonitor/vllm@sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a
+  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-f67105d-ec6edd9:/cache/jit:rw \
+  voipmonitor/vllm@sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab
 ```
 
 The image entrypoint is
@@ -169,14 +194,17 @@ objects, and no disk tier.
 Wait for readiness and verify the reported model:
 
 ```bash
-docker logs -f kimi-k3-production-mamba-dcp-protocol
+docker logs -f kimi-k3-production-dspark-lmcache-f67105d
 curl -fsS http://127.0.0.1:8001/v1/models | jq .
 curl -fsS http://127.0.0.1:8100/healthcheck
 ```
 
-Startup on the qualification host read 1.41 TiB through InstantTensor in
-approximately 160 seconds. Complete model loading took 179.3 seconds and allocated
-90.48 GiB per GPU. CUDA graph capture took 48 seconds and 0.29 GiB per GPU.
+Startup on the qualification host read 1.41 TiB through InstantTensor in 160
+seconds at 9.72 GB/s. Weight loading took 164.24 seconds. Complete model loading
+took 179.51 seconds and allocated 90.52 GiB per GPU. CUDA graph capture took 51
+seconds and 0.29 GiB per GPU. LMCache uses PyTorch's native CUDA allocator;
+the launcher rejects an expandable-segments override because CUDA IPC requires
+native allocations.
 
 ## Start LLMConduit
 
@@ -291,9 +319,13 @@ recurrent-cache and stream-parser corrections measured 31.430 target cycles/s
 under the same protocol. The artifact with those source corrections measures
 31.394 target cycles/s, a 0.11% reduction that is below run-to-run variation.
 
-The source-locked image containing vLLM #422 completed three additional
-1,024-token decode runs at 106.62, 121.91, and 108.28 emitted tok/s; the median
-was 108.28 tok/s. DSpark acceptance varies with generated content, so
+Docker digest
+`sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a`
+completed three additional 1,024-token decode runs at 106.62, 121.91, and
+108.28 emitted tok/s; the median was 108.28 tok/s. The qualified image in this
+document completed one 512-token coding decode at 108.82 tok/s and three
+unique uncached repeats at 114.68, 123.82, and 112.21 tok/s. The uncached-repeat
+median is 114.68 tok/s. DSpark acceptance varies with generated content, so
 target-cycle throughput from the normalized protocol remains the primary
 language-runtime regression control.
 
@@ -324,6 +356,14 @@ redacted input source is `api_23bd0f237db245c3a86ef522ec102e88.json`. The
 receipts are stored under
 `/mnt/luke/kimi-k3-runs/llmconduit-turn-captures/`.
 
+The interleaved-query image also replayed captured OMP turn
+`api_23ce09b17db24c4bbf3996e2c8f46de8.json` through LLMConduit. The model
+consumed 60,922 prompt tokens, returned HTTP 200, emitted 45 SSE events plus
+`[DONE]`, and finished with a syntactically valid `bash` tool call. The stream
+contained no gateway error event and no `<|open|>`, `<|close|>`, or `<|sep|>`
+marker. The receipt and raw stream are stored under
+`/mnt/luke/kimi-k3-runs/interleaved-query-image-qualification-20260818/`.
+
 Replay a redacted capture without image content:
 
 ```bash
@@ -333,6 +373,11 @@ python3 models/kimi-k3/tools/replay-llmconduit-turn-capture.py \
   --output /tmp/replay.sse \
   --receipt /tmp/replay.json
 ```
+
+The replay command exits nonzero for HTTP failures, missing `[DONE]`, XTML
+control-marker leakage, and gateway error objects embedded in an otherwise
+HTTP-200 SSE stream. A short generation that ends normally with
+`finish_reason=length` is not classified as a transport failure.
 
 For a multimodal replay, pass one `--replacement-image-url` for each captured
 image in encounter order. A replacement may be an HTTP URL or a data URI. Use
@@ -355,6 +400,7 @@ Host-local raw receipts are stored under:
 ```text
 /mnt/luke/kimi-k3-runs/qualification-mamba-dcp-protocol-20260818
 /mnt/luke/kimi-k3-runs/reasoning-protocol-fix-20260818
+/mnt/luke/kimi-k3-runs/interleaved-query-image-qualification-20260818
 ```
 
 ## Comparison Entry Points
@@ -380,11 +426,11 @@ locks and verifies the resulting source trees before compiling:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout f3140c98b683dcfee0c6b8672692e3ccc2b9804e
+git checkout 0e22e5f19c56e2dbe5adaab159db3c86b080598d
 
 IMAGE=voipmonitor/vllm:kimi-k3-production-local \
 RELEASE_DATE=20260818 \
-REVISION=hybrid-kv-failure \
+REVISION=interleaved-query \
 ./build-kimi-k3-qsrt-tp16-runtime.sh
 ```
 
@@ -393,15 +439,16 @@ checks all three integration locks, builds native extensions against the same
 ABI, validates required launchers and imports, and runs source-composition
 tests. Compiler metadata can produce a different Docker digest even when the
 verified source trees match. The vLLM lock composes PRs #310, #413, #414,
-#415, #418, #419, and #422 into tree
-`449ee263cf0859cc64ac3ef4e220b189c1f667eb`.
+#415, #418, #419, #422, and #427 into tree
+`f67105dd807842a3c1f1fc07931e1e4dadc0b68c`.
 
 ## Operational Limits
 
 - The qualified topology is TP16/DCP16 on 16 RTX PRO 6000 Blackwell GPUs.
 - Natural or model-generated inputs are qualified through 500,224 tokens.
-  One million token positions are allocation-qualified. Coherent language
-  behavior above 500,224 tokens has not been qualified.
+  A 520,002-token repeated-text prompt is runtime-qualified. One million token
+  positions are allocation-qualified. Coherent-document language behavior
+  above 500,224 tokens has not been qualified.
 - The scheduler permits one active sequence. Parallel request throughput has
   not been qualified for the vision-and-LMCache allocation.
 - Five images are permitted per prompt, matching the OMP 17.3.5 custom-provider

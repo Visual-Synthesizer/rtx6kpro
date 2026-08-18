@@ -1,0 +1,101 @@
+{
+  "schema": "kimi-k3-production-qualification-v6",
+  "status": "qualified",
+  "hardware": {
+    "gpu_count": 16,
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "topology": "TP16/DCP16"
+  },
+  "target": {
+    "checkpoint": "moonshotai/Kimi-K3",
+    "revision": "2496450e92e425c886db095102a52a6682ca3970",
+    "routed_expert_format": "MXFP4",
+    "activation_dtype": "BF16",
+    "kv_cache_dtype": "FP8",
+    "max_model_len": 1000000,
+    "physical_kv_tokens": 1033126,
+    "max_images_per_prompt": 5
+  },
+  "draft": {
+    "checkpoint": "Inferact/Kimi-K3-DSpark",
+    "revision": "cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "speculative_tokens": 7
+  },
+  "runtime_image": {
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllmf67105d-b12xec6edd9-cu133-torch213-20260818-interleaved-query",
+    "digest": "sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab",
+    "local_image_id": "sha256:48e86fdbb5a266948c1db3d1ef1c1b7825e2167c243698941797faf697368c24",
+    "size_bytes": 31058387367,
+    "vllm_tree": "f67105dd807842a3c1f1fc07931e1e4dadc0b68c",
+    "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
+    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+    "docker_image_recipe_commit": "0e22e5f19c56e2dbe5adaab159db3c86b080598d",
+    "vllm_pull_requests": {
+      "310": "f85d3d87e196546eff162c2a61b49aab13f2e625",
+      "413": "3ebc8967dab28a9df103d8c66bff9688525263bc",
+      "414": "990a63debf7201ae5446436a712609fcc8ffaef7",
+      "415": "c805ebd0896ccfbd2569bc0b2a7944d3282106ff",
+      "418": "6b18a8a767f406f08a519757ca6d5ef118b18296",
+      "419": "04a6acfe467f4a208c7231a18fc99faf656d016a",
+      "422": "6bafa633153a44ba1aa54eb7c5bafac248fe68e6",
+      "427": "0ad95065da12e45c28d585d8c758a87d3a708b1f"
+    },
+    "b12x_pull_request_227_revision": "debaafe156c9824396178d53e01e5f15d2a2a04a"
+  },
+  "startup": {
+    "instanttensor_weight_read_tib": 1.41,
+    "instanttensor_weight_read_seconds": 160.0,
+    "instanttensor_read_gigabytes_per_second": 9.72,
+    "weight_load_seconds": 164.24,
+    "complete_model_load_seconds": 179.51,
+    "model_allocation_gib_per_gpu": 90.52,
+    "graph_capture_seconds": 51.0,
+    "graph_allocation_gib_per_gpu": 0.29
+  },
+  "interleaved_query_regression": {
+    "operation": "absorbed MLA query-times-W_UV batched matrix multiplication",
+    "input_shape": [14, 6, 128],
+    "input_stride": [1152, 192, 1],
+    "failure_without_correction": "CUBLAS_STATUS_INTERNAL_ERROR with a 4608-byte allocation-boundary overread",
+    "correction": "materialize the head-major query transpose before the batched matrix multiplication",
+    "arithmetic_dtype": "BF16",
+    "cold_runs": 21,
+    "successful_http_200_runs": 21,
+    "prompt_tokens_per_run": 14,
+    "completion_tokens_per_run": 4,
+    "cuda_error_markers": 0
+  },
+  "coding_decode": {
+    "prompt_tokens": 119,
+    "completion_tokens": 512,
+    "tokens_per_second": [108.82, 114.68, 123.82, 112.21],
+    "unique_uncached_repeat_tokens_per_second": [114.68, 123.82, 112.21],
+    "unique_uncached_repeat_median_tokens_per_second": 114.68,
+    "conclusion": "The source-locked image matches the qualified DSpark coding throughput within run-to-run variation."
+  },
+  "long_context": {
+    "prompt_tokens": 520002,
+    "completion_tokens": 64,
+    "elapsed_seconds": 648.194137,
+    "http_status": 200,
+    "coherent_completion": true,
+    "cuda_error_markers": 0,
+    "semantics": "cache-index and long-prefill stability over repeated coherent text; not coherent-document language-quality qualification"
+  },
+  "llmconduit_replay": {
+    "capture": "api_23ce09b17db24c4bbf3996e2c8f46de8.json",
+    "prompt_tokens": 60922,
+    "maximum_completion_tokens": 1024,
+    "http_status": 200,
+    "sse_event_count": 45,
+    "done_event": true,
+    "stream_error_count": 0,
+    "finish_reason": "tool_calls",
+    "tool_name": "bash",
+    "tool_arguments_valid_json": true,
+    "xtml_control_marker_count": 0,
+    "receipt_sha256": "79efa6ce9b572bb9c86be6f91a7d93275db5aee82d49e7620494ac987733a2c2",
+    "sse_sha256": "6cd903be4c74cb2976fc65fbed213ba96e670d03daf86a03ef51dc60352c8f56"
+  },
+  "host_receipt_root": "/mnt/luke/kimi-k3-runs/interleaved-query-image-qualification-20260818"
+}
