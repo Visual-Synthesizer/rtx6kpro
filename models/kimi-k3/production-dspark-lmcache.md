@@ -23,6 +23,7 @@ reasoning-stream corrections is
 | Target KV cache | FP8, 1,033,126 physical tokens |
 | Configured maximum request length | 1,000,000 tokens |
 | Longest model-qualified prompt with vLLM #418 | 500,224 tokens |
+| Images per prompt | 2 |
 | Speculative depth | 7 draft tokens |
 | vLLM endpoint | `http://127.0.0.1:8001/v1` |
 | LMCache control and metrics | `http://127.0.0.1:8100` |
@@ -46,12 +47,12 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 
 | Artifact | Identifier |
 |---|---|
-| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-mamba-dcp-protocol` |
-| vLLM runtime digest | `sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a` |
+| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-two-image` |
+| vLLM runtime digest | `sha256:3aed14b70f54ea14c9d109e2df04c53df37db69d8182e430c43deba503c705e1` |
 | vLLM source tree | `452bd5c56d7fb64de808d5a111c2272c70674c80` |
 | B12X source tree | `ec6edd9da4687f83519fd37bd7322ea0800f0ace` |
 | LMCache source tree | `e045d729bc5c4c63a40e13d032f42923de97812f` |
-| Docker image recipe revision | `2ed422aa1c8a0a1aee95430962be00caabf93b4a` |
+| Docker image recipe revision | `da2a8be7a7270609786ff1bb06c263c7197556f9` |
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-a628f0a-20260817-r4` |
 | LLMConduit digest | `sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 | LLMConduit source revision | `a628f0ae61b3362b8c3e571879d55d7ea36de5d2` |
@@ -59,7 +60,7 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 | Kimi stream-parser correction | [`vLLM#419`](https://github.com/local-inference-lab/vllm/pull/419), commit `04a6acfe467f4a208c7231a18fc99faf656d016a` |
 
 The source locks are stored at Docker recipe revision
-`2ed422aa1c8a0a1aee95430962be00caabf93b4a` under
+`da2a8be7a7270609786ff1bb06c263c7197556f9` under
 `patches/releases/kimi-k3-production-lmcache-mamba-dcp-protocol/`. Each lock records the
 repository base, pull-request revisions, patch hash, and resulting Git tree.
 The LLMConduit reasoning-control change is
@@ -111,7 +112,7 @@ qualified image.
 
 ```bash
 docker pull \
-  voipmonitor/vllm@sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a
+  voipmonitor/vllm@sha256:3aed14b70f54ea14c9d109e2df04c53df37db69d8182e430c43deba503c705e1
 
 mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-452bd5c-ec6edd9
 
@@ -128,7 +129,7 @@ docker run -d \
   -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
   -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-452bd5c-ec6edd9:/cache/jit:rw \
-  voipmonitor/vllm@sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a
+  voipmonitor/vllm@sha256:3aed14b70f54ea14c9d109e2df04c53df37db69d8182e430c43deba503c705e1
 ```
 
 The image entrypoint is
@@ -261,9 +262,39 @@ a 0.11% reduction that is below run-to-run variation.
 
 The Kimi XTML stream parser was also tested by replaying a captured OMP turn
 through LLMConduit. The request completed with 124 SSE events and 28,629 bytes,
-and emitted zero `<|open|>`, `<|close|>`, or `<|sep|>` markers. One image whose
-URL had been redacted by turn capture was removed before replay; the test
-therefore qualifies reasoning and tool streaming but not that archived image.
+and emitted zero `<|open|>`, `<|close|>`, or `<|sep|>` markers. LLMConduit turn
+captures replace image URLs and data URIs with `<redacted uri>` so diagnostic
+artifacts do not retain image payloads or credentials. The replay tool
+[`tools/replay-llmconduit-turn-capture.py`](tools/replay-llmconduit-turn-capture.py)
+removes those placeholders by default, accepts explicit replacements through
+`--replacement-image-url`, and can reject incomplete replay input through
+`--fail-on-redacted-images`.
+
+The two-image prompt limit was qualified through LLMConduit with two distinct
+native image payloads and through Oh My Pi with the failure-sensitive agent
+sequence: the first turn attached one image, and a continued second turn sent
+the archived image together with a newly attached image. The second backend
+request contained two image items, completed normally, and did not produce the
+repeated HTTP 400 failure caused by a one-image runtime limit. The qualified
+captures are
+`api_c6bc9d693d5b4618baad13487e76e497.json` for the first turn and
+`api_b76fbb72f3d349aa884a48a4102f86dd.json` for the continued turn under
+`/mnt/luke/kimi-k3-runs/llmconduit-turn-captures/`.
+
+Replay a redacted capture without image content:
+
+```bash
+python3 models/kimi-k3/tools/replay-llmconduit-turn-capture.py \
+  /path/to/capture.json \
+  --max-completion-tokens 256 \
+  --output /tmp/replay.sse \
+  --receipt /tmp/replay.json
+```
+
+For a multimodal replay, pass one `--replacement-image-url` for each captured
+image in encounter order. A replacement may be an HTTP URL or a data URI. Use
+`--fail-on-redacted-images` when dropping image content would invalidate the
+test objective.
 
 External LMCache restore was tested after clearing the vLLM-local prefix cache.
 A 24,576-token prompt restored 12,288 tokens from LMCache. A 49,152-token
@@ -306,11 +337,11 @@ locks and verifies the resulting source trees before compiling:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 2ed422aa1c8a0a1aee95430962be00caabf93b4a
+git checkout da2a8be7a7270609786ff1bb06c263c7197556f9
 
 IMAGE=voipmonitor/vllm:kimi-k3-production-local \
 RELEASE_DATE=20260818 \
-REVISION=mamba-dcp-protocol \
+REVISION=two-image \
 ./build-kimi-k3-qsrt-tp16-runtime.sh
 ```
 
@@ -330,8 +361,9 @@ verified source trees match. The vLLM lock composes PRs #310, #413, #414,
   behavior above 500,224 tokens has not been qualified.
 - The scheduler permits one active sequence. Parallel request throughput has
   not been qualified for the vision-and-LMCache allocation.
-- One image is permitted per request. Image preprocessing is bounded to
-  40,960 input patches and 512 patches on one side.
+- Two images are permitted per prompt. This supports an agent turn containing
+  one archived frame and one newly attached image. Image preprocessing is
+  bounded to 40,960 input patches and 512 patches on one side.
 - The qualified LMCache tier is CPU RAM only. The launcher implements a
   filesystem tier, but that tier is not part of this qualification.
 - A host-local proxy exposes port 8000 on the qualification machine. The vLLM
