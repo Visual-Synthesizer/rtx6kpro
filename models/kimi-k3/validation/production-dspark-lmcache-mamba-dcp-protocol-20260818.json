@@ -14,7 +14,7 @@
     "kv_cache_dtype": "FP8",
     "max_model_len": 1000000,
     "physical_kv_tokens": 1033126,
-    "max_images_per_prompt": 2
+    "max_images_per_prompt": 5
   },
   "draft": {
     "checkpoint": "Inferact/Kimi-K3-DSpark",
@@ -22,12 +22,12 @@
     "speculative_tokens": 7
   },
   "runtime_image": {
-    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-two-image",
-    "digest": "sha256:3aed14b70f54ea14c9d109e2df04c53df37db69d8182e430c43deba503c705e1",
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-five-image",
+    "digest": "sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999",
     "vllm_tree": "452bd5c56d7fb64de808d5a111c2272c70674c80",
     "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
     "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
-    "docker_image_recipe_commit": "da2a8be7a7270609786ff1bb06c263c7197556f9",
+    "docker_image_recipe_commit": "1c8fceae0d6b0643861a00fec6c0fa4a8eb7ecbc",
     "vllm_pull_requests": {
       "310": "f85d3d87e196546eff162c2a61b49aab13f2e625",
       "413": "3ebc8967dab28a9df103d8c66bff9688525263bc",
@@ -99,15 +99,20 @@
     "capture_replay_redaction_policy": "remove_by_default_or_replace_from_operator_input"
   },
   "multimodal_agent_replay": {
-    "measurement_runtime_digest": "sha256:3aed14b70f54ea14c9d109e2df04c53df37db69d8182e430c43deba503c705e1",
-    "direct_two_image_chat_http_status": 200,
-    "direct_two_image_chat_finish_reason": "stop",
-    "omp_first_turn_capture": "api_c6bc9d693d5b4618baad13487e76e497.json",
-    "omp_first_turn_image_count": 1,
-    "omp_continued_turn_capture": "api_b76fbb72f3d349aa884a48a4102f86dd.json",
-    "omp_continued_turn_image_count": 2,
-    "omp_continued_turn_status": "response.completed",
-    "conclusion": "one_archived_image_plus_one_active_image_is_qualified"
+    "measurement_runtime_digest": "sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999",
+    "configured_image_limit": 5,
+    "omp_17_3_5_custom_provider_image_budget": 5,
+    "direct_five_image_chat_http_status": 200,
+    "direct_five_image_chat_finish_reason": "stop",
+    "exact_history_capture": "api_7b7e26b8582b4eab8a0b923e7ad9a7b2.json",
+    "exact_history_message_count": 135,
+    "exact_history_image_count": 3,
+    "exact_history_request_json_bytes": 652368,
+    "exact_history_http_status": 200,
+    "exact_history_elapsed_seconds": 114.62,
+    "exact_history_completion_token_limit": 1,
+    "exact_history_finish_reason": "length",
+    "conclusion": "five_image_prompt_limit_and_three_image_omp_history_are_qualified"
   },
   "host_receipts": [
     "/mnt/luke/kimi-k3-runs/qualification-mamba-dcp-protocol-20260818",
