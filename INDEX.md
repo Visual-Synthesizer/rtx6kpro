@@ -139,6 +139,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [MiniMax M2.5 — Setup & Benchmarks](models/minimax-m25.md) - `models/minimax-m25.md`
 - [Qwen3.5 Smaller Variants (27B, 35B, 122B) on RTX PRO 6000 Blackwell](models/qwen35-27b.md) - `models/qwen35-27b.md`
 - [Qwen3.5-397B-A17B on RTX PRO 6000 Blackwell](models/qwen35-397b.md) - `models/qwen35-397b.md`
+- [Qwen3.8-27B on RTX PRO 6000 Blackwell](models/qwen38-27b.md) - `models/qwen38-27b.md`
 - [Xiaomi MiMo V2.5 Pro FP4-DFlash](models/xiaomi-mimo-v2.5-pro-fp4-dflash.md) - `models/xiaomi-mimo-v2.5-pro-fp4-dflash.md`
 - [Xiaomi MiMo V2.5 Pro FP4-DFlash v2](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v2.md) - `models/xiaomi-mimo-v2.5-pro-fp4-dflash_v2.md`
 - [Xiaomi MiMo V2.5 Pro FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) - `models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md`
