@@ -1,0 +1,102 @@
+{
+  "schema": "kimi-k3-production-qualification-v3",
+  "status": "qualified",
+  "hardware": {
+    "gpu_count": 16,
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "topology": "TP16/DCP16"
+  },
+  "target": {
+    "checkpoint": "moonshotai/Kimi-K3",
+    "revision": "2496450e92e425c886db095102a52a6682ca3970",
+    "routed_expert_format": "MXFP4",
+    "activation_dtype": "BF16",
+    "kv_cache_dtype": "FP8",
+    "max_model_len": 1000000,
+    "physical_kv_tokens": 1033126
+  },
+  "draft": {
+    "checkpoint": "Inferact/Kimi-K3-DSpark",
+    "revision": "cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "speculative_tokens": 7
+  },
+  "runtime_image": {
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-mamba-dcp-protocol",
+    "digest": "sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a",
+    "vllm_tree": "452bd5c56d7fb64de808d5a111c2272c70674c80",
+    "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
+    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+    "docker_image_recipe_commit": "2ed422aa1c8a0a1aee95430962be00caabf93b4a",
+    "vllm_pull_requests": {
+      "310": "f85d3d87e196546eff162c2a61b49aab13f2e625",
+      "413": "3ebc8967dab28a9df103d8c66bff9688525263bc",
+      "414": "990a63debf7201ae5446436a712609fcc8ffaef7",
+      "415": "c805ebd0896ccfbd2569bc0b2a7944d3282106ff",
+      "418": "6b18a8a767f406f08a519757ca6d5ef118b18296",
+      "419": "04a6acfe467f4a208c7231a18fc99faf656d016a"
+    },
+    "b12x_pull_request_227_revision": "debaafe156c9824396178d53e01e5f15d2a2a04a"
+  },
+  "llmconduit_image": {
+    "name": "voipmonitor/llmconduit:kimi-k3-a628f0a-20260817-r4",
+    "digest": "sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61",
+    "source_revision": "a628f0ae61b3362b8c3e571879d55d7ea36de5d2"
+  },
+  "startup": {
+    "instanttensor_weight_read_tib": 1.41,
+    "instanttensor_weight_read_seconds_approximate": 160,
+    "complete_model_load_seconds": 179.3,
+    "model_allocation_gib_per_gpu": 90.48,
+    "graph_capture_seconds": 48,
+    "graph_allocation_gib_per_gpu": 0.29
+  },
+  "decode_protocol": {
+    "prompt_tokens": 256,
+    "completion_tokens": 1024,
+    "measured_runs": 8,
+    "warmup_runs": 2,
+    "sampling_temperature": 0,
+    "request_seed": 1,
+    "active_requests": 1
+  },
+  "decode_result": {
+    "median_emitted_tokens_per_second": 113.70751904898529,
+    "median_target_cycles_per_second": 31.394103484873217,
+    "median_emitted_tokens_per_target_cycle": 3.6239583333333334,
+    "median_acceptance_rate": 0.3748511904761905,
+    "comparison_target_cycles_per_second": 31.429715523226186,
+    "target_cycle_change_fraction": -0.0011330642884707446,
+    "conclusion": "no_material_runtime_regression"
+  },
+  "long_context": {
+    "allocation_qualified_tokens": 1000000,
+    "model_generated_prompt_qualified_tokens": 500224,
+    "model_generated_prompt_elapsed_seconds": 1258.884,
+    "model_generated_prompt_finite": true,
+    "subsequent_decode_tokens": 128,
+    "subsequent_decode_finite_logprob_values": 640,
+    "subsequent_decode_nonfinite_logprob_values": 0,
+    "production_exact_capture_tokens": 140960,
+    "production_exact_capture_elapsed_seconds": 106.19642028491944,
+    "production_exact_capture_finite_logprob_values": 21,
+    "production_exact_capture_nonfinite_logprob_values": 0,
+    "target_only_repeated_stress_tokens": 520000,
+    "target_only_repeated_stress_elapsed_seconds": 464.81154200201854,
+    "target_only_repeated_stress_finite_logprob_values": 21,
+    "target_only_repeated_stress_nonfinite_logprob_values": 0,
+    "target_only_repeated_stress_semantics": "cache_indexing_only"
+  },
+  "protocol_stream": {
+    "captured_turn_replay_http_status": 200,
+    "captured_turn_replay_sse_events": 124,
+    "captured_turn_replay_bytes": 28629,
+    "xtml_open_marker_count": 0,
+    "xtml_close_marker_count": 0,
+    "xtml_separator_marker_count": 0,
+    "removed_redacted_image_urls": 1
+  },
+  "host_receipts": [
+    "/mnt/luke/kimi-k3-runs/qualification-mamba-dcp-protocol-20260818",
+    "/mnt/luke/kimi-k3-runs/reasoning-protocol-fix-20260818"
+  ]
+}
