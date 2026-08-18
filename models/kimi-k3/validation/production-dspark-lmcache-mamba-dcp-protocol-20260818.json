@@ -61,6 +61,7 @@
     "active_requests": 1
   },
   "decode_result": {
+    "measurement_runtime_digest": "sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a",
     "median_emitted_tokens_per_second": 113.70751904898529,
     "median_target_cycles_per_second": 31.394103484873217,
     "median_emitted_tokens_per_target_cycle": 3.6239583333333334,
@@ -98,6 +99,7 @@
     "capture_replay_redaction_policy": "remove_by_default_or_replace_from_operator_input"
   },
   "multimodal_agent_replay": {
+    "measurement_runtime_digest": "sha256:3aed14b70f54ea14c9d109e2df04c53df37db69d8182e430c43deba503c705e1",
     "direct_two_image_chat_http_status": 200,
     "direct_two_image_chat_finish_reason": "stop",
     "omp_first_turn_capture": "api_c6bc9d693d5b4618baad13487e76e497.json",

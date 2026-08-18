@@ -245,7 +245,13 @@ vision, and the exact wire controls emitted by OMP.
 
 The normalized decode protocol used one request, 256 stored input tokens,
 1,024 generated tokens, greedy sampling, one seed, two unrecorded warmups, and
-eight measured runs.
+eight measured runs. The decode measurement was captured from Docker digest
+`sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a`.
+The published two-image digest uses the same vLLM, B12X, and LMCache trees and
+changes only the launcher default from one image to two images per prompt. The
+two-image digest was qualified for startup, KV allocation, direct multimodal
+requests, and OMP image replay; the normalized decode protocol was not
+repeated after the launcher-only configuration change.
 
 | Metric | Median |
 |---|---:|
@@ -255,10 +261,10 @@ eight measured runs.
 | Draft acceptance | 0.3749 |
 
 Emitted throughput varies with draft acceptance. Target-cycle throughput is
-the acceptance-independent runtime regression control. The image without the
+the acceptance-independent runtime regression control. The artifact without the
 recurrent-cache and stream-parser corrections measured 31.430 target cycles/s
-under the same protocol. The corrected image measures 31.394 target cycles/s,
-a 0.11% reduction that is below run-to-run variation.
+under the same protocol. The artifact with those source corrections measures
+31.394 target cycles/s, a 0.11% reduction that is below run-to-run variation.
 
 The Kimi XTML stream parser was also tested by replaying a captured OMP turn
 through LLMConduit. The request completed with 124 SSE events and 28,629 bytes,
