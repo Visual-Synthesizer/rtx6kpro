@@ -47,27 +47,52 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 
 | Artifact | Identifier |
 |---|---|
-| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-five-image` |
-| vLLM runtime digest | `sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999` |
-| vLLM source tree | `452bd5c56d7fb64de808d5a111c2272c70674c80` |
+| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm449ee26-b12xec6edd9-cu133-torch213-20260818-hybrid-kv-failure` |
+| vLLM runtime digest | `sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a` |
+| vLLM source tree | `449ee263cf0859cc64ac3ef4e220b189c1f667eb` |
 | B12X source tree | `ec6edd9da4687f83519fd37bd7322ea0800f0ace` |
 | LMCache source tree | `e045d729bc5c4c63a40e13d032f42923de97812f` |
-| Docker image recipe revision | `1c8fceae0d6b0643861a00fec6c0fa4a8eb7ecbc` |
+| Docker image recipe revision | `f3140c98b683dcfee0c6b8672692e3ccc2b9804e` |
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-a628f0a-20260817-r4` |
 | LLMConduit digest | `sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 | LLMConduit source revision | `a628f0ae61b3362b8c3e571879d55d7ea36de5d2` |
 | Oh My Pi client | `v17.3.5`, commit `37eee71978951fccf66b21f7e3e2b74596ac9d74` |
 | Long-context cache correction | [`vLLM#418`](https://github.com/local-inference-lab/vllm/pull/418), commit `6b18a8a767f406f08a519757ca6d5ef118b18296` |
 | Kimi stream-parser correction | [`vLLM#419`](https://github.com/local-inference-lab/vllm/pull/419), commit `04a6acfe467f4a208c7231a18fc99faf656d016a` |
+| Hybrid KV-load failure isolation | [`vLLM#422`](https://github.com/local-inference-lab/vllm/pull/422), commit `6bafa633153a44ba1aa54eb7c5bafac248fe68e6` |
 
 The source locks are stored at Docker recipe revision
-`1c8fceae0d6b0643861a00fec6c0fa4a8eb7ecbc` under
+`f3140c98b683dcfee0c6b8672692e3ccc2b9804e` under
 `patches/releases/kimi-k3-production-lmcache-mamba-dcp-protocol/`. Each lock records the
 repository base, pull-request revisions, patch hash, and resulting Git tree.
 The LLMConduit reasoning-control change is
 [`llmconduit#37`](https://github.com/local-inference-lab/llmconduit/pull/37).
 The maintainer merge map is
 [`rtx6kpro#75`](https://github.com/local-inference-lab/rtx6kpro/issues/75).
+
+## Hybrid KV-Load Failure Contract
+
+Kimi-K3 uses 17 KV-cache groups: 16 full-attention groups and one recurrent
+sliding-window group. A failed external-cache load can therefore invalidate a
+different set of blocks in each group. vLLM #422 evaluates all cache groups,
+uses each group's block size for token alignment, and applies the configured
+failure policy without assuming that a request has only one group.
+
+The production launcher uses `kv_load_failure_policy=fail`. A failed LMCache
+load terminates only the affected request with `FINISHED_ERROR`; the engine
+continues scheduling unrelated requests. The `recompute` policy is unsupported
+for distributed external-cache loads until connectors report peer-rank block
+availability. Recomputing from rank-local metadata can otherwise reuse stale
+blocks on another rank.
+
+Validation used the connector scheduler suite and a Kimi-shaped regression:
+
+- 20 external-cache connector tests passed;
+- seven selected hybrid-cache and Mamba scheduler tests passed;
+- a 17-group request with an invalid block in the recurrent group finished
+  with `FINISHED_ERROR`, and a subsequent healthy request scheduled normally;
+- the same 17-group input raises `ValueError: too many values to unpack` when
+  executed against the single-group implementation.
 
 ## Long-Context Recurrent-Cache Contract
 
@@ -113,9 +138,9 @@ qualified image.
 
 ```bash
 docker pull \
-  voipmonitor/vllm@sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999
+  voipmonitor/vllm@sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a
 
-mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-452bd5c-ec6edd9
+mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-449ee26-ec6edd9
 
 docker run -d \
   --name kimi-k3-production-mamba-dcp-protocol \
@@ -129,8 +154,8 @@ docker run -d \
   -e PORT=8001 \
   -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
-  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-452bd5c-ec6edd9:/cache/jit:rw \
-  voipmonitor/vllm@sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999
+  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-449ee26-ec6edd9:/cache/jit:rw \
+  voipmonitor/vllm@sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a
 ```
 
 The image entrypoint is
@@ -248,12 +273,10 @@ The normalized decode protocol used one request, 256 stored input tokens,
 1,024 generated tokens, greedy sampling, one seed, two unrecorded warmups, and
 eight measured runs. The decode measurement was captured from Docker digest
 `sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a`.
-The published five-image digest uses the same vLLM, B12X, and LMCache trees as
-the normalized decode measurement and changes only the launcher image-count
-limit. The five-image digest is qualified for startup, KV allocation, direct
-multimodal requests, and OMP image replay. The normalized decode protocol was
-not repeated because the launcher-only limit does not change the language-only
-execution path.
+That reference image uses vLLM tree
+`452bd5c56d7fb64de808d5a111c2272c70674c80`; the production tree differs by
+the scheduler error-path correction in vLLM #422. Both images use identical
+B12X, LMCache, model, and launcher sources.
 
 | Metric | Median |
 |---|---:|
@@ -267,6 +290,12 @@ the acceptance-independent runtime regression control. The artifact without the
 recurrent-cache and stream-parser corrections measured 31.430 target cycles/s
 under the same protocol. The artifact with those source corrections measures
 31.394 target cycles/s, a 0.11% reduction that is below run-to-run variation.
+
+The source-locked image containing vLLM #422 completed three additional
+1,024-token decode runs at 106.62, 121.91, and 108.28 emitted tok/s; the median
+was 108.28 tok/s. DSpark acceptance varies with generated content, so
+target-cycle throughput from the normalized protocol remains the primary
+language-runtime regression control.
 
 The Kimi XTML stream parser was also tested by replaying a captured OMP turn
 through LLMConduit. The request completed with 124 SSE events and 28,629 bytes,
@@ -282,13 +311,17 @@ OMP 17.3.5 retains at most five images for a custom provider and removes the
 oldest transient images above that budget. The vLLM prompt limit is therefore
 five so OMP can replay every image it is permitted to retain. A direct
 LLMConduit request containing five WebP payloads completed with HTTP 200 and
-returned the expected image count. An exact OMP history replay also completed
-with HTTP 200: 135 messages, three archived images, 652,368 request JSON bytes,
-and a deliberately one-token response limit. That replay took 114.62 seconds
-and did not enter the OMP retry path. The five-image request receipt is
-`api_24345a17961b4ffc853036e8b8cb9a7f.json`; the long replay receipt is
-`api_fe83f47bf28b4b8887ffe19a9110895a.json`; and its redacted input source is
-`api_7b7e26b8582b4eab8a0b923e7ad9a7b2.json`. The receipts are stored under
+returned the expected image count.
+
+The request that exposed the hybrid-group scheduler defect contained 186
+messages and five archived images. Replaying that exact message history with
+five valid WebP data URIs through LLMConduit completed with HTTP 200 after
+171.84 seconds. The model consumed 179,279 prompt tokens, emitted 865 tokens,
+finished with a valid `write` tool call, delivered 672 SSE events plus
+`[DONE]`, and emitted zero `<|open|>`, `<|close|>`, or `<|sep|>` markers. The
+successful replay receipt is `api_7c37481cb259410192fd14b33009ed6a.json`; its
+redacted input source is `api_23bd0f237db245c3a86ef522ec102e88.json`. The
+receipts are stored under
 `/mnt/luke/kimi-k3-runs/llmconduit-turn-captures/`.
 
 Replay a redacted capture without image content:
@@ -347,11 +380,11 @@ locks and verifies the resulting source trees before compiling:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 1c8fceae0d6b0643861a00fec6c0fa4a8eb7ecbc
+git checkout f3140c98b683dcfee0c6b8672692e3ccc2b9804e
 
 IMAGE=voipmonitor/vllm:kimi-k3-production-local \
 RELEASE_DATE=20260818 \
-REVISION=five-image \
+REVISION=hybrid-kv-failure \
 ./build-kimi-k3-qsrt-tp16-runtime.sh
 ```
 
@@ -360,8 +393,8 @@ checks all three integration locks, builds native extensions against the same
 ABI, validates required launchers and imports, and runs source-composition
 tests. Compiler metadata can produce a different Docker digest even when the
 verified source trees match. The vLLM lock composes PRs #310, #413, #414,
-#415, #418, and #419 into tree
-`452bd5c56d7fb64de808d5a111c2272c70674c80`.
+#415, #418, #419, and #422 into tree
+`449ee263cf0859cc64ac3ef4e220b189c1f667eb`.
 
 ## Operational Limits
 
@@ -376,6 +409,9 @@ verified source trees match. The vLLM lock composes PRs #310, #413, #414,
   patches on one side.
 - The qualified LMCache tier is CPU RAM only. The launcher implements a
   filesystem tier, but that tier is not part of this qualification.
+- External-cache load failures use the `fail` policy and terminate only the
+  affected request. Distributed `recompute` is unsupported until every rank's
+  external-cache block availability is available to the scheduler.
 - A host-local proxy exposes port 8000 on the qualification machine. The vLLM
   container binds port 8001; port 8000 is not created by the image.
 - LLMConduit rewrites a `developer` role to `system` for the Kimi template and

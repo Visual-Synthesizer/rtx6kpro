@@ -1,5 +1,5 @@
 {
-  "schema": "kimi-k3-production-qualification-v4",
+  "schema": "kimi-k3-production-qualification-v5",
   "status": "qualified",
   "hardware": {
     "gpu_count": 16,
@@ -22,19 +22,20 @@
     "speculative_tokens": 7
   },
   "runtime_image": {
-    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm452bd5c-b12xec6edd9-cu133-torch213-20260818-five-image",
-    "digest": "sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999",
-    "vllm_tree": "452bd5c56d7fb64de808d5a111c2272c70674c80",
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm449ee26-b12xec6edd9-cu133-torch213-20260818-hybrid-kv-failure",
+    "digest": "sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a",
+    "vllm_tree": "449ee263cf0859cc64ac3ef4e220b189c1f667eb",
     "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
     "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
-    "docker_image_recipe_commit": "1c8fceae0d6b0643861a00fec6c0fa4a8eb7ecbc",
+    "docker_image_recipe_commit": "f3140c98b683dcfee0c6b8672692e3ccc2b9804e",
     "vllm_pull_requests": {
       "310": "f85d3d87e196546eff162c2a61b49aab13f2e625",
       "413": "3ebc8967dab28a9df103d8c66bff9688525263bc",
       "414": "990a63debf7201ae5446436a712609fcc8ffaef7",
       "415": "c805ebd0896ccfbd2569bc0b2a7944d3282106ff",
       "418": "6b18a8a767f406f08a519757ca6d5ef118b18296",
-      "419": "04a6acfe467f4a208c7231a18fc99faf656d016a"
+      "419": "04a6acfe467f4a208c7231a18fc99faf656d016a",
+      "422": "6bafa633153a44ba1aa54eb7c5bafac248fe68e6"
     },
     "b12x_pull_request_227_revision": "debaafe156c9824396178d53e01e5f15d2a2a04a"
   },
@@ -68,7 +69,26 @@
     "median_acceptance_rate": 0.3748511904761905,
     "comparison_target_cycles_per_second": 31.429715523226186,
     "target_cycle_change_fraction": -0.0011330642884707446,
-    "conclusion": "no_material_runtime_regression"
+    "conclusion": "no_material_runtime_regression",
+    "hybrid_kv_failure_image_proof_tokens_per_second": [
+      106.6191,
+      121.9122,
+      108.2775
+    ],
+    "hybrid_kv_failure_image_proof_median_tokens_per_second": 108.2775,
+    "hybrid_kv_failure_image_proof_completion_tokens": 1024
+  },
+  "hybrid_kv_load_failure": {
+    "kv_cache_groups": 17,
+    "full_attention_groups": 16,
+    "recurrent_sliding_window_groups": 1,
+    "production_policy": "fail",
+    "connector_scheduler_tests_passed": 20,
+    "selected_hybrid_mamba_tests_passed": 7,
+    "in_image_regression": "passed",
+    "invalid_recurrent_group_result": "FINISHED_ERROR",
+    "subsequent_healthy_request_scheduled": true,
+    "distributed_recompute_status": "unsupported_without_peer_rank_block_availability"
   },
   "long_context": {
     "allocation_qualified_tokens": 1000000,
@@ -99,22 +119,30 @@
     "capture_replay_redaction_policy": "remove_by_default_or_replace_from_operator_input"
   },
   "multimodal_agent_replay": {
-    "measurement_runtime_digest": "sha256:2e4a4381db94a8bd73846b35ae3da8e5741ba0b5916c3a875e275e0e3c7cc999",
+    "measurement_runtime_digest": "sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a",
     "configured_image_limit": 5,
     "omp_17_3_5_custom_provider_image_budget": 5,
-    "direct_five_image_capture": "api_24345a17961b4ffc853036e8b8cb9a7f.json",
-    "direct_five_image_chat_http_status": 200,
-    "direct_five_image_chat_finish_reason": "stop",
-    "exact_history_capture": "api_7b7e26b8582b4eab8a0b923e7ad9a7b2.json",
-    "exact_history_replay_capture": "api_fe83f47bf28b4b8887ffe19a9110895a.json",
-    "exact_history_message_count": 135,
-    "exact_history_image_count": 3,
-    "exact_history_request_json_bytes": 652368,
+    "direct_five_image_capture": "api_19c7106d55b44d4097f8bd58eb9c25de.json",
+    "direct_five_image_responses_http_status": 200,
+    "direct_five_image_responses_terminal_event": "response.completed",
+    "exact_history_capture": "api_23bd0f237db245c3a86ef522ec102e88.json",
+    "exact_history_replay_capture": "api_7c37481cb259410192fd14b33009ed6a.json",
+    "exact_history_message_count": 186,
+    "exact_history_image_count": 5,
+    "exact_history_request_json_bytes": 562275,
     "exact_history_http_status": 200,
-    "exact_history_elapsed_seconds": 114.62,
-    "exact_history_completion_token_limit": 1,
-    "exact_history_finish_reason": "length",
-    "conclusion": "five_image_prompt_limit_and_three_image_omp_history_are_qualified"
+    "exact_history_elapsed_seconds": 171.835,
+    "exact_history_prompt_tokens": 179279,
+    "exact_history_completion_tokens": 865,
+    "exact_history_completion_token_limit": 4096,
+    "exact_history_sse_events": 672,
+    "exact_history_done_event": true,
+    "exact_history_finish_reason": "tool_calls",
+    "exact_history_valid_write_tool_call": true,
+    "exact_history_xtml_open_marker_count": 0,
+    "exact_history_xtml_close_marker_count": 0,
+    "exact_history_xtml_separator_marker_count": 0,
+    "conclusion": "five_image_prompt_and_exact_failed_omp_history_replay_are_qualified"
   },
   "host_receipts": [
     "/mnt/luke/kimi-k3-runs/qualification-mamba-dcp-protocol-20260818",
