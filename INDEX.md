@@ -36,6 +36,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r14](models/ds4dspark-infernal-invocation-r14.md) - `models/ds4dspark-infernal-invocation-r14.md`
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r15](models/ds4dspark-infernal-invocation-r15.md) - `models/ds4dspark-infernal-invocation-r15.md`
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r16](models/ds4dspark-infernal-invocation-r16.md) - `models/ds4dspark-infernal-invocation-r16.md`
+- [DeepSeek-V4-Flash-0731 on Infernal Invocation r18](models/ds4dspark-infernal-invocation-r18.md) - `models/ds4dspark-infernal-invocation-r18.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) - `models/ds4dspark-infernal-invocation-r2.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r4](models/ds4dspark-infernal-invocation-r4.md) - `models/ds4dspark-infernal-invocation-r4.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r7](models/ds4dspark-infernal-invocation-r7.md) - `models/ds4dspark-infernal-invocation-r7.md`
@@ -87,6 +88,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 SQG W4A8 on Infernal Invocation r13](models/glm5.2-infernal-invocation-r13-sqg.md) - `models/glm5.2-infernal-invocation-r13-sqg.md`
 - [GLM-5.2 on Infernal Invocation r16](models/glm5.2-infernal-invocation-r16.md) - `models/glm5.2-infernal-invocation-r16.md`
 - [GLM-5.2 on Infernal Invocation r17](models/glm5.2-infernal-invocation-r17.md) - `models/glm5.2-infernal-invocation-r17.md`
+- [GLM-5.2 on Infernal Invocation r18](models/glm5.2-infernal-invocation-r18.md) - `models/glm5.2-infernal-invocation-r18.md`
 - [GLM-5.2 EXL3 shared-H quantization](models/glm5.2_exl3_shared_h_quantization.md) - `models/glm5.2_exl3_shared_h_quantization.md`
 - [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) - `models/glm5.2_mxfp4.md`
 - [GLM-5.2 v11 NVFP4 / FP8 / MXFP8 on Dark Devotion](models/glm5.2_v11.md) - `models/glm5.2_v11.md`
@@ -381,6 +383,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-14](daily-summaries/2026-08/2026-08-15.md) - `daily-summaries/2026-08/2026-08-15.md`
 - [Daily Summary — 2026-08-15](daily-summaries/2026-08/2026-08-16.md) - `daily-summaries/2026-08/2026-08-16.md`
 - [Daily Summary — 2026-08-16](daily-summaries/2026-08/2026-08-17.md) - `daily-summaries/2026-08/2026-08-17.md`
+- [Daily Summary — 2026-08-17](daily-summaries/2026-08/2026-08-18.md) - `daily-summaries/2026-08/2026-08-18.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

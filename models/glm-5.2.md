@@ -8,7 +8,7 @@ benchmark evidence.
 
 | Need | Page |
 |---|---|
-| Serve NVFP4 or projection-mixed EXL3 on CUDA 13.3 | [GLM-5.2 Infernal Invocation r17](glm5.2-infernal-invocation-r17.md) |
+| Serve NVFP4 or projection-mixed EXL3 on CUDA 13.3 | [GLM-5.2 Infernal Invocation r18](glm5.2-infernal-invocation-r18.md) |
 | Run the MXFP4 expert checkpoint | [GLM-5.2 FP8 + MXFP4 Experts](glm5.2_mxfp4.md) |
 | Compare KLD and quant quality | [GLM-5.2 KLD Evaluation](../benchmarks/glm52-kld-evaluation.md) |
 | Reproduce GGUF/BF16 dequant KLD | [GGUF to BF16 Dequant KLD Audit](glm5.2/glm52-gguf-bf16-dequant-kld-2026-07-08.md) |
@@ -18,17 +18,18 @@ benchmark evidence.
 
 | Area | Guidance |
 |---|---|
-| Recommended image | Use the [Infernal Invocation r17 NVFP4/EXL3 profiles](glm5.2-infernal-invocation-r17.md); EXL3 TP4/DCP1/MTP3 is runtime-qualified and NVFP4 TP8 is source-qualified |
+| Recommended image | Use the [Infernal Invocation r18 NVFP4/EXL3 profiles](glm5.2-infernal-invocation-r18.md); r18 is source-qualified and the [r17 EXL profile](glm5.2-infernal-invocation-r17.md) retains the TP4/DCP1/MTP3 runtime receipt |
 | Main checkpoint | `lukealonso/GLM-5.2-NVFP4` |
 | Main backend | B12X sparse MLA, B12X MoE, B12X dense/FP8 path unless a page says otherwise |
-| DCP | [GLM-5.2 v18](glm5.2_v18.md) contains broad DCP1/2/4/8 measurements; Infernal Invocation r17 provides DCP1 profile defaults |
-| Spec decode | Infernal Invocation r17 provides MTP3 defaults for NVFP4 and projection-mixed EXL3 |
+| DCP | [GLM-5.2 v18](glm5.2_v18.md) contains broad DCP1/2/4/8 measurements; Infernal Invocation r18 provides DCP1 profile defaults |
+| Spec decode | Infernal Invocation r18 provides MTP3 defaults for NVFP4 and projection-mixed EXL3 |
 | Quality checks | KLD, long-context decode, coding probes, acceptance rates |
 
 ## Version Map
 
 | Page | Status | Why keep it |
 |---|---|---|
+| [GLM-5.2 Infernal Invocation r18](glm5.2-infernal-invocation-r18.md) | Source-qualified | CUDA 13.3 image with sparse-prefill row validation, projection-mixed EXL3 TP4, and NVFP4 TP8 deployment profiles. |
 | [GLM-5.2 Infernal Invocation r17](glm5.2-infernal-invocation-r17.md) | EXL3 runtime-qualified; NVFP4 source-qualified | CUDA 13.3 projection-mixed EXL3 TP4 serving evidence and NVFP4 TP8 profile. |
 | [GLM-5.2 Infernal Invocation r16](glm5.2-infernal-invocation-r16.md) | Source-qualified | CUDA 13.3 NVFP4 TP8 and projection-mixed EXL3 TP4 serving contracts. |
 | [GLM-5.2 v20](glm5.2_v20.md) | Historical Gilded Gnosis reference | Gilded Gnosis/SparkInfer image, cuBLAS-safe DCP output, and TP6 release evidence. |
