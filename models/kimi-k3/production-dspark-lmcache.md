@@ -282,12 +282,13 @@ OMP 17.3.5 retains at most five images for a custom provider and removes the
 oldest transient images above that budget. The vLLM prompt limit is therefore
 five so OMP can replay every image it is permitted to retain. A direct
 LLMConduit request containing five WebP payloads completed with HTTP 200 and
-returned the expected image count. The exact OMP history that exposed the
-previously lower runtime limit also completed with HTTP 200: 135 messages,
-three archived images, 652,368 request JSON bytes, and a deliberately
-one-token response limit. That replay took 114.62 seconds and did not enter the
-OMP retry path. The redacted source capture is
-`api_7b7e26b8582b4eab8a0b923e7ad9a7b2.json` under
+returned the expected image count. An exact OMP history replay also completed
+with HTTP 200: 135 messages, three archived images, 652,368 request JSON bytes,
+and a deliberately one-token response limit. That replay took 114.62 seconds
+and did not enter the OMP retry path. The five-image request receipt is
+`api_24345a17961b4ffc853036e8b8cb9a7f.json`; the long replay receipt is
+`api_fe83f47bf28b4b8887ffe19a9110895a.json`; and its redacted input source is
+`api_7b7e26b8582b4eab8a0b923e7ad9a7b2.json`. The receipts are stored under
 `/mnt/luke/kimi-k3-runs/llmconduit-turn-captures/`.
 
 Replay a redacted capture without image content:
