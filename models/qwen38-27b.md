@@ -36,27 +36,28 @@ NVFP4 checkpoint.
 
 ## Configuration Summary
 
-| TP | Checkpoint and runtime | Speculation | Prefill sample | C1 sample | C4 sample | Status |
+| TP setting | Checkpoint and runtime | Speculation | Prefill sample | C1 sample | C4 sample | Status |
 |---:|---|---|---:|---:|---:|---|
-| 1 | Official FP8, vLLM Gilded Gnosis r31 | MTP3 | 7,686 at 8K | 77.8 at ctx0 | 292.7 at ctx0 | `research-only` |
-| 1 | EXL3 K5/K6, vLLM, PCIe 5.0 x8 Max-Q | MTP3 | 3,466 at 8K | 78.0 at ctx0 | - | `research-only` |
-| 1 | W8A8 FP8 GPTQ v17, vLLM 0.26.1rc0 | off | 7,306 at 2K | 49.8 at ctx0 | 180.6 at ctx0 | `research-only` |
-| 2 | W8A8 FP8 GPTQ v17, vLLM | MTP3 | 11,851 at 8K | 102.5 at ctx0 | 393.5 at ctx0 | `research-only` |
-| 2 | Official FP8, tuned vLLM/FlashInfer | MTP3 | 7,200 at 8K | 120.8 at ctx0 | - | `research-only` |
-| 2 | Official FP8, SGLang/EAGLE | EAGLE | 7,325 at 8K | 141.0 at ctx8K | 507.4 at ctx8K | `research-only` |
-| 4 | Official FP8, vLLM, FP8 KV, full graph ladder | MTP3 | - | 135.8 sustained | 464.6 sustained | `qualified` |
+| `TP=1` | Official FP8, vLLM Gilded Gnosis r31 | MTP3 | 7,686 at 8K | 77.8 at ctx0 | 292.7 at ctx0 | `research-only` |
+| `TP=1` | EXL3 K5/K6, vLLM, PCIe 5.0 x8 Max-Q | MTP3 | 3,466 at 8K | 78.0 at ctx0 | - | `research-only` |
+| `TP=1` | W8A8 FP8 GPTQ v17, vLLM 0.26.1rc0 | off | 7,306 at 2K | 49.8 at ctx0 | 180.6 at ctx0 | `research-only` |
+| `TP=2` | W8A8 FP8 GPTQ v17, vLLM | MTP3 | 11,851 at 8K | 102.5 at ctx0 | 393.5 at ctx0 | `research-only` |
+| `TP=2` | Official FP8, tuned vLLM/FlashInfer | MTP3 | 7,200 at 8K | 120.8 at ctx0 | - | `research-only` |
+| `TP=2` | Official FP8, SGLang/EAGLE | EAGLE | 7,325 at 8K | 141.0 at ctx8K | 507.4 at ctx8K | `research-only` |
+| `TP=4` | Official FP8, vLLM, FP8 KV, full graph ladder | MTP3 | - | 135.8 sustained | 464.6 sustained | `qualified` |
 
 This summary is a navigation aid, not a ranking. Detailed conditions and
 context curves follow.
 
-## TP1: One GPU
+## TP=1: One GPU
 
-### Official FP8 With MTP3
+### Official FP8 With MTP3, TP=1
 
 The following result used `Qwen/Qwen3.8-27B-FP8` on one 600 W RTX PRO 6000
 workstation GPU. The server used vLLM Gilded Gnosis r31, MTP3, FP8 KV cache,
 InstantTensor loading, 48 GiB native KV offload, `max_num_seqs=4`, and prefix
-caching.
+caching. Tensor parallelism was `TP=1`, passed to vLLM as
+`--tensor-parallel-size 1`.
 
 **Status:** `research-only`; the source is one community benchmark capture
 without repeat variance or quality-gate receipts.
@@ -73,12 +74,13 @@ without repeat variance or quality-gate receipts.
 
 Source: [Discord benchmark and complete launch command](https://discord.com/channels/1466898002793857221/1528331644933767190/1537926814008213636).
 
-### W8A8 FP8 GPTQ V17
+### W8A8 FP8 GPTQ V17, TP=1
 
 The `lribeiro/Qwen3.8-27B-nvfp4-v17` checkpoint uses FP8 E4M3 weights and
 dynamic FP8 activations. The vision tower and MTP head remain BF16. The model
 card reports one RTX PRO 6000, vLLM 0.26.1rc0, FlashInfer, temperature 0, and
-`ignore_eos` for the MTP-off duration test.
+`ignore_eos` for the MTP-off duration test. Effective tensor parallelism was
+`TP=1`, equivalent to vLLM `--tensor-parallel-size 1`.
 
 **Status:** `research-only`; the model-card result does not include the same
 long-context matrix as the official-FP8 capture.
@@ -98,11 +100,12 @@ from the MTP-off table and is not merged into the context matrix.
 
 Source: [W8A8 FP8 GPTQ v17 model card](https://huggingface.co/lribeiro/Qwen3.8-27B-nvfp4-v17).
 
-### EXL3 K5/K6 Versus NVFP4
+### EXL3 K5/K6 Versus NVFP4, TP=1
 
 This same-host comparison used one RTX PRO 6000 Max-Q connected at PCIe 5.0
 x8 and MTP3. It is useful because both checkpoints share the host and harness;
-it does not establish performance on a full-width PCIe link.
+it does not establish performance on a full-width PCIe link. Both arms used
+`TP=1`, equivalent to vLLM `--tensor-parallel-size 1`.
 
 **Status:** `research-only`.
 
@@ -117,12 +120,13 @@ it does not establish performance on a full-width PCIe link.
 
 Source: [Discord same-host EXL3/NVFP4 capture](https://discord.com/channels/1466898002793857221/1528331644933767190/1538168616166367263).
 
-## TP2: Two GPUs
+## TP=2: Two GPUs
 
-### W8A8 FP8 GPTQ V17 With MTP3
+### W8A8 FP8 GPTQ V17 With MTP3, TP=2
 
 The following matrix used two RTX PRO 6000 GPUs, MTP3, and a reported GPU
-memory utilization of 0.40.
+memory utilization of 0.40. Tensor parallelism was `TP=2`, passed to vLLM as
+`--tensor-parallel-size 2`.
 
 **Status:** `research-only`; exact card power, PCIe topology, client duration,
 and repeat variance were not published with the capture.
@@ -142,11 +146,12 @@ and repeat variance were not published with the capture.
 
 Source: [Discord TP2 W8A8 FP8 GPTQ capture](https://discord.com/channels/1466898002793857221/1538962909672112208/1538977882896994314).
 
-### Official FP8: Attention Backend Comparison
+### Official FP8: Attention Backend Comparison, TP=2
 
 These results used two 350 W RTX PRO 6000 workstation GPUs, official FP8
 weights, and MTP3. They show why the effective attention backend and runtime
-build must accompany every throughput claim.
+build must accompany every throughput claim. Every row used `TP=2`, passed to
+vLLM as `--tensor-parallel-size 2`.
 
 **Status:** `research-only`.
 
@@ -162,12 +167,13 @@ long-context path.
 
 Sources: [implicit backend](https://discord.com/channels/1466898002793857221/1528331644933767190/1537889649249493087), [explicit FlashInfer](https://discord.com/channels/1466898002793857221/1528331644933767190/1537901135489404999), [compiled Gilded Gnosis runtime](https://discord.com/channels/1466898002793857221/1528331644933767190/1537915668727332924).
 
-### Official FP8 With SGLang/EAGLE
+### Official FP8 With SGLang/EAGLE, TP=2
 
 This external-runtime reference used SGLang with EAGLE on two RTX PRO 6000
 Max-Q GPUs. It is included to define the reported cross-runtime envelope; it
 does not isolate engine effects from graph, speculation, power, or launch
-configuration.
+configuration. Tensor parallelism was `TP=2`, passed to SGLang as
+`--tp-size 2`.
 
 **Status:** `research-only`.
 
@@ -185,14 +191,15 @@ configuration.
 
 Source: [Discord SGLang/EAGLE TP2 capture](https://discord.com/channels/1466898002793857221/1528331644933767190/1537934075573043401).
 
-## TP4: Four GPUs
+## TP=4: Four GPUs
 
-### Qualified Official-FP8 Deployment
+### Qualified Official-FP8 Deployment, TP=4
 
 The qualified configuration uses four RTX PRO 6000 Blackwell 96 GB GPUs,
 official FP8 weights, FP8 KV cache, static YaRN for a 1M-token context window,
 MTP3, and a full MTP-aligned decode CUDA graph ladder from 4 through 256
-physical rows. The multimodal processor uses `min_pixels=131072`.
+physical rows. The multimodal processor uses `min_pixels=131072`. Tensor
+parallelism was `TP=4`, passed to vLLM as `--tensor-parallel-size 4`.
 
 **Status:** `qualified`.
 
@@ -218,12 +225,13 @@ for this recurrent/full-attention hybrid profile because the required
 
 Source: [TP4 qualification report](https://discord.com/channels/1466898002793857221/1528331644933767190/1539032445515726970).
 
-### Coding Workload Reference
+### Coding Workload Reference, TP=4
 
 A separate BF16 TP4 coding request emitted 772 completion tokens at 172.58
 tok/s including time to first token and 174.61 tok/s for generation only.
 Because this is a workload trace rather than a fixed C1 duration benchmark, it
-must not replace the qualified C1 row above.
+must not replace the qualified C1 row above. Tensor parallelism was `TP=4`,
+equivalent to vLLM `--tensor-parallel-size 4`.
 
 **Status:** `research-only`.
 
