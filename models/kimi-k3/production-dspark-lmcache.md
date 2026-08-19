@@ -8,8 +8,8 @@ This document specifies a reproducible Kimi-K3 service on 16 NVIDIA RTX PRO
 TP16/DCP16, native image input, structured tool calls, CPU-only LMCache,
 LLMConduit, and Oh My Pi.
 
-The machine-readable result for the source-locked runtime is
-[`validation/production-dspark-lmcache-interleaved-query-20260818.json`](validation/production-dspark-lmcache-interleaved-query-20260818.json).
+The machine-readable qualification receipt for the source-activated runtime is
+[`validation/production-dspark-lmcache-source-overlay-20260819.json`](validation/production-dspark-lmcache-source-overlay-20260819.json).
 
 ## Deployment Contract
 
@@ -47,12 +47,12 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 
 | Artifact | Identifier |
 |---|---|
-| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllmf67105d-b12xec6edd9-cu133-torch213-20260818-interleaved-query` |
-| vLLM runtime digest | `sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab` |
-| vLLM source tree | `f67105dd807842a3c1f1fc07931e1e4dadc0b68c` |
-| B12X source tree | `ec6edd9da4687f83519fd37bd7322ea0800f0ace` |
+| vLLM runtime image | `voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm12776c0-b12x468c312-cu133-torch213-20260819-source-overlay` |
+| vLLM runtime digest | `sha256:a54da4e2432138d42334cac54555f3a51188489cb66029da0d96e4b39162d726` |
+| vLLM source tree | `12776c0df15ca4087b636c43004b5bc1fde61434` |
+| B12X source tree | `468c31256b585c8078782c63ba723e404c04eb76` |
 | LMCache source tree | `e045d729bc5c4c63a40e13d032f42923de97812f` |
-| Docker image recipe revision | `0e22e5f19c56e2dbe5adaab159db3c86b080598d` |
+| Docker image recipe revision | `f9cc49c187f7525453b65ed8b4a1733f6d97471a` |
 | LLMConduit image | `voipmonitor/llmconduit:kimi-k3-a628f0a-20260817-r4` |
 | LLMConduit digest | `sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 | LLMConduit source revision | `a628f0ae61b3362b8c3e571879d55d7ea36de5d2` |
@@ -61,10 +61,13 @@ GPUs after online MXFP8 conversion. The physical KV-cache measurement of
 | Kimi stream-parser correction | [`vLLM#419`](https://github.com/local-inference-lab/vllm/pull/419), commit `04a6acfe467f4a208c7231a18fc99faf656d016a` |
 | Hybrid KV-load failure isolation | [`vLLM#422`](https://github.com/local-inference-lab/vllm/pull/422), commit `6bafa633153a44ba1aa54eb7c5bafac248fe68e6` |
 | Interleaved MLA query materialization | [`vLLM#427`](https://github.com/local-inference-lab/vllm/pull/427), commit `0ad95065da12e45c28d585d8c758a87d3a708b1f` |
+| DCP hybrid local-prefix correction | [`vLLM#401`](https://github.com/local-inference-lab/vllm/pull/401), merge commit `f8390f93a8057833803f866dcddf619c7606ecde` |
+| Cached logits-processing state | [`vLLM#433`](https://github.com/local-inference-lab/vllm/pull/433), commit `9151d114e270250fb0367333b2dc5a49c6383796` |
+| W4A16 inactive-route handling | [`B12X#227`](https://github.com/local-inference-lab/b12x/pull/227), commit `0eba6ae99e0d1fad6ec268d8c291f498ec1dd4d9` |
 
 The source locks are stored at Docker recipe revision
-`0e22e5f19c56e2dbe5adaab159db3c86b080598d` under
-`patches/releases/kimi-k3-production-lmcache-mamba-dcp-protocol/`. Each lock records the
+`f9cc49c187f7525453b65ed8b4a1733f6d97471a` under
+`patches/releases/kimi-k3-production-lmcache-sampler-overlay/`. Each lock records the
 repository base, pull-request revisions, patch hash, and resulting Git tree.
 The LLMConduit reasoning-control change is
 [`llmconduit#37`](https://github.com/local-inference-lab/llmconduit/pull/37).
@@ -156,6 +159,26 @@ model-generated inputs are qualified through 500,224 tokens; behavior from
 500,225 through 1,000,000 coherent tokens remains unsupported until a coherent
 input in that range is tested.
 
+## DCP Hybrid Local Prefix Cache
+
+vLLM #401 permits a fine-grained local prefix hit only when every aligned
+recurrent-cache manager has materialized a complete state at the candidate hash
+boundary. A partial recurrent state retains the coarser DCP attention-block
+boundary. External LMCache object geometry remains 12,288 tokens and is not
+changed by this correction.
+
+The TP16/DCP16 production service was tested with a 44,449-token producer and a
+44,609-token consumer sharing the producer prefix. The producer took 30.919
+seconds. The consumer reused 43,008 local tokens and completed in 1.741 seconds.
+The external-prefix hit counter remained zero, proving that this result came
+from vLLM's same-process local cache rather than LMCache.
+
+The image sets `VLLM_SOURCE_OVERLAY_ACTIVE=1` globally and activates the pinned
+source lazily. Both the packaged entrypoint and a custom Python or vLLM command
+therefore import `/opt/kimi-k3-qsrt/vllm`; compiled extension modules fall back
+to `/opt/infernal-invocation/vllm/vllm`. A custom command does not need to set a
+source-overlay environment variable.
+
 ## Start vLLM, DSpark, Vision, and LMCache
 
 The Hugging Face cache must contain both pinned checkpoint snapshots at the
@@ -164,12 +187,12 @@ qualified image.
 
 ```bash
 docker pull \
-  voipmonitor/vllm@sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab
+  voipmonitor/vllm@sha256:a54da4e2432138d42334cac54555f3a51188489cb66029da0d96e4b39162d726
 
-mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-f67105d-ec6edd9
+mkdir -p /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-12776c0-468c312
 
 docker run -d \
-  --name kimi-k3-production-dspark-lmcache-f67105d \
+  --name kimi-k3-production-dspark-lmcache-12776c0 \
   --restart unless-stopped \
   --gpus all \
   --network host \
@@ -179,8 +202,8 @@ docker run -d \
   -e HOST=127.0.0.1 \
   -e PORT=8001 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
-  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-f67105d-ec6edd9:/cache/jit:rw \
-  voipmonitor/vllm@sha256:042bfa339c5c516b78297cfff878770d0d4c2af13c7f3b0f81b5b288033ccbab
+  -v /mnt/luke/kimi-k3-cache/kimi-k3-production-lmcache-12776c0-468c312:/cache/jit:rw \
+  voipmonitor/vllm@sha256:a54da4e2432138d42334cac54555f3a51188489cb66029da0d96e4b39162d726
 ```
 
 The image entrypoint is
@@ -194,17 +217,19 @@ objects, and no disk tier.
 Wait for readiness and verify the reported model:
 
 ```bash
-docker logs -f kimi-k3-production-dspark-lmcache-f67105d
+docker logs -f kimi-k3-production-dspark-lmcache-12776c0
 curl -fsS http://127.0.0.1:8001/v1/models | jq .
 curl -fsS http://127.0.0.1:8100/healthcheck
 ```
 
-Startup on the qualification host read 1.41 TiB through InstantTensor in 160
-seconds at 9.72 GB/s. Weight loading took 164.24 seconds. Complete model loading
-took 179.51 seconds and allocated 90.52 GiB per GPU. CUDA graph capture took 51
-seconds and 0.29 GiB per GPU. LMCache uses PyTorch's native CUDA allocator;
-the launcher rejects an expandable-segments override because CUDA IPC requires
-native allocations.
+Startup on the qualification host read 1.41 TiB through InstantTensor in
+approximately 160 seconds. Target weight loading took 164.32 seconds, and draft
+weight loading took 1.60 seconds.
+All 16 workers compiled the bounded vision interpolation before allocation of
+the 1,033,126-token KV cache. CUDA graph capture took approximately 51 seconds
+and 0.29 GiB per GPU. LMCache uses PyTorch's native CUDA allocator; the wrapper
+disables expandable segments before starting the vLLM workers because CUDA IPC
+requires stable native allocations.
 
 ## Start LLMConduit
 
@@ -297,27 +322,21 @@ vision, and the exact wire controls emitted by OMP.
 
 ## Measured Behavior
 
-The normalized decode protocol used one request, 256 stored input tokens,
-1,024 generated tokens, greedy sampling, one seed, two unrecorded warmups, and
-eight measured runs. The decode measurement was captured from Docker digest
-`sha256:c4b8ca2841309dc2c8f746d71f1783d8f03edbcf213b087e2d11e1c2e2ca557a`.
-That reference image uses vLLM tree
-`452bd5c56d7fb64de808d5a111c2272c70674c80`; the production tree differs by
-the scheduler error-path correction in vLLM #422. Both images use identical
-B12X, LMCache, model, and launcher sources.
+The source-activated image was measured with one streamed coding request, 119
+prompt tokens, 512 generated tokens, greedy sampling, and three runs. Throughput
+uses the interval from the first streamed output token through the last; HTTP
+time-to-first-token is excluded.
 
-| Metric | Median |
-|---|---:|
-| Emitted decode throughput | 113.71 tok/s |
-| Target cycles | 31.394 cycles/s |
-| Emitted tokens per target cycle | 3.624 |
-| Draft acceptance | 0.3749 |
+| Run | Active decode throughput |
+|---:|---:|
+| 1 | 133.55 tok/s |
+| 2 | 118.72 tok/s |
+| 3 | 91.05 tok/s |
+| Median | 118.72 tok/s |
 
-Emitted throughput varies with draft acceptance. Target-cycle throughput is
-the acceptance-independent runtime regression control. The artifact without the
-recurrent-cache and stream-parser corrections measured 31.430 target cycles/s
-under the same protocol. The artifact with those source corrections measures
-31.394 target cycles/s, a 0.11% reduction that is below run-to-run variation.
+The comparison image measured 122.18 tok/s median under the same three-run
+protocol. DSpark throughput varies with draft acceptance; the two medians are
+inside the observed per-run range.
 
 Docker digest
 `sha256:5cb7978445e6f3bb3efd70102bc5737e4fc6f0bb6a89d3ede4b74882a5da899a`
@@ -426,11 +445,11 @@ locks and verifies the resulting source trees before compiling:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 0e22e5f19c56e2dbe5adaab159db3c86b080598d
+git checkout f9cc49c187f7525453b65ed8b4a1733f6d97471a
 
 IMAGE=voipmonitor/vllm:kimi-k3-production-local \
-RELEASE_DATE=20260818 \
-REVISION=interleaved-query \
+RELEASE_DATE=20260819 \
+REVISION=source-overlay \
 ./build-kimi-k3-qsrt-tp16-runtime.sh
 ```
 
@@ -438,9 +457,10 @@ The builder starts from the pinned CUDA 13.3 and PyTorch 2.13 base image,
 checks all three integration locks, builds native extensions against the same
 ABI, validates required launchers and imports, and runs source-composition
 tests. Compiler metadata can produce a different Docker digest even when the
-verified source trees match. The vLLM lock composes PRs #310, #413, #414,
-#415, #418, #419, #422, and #427 into tree
-`f67105dd807842a3c1f1fc07931e1e4dadc0b68c`.
+verified source trees match. The vLLM base contains merged PR #401. The vLLM
+lock composes PRs #310, #413, #414, #415, #418, #419, #422, #427, #428, and
+#433 into tree `12776c0df15ca4087b636c43004b5bc1fde61434`. The B12X lock
+composes PR #227 into tree `468c31256b585c8078782c63ba723e404c04eb76`.
 
 ## Operational Limits
 
