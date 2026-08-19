@@ -10,6 +10,7 @@ source-locked CUDA 13.3 and PyTorch 2.13 image.
 | Document | Purpose | Status |
 |---|---|---|
 | [Production DSpark and LMCache](production-dspark-lmcache.md) | Docker, vLLM, LLMConduit, reasoning controls, native vision, tools, and Oh My Pi | qualified |
+| [Native host KV offload](native-host-kv-offload.md) | Process-shared RAM KV reuse for official MXFP4 with DSpark on TP16/DCP16 | qualified |
 | [Source-locked serving receipt](validation/source-locked-runtime-20260816.json) | No-speculation, DSpark, and DFlash source composition and runtime evidence | qualified |
 | [Distribution-fidelity reference](distribution-fidelity-1024x2048.md) | Teacher-forced hidden-state and KLD comparison over 1,024 contexts | implemented |
 | [AA-LCR reproduction](aa-lcr-reproduction.md) | Reproducible capability comparison protocol | qualified |

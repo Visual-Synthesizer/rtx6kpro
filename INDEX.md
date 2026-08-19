@@ -128,6 +128,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Kimi K3 AA-LCR reproduction specification](models/kimi-k3/aa-lcr-reproduction.md) - `models/kimi-k3/aa-lcr-reproduction.md`
 - [Kimi K3 distribution-fidelity reference](models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md) - `models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md`
 - [Kimi K3 distribution-fidelity reference: 1,024 contexts × 2,048 tokens](models/kimi-k3/distribution-fidelity-1024x2048.md) - `models/kimi-k3/distribution-fidelity-1024x2048.md`
+- [Kimi-K3 Native Host KV Offload](models/kimi-k3/native-host-kv-offload.md) - `models/kimi-k3/native-host-kv-offload.md`
 - [Kimi-K3 Official MXFP4 Production Deployment](models/kimi-k3/production-dspark-lmcache.md) - `models/kimi-k3/production-dspark-lmcache.md`
 - [Kimi-K3 QSRT K2 TP16/DCP8 Serving](models/kimi-k3/qsrt-k2-tp16-dcp8.md) - `models/kimi-k3/qsrt-k2-tp16-dcp8.md`
 - [RedHatAI BF16 DSpark for Kimi-K3 with DCP16](models/kimi-k3/redhat-dspark-dcp16.md) - `models/kimi-k3/redhat-dspark-dcp16.md`

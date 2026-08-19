@@ -10,6 +10,9 @@ a 1,000,000-token request limit.
 The machine-readable qualification record is
 [`validation/production-dspark-lmcache-clean-20260819.json`](validation/production-dspark-lmcache-clean-20260819.json).
 
+For a RAM-only cache owned by vLLM instead of LMCache, use the separately
+qualified [native host KV offload profile](native-host-kv-offload.md).
+
 ## Published artifacts
 
 | Component | Immutable identity |
