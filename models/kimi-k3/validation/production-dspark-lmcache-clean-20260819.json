@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "status": "qualified",
+  "qualified_at_utc": "2026-08-19",
+  "image": {
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-clean-vllm768a4fc-b12x4fd20fa-cu133-torch213-20260819-r3",
+    "digest": "sha256:5685a277bd5e51a433c51dfc45c248ddb340dacdc135682f74507015d2a0368d",
+    "local_image_id": "sha256:76cbee846c7d971b57a568a88574629d2952f415491944b4369e95693ff625d3",
+    "size_bytes": 31178739364,
+    "recipe_commit": "e5dc1506ac3df4812a643f2ebc77c86399e88321",
+    "source_mode": "compiled-installed-package",
+    "source_overlay": "absent"
+  },
+  "source": {
+    "vllm_base": "dev/infernal-invocation@6dc2f516688fe6f84c6994dcd20fddf296853a6c",
+    "vllm_commit": "9b1ac36efd2beb9a5adb60302cb9431ff2c11050",
+    "vllm_tree": "768a4fc36104cb9ffa09d562192dd6deb5bbf3f2",
+    "b12x_base": "master@c25cdba2c1df7a69b2d7771e4243e12a8fbf19d5",
+    "b12x_commit": "244e324997eb968bdbd53e5c264a1656abe55ac7",
+    "b12x_tree": "4fd20fa4bf81c476d61af9dcd11d23cb6dc1ad5a",
+    "lmcache_commit": "a128b2e286ebb3556cb43124149e600ff99fe481",
+    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+    "source_patches": []
+  },
+  "installed_package_equality": {
+    "excluded_file_types": ["compiled shared objects", "Python bytecode"],
+    "vllm": {
+      "files": 2924,
+      "source_manifest_sha256": "931eafae908e7dad616a840d3bb409f240d8f5d5c042b37a1525cda0fd61cd4a",
+      "installed_manifest_sha256": "931eafae908e7dad616a840d3bb409f240d8f5d5c042b37a1525cda0fd61cd4a"
+    },
+    "b12x": {
+      "files": 237,
+      "source_manifest_sha256": "24f2abefe8baa30046049d59c6a854dca55fa92b92e16581213f3d6e0fdfa433",
+      "installed_manifest_sha256": "24f2abefe8baa30046049d59c6a854dca55fa92b92e16581213f3d6e0fdfa433"
+    },
+    "lmcache": {
+      "files": 684,
+      "source_manifest_sha256": "f31734f44bbfa2e97050eaf64d307ea2d36c23eabb7eab38cd68abc129f27dc5",
+      "installed_manifest_sha256": "f31734f44bbfa2e97050eaf64d307ea2d36c23eabb7eab38cd68abc129f27dc5"
+    }
+  },
+  "runtime": {
+    "target": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "target_weight_format": "official MXFP4",
+    "draft": "Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "maximum_model_length_tokens": 1000000,
+    "physical_kv_tokens": 1033126,
+    "kv_cache_memory_bytes_per_gpu": 1325000000,
+    "kv_cache_dtype": "FP8",
+    "load_format": "instanttensor",
+    "target_weight_load_seconds_rank0": 183.636436,
+    "instanttensor_checkpoint_bytes_display": "1.41 TiB",
+    "instanttensor_terminal_throughput_display": "9.51 GB/s",
+    "cuda_graph_capture_seconds": 51,
+    "cuda_graph_memory_gib_per_gpu": 0.29,
+    "container_restarts": 0
+  },
+  "lmcache": {
+    "l1_gib": 32,
+    "chunk_tokens": 12288,
+    "transfer_mode": "engine_driven",
+    "kv_load_failure_policy": "recompute",
+    "heartbeat_interval_seconds": 30,
+    "worker_reap_timeout_seconds": 120
+  },
+  "tests": {
+    "hybrid_external_cache": {
+      "passed": 20,
+      "failed": 0
+    },
+    "launcher_configuration": "passed",
+    "unique_short_requests": {
+      "http_200": 21,
+      "requests": 21,
+      "fatal_runtime_markers": 0
+    },
+    "five_image_omp_replay": {
+      "prompt_tokens": 134219,
+      "completion_tokens": 128,
+      "images": 5,
+      "cold_http_status": 200,
+      "repeat_http_status": 200,
+      "done_events": 2,
+      "stream_errors": 0,
+      "protocol_marker_leaks": 0,
+      "lmcache_aligned_hit_tokens": 122880,
+      "lmcache_l1_read_chunks": 2720,
+      "local_gpu_prefix_cache_also_warm": true
+    }
+  },
+  "performance": {
+    "target_only_normalized_decode": {
+      "prompt_tokens": 256,
+      "completion_tokens_per_run": 1024,
+      "runs": 3,
+      "tokens_per_second_median": 55.68346141919786,
+      "reference_tokens_per_second_median": 56.14912083764279,
+      "relative_difference_percent": -0.829326,
+      "output_hash_identical_across_runs": true,
+      "physical_kv_tokens": 1460937
+    },
+    "normalized_decode": {
+      "prompt_tokens": 256,
+      "completion_tokens_per_run": 1024,
+      "runs": 3,
+      "target_cycles_per_second_median": 31.369067471440523,
+      "reference_target_cycles_per_second_median": 31.467134301322126,
+      "relative_difference_percent": -0.311648,
+      "emitted_tokens_per_second_median": 106.6756036197663,
+      "draft_acceptance_rate_median": 0.34295175023651847
+    },
+    "dflash_normalized_decode": {
+      "prompt_tokens": 256,
+      "completion_tokens_per_run": 1024,
+      "runs": 3,
+      "target_cycles_per_second_median": 27.78878510689143,
+      "reference_target_cycles_per_second_median": 27.846829959139434,
+      "target_cycle_relative_difference_percent": -0.208443,
+      "emitted_tokens_per_second_median": 90.6258740275641,
+      "reference_emitted_tokens_per_second_median": 90.96204650828257,
+      "draft_acceptance_rate_median": 0.32256596906278434,
+      "physical_kv_tokens": 1048576
+    },
+    "coding_decode": {
+      "prompt_tokens": 119,
+      "completion_tokens_per_run": 512,
+      "runs": 3,
+      "active_tokens_per_second": [124.3359156100593, 115.25260306255102, 126.05667156091684],
+      "median_active_tokens_per_second": 124.3359156100593
+    },
+    "gpu_links_under_decode_load": {
+      "gpu_count": 16,
+      "pcie_generation": 5,
+      "pcie_width": 16,
+      "utilization_percent": 100
+    }
+  },
+  "service": {
+    "container": "kimi-k3-production-dspark-lmcache-clean-768a4fc",
+    "vllm": "http://127.0.0.1:8001",
+    "lmcache": "http://127.0.0.1:8100",
+    "llmconduit": "http://127.0.0.1:8003"
+  }
+}
