@@ -3,20 +3,20 @@
   "status": "qualified",
   "qualified_at_utc": "2026-08-19",
   "image": {
-    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-clean-vllm95114d4-b12x4fd20fa-cu133-torch213-20260819-r4",
-    "digest": "sha256:67936d155e318122a545beae97579146b086a62842bdb04b52070a4b18b45c9a",
-    "local_image_id": "sha256:6ddf07ee07a5daf57047c1c821c4728ef83f5738d0e3017e1195829b70a0db32",
-    "size_bytes": 31178776949,
-    "recipe_commit": "71d02d23a64228d73032effe27e5abeccded5258",
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-clean-vllm726b234-b12x4fd20fa-cu133-torch213-20260819-r5",
+    "digest": "sha256:bd8a4be5e87c89f37548ee0502c1a0dc186e9058d57f3278927c1ef5d01e65fa",
+    "local_image_id": "sha256:f3346a059af1c755f621cbdc869791472ea79548860ddf8a8d124ad1b2e893cf",
+    "size_bytes": 31178812559,
+    "recipe_commit": "0b6dd14369588b894cd0ce9fe50c783be41d3a8e",
     "source_mode": "compiled-installed-package",
     "source_overlay": "absent"
   },
   "source": {
     "vllm_base": "dev/infernal-invocation@6dc2f516688fe6f84c6994dcd20fddf296853a6c",
-    "vllm_commit": "1057b63a6844b7e3816e4eaeac06d913a09c3e9d",
-    "vllm_tree": "95114d4e367b24a923e77af33b38f3c795c3f000",
+    "vllm_commit": "910bf43ca6b6a524fe469c3561e89b951c109057",
+    "vllm_tree": "726b2348584e75857ffe8b6eb19ef117b0b85c57",
     "vllm_pull_request": 441,
-    "vllm_pull_request_head": "8164755964b87be9b13e3fe76e8bd7d0d0a37559",
+    "vllm_pull_request_head": "9a8aa110a7c73db97be767485f5033040cd9e433",
     "b12x_commit": "244e324997eb968bdbd53e5c264a1656abe55ac7",
     "b12x_tree": "4fd20fa4bf81c476d61af9dcd11d23cb6dc1ad5a",
     "lmcache_commit": "a128b2e286ebb3556cb43124149e600ff99fe481",
@@ -35,7 +35,7 @@
     "kv_cache_dtype": "FP8",
     "native_host_kv_gib": 32,
     "load_format": "instanttensor",
-    "weight_load_seconds_rank0": 163.27,
+    "weight_load_seconds_rank0": 165.90,
     "cuda_graph_capture_seconds": 51,
     "draft_cache_groups": [16]
   },
@@ -57,9 +57,9 @@
     "done_event": true,
     "stream_errors": 0,
     "protocol_marker_leaks": 0,
-    "engine_prefill_seconds": 87.77352877997328,
+    "engine_prefill_seconds": 88.64412443898618,
     "host_store_bytes": 12706283520,
-    "host_store_seconds": 0.5175013756901027
+    "host_store_seconds": 0.5024699525386095
   },
   "restore": {
     "runs": 3,
@@ -71,30 +71,29 @@
     "recomputed_tokens_each_run": 11339,
     "host_to_device_bytes_each_run": 3705421824,
     "engine_prefill_seconds": [
-      9.249862984986976,
-      9.270786672015674,
-      9.1956078709336
+      9.234128139098175,
+      9.238915454014204,
+      9.251612494001165
     ],
-    "engine_prefill_seconds_median": 9.249862984986976,
+    "engine_prefill_seconds_median": 9.238915454014204,
     "engine_ttft_seconds": [
-      9.61086916923523,
-      9.586745023727417,
-      9.498660326004028
+      9.543906211853027,
+      9.540607452392578,
+      9.563941240310669
     ],
-    "engine_ttft_seconds_median": 9.586745023727417,
+    "engine_ttft_seconds_median": 9.543906211853027,
     "host_to_device_seconds": [
-      0.09460668802261353,
-      0.16811552047729494,
-      0.16149689483642582
+      0.16622268676757812,
+      0.17094528007507326,
+      0.16209321498870854
     ],
-    "host_to_device_seconds_median": 0.16149689483642582,
+    "host_to_device_seconds_median": 0.16622268676757812,
     "end_to_end_seconds": [
-      12.201531175989658,
-      12.856793091981672,
-      12.842909420025535
+      12.596029718988575,
+      12.386900934041478,
+      11.535201877937652
     ],
-    "end_to_end_seconds_median": 12.842909420025535
+    "end_to_end_seconds_median": 12.386900934041478
   },
-  "evidence_directory": "/mnt/luke/kimi-k3-runs/native-offload-source-locked-r4-tp16-20260819"
+  "evidence_directory": "/mnt/luke/kimi-k3-runs/native-offload-source-locked-r5-tp16-20260819"
 }
-
