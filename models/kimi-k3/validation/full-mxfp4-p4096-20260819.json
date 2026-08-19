@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "artifact_role": "Kimi-K3 full-MXFP4 4096-token prefill qualification receipt",
+  "created_at": "2026-08-19T22:49:58Z",
+  "implementation_status": "implemented",
+  "runtime_status": "qualified",
+  "deployment_status": "research-only",
+  "runtime": {
+    "base_image": "voipmonitor/vllm@sha256:bd8a4be5e87c89f37548ee0502c1a0dc186e9058d57f3278927c1ef5d01e65fa",
+    "served_model": "Kimi-K3-MXFP4-DSpark7-DCP16-1M",
+    "target_checkpoint": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "draft_checkpoint": "Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "max_model_len": 1048576,
+    "physical_kv_cache_tokens": 1057049,
+    "kv_cache_memory_bytes_per_rank": 1325000000,
+    "kv_cache_dtype": "fp8",
+    "max_num_batched_tokens": 4102,
+    "draft_reserved_token_slots": 6,
+    "max_num_scheduled_tokens": 4096,
+    "max_num_seqs": 1,
+    "vision_enabled": false,
+    "prefix_caching_enabled": false,
+    "external_kv_cache": "off"
+  },
+  "source": {
+    "vllm_base_revision": "337ef76dcd30198d8dd47f6c9e61ae1d8be73656",
+    "vllm_runtime_overlays": [
+      {
+        "pull_request": "https://github.com/local-inference-lab/vllm/pull/444",
+        "commit": "98d19989bb4744814f370dcd76932d02264f6a25"
+      },
+      {
+        "pull_request": "https://github.com/local-inference-lab/vllm/pull/445",
+        "commit": "653c7ff980b25f288cebddd02dc92d0fe42f106e"
+      },
+      {
+        "pull_request": "https://github.com/local-inference-lab/vllm/pull/446",
+        "commit": "8bdc2ff939616e3603b74dceff3d9088a6a630f6"
+      },
+      {
+        "pull_request": "https://github.com/local-inference-lab/vllm/pull/447",
+        "commit": "097ad6ac495490b240aff8356479e5b50d0db78b"
+      }
+    ],
+    "b12x_base_revision": "c25cdba2c1df7a69b2d7771e4243e12a8fbf19d5",
+    "b12x_dependency_heads": [
+      "0eba6ae99e0d1fad6ec268d8c291f498ec1dd4d9",
+      "7f88972df71d580951115220b75923078b769fe8"
+    ],
+    "b12x_prefill_reduction": {
+      "pull_request": "https://github.com/local-inference-lab/b12x/pull/238",
+      "commit": "325528adda0a8f0ec88665dfc86e1f008e9058d5"
+    },
+    "b12x_composed_tree": "5f9ebc037bd02d33185b23354957543924b5a7e4"
+  },
+  "prefill_median": {
+    "8192": {
+      "ttft_seconds": 2.1235926229855977,
+      "tokens_per_second": 3857.613702452745,
+      "measured_runs": 6
+    },
+    "32768": {
+      "ttft_seconds": 8.791526513057761,
+      "tokens_per_second": 3727.2252948712357,
+      "measured_runs": 3
+    },
+    "65535": {
+      "ttft_seconds": 18.46292852202896,
+      "tokens_per_second": 3549.545237192854,
+      "measured_runs": 3
+    }
+  },
+  "decode_sanity": {
+    "target_cycles_per_second_medians": [
+      30.319902856815073,
+      30.450600689779737
+    ],
+    "emitted_tokens_per_second_medians": [
+      121.54105510773798,
+      112.97614168961758
+    ],
+    "note": "Emitted DSpark throughput depends on the generated path and draft acceptance. Target cycles per second are the regression metric."
+  },
+  "evidence": [
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/prefill-8k-repeat6.json",
+      "sha256": "7abd5f23b133586a4c5d80e443b040070f1a88ac41d539297dfaad47f34e8d53"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/prefill-32k-64k.json",
+      "sha256": "f1cb21dcb15022e27ab26f1e6e8c096e1cd4f38ffb9b3b661176369d597b8e4f"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/decode-normalized/summary.json",
+      "sha256": "556d98afe110f49487ba4167f8ff07f5acb81f2194b1cdf07d4a62281721b1a0"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/decode-normalized-repeat/summary.json",
+      "sha256": "24e35c2430d25c31df270838fce2122c50eccc3db57c15b6c375db2470d0cfe7"
+    }
+  ],
+  "numerical_limit": "The opt-in B12X prefill reduction changes FP32 route-addition order. The Kimi shape test measured cosine similarity 1.0 and maximum BF16 absolute difference 0.015625; bitwise parity is unsupported."
+}
