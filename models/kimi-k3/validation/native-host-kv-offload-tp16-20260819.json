@@ -18,9 +18,10 @@
       "8164755964",
       "9a8aa110a7",
       "2be610a9cc",
-      "b3305dcd5e"
+      "b3305dcd5e",
+      "b92553052a"
     ],
-    "recommended_combined_vllm_tree": "300b1b3b0f738125dfe78f0a97d53b4e5313f209",
+    "recommended_combined_vllm_tree": "f98342a7cd289a1ec094f8a1b3c4e0aef185a666",
     "runtime_qualified_combined_vllm_tree": "bcc3d52dd160a86f592fa1270cb8c40a7f850b16",
     "runtime_qualified_vllm_pull_request_443_commit": "2be610a9cc69f0ca5a0a2892aca1fe2f563e3d70",
     "overlays": [
@@ -30,7 +31,7 @@
       },
       {
         "path": "vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py",
-        "sha256": "fb6e908e24ffca0dd1409991784b49d2610adf90fd63834d1c852da1f07224cc"
+        "sha256": "712fe2363bace458d650b2d0c4b19132828d8b729275b9f41ea82bbb6c8ea15b"
       }
     ],
     "runtime_qualified_overlays": [
