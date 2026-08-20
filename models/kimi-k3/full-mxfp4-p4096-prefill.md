@@ -315,6 +315,11 @@ tokens, so this memory-only harness change does not alter transformer math.
 The result qualifies teacher-forced distributions at 2,048-token context; it
 does not qualify free-running generation or longer-context numerical drift.
 
+The capture-only vLLM callbacks are preserved at commit
+[`b6507fdbb47ff99fdeeaead1b3c59cb01e64324b`](https://github.com/voipmonitor/vllm/commit/b6507fdbb47ff99fdeeaead1b3c59cb01e64324b)
+on branch `research/ii-kimi-p4096-kld-capture-20260820`. They export the
+pre-LM-head tensor after a request and do not change the model calculation.
+
 An A-B-B-A microbenchmark measured 5,214.17 us for materialized reduction and
 5,304.32 us for bounded reduction. The bounded kernel is 1.73% slower in
 isolation; its end-to-end gain comes from executing one 4,096-token MoE launch

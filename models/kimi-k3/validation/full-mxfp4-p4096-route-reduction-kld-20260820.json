@@ -37,6 +37,8 @@
     "image": "voipmonitor/vllm@sha256:bd8a4be5e87c89f37548ee0502c1a0dc186e9058d57f3278927c1ef5d01e65fa",
     "pytorch": "2.13.0",
     "cuda": "13.3",
+    "vllm_capture_repository": "https://github.com/voipmonitor/vllm",
+    "vllm_capture_branch": "research/ii-kimi-p4096-kld-capture-20260820",
     "vllm_capture_revision": "b6507fdbb47ff99fdeeaead1b3c59cb01e64324b",
     "vllm_capture_tree": "bd210e345e214d1cf4dccbebe654d972fe0204a3",
     "b12x_revision": "90e722fc67be33d1e5752b68ec5e0a6759954602",
