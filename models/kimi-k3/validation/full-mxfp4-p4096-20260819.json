@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "artifact_role": "Kimi-K3 full-MXFP4 4096-token prefill qualification receipt",
-  "created_at": "2026-08-19T22:49:58Z",
+  "created_at": "2026-08-19T23:52:35Z",
   "implementation_status": "implemented",
   "runtime_status": "qualified",
   "deployment_status": "research-only",
@@ -33,7 +33,10 @@
       },
       {
         "pull_request": "https://github.com/local-inference-lab/vllm/pull/445",
-        "commit": "653c7ff980b25f288cebddd02dc92d0fe42f106e"
+        "commits": [
+          "653c7ff980b25f288cebddd02dc92d0fe42f106e",
+          "d3ab47527c4904c5f9ea510c82236e677facc95a"
+        ]
       },
       {
         "pull_request": "https://github.com/local-inference-lab/vllm/pull/446",
@@ -44,6 +47,7 @@
         "commit": "097ad6ac495490b240aff8356479e5b50d0db78b"
       }
     ],
+    "vllm_composed_tree": "d4195f16a70f8d441ad5969acb021ee71f39e13b",
     "b12x_base_revision": "c25cdba2c1df7a69b2d7771e4243e12a8fbf19d5",
     "b12x_dependency_heads": [
       "0eba6ae99e0d1fad6ec268d8c291f498ec1dd4d9",
@@ -51,54 +55,92 @@
     ],
     "b12x_prefill_reduction": {
       "pull_request": "https://github.com/local-inference-lab/b12x/pull/238",
-      "commit": "325528adda0a8f0ec88665dfc86e1f008e9058d5"
+      "head_revision": "450ba32b0580bb35d0dce28f70e1cd5fb7ce8116",
+      "code_revision": "0c3be37138f74a6d0213c10202e0077c2d2a44da",
+      "implementation_patch_id": "ac0b86c5901941483654e6e3314f66bb095bf623",
+      "qualification_receipt_sha256": "65db1e3220c45246e0eede79da4d9ebb448f27c631bfcf23194a5248efdeb551"
     },
-    "b12x_composed_tree": "5f9ebc037bd02d33185b23354957543924b5a7e4"
+    "b12x_composed_tree": "4757592885f764593625d19f99bfba8d7c973b6b",
+    "b12x_package_subtree": "1e71cf90fbe4116685819845186439df46722c19"
   },
   "prefill_median": {
     "8192": {
-      "ttft_seconds": 2.1235926229855977,
-      "tokens_per_second": 3857.613702452745,
+      "ttft_seconds": 2.1213274939800613,
+      "tokens_per_second": 3861.7328320124448,
       "measured_runs": 6
     },
     "32768": {
-      "ttft_seconds": 8.791526513057761,
-      "tokens_per_second": 3727.2252948712357,
+      "ttft_seconds": 8.779126451932825,
+      "tokens_per_second": 3732.4898074324637,
       "measured_runs": 3
     },
     "65535": {
-      "ttft_seconds": 18.46292852202896,
-      "tokens_per_second": 3549.545237192854,
+      "ttft_seconds": 18.437468013027683,
+      "tokens_per_second": 3554.446844528424,
       "measured_runs": 3
     }
   },
   "decode_sanity": {
-    "target_cycles_per_second_medians": [
-      30.319902856815073,
-      30.450600689779737
-    ],
-    "emitted_tokens_per_second_medians": [
-      121.54105510773798,
-      112.97614168961758
-    ],
+    "target_cycles_per_second_median": 31.485556126792343,
+    "emitted_tokens_per_second_median": 109.98990444040119,
+    "draft_acceptance_rate_median": 0.3561710398445092,
     "note": "Emitted DSpark throughput depends on the generated path and draft acceptance. Target cycles per second are the regression metric."
+  },
+  "workspace": {
+    "materialized_bytes_per_rank": 1063787080,
+    "bounded_bytes_per_rank": 292035144,
+    "saved_bytes_per_rank": 771751936,
+    "isolated_materialized_microseconds": 5214.168,
+    "isolated_bounded_microseconds": 5304.320,
+    "isolated_bounded_over_materialized_ratio": 1.0172898,
+    "interpretation": "The bounded reduction is 1.73% slower in isolation. End-to-end throughput improves because 4096 scheduler tokens execute as one MoE launch instead of four 1024-token launches."
+  },
+  "gpu_mode": {
+    "sample_rows": 7072,
+    "throttle_mask_nonzero_rows": 0,
+    "active_pstate": "P1",
+    "active_clock_mhz_min": 2595,
+    "active_clock_mhz_median": 2790,
+    "active_clock_mhz_max": 2880,
+    "gpu_count_reaching_100_percent_utilization": 16
+  },
+  "validation": {
+    "b12x_default_w4a16_gpu_suite": {
+      "passed": 292,
+      "skipped": 16
+    },
+    "b12x_focused_route_reduction": {
+      "passed": 5
+    },
+    "vllm_moe_workspace": {
+      "passed": 4
+    },
+    "vllm_attnres": {
+      "passed": 6
+    },
+    "vllm_vision_projector": {
+      "passed": 4
+    },
+    "vllm_manual_kv_worker": {
+      "passed": 10
+    }
   },
   "evidence": [
     {
-      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/prefill-8k-repeat6.json",
-      "sha256": "7abd5f23b133586a4c5d80e443b040070f1a88ac41d539297dfaad47f34e8d53"
+      "path": "/mnt/luke/kimi-k3-runs/p4096-review-final-full1m-20260819/prefill-8k-repeat6.json",
+      "sha256": "9e63c0f22769d60413479d951ee9ac2e647d87128077d80e75183fbafdf931d0"
     },
     {
-      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/prefill-32k-64k.json",
-      "sha256": "f1cb21dcb15022e27ab26f1e6e8c096e1cd4f38ffb9b3b661176369d597b8e4f"
+      "path": "/mnt/luke/kimi-k3-runs/p4096-review-final-full1m-20260819/prefill-32k-64k.json",
+      "sha256": "0f1366f9107f2c3e45c87e1f2545e79e178161e1a9d5423a421fa04936f21acb"
     },
     {
-      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/decode-normalized/summary.json",
-      "sha256": "556d98afe110f49487ba4167f8ff07f5acb81f2194b1cdf07d4a62281721b1a0"
+      "path": "/mnt/luke/kimi-k3-runs/p4096-review-final-full1m-20260819/decode-normalized/summary.json",
+      "sha256": "c7538de0e5f6786ef53ec3f72706a208ca5389a91f1b31012263dcef898aa124"
     },
     {
-      "path": "/mnt/luke/kimi-k3-runs/p4096-exact-fused-clean-integration-full1m-20260819/decode-normalized-repeat/summary.json",
-      "sha256": "24e35c2430d25c31df270838fce2122c50eccc3db57c15b6c375db2470d0cfe7"
+      "path": "/mnt/luke/kimi-k3-runs/p4096-review-final-full1m-20260819/gpu-mode.csv",
+      "sha256": "3b9403b3ac1b574912003280c4285d61bc3aa7c7818ae87de51ae902a43a73a1"
     }
   ],
   "numerical_limit": "The opt-in B12X prefill reduction changes FP32 route-addition order. The Kimi shape test measured cosine similarity 1.0 and maximum BF16 absolute difference 0.015625; bitwise parity is unsupported."
