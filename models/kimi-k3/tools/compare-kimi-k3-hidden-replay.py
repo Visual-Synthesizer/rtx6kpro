@@ -438,6 +438,15 @@ def main() -> None:
     parser.add_argument("--lm-head", type=Path)
     parser.add_argument("--suite-manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--raw-metrics-output",
+        type=Path,
+        help=(
+            "Optional compressed NumPy artifact containing per-position KLD and "
+            "Jensen-Shannon values in selected-context order. This supports exact "
+            "aggregation of disjoint context ranges."
+        ),
+    )
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--hidden-width", type=int, default=7168)
     parser.add_argument("--vocab-size", type=int, default=163840)
@@ -755,6 +764,22 @@ def main() -> None:
         encoding="utf-8",
     )
     temporary.replace(args.output)
+    if args.raw_metrics_output is not None:
+        args.raw_metrics_output.parent.mkdir(parents=True, exist_ok=True)
+        raw_temporary = args.raw_metrics_output.with_suffix(
+            args.raw_metrics_output.suffix + ".tmp.npz"
+        )
+        np.savez_compressed(
+            raw_temporary,
+            context_indices=np.asarray(
+                [item["context_index"] for item in context_reports],
+                dtype=np.int64,
+            ),
+            js=combined_js,
+            kl_reference_to_candidate=combined_kl,
+            positions_per_context=np.asarray(scored_rows, dtype=np.int64),
+        )
+        raw_temporary.replace(args.raw_metrics_output)
     print(json.dumps(result, indent=2, sort_keys=True))
 
 

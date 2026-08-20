@@ -12,6 +12,8 @@ published for this profile.
 
 The machine-readable receipt is
 [`validation/full-mxfp4-p4096-20260819.json`](validation/full-mxfp4-p4096-20260819.json).
+The route-reduction distribution-fidelity receipt is
+[`validation/full-mxfp4-p4096-route-reduction-kld-20260820.json`](validation/full-mxfp4-p4096-route-reduction-kld-20260820.json).
 
 ## Result
 
@@ -256,12 +258,62 @@ The 8,192-token six-run result was collected with `--sizes 8192 --runs 6`.
 | vLLM manual-KV worker tests | 10 passed |
 | Kimi 4,096-token graph replay | completed |
 | Physical KV allocation | 1,057,049 tokens |
+| Teacher-forced route-reduction fidelity suite | 1,024 contexts, 2,096,128 scored positions |
+| Runtime-repeat control | 64 stratified sentinel contexts per reduction mode |
 
 The direct route reduction changes the order of FP32 additions. The Kimi shape
 test measured cosine similarity 1.0 and a maximum BF16 absolute difference of
 0.015625 against the materialized-route implementation. Bitwise identity and
 bitwise repeat determinism are unsupported. The optimization is opt-in through
 `B12X_W4A16_PREFILL_FUSED_SUM=1`.
+
+### Distribution-fidelity qualification
+
+The immutable 1,024-context teacher-forced suite
+`kimi-k3-distribution-fidelity-1024x2048-v1` captures BF16 hidden states after
+final RMSNorm and immediately before the LM head. Both route-reduction modes
+use the same official MXFP4 routed experts, online MXFP8 dense-linear overlay,
+token IDs, BF16 LM-head weight, TP16/DCP16 topology, B12X MLA backend, Triton
+KDA backend, FP8 KV dtype, and 4,096-token scheduler limit. A shared
+deterministic full-vocabulary LM-head replay computes
+`KL(materialized || bounded)`.
+
+The 1,024-context comparison covers 2,096,128 scored positions and measures:
+
+| Metric | Result |
+|---|---:|
+| Mean KLD | 0.003135632 |
+| Median KLD | 0.000201040 |
+| p95 KLD | 0.011897739 |
+| p99 KLD | 0.039854055 |
+| Mean Jensen-Shannon divergence | 0.000758334 |
+| Top-1 agreement | 98.4209% |
+
+The absolute comparison includes runtime nondeterminism. A stratified
+64-context sentinel control therefore compares the bounded result with an
+independent materialized repeat that uses the same reference capture:
+
+| Sentinel comparison | Mean KLD |
+|---|---:|
+| Bounded vs. materialized | 0.003304443 |
+| Materialized repeat | 0.003255040 |
+| Bounded repeat | 0.003269351 |
+
+The paired bounded-minus-materialized-repeat estimate is `+0.000049403` KLD.
+Its stratified source-cluster bootstrap 95% interval is
+`[-0.000111022, +0.000257288]`; the median paired context difference is
+`-0.000011861`, and bounded reduction has lower KLD on 34 of 64 contexts. The
+interval crosses zero, so the suite does not detect fidelity loss caused by
+bounded FP32 route accumulation beyond measured runtime-repeat variation. The
+upper interval endpoint is the measured resolution bound, not proof of exact
+numerical equivalence.
+
+The fidelity harness uses a 300,000,000-byte KV allocation per rank and a
+4,096-token model limit so that the materialized implementation can coexist
+with its 1,014.51 MiB route-output workspace. Every scored context has 2,048
+tokens, so this memory-only harness change does not alter transformer math.
+The result qualifies teacher-forced distributions at 2,048-token context; it
+does not qualify free-running generation or longer-context numerical drift.
 
 An A-B-B-A microbenchmark measured 5,214.17 us for materialized reduction and
 5,304.32 us for bounded reduction. The bounded kernel is 1.73% slower in
