@@ -1,27 +1,37 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "qualified",
   "qualified_at_utc": "2026-08-19",
+  "deployment_status": "research-only-source-overlay",
   "image": {
     "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-clean-vllm726b234-b12x4fd20fa-cu133-torch213-20260819-r5",
     "digest": "sha256:bd8a4be5e87c89f37548ee0502c1a0dc186e9058d57f3278927c1ef5d01e65fa",
     "local_image_id": "sha256:f3346a059af1c755f621cbdc869791472ea79548860ddf8a8d124ad1b2e893cf",
     "size_bytes": 31178812559,
     "recipe_commit": "0b6dd14369588b894cd0ce9fe50c783be41d3a8e",
-    "source_mode": "compiled-installed-package",
-    "source_overlay": "absent"
+    "source_mode": "compiled-base-with-read-only-python-source-overlay"
   },
   "source": {
-    "vllm_base": "dev/infernal-invocation@6dc2f516688fe6f84c6994dcd20fddf296853a6c",
-    "vllm_commit": "910bf43ca6b6a524fe469c3561e89b951c109057",
-    "vllm_tree": "726b2348584e75857ffe8b6eb19ef117b0b85c57",
-    "vllm_pull_request": 441,
-    "vllm_pull_request_head": "9a8aa110a7c73db97be767485f5033040cd9e433",
-    "b12x_commit": "244e324997eb968bdbd53e5c264a1656abe55ac7",
+    "vllm_base": "dev/infernal-invocation@337ef76dcd30198d8dd47f6c9e61ae1d8be73656",
+    "vllm_pull_requests": [441, 443],
+    "vllm_commits": [
+      "8164755964",
+      "9a8aa110a7",
+      "2be610a9cc"
+    ],
+    "combined_vllm_tree": "bcc3d52dd160a86f592fa1270cb8c40a7f850b16",
+    "overlays": [
+      {
+        "path": "vllm/v1/core/kv_cache_utils.py",
+        "sha256": "ccf1f759cbb6dc86f8101fd1f3591bf2943bc3ff86f703671f4feb0acf00a91e"
+      },
+      {
+        "path": "vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py",
+        "sha256": "304794f90fdc720687b2ea742bdfab78987a78bb368b0e31468c621eedd1de7f"
+      }
+    ],
     "b12x_tree": "4fd20fa4bf81c476d61af9dcd11d23cb6dc1ad5a",
-    "lmcache_commit": "a128b2e286ebb3556cb43124149e600ff99fe481",
-    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
-    "source_patches": []
+    "lmcache_tree_in_base_image": "e045d729bc5c4c63a40e13d032f42923de97812f"
   },
   "runtime": {
     "target": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
@@ -35,14 +45,18 @@
     "kv_cache_dtype": "FP8",
     "native_host_kv_gib": 32,
     "load_format": "instanttensor",
-    "weight_load_seconds_rank0": 165.90,
-    "cuda_graph_capture_seconds": 51,
-    "draft_cache_groups": [16]
+    "draft_cache_groups": [16],
+    "replay_tail_alignment_tokens": 768,
+    "target_cache_page_tokens": 12288,
+    "lmcache_enabled": false,
+    "pytorch_cuda_alloc_conf": "expandable_segments:False"
   },
   "compatibility": {
     "cache_group_rule": "attention-layer non_causal_multi_token_decode metadata",
-    "dcp8_unit_test": "passed",
-    "dcp16_unit_test": "passed",
+    "replay_tail_contract": "completed request, completion-only partial-page keys, contiguous full-attention keys, terminal window keys, and later complete draft stability key",
+    "aborted_request_tail_store": false,
+    "dcp8_grouping_unit_test": "passed",
+    "dcp16_grouping_unit_test": "passed",
     "tp8_full_model": "unqualified",
     "tp16_dcp16_full_model": "qualified"
   },
@@ -53,20 +67,17 @@
     "completion_tokens": 128
   },
   "cold_seed": {
+    "artifact": "cold-seed-04/receipt.json",
+    "artifact_sha256": "79ca3dc09c0abf0e5514d55024679be03732ac882fe7a320affe2ede35b79b16",
     "http_status": 200,
     "done_event": true,
     "stream_errors": 0,
     "protocol_marker_leaks": 0,
-    "engine_prefill_seconds": 88.64412443898618,
-    "host_store_bytes": 12706283520,
-    "host_store_seconds": 0.5024699525386095
+    "engine_prefill_seconds": 82.94934202195145,
+    "host_store_bytes": 13361135616,
+    "host_store_seconds": 0.5385852491855619
   },
-  "restore": {
-    "runs": 3,
-    "http_200": 3,
-    "done_events": 3,
-    "stream_errors": 0,
-    "protocol_marker_leaks": 0,
+  "complete_target_page_baseline": {
     "host_hit_tokens_each_run": 122880,
     "recomputed_tokens_each_run": 11339,
     "host_to_device_bytes_each_run": 3705421824,
@@ -82,18 +93,64 @@
       9.563941240310669
     ],
     "engine_ttft_seconds_median": 9.543906211853027,
-    "host_to_device_seconds": [
-      0.16622268676757812,
-      0.17094528007507326,
-      0.16209321498870854
-    ],
     "host_to_device_seconds_median": 0.16622268676757812,
-    "end_to_end_seconds": [
-      12.596029718988575,
-      12.386900934041478,
-      11.535201877937652
-    ],
-    "end_to_end_seconds_median": 12.386900934041478
+    "end_to_end_seconds_median": 12.386900934041478,
+    "host_bytes_after_cold_seed": 12706283520
   },
-  "evidence_directory": "/mnt/luke/kimi-k3-runs/native-offload-source-locked-r5-tp16-20260819"
+  "replay_tail_restore": {
+    "runs": 3,
+    "http_200": 3,
+    "done_events": 3,
+    "stream_errors": 0,
+    "protocol_marker_leaks": 0,
+    "host_hit_tokens_each_run": 132864,
+    "recomputed_tokens_each_run": 1355,
+    "host_to_device_bytes_each_run": 3875291136,
+    "engine_prefill_seconds": [
+      1.260010845027864,
+      1.2747525660088286,
+      1.2703687789617106
+    ],
+    "engine_prefill_seconds_median": 1.2703687789617106,
+    "engine_ttft_seconds": [
+      1.5698108673095703,
+      1.616743803024292,
+      1.5722389221191406
+    ],
+    "engine_ttft_seconds_median": 1.5722389221191406,
+    "host_to_device_seconds": [
+      0.17317862415313723,
+      0.10339625501632693,
+      0.17792169666290286
+    ],
+    "host_to_device_seconds_median": 0.17317862415313723,
+    "api_time_to_first_output_seconds": [
+      1.5751187229761854,
+      1.6220808899961412,
+      1.5774856570642442
+    ],
+    "api_time_to_first_output_seconds_median": 1.5774856570642442,
+    "end_to_end_seconds": [
+      4.707256125984713,
+      3.9556698239175603,
+      3.956928426050581
+    ],
+    "end_to_end_seconds_median": 3.956928426050581,
+    "host_bytes_after_cold_seed": 13361135616,
+    "receipts": [
+      {
+        "path": "host-restore-02/receipt.json",
+        "sha256": "620d6ac32b796148e9bbeb82a22e69a9e1c01e4077137e357ff37eb60e639d94"
+      },
+      {
+        "path": "host-restore-03/receipt.json",
+        "sha256": "694fd77dd9a9f3c4684fb571f4afc7515d9e683496b990d520d1e622107ee027"
+      },
+      {
+        "path": "host-restore-04/receipt.json",
+        "sha256": "804424b608a881bf45b475e41326c1dbe0213339c862a3a4ffd778068a7214b0"
+      }
+    ]
+  },
+  "evidence_directory": "/mnt/luke/kimi-k3-runs/native-replay-tail-tp16-20260819"
 }
