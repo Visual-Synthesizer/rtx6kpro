@@ -1,8 +1,10 @@
 # Kimi-K3 Native Host KV Offload
 
-Status: **qualified** for a TP16/DCP16 Kimi-K3 runtime assembled from vLLM
-pull requests [#441](https://github.com/local-inference-lab/vllm/pull/441)
-and [#443](https://github.com/local-inference-lab/vllm/pull/443).
+Implementation status: **implemented** at vLLM #443 commit `b3305dcd5e`.
+Runtime status: **qualified** at its parent `2be610a9cc` with vLLM
+[#441](https://github.com/local-inference-lab/vllm/pull/441). The head commit
+adds bounded lookup, deterministic source ordering, retention fallback, and
+tests without changing the qualified GPU transfer implementation.
 
 Deployment status: **research-only** until vLLM #443 is included in a
 published image. The command below mounts two Python modules from an exact
@@ -27,20 +29,22 @@ The machine-readable qualification record is
 | Docker recipe | `local-inference-lab/blackwell-llm-docker@0b6dd14369588b894cd0ce9fe50c783be41d3a8e` |
 | vLLM composition base | `dev/infernal-invocation@337ef76dcd30198d8dd47f6c9e61ae1d8be73656` |
 | Draft-group metadata | vLLM #441 commits `8164755964` and `9a8aa110a7` |
-| Completed replay tails | vLLM #443 commit `2be610a9cc` |
-| Combined vLLM tree | `bcc3d52dd160a86f592fa1270cb8c40a7f850b16` |
+| Completed replay tails | vLLM #443 commits `2be610a9cc` and `b3305dcd5e` |
+| Recommended combined vLLM tree | `300b1b3b0f738125dfe78f0a97d53b4e5313f209` |
+| Runtime-qualified combined vLLM tree | `bcc3d52dd160a86f592fa1270cb8c40a7f850b16` |
 | B12X tree | `4fd20fa4bf81c476d61af9dcd11d23cb6dc1ad5a` |
 | Target checkpoint | `moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970` |
 | Draft checkpoint | `Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6` |
 
-The base image already contains vLLM #441. Both source modules are mounted
-from one combined checkout to make the active source identity explicit:
+The base image already contains vLLM #441. The recommended #443 head mounts
+both source modules from one combined checkout to make the active source
+identity explicit:
 
 ```text
 vllm/v1/core/kv_cache_utils.py
   SHA-256 ccf1f759cbb6dc86f8101fd1f3591bf2943bc3ff86f703671f4feb0acf00a91e
 vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py
-  SHA-256 304794f90fdc720687b2ea742bdfab78987a78bb368b0e31468c621eedd1de7f
+  SHA-256 fb6e908e24ffca0dd1409991784b49d2610adf90fd63834d1c852da1f07224cc
 ```
 
 ## Cache contract
@@ -71,10 +75,11 @@ git checkout --detach 337ef76dcd30198d8dd47f6c9e61ae1d8be73656
 git cherry-pick \
   8164755964 \
   9a8aa110a7 \
-  2be610a9cc
+  2be610a9cc \
+  b3305dcd5e
 
 test "$(git rev-parse HEAD^{tree})" = \
-  bcc3d52dd160a86f592fa1270cb8c40a7f850b16
+  300b1b3b0f738125dfe78f0a97d53b4e5313f209
 ```
 
 The cherry-picked commit ID depends on Git committer metadata; the verified
@@ -166,9 +171,10 @@ Host-local evidence is stored under:
 
 ## Validation and limits
 
-- Seven focused scheduler tests cover mixed cache geometry, missing completion
-  and draft keys, full-attention holes, local-prefix deltas, partial-page
-  stores, load mappings, and recurrent-boundary retention.
+- Eleven focused scheduler tests cover mixed cache geometry, missing completion
+  and draft keys, full-attention holes, local-prefix deltas, bounded
+  long-prompt lookup, partial-page stores, manager-order independence, unsafe
+  requests, load mappings, and recurrent-boundary retention.
 - Cache-spec promotion and DCP8/DCP16 grouping are covered by vLLM #441 tests.
 - TP16/DCP16 full-model serving is qualified. TP8 grouping is unit-tested;
   TP8 full-model serving is unqualified.
