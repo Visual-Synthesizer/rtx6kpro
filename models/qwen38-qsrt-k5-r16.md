@@ -287,10 +287,10 @@ their state does not rewrite the immutable image contents.
 | [#304](https://github.com/local-inference-lab/vllm/pull/304) create-if-absent filesystem KV publication | `229de6270e51` | open | Fork-specific; no upstream mapping declared |
 | [#308](https://github.com/local-inference-lab/vllm/pull/308) heterogeneous KV block zeroing | `053e6351d0b3` | open | [upstream #51749](https://github.com/vllm-project/vllm/pull/51749) and [#52058](https://github.com/vllm-project/vllm/pull/52058), merged |
 | [#309](https://github.com/local-inference-lab/vllm/pull/309) deferred MLA DCP workspace | `dc0c026df624` | open | Fork-specific; no upstream mapping declared |
-| [#320](https://github.com/local-inference-lab/vllm/pull/320) speculative structured-output validation | `e9534672129b` | open; head `fd0237e15f71` | [upstream #52452](https://github.com/vllm-project/vllm/pull/52452), open |
+| [#320](https://github.com/local-inference-lab/vllm/pull/320) speculative structured-output validation | `e9534672129b` | open; head `fd0237e15f71` | [upstream #52452](https://github.com/vllm-project/vllm/pull/52452), open with merge conflicts |
 | [#415](https://github.com/local-inference-lab/vllm/pull/415) DSpark CUDA-graph capture contract | `c805ebd0896c` | open; head `2e8535c70af8` | Fork-specific; no upstream mapping declared |
 | [#417](https://github.com/local-inference-lab/vllm/pull/417) legacy direct DSML tool calls | `2511e5df2b1e` | open | Fork-specific; no upstream mapping declared |
-| [#461](https://github.com/local-inference-lab/vllm/pull/461) missing-vendored-rotary fallback | `0942707892ca` | open; ready for review | Distinct from [upstream #52121](https://github.com/vllm-project/vllm/pull/52121), which handles an installed but unloadable dependency |
+| [#461](https://github.com/local-inference-lab/vllm/pull/461) missing-vendored-rotary fallback | `0942707892ca` | open; ready for review | Distinct from [upstream #52121](https://github.com/vllm-project/vllm/pull/52121), open and blocked, which handles an installed but unloadable dependency |
 | [#462](https://github.com/local-inference-lab/vllm/pull/462) B12X hybrid page-table capacity | `1d341d8482e4` | open; ready for review | Fork-specific B12X integration; no upstream mapping |
 
 ### B12X
