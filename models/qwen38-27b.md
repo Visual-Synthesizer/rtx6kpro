@@ -5,11 +5,16 @@ Blackwell systems. Results are grouped by tensor-parallel (TP) size so that a
 single-GPU result is not presented as directly comparable to a two-GPU or
 four-GPU deployment.
 
-**Evidence snapshot:** 2026-08-18
+**Evidence snapshot:** 2026-08-21
 
 **Status:** `research-only` except for the explicitly marked TP4 official-FP8
 configuration, which is `qualified` against repeated performance and quality
 gates.
+
+The research-only dense-MLP QSRT K5 checkpoint, its weighted-SVD rank-16
+recovery, all-boundary optimizer evaluation, packed B12X runtime, and exact
+source inventory are documented in
+[Qwen3.8-27B QSRT K5 dense-MLP recovery](qwen38-qsrt-k5-r16.md).
 
 ## Reading The Tables
 
