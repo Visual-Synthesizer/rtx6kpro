@@ -15,17 +15,17 @@ request limit and 1,016,293 physical FP8 KV tokens while retaining 32 GiB of
 host RAM for native vLLM KV offload.
 
 The machine-readable qualification record is
-[`validation/kimi-k3-upstream-aligned-r27-20260821.json`](validation/kimi-k3-upstream-aligned-r27-20260821.json).
+[`validation/kimi-k3-upstream-aligned-r28-20260821.json`](validation/kimi-k3-upstream-aligned-r28-20260821.json).
 
 ## Immutable artifacts
 
 | Component | Identity |
 |---|---|
-| vLLM image | `voipmonitor/vllm@sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3` |
-| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm9680645-b12xf006681-cu133-torch213-20260821-r27` |
-| Image ID | `sha256:12a305bc8d302472bd0d18c3286e660de8223d288f48bde20c8cbcd4551ae9a0` |
-| Docker recipe and `main` publication | `local-inference-lab/blackwell-llm-docker@c6c4572e85466b47e9b03cb330c4fb6b3bd22136` |
-| vLLM integration tree | `96806454ea9f14e6b52c14898ae958cb516e9595` |
+| vLLM image | `voipmonitor/vllm@sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71` |
+| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme96c97b-b12xf006681-cu133-torch213-20260821-r28` |
+| Image ID | `sha256:84853004dc748d7945b3f2b72bb7e4a823523747d1bd78ee23b16d8451fb20c5` |
+| Docker recipe and `main` publication | `local-inference-lab/blackwell-llm-docker@203e1a11a373a0486897a5a284409ba4417d0f7a` |
+| vLLM integration tree | `e96c97b7ff8556a26fda87b6a3e7fe1cb4891e7f` |
 | B12X integration tree | `f0066813bd55e6e19b6a8d84ab47087510c12890` |
 | LLMConduit image | `voipmonitor/llmconduit@sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 
@@ -59,14 +59,14 @@ The Hugging Face cache must contain the pinned target and Inferact DSpark
 snapshots. Do not set `NCCL_GRAPH_FILE` to an empty value.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3
-CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-r27
+IMAGE=voipmonitor/vllm@sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71
+CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-r28
 
 mkdir -p "$CACHE_DIR"
 docker pull "$IMAGE"
 
 docker run -d \
-  --name kimi-k3-r27-production-dspark \
+  --name kimi-k3-r28-production-dspark \
   --restart unless-stopped \
   --gpus all \
   --network host \
@@ -99,7 +99,7 @@ docker run -d \
 Readiness and model identity:
 
 ```bash
-docker logs -f kimi-k3-r27-production-dspark
+docker logs -f kimi-k3-r28-production-dspark
 curl -fsS http://127.0.0.1:8001/health
 curl -fsS http://127.0.0.1:8001/v1/models | jq .
 ```
@@ -170,7 +170,7 @@ provides 1,458,823 physical FP8 KV tokens with the qualified manual allocation.
 
 ```bash
 docker run -d \
-  --name kimi-k3-r27-nospec \
+  --name kimi-k3-r28-nospec \
   --gpus all --network host --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
@@ -193,7 +193,7 @@ KV tokens.
 
 ```bash
 docker run -d \
-  --name kimi-k3-r27-dflash \
+  --name kimi-k3-r28-dflash \
   --gpus all --network host --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
@@ -247,6 +247,32 @@ eight decode positions in 261.33 seconds. The response returned HTTP 200, all
 emitted. The r26 qualification record retains the independent 134,209-token,
 five-image native host-KV replay evidence.
 
+## Recurrent prefix-hit correctness
+
+Model Runner V2 stores recurrent state on the logical Mamba checkpoint grid.
+For this profile, physical attention pages contain 768 tokens and recurrent
+checkpoints contain 12,288 tokens. A resumed request must therefore select its
+recurrent-state block-table column with the 12,288-token cadence.
+
+[Local vLLM #463](https://github.com/local-inference-lab/vllm/pull/463)
+enforces that invariant. Without the change, a request resumed at 110,592
+computed tokens selected recurrent column 143 instead of column 8. The
+following prefill step could copy unrelated state and emit malformed Kimi
+protocol tokens or incoherent text.
+
+The production DSpark profile was qualified with two cache-hit tests:
+
+- An identical 112,301-token OMP request containing five images was submitted
+  twice through LLMConduit. The cold request completed in 48.691 seconds. The
+  second request reused the 110,592-token recurrent checkpoint, recomputed
+  1,709 tokens, and completed in 6.225 seconds. Both responses contained
+  coherent reasoning, content, and a valid tool call; neither response emitted
+  a Kimi control marker.
+- A deterministic 500,224-token completion was submitted cold and then from a
+  491,520-token recurrent checkpoint. The requests completed in 230.376 and
+  8.394 seconds. All 16 sampled tokens and decoded text matched. The maximum
+  absolute sampled-token log-probability difference was 0.000104.
+
 ## Per-cache DCP topology
 
 Each cache specification defines how many token-position shards it stores.
@@ -269,7 +295,7 @@ The corresponding official-vLLM implementation is maintained on branch
 The Docker source lock composes these pull requests in order:
 
 ```text
-vLLM: 414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460
+vLLM: 414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460, 463
 B12X: 227, 238
 ```
 
@@ -288,7 +314,7 @@ Check out the exact recipe commit to reproduce the published image metadata:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout c6c4572e85466b47e9b03cb330c4fb6b3bd22136
+git checkout 203e1a11a373a0486897a5a284409ba4417d0f7a
 ./build-kimi-k3-vllm-python-refresh.sh
 ```
 
@@ -296,9 +322,9 @@ git checkout c6c4572e85466b47e9b03cb330c4fb6b3bd22136
 
 - TP16/DCP16 on 16 RTX PRO 6000 Blackwell GPUs is qualified. Other topologies
   require separate runtime measurement.
-- One million token positions are allocation-qualified. Numerical finiteness is
-  qualified through a 500,224-token DFlash request; semantic quality at that
-  depth requires a separate evaluation.
+- One million token positions are allocation-qualified. The DSpark recurrent
+  prefix-hit path is numerically qualified through 500,224 tokens. Broader
+  semantic quality at that depth requires a separate evaluation.
 - The production scheduler permits one active sequence.
 - Each prompt may contain at most five images. Each image is bounded to 40,960
   input patches and 512 patches on one side.
@@ -306,4 +332,4 @@ git checkout c6c4572e85466b47e9b03cb330c4fb6b3bd22136
   available in the image but is not the low-latency production default.
 
 The immutable rollback image is
-`voipmonitor/vllm@sha256:60ddcb1ebae94c21d66c8a0433952538c3a77feb6712eb2c907c0e727426c8b2`.
+`voipmonitor/vllm@sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3`.
