@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
 | [2026-08-20](2026-08/2026-08-20.md) | DS4-Flash "Infernal Invocation r18" image released, fixing VLLM bugs introduced during GG→II migra |
 | [2026-08-19](2026-08/2026-08-19.md) | - DS4F "Infernal Invocation" r18 shipped, fixing a reproduced output-corruption bug (garbled tool ca |
 | [2026-08-18](2026-08/2026-08-18.md) | - CDW quietly bumped RTX PRO 6000 Blackwell MSRP from $16,000 to $19,999; scalper prices reported at |
@@ -183,6 +184,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
 | [2026-08-20](2026-08/2026-08-20.md) | DS4-Flash "Infernal Invocation r18" image released, fixing VLLM bugs introduced during GG→II migra |
 | [2026-08-19](2026-08/2026-08-19.md) | - DS4F "Infernal Invocation" r18 shipped, fixing a reproduced output-corruption bug (garbled tool ca |
 | [2026-08-18](2026-08/2026-08-18.md) | - CDW quietly bumped RTX PRO 6000 Blackwell MSRP from $16,000 to $19,999; scalper prices reported at |
