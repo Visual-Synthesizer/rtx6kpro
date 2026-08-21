@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "Kimi-K3 TP16/DCP16 per-cache DCP topology qualification",
+  "created_at": "2026-08-21T10:10:00Z",
+  "status": "qualified",
+  "published_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm9680645-b12xf006681-cu133-torch213-20260821-r27",
+    "digest": "sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3",
+    "image_id": "sha256:12a305bc8d302472bd0d18c3286e660de8223d288f48bde20c8cbcd4551ae9a0",
+    "size_bytes": 31500146888,
+    "source_overlay": false,
+    "native_artifact_reuse": "python-only source differences verified"
+  },
+  "source": {
+    "docker_recipe_commit": "c6c4572e85466b47e9b03cb330c4fb6b3bd22136",
+    "docker_main_publication_commit": "c6c4572e85466b47e9b03cb330c4fb6b3bd22136",
+    "vllm_base_commit": "b5f995e73e6b7fe27c9927477e277a151ebcc9e9",
+    "vllm_integration_commit": "b9ec06894bb37fa67a79e8255b64196bb238df6f",
+    "vllm_tree": "96806454ea9f14e6b52c14898ae958cb516e9595",
+    "vllm_changed_paths_sha256": "e372ee175c3e13327d6c7f4dfd872f64775a76c0ac37bbbda3e763c886248b65",
+    "b12x_base_commit": "36bce2c1552ba2d47dc09f20a6f64fbfc8ec4ff8",
+    "b12x_integration_commit": "f25c8bdd23aa45f0ba68161931e3417c6f008b3e",
+    "b12x_tree": "f0066813bd55e6e19b6a8d84ab47087510c12890",
+    "vllm_pull_requests_in_merge_order": [
+      414,
+      295,
+      294,
+      320,
+      413,
+      422,
+      310,
+      415,
+      418,
+      419,
+      459,
+      460
+    ],
+    "b12x_pull_requests_in_merge_order": [227, 238]
+  },
+  "cache_topology_contract": {
+    "dcp_sharded_attention_token_position_shards": 16,
+    "recurrent_state_token_position_shards": 1,
+    "fully_replicated_draft_token_position_shards": 1,
+    "target_attention_block_table_columns": 86,
+    "recurrent_state_block_table_columns": 8,
+    "dflash_draft_block_table_columns": 1366
+  },
+  "runtime": {
+    "target_checkpoint": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "target_kv_dtype": "fp8",
+    "maximum_request_tokens": 1000000,
+    "scheduler_chunk_tokens": 4096,
+    "maximum_images_per_prompt": 5,
+    "host_kv_backend": "native",
+    "host_kv_gib": 32,
+    "cuda": "13.3",
+    "pytorch": "2.13.0",
+    "nccl": "2.31.2",
+    "cutlass_dsl": "4.6.2",
+    "instanttensor": "0.1.9"
+  },
+  "qualification": {
+    "target_only": {
+      "physical_kv_tokens": 1458823,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 7,
+      "decode_tokens_per_second_median": 55.71931193816302,
+      "r26_decode_tokens_per_second_median": 55.69294489096649,
+      "relative_change": 0.0004734408517045154,
+      "summary_sha256": "487cec4681767c3e0265b4f86536b3da2e667582a860005c132b783d28e118ae"
+    },
+    "production_dspark": {
+      "physical_kv_tokens": 1016293,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 7,
+      "decode_tokens_per_second_median": 118.07630093313841,
+      "draft_acceptance_rate_median": 0.39653361344537813,
+      "target_cycles_per_second_median": 31.415746070242914,
+      "r26_target_cycles_per_second_median": 31.41718832287668,
+      "relative_target_cycle_change": -0.00004590646121856614,
+      "summary_sha256": "969c361c1d3bc9c23ff6665e7984eebd2a158de23e19715af057d5284a853bc0"
+    },
+    "dflash": {
+      "physical_kv_tokens": 1048576,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 5,
+      "decode_tokens_per_second_median": 166.71536338570644,
+      "draft_acceptance_rate_median": 0.6735833998403831,
+      "target_cycles_per_second_median": 29.160023411351986,
+      "fresh_r26_target_cycles_per_second_median": 29.194843152442914,
+      "relative_target_cycle_change": -0.0011926998244572855,
+      "summary_sha256": "d732d47856d4fb32fe714144d7920e4e957376c64cb2c3d299475d44451673c9",
+      "fresh_r26_control_summary_sha256": "7259be04b278f0b432a639233f78fefee3b42d790a11c04b17b35976b6c40524"
+    },
+    "prefill": {
+      "cache_isolation": "unique cache salt and per-request host offload disabled",
+      "runs_per_length": 3,
+      "tokens_per_second_median": {
+        "8192": 3627.0491912945904,
+        "32768": 3694.531235321123,
+        "65535": 3538.4456655038043
+      },
+      "r26_tokens_per_second_median": {
+        "8192": 3641.1032818475537,
+        "32768": 3693.8938885500766,
+        "65535": 3531.3034629496265
+      },
+      "receipt_sha256": "3f749d97cd31faf127112d9f8d56b869dbd7f915e8729fb675910438c5b8052c"
+    },
+    "dflash_long_context_finiteness": {
+      "prompt_tokens": 500224,
+      "completion_tokens": 8,
+      "http_status": 200,
+      "elapsed_seconds": 261.333858387894,
+      "logprob_value_count": 44,
+      "nonfinite_logprob_count": 0,
+      "protocol_marker_count": 0,
+      "manifest_sha256": "f1aaa7dfb19461b9b59546244a4d3c0b2d300c1276074e117ee7af5ef3447cfd",
+      "receipt_sha256": "a0e05782be70960d4ddc8ac0e58aabb065abb8494a8546364f86b7ae73adb2ed"
+    }
+  },
+  "measurement_conditions": {
+    "concurrent_nvml_sampling": false,
+    "reason": "Concurrent nvidia-smi dmon sampling changed the measured GPU state and reduced an unchanged r26 DFlash process from 29.195 to 28.136 target cycles per second. Measurements taken during or after that sampling event are excluded."
+  },
+  "rollback_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllmddf87d6-b12xf006681-cu133-torch213-20260821-r26",
+    "digest": "sha256:60ddcb1ebae94c21d66c8a0433952538c3a77feb6712eb2c907c0e727426c8b2"
+  }
+}

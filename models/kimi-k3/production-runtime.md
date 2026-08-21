@@ -15,18 +15,17 @@ request limit and 1,016,293 physical FP8 KV tokens while retaining 32 GiB of
 host RAM for native vLLM KV offload.
 
 The machine-readable qualification record is
-[`validation/kimi-k3-upstream-aligned-r26-20260821.json`](validation/kimi-k3-upstream-aligned-r26-20260821.json).
+[`validation/kimi-k3-upstream-aligned-r27-20260821.json`](validation/kimi-k3-upstream-aligned-r27-20260821.json).
 
 ## Immutable artifacts
 
 | Component | Identity |
 |---|---|
-| vLLM image | `voipmonitor/vllm@sha256:60ddcb1ebae94c21d66c8a0433952538c3a77feb6712eb2c907c0e727426c8b2` |
-| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllmddf87d6-b12xf006681-cu133-torch213-20260821-r26` |
-| Image ID | `sha256:24675acf9976b770dce9d937e81fbce7621b15d305771d847f3fa4b2e6fb9f73` |
-| Docker recipe | `local-inference-lab/blackwell-llm-docker@7b3cedb9d8a2a9f45624940e6e63c52b4fd6dcf1` |
-| Docker `main` publication | `fb0ecfed677ea60c020f0d141c987aa5fd258ca8` |
-| vLLM integration tree | `ddf87d676505d4e1c920357d4f9da2a58e2c8ec7` |
+| vLLM image | `voipmonitor/vllm@sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3` |
+| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm9680645-b12xf006681-cu133-torch213-20260821-r27` |
+| Image ID | `sha256:12a305bc8d302472bd0d18c3286e660de8223d288f48bde20c8cbcd4551ae9a0` |
+| Docker recipe and `main` publication | `local-inference-lab/blackwell-llm-docker@c6c4572e85466b47e9b03cb330c4fb6b3bd22136` |
+| vLLM integration tree | `96806454ea9f14e6b52c14898ae958cb516e9595` |
 | B12X integration tree | `f0066813bd55e6e19b6a8d84ab47087510c12890` |
 | LLMConduit image | `voipmonitor/llmconduit@sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 
@@ -60,14 +59,14 @@ The Hugging Face cache must contain the pinned target and Inferact DSpark
 snapshots. Do not set `NCCL_GRAPH_FILE` to an empty value.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:60ddcb1ebae94c21d66c8a0433952538c3a77feb6712eb2c907c0e727426c8b2
-CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-r26
+IMAGE=voipmonitor/vllm@sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3
+CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-r27
 
 mkdir -p "$CACHE_DIR"
 docker pull "$IMAGE"
 
 docker run -d \
-  --name kimi-k3-r26-production-dspark \
+  --name kimi-k3-r27-production-dspark \
   --restart unless-stopped \
   --gpus all \
   --network host \
@@ -100,7 +99,7 @@ docker run -d \
 Readiness and model identity:
 
 ```bash
-docker logs -f kimi-k3-r26-production-dspark
+docker logs -f kimi-k3-r27-production-dspark
 curl -fsS http://127.0.0.1:8001/health
 curl -fsS http://127.0.0.1:8001/v1/models | jq .
 ```
@@ -171,7 +170,7 @@ provides 1,458,823 physical FP8 KV tokens with the qualified manual allocation.
 
 ```bash
 docker run -d \
-  --name kimi-k3-r26-nospec \
+  --name kimi-k3-r27-nospec \
   --gpus all --network host --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
@@ -194,7 +193,7 @@ KV tokens.
 
 ```bash
 docker run -d \
-  --name kimi-k3-r26-dflash \
+  --name kimi-k3-r27-dflash \
   --gpus all --network host --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
@@ -212,37 +211,58 @@ docker run -d \
 ## Qualification results
 
 The normalized decode measurements use a pinned 256-token prompt, 1,024 output
-tokens, temperature zero, and seven measured requests after warmup.
-
-| Profile | Emitted median | Acceptance median | Target cycles/s median | Physical KV tokens |
-|---|---:|---:|---:|---:|
-| Target-only | 55.693 tok/s | not applicable | not applicable | 1,458,823 |
-| Inferact DSpark | 121.439 tok/s | 0.413961 | 31.417 | 1,016,293 |
-| modal-labs DFlash | 139.187 tok/s | 0.533246 | 29.442 | 1,048,576 |
-
-Speculative emitted throughput depends on generated token acceptance. Target
-cycles per second are the stable hot-path regression metric. The DFlash target
-rate differs by +0.10% from the isolated pre-normalization AttnRes reference;
-the target-only rate differs by +0.02% from its 55.683 tok/s reference.
-
-A three-run sanity test executed from the published image produced 31.526
-target cycles/s median. Its emitted median was 147.941 tok/s at 0.527523 draft
-acceptance; emitted throughput is not compared across prompts with different
+tokens, temperature zero, and measured requests after warmup. Target cycles per
+second isolate target execution speed from prompt-dependent speculative
 acceptance.
+
+| Profile | Runs | Emitted median | Acceptance median | Target cycles/s median | Physical KV tokens |
+|---|---:|---:|---:|---:|---:|
+| Target-only | 7 | 55.719 tok/s | not applicable | not applicable | 1,458,823 |
+| Inferact DSpark | 7 | 118.076 tok/s | 0.396534 | 31.416 | 1,016,293 |
+| modal-labs DFlash | 5 | 166.715 tok/s | 0.673583 | 29.160 | 1,048,576 |
+
+The immutable r26 control measured 55.693 tok/s for target-only decode and
+31.417 target cycles/s for DSpark. The r27 differences are +0.05% and -0.005%,
+respectively. A clean, deterministic DFlash A/B measured 29.195 target cycles/s
+on r26 and 29.160 on r27, a -0.12% difference.
+
+Decode qualification must not run concurrent NVML polling. On the unchanged
+r26 DFlash process, starting `nvidia-smi dmon` reduced target execution from
+29.195 to 28.136 cycles/s; subsequent samples remained at 28.156 cycles/s.
+Measurements affected by that GPU-state transition are excluded from the
+qualification record.
 
 Uncached DSpark prefill uses a unique cache salt and disables host offload for
 each request:
 
 | Prompt tokens | Median effective prefill |
 |---:|---:|
-| 8,192 | 3,641.10 tok/s |
-| 32,768 | 3,693.89 tok/s |
-| 65,535 | 3,531.30 tok/s |
+| 8,192 | 3,627.05 tok/s |
+| 32,768 | 3,694.53 tok/s |
+| 65,535 | 3,538.45 tok/s |
 
-A 134,209-token OMP replay containing five images completed both cold and on an
-immediate repeat. Both requests returned HTTP 200, completed their streams,
-emitted zero Kimi protocol markers, and left the engine healthy. The repeat
-restored 122,880 prompt tokens through native host KV offload.
+A DFlash request containing 500,224 stored token IDs completed prefill and
+eight decode positions in 261.33 seconds. The response returned HTTP 200, all
+44 captured log-probability values were finite, and no Kimi protocol marker was
+emitted. The r26 qualification record retains the independent 134,209-token,
+five-image native host-KV replay evidence.
+
+## Per-cache DCP topology
+
+Each cache specification defines how many token-position shards it stores.
+DCP-sharded target attention uses the configured DCP size. Recurrent state and
+fully position-replicated speculative-draft caches use one token-position
+shard, although tensor parallelism may still partition feature dimensions.
+
+For the DFlash TP16/DCP16 profile, target MLA groups use 86 block-table columns,
+recurrent groups use eight columns, and the replicated sliding-window draft
+uses 1,366 columns. The contract prevents recurrent and draft tables from being
+underallocated without changing physical KV capacity.
+
+The Infernal Invocation adaptation is
+[local vLLM #418](https://github.com/local-inference-lab/vllm/pull/418).
+The corresponding official-vLLM implementation is maintained on branch
+[`fix/dcp-cache-topology-contract-20260821`](https://github.com/voipmonitor/vllm/tree/fix/dcp-cache-topology-contract-20260821).
 
 ## Source composition
 
@@ -263,28 +283,27 @@ patches/releases/kimi-k3-upstream-aligned-20260821/lmcache/source.lock.json
 
 ## Rebuild
 
-Checkout the exact recipe commit to reproduce the published image metadata:
+Check out the exact recipe commit to reproduce the published image metadata:
 
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 7b3cedb9d8a2a9f45624940e6e63c52b4fd6dcf1
+git checkout c6c4572e85466b47e9b03cb330c4fb6b3bd22136
 ./build-kimi-k3-vllm-python-refresh.sh
 ```
-
-The same recipe content is present on `main` at
-`fb0ecfed677ea60c020f0d141c987aa5fd258ca8`. Building from that merge commit
-changes the OCI revision label and therefore the image digest, but not the
-locked vLLM or B12X source trees.
 
 ## Operational limits
 
 - TP16/DCP16 on 16 RTX PRO 6000 Blackwell GPUs is qualified. Other topologies
   require separate runtime measurement.
-- One million token positions are allocation- and replay-qualified. Model
-  quality for coherent documents above 500,224 tokens is unsupported.
+- One million token positions are allocation-qualified. Numerical finiteness is
+  qualified through a 500,224-token DFlash request; semantic quality at that
+  depth requires a separate evaluation.
 - The production scheduler permits one active sequence.
 - Each prompt may contain at most five images. Each image is bounded to 40,960
   input patches and 512 patches on one side.
 - Native host KV offload is the qualified production cache backend. LMCache is
   available in the image but is not the low-latency production default.
+
+The immutable rollback image is
+`voipmonitor/vllm@sha256:60ddcb1ebae94c21d66c8a0433952538c3a77feb6712eb2c907c0e727426c8b2`.
