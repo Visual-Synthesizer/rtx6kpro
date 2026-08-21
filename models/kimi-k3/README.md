@@ -1,7 +1,7 @@
 # Kimi-K3 on RTX PRO 6000 Blackwell
 
 The qualified production deployment is documented in
-[Official MXFP4 with DSpark, CPU LMCache, vision, and LLMConduit](production-dspark-lmcache.md).
+[Kimi-K3 MXFP4 Runtime](production-runtime.md).
 It serves `moonshotai/Kimi-K3` on 16 RTX PRO 6000 Blackwell GPUs through a
 source-locked CUDA 13.3 and PyTorch 2.13 image.
 
@@ -9,7 +9,7 @@ source-locked CUDA 13.3 and PyTorch 2.13 image.
 
 | Document | Purpose | Status |
 |---|---|---|
-| [Production DSpark and LMCache](production-dspark-lmcache.md) | Docker, vLLM, LLMConduit, reasoning controls, native vision, tools, and Oh My Pi | qualified |
+| [Kimi-K3 MXFP4 Runtime](production-runtime.md) | Source-locked Docker, DSpark, DFlash, target-only decode, native host KV offload, vision, LLMConduit, tools, and Oh My Pi | qualified |
 | [Native host KV offload](native-host-kv-offload.md) | Process-shared RAM KV reuse for official MXFP4 with DSpark on TP16/DCP16 | qualified |
 | [Full MXFP4 4096-token prefill](full-mxfp4-p4096-prefill.md) | Exact 4096-token scheduler chunks with physical 1M KV capacity on TP16/DCP16 | research-only |
 | [Source-locked serving receipt](validation/source-locked-runtime-20260816.json) | No-speculation, DSpark, and DFlash source composition and runtime evidence | qualified |
