@@ -11,9 +11,10 @@ four-GPU deployment.
 configuration, which is `qualified` against repeated performance and quality
 gates.
 
-The research-only dense-MLP QSRT K5 checkpoint, its weighted-SVD rank-16
-recovery, all-boundary optimizer evaluation, packed B12X runtime, and exact
-source inventory are documented in
+The readable interpretation of the dense-MLP QSRT K5 training run is
+[Qwen3.8-27B QSRT K5 recovery: what the training result means](qwen38-qsrt-k5-training-result.md).
+The exact artifact, all-boundary evaluation, packed B12X runtime, and source
+contracts are documented in
 [Qwen3.8-27B QSRT K5 dense-MLP recovery](qwen38-qsrt-k5-r16.md).
 
 ## Reading The Tables

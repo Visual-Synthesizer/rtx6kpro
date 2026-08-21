@@ -9,6 +9,10 @@ correction initialized by activation-weighted singular value decomposition
 
 **Evidence snapshot:** 2026-08-21
 
+For a shorter explanation of the experiment, the TensorBoard curves, and the
+checkpoint-selection result, read
+[Qwen3.8-27B QSRT K5 recovery: what the training result means](qwen38-qsrt-k5-training-result.md).
+
 ## Scope and status
 
 | Scope | Status | Result |

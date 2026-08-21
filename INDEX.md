@@ -128,8 +128,10 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Kimi K3 AA-LCR reproduction specification](models/kimi-k3/aa-lcr-reproduction.md) - `models/kimi-k3/aa-lcr-reproduction.md`
 - [Kimi K3 distribution-fidelity reference](models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md) - `models/kimi-k3/artifacts/distribution-fidelity-1024x2048-README.md`
 - [Kimi K3 distribution-fidelity reference: 1,024 contexts × 2,048 tokens](models/kimi-k3/distribution-fidelity-1024x2048.md) - `models/kimi-k3/distribution-fidelity-1024x2048.md`
+- [Kimi-K3 Full-MXFP4 4096-Token Prefill](models/kimi-k3/full-mxfp4-p4096-prefill.md) - `models/kimi-k3/full-mxfp4-p4096-prefill.md`
 - [Kimi-K3 Native Host KV Offload](models/kimi-k3/native-host-kv-offload.md) - `models/kimi-k3/native-host-kv-offload.md`
-- [Kimi-K3 Official MXFP4 Production Deployment](models/kimi-k3/production-dspark-lmcache.md) - `models/kimi-k3/production-dspark-lmcache.md`
+- [Kimi-K3 Production Runtime](models/kimi-k3/production-dspark-lmcache.md) - `models/kimi-k3/production-dspark-lmcache.md`
+- [Kimi-K3 MXFP4 Runtime](models/kimi-k3/production-runtime.md) - `models/kimi-k3/production-runtime.md`
 - [Kimi-K3 QSRT K2 TP16/DCP8 Serving](models/kimi-k3/qsrt-k2-tp16-dcp8.md) - `models/kimi-k3/qsrt-k2-tp16-dcp8.md`
 - [RedHatAI BF16 DSpark for Kimi-K3 with DCP16](models/kimi-k3/redhat-dspark-dcp16.md) - `models/kimi-k3/redhat-dspark-dcp16.md`
 - [Kimi Runbook Hub](models/kimi.md) - `models/kimi.md`
@@ -144,6 +146,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Qwen3.5-397B-A17B on RTX PRO 6000 Blackwell](models/qwen35-397b.md) - `models/qwen35-397b.md`
 - [Qwen3.8-27B on RTX PRO 6000 Blackwell](models/qwen38-27b.md) - `models/qwen38-27b.md`
 - [Qwen3.8-27B QSRT K5 dense-MLP recovery](models/qwen38-qsrt-k5-r16.md) - `models/qwen38-qsrt-k5-r16.md`
+- [Qwen3.8-27B QSRT K5 recovery: what the training result means](models/qwen38-qsrt-k5-training-result.md) - `models/qwen38-qsrt-k5-training-result.md`
 - [Xiaomi MiMo V2.5 Pro FP4-DFlash](models/xiaomi-mimo-v2.5-pro-fp4-dflash.md) - `models/xiaomi-mimo-v2.5-pro-fp4-dflash.md`
 - [Xiaomi MiMo V2.5 Pro FP4-DFlash v2](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v2.md) - `models/xiaomi-mimo-v2.5-pro-fp4-dflash_v2.md`
 - [Xiaomi MiMo V2.5 Pro FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) - `models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md`
@@ -386,6 +389,9 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-15](daily-summaries/2026-08/2026-08-16.md) - `daily-summaries/2026-08/2026-08-16.md`
 - [Daily Summary — 2026-08-16](daily-summaries/2026-08/2026-08-17.md) - `daily-summaries/2026-08/2026-08-17.md`
 - [Daily Summary — 2026-08-17](daily-summaries/2026-08/2026-08-18.md) - `daily-summaries/2026-08/2026-08-18.md`
+- [Daily Summary — 2026-08-18](daily-summaries/2026-08/2026-08-19.md) - `daily-summaries/2026-08/2026-08-19.md`
+- [Daily Summary — 2026-08-19](daily-summaries/2026-08/2026-08-20.md) - `daily-summaries/2026-08/2026-08-20.md`
+- [Daily Summary — 2026-08-20](daily-summaries/2026-08/2026-08-21.md) - `daily-summaries/2026-08/2026-08-21.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
