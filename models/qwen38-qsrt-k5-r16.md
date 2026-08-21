@@ -290,7 +290,7 @@ their state does not rewrite the immutable image contents.
 | [#320](https://github.com/local-inference-lab/vllm/pull/320) speculative structured-output validation | `e9534672129b` | open; head `fd0237e15f71` | [upstream #52452](https://github.com/vllm-project/vllm/pull/52452), open with merge conflicts |
 | [#415](https://github.com/local-inference-lab/vllm/pull/415) DSpark CUDA-graph capture contract | `c805ebd0896c` | open; head `2e8535c70af8` | Fork-specific; no upstream mapping declared |
 | [#417](https://github.com/local-inference-lab/vllm/pull/417) legacy direct DSML tool calls | `2511e5df2b1e` | open | Fork-specific; no upstream mapping declared |
-| [#461](https://github.com/local-inference-lab/vllm/pull/461) missing-vendored-rotary fallback | `0942707892ca` | open; ready for review | Distinct from [upstream #52121](https://github.com/vllm-project/vllm/pull/52121), open and blocked, which handles an installed but unloadable dependency |
+| [#461](https://github.com/local-inference-lab/vllm/pull/461) missing-vendored-rotary fallback | `0942707892ca` | open; ready for review; head `a434f31d77ed` | Distinct from [upstream #52121](https://github.com/vllm-project/vllm/pull/52121), open and blocked, which handles an installed but unloadable dependency |
 | [#462](https://github.com/local-inference-lab/vllm/pull/462) B12X hybrid page-table capacity | `1d341d8482e4` | open; ready for review | Fork-specific B12X integration; no upstream mapping |
 
 ### B12X
@@ -304,7 +304,7 @@ their state does not rewrite the immutable image contents.
 | [#228](https://github.com/local-inference-lab/b12x/pull/228) inactive tiny-decode routes | `50046df84a15` | merged | Fork-specific; no upstream mapping declared |
 | [#229](https://github.com/local-inference-lab/b12x/pull/229) CUDA-graph buffer tests | `2cdd9e265cd6` | merged | Fork-specific; no upstream mapping declared |
 | [#230](https://github.com/local-inference-lab/b12x/pull/230) mapped-route namespace planning | `156920046e85` | merged | Fork-specific; no upstream mapping declared |
-| [#236](https://github.com/local-inference-lab/b12x/pull/236) packed Qwen QSRT K5 dense inference | `1dfe87039951` | open; ready for review; all eight review threads resolved | Fork-specific; no upstream mapping declared |
+| [#236](https://github.com/local-inference-lab/b12x/pull/236) packed Qwen QSRT K5 dense inference | `1dfe87039951` | open; ready for review; head `fe96602864fe`; all 11 review threads resolved; bot re-review rate-limited | Fork-specific; no upstream mapping declared |
 
 The Qwen image applies a content-checked reconciliation patch after B12X
 #236. Its SHA-256 is
