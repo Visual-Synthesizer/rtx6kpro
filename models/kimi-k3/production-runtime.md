@@ -15,17 +15,17 @@ request limit and 1,016,293 physical FP8 KV tokens while retaining 32 GiB of
 host RAM for native vLLM KV offload.
 
 The machine-readable qualification record is
-[`validation/kimi-k3-upstream-aligned-r28-20260821.json`](validation/kimi-k3-upstream-aligned-r28-20260821.json).
+[`validation/kimi-k3-upstream-aligned-r29-20260821.json`](validation/kimi-k3-upstream-aligned-r29-20260821.json).
 
 ## Immutable artifacts
 
 | Component | Identity |
 |---|---|
-| vLLM image | `voipmonitor/vllm@sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71` |
-| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme96c97b-b12xf006681-cu133-torch213-20260821-r28` |
-| Image ID | `sha256:84853004dc748d7945b3f2b72bb7e4a823523747d1bd78ee23b16d8451fb20c5` |
-| Docker recipe and `main` publication | `local-inference-lab/blackwell-llm-docker@203e1a11a373a0486897a5a284409ba4417d0f7a` |
-| vLLM integration tree | `e96c97b7ff8556a26fda87b6a3e7fe1cb4891e7f` |
+| vLLM image | `voipmonitor/vllm@sha256:f444688fafa4e4649481cec660a3941d20984a2792ca0da3e7b8df42a04135c9` |
+| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm036b9ad-b12xf006681-cu133-torch213-20260821-r29` |
+| Image ID | `sha256:6c3c1514de7061562fe535679448138f59dbc19d67b6e582e678155b35c4322b` |
+| Docker recipe and `main` publication | `local-inference-lab/blackwell-llm-docker@bb3a4f954cfcc831dd4520a883a402eb09e66e62` |
+| vLLM integration tree | `036b9adf727ff9993335ef688531cdacdbe628a0` |
 | B12X integration tree | `f0066813bd55e6e19b6a8d84ab47087510c12890` |
 | LLMConduit image | `voipmonitor/llmconduit@sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 
@@ -59,14 +59,14 @@ The Hugging Face cache must contain the pinned target and Inferact DSpark
 snapshots. Do not set `NCCL_GRAPH_FILE` to an empty value.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71
-CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-r28
+IMAGE=voipmonitor/vllm@sha256:f444688fafa4e4649481cec660a3941d20984a2792ca0da3e7b8df42a04135c9
+CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-r29
 
 mkdir -p "$CACHE_DIR"
 docker pull "$IMAGE"
 
 docker run -d \
-  --name kimi-k3-r28-production-dspark \
+  --name kimi-k3-r29-production-dspark \
   --restart unless-stopped \
   --gpus all \
   --network host \
@@ -99,7 +99,7 @@ docker run -d \
 Readiness and model identity:
 
 ```bash
-docker logs -f kimi-k3-r28-production-dspark
+docker logs -f kimi-k3-r29-production-dspark
 curl -fsS http://127.0.0.1:8001/health
 curl -fsS http://127.0.0.1:8001/v1/models | jq .
 ```
@@ -170,7 +170,7 @@ provides 1,458,823 physical FP8 KV tokens with the qualified manual allocation.
 
 ```bash
 docker run -d \
-  --name kimi-k3-r28-nospec \
+  --name kimi-k3-r29-nospec \
   --gpus all --network host --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
@@ -193,7 +193,7 @@ KV tokens.
 
 ```bash
 docker run -d \
-  --name kimi-k3-r28-dflash \
+  --name kimi-k3-r29-dflash \
   --gpus all --network host --ipc=host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
@@ -224,7 +224,9 @@ acceptance.
 The immutable r26 control measured 55.693 tok/s for target-only decode and
 31.417 target cycles/s for DSpark. The r27 differences are +0.05% and -0.005%,
 respectively. A clean, deterministic DFlash A/B measured 29.195 target cycles/s
-on r26 and 29.160 on r27, a -0.12% difference.
+on r26 and 29.160 on r27, a -0.12% difference. The r29 source delta executes
+only for vision requests, so the text-only target, DSpark, DFlash, and prefill
+performance qualification remains applicable.
 
 Decode qualification must not run concurrent NVML polling. On the unchanged
 r26 DFlash process, starting `nvidia-smi dmon` reduced target execution from
@@ -273,6 +275,33 @@ The production DSpark profile was qualified with two cache-hit tests:
   8.394 seconds. All 16 sampled tokens and decoded text matched. The maximum
   absolute sampled-token log-probability difference was 0.000104.
 
+## Uneven vision-shard collective
+
+Data-parallel vision execution can assign an image to one tensor-parallel rank
+while the other ranks receive zero encoder rows. Padding every rank to the
+largest row count makes the subsequent all-gather allocate the largest image
+once per rank. For one Kimi image with 1,792 encoder rows, merge factor four,
+hidden width 1,024, BF16 activations, and TP16, the padded collective allocates
+28,672 output rows, or 224 MiB per GPU.
+
+[Local vLLM #464](https://github.com/local-inference-lab/vllm/pull/464)
+gathers each rank's exact row count. The same TP16 shape allocates 1,792 output
+rows, or 14 MiB per GPU. The gathered BF16 tensor matches the padded reference
+bit-for-bit. The generic uniform-size path remains unchanged when all rank
+sizes are equal.
+
+The source change passed the PyNccl variable-size collective test with a
+zero-row rank and five vision-model tests covering one image, three images,
+five images, no images, and uneven four-rank image assignment. The full-model
+qualification warmed four archived OMP image blobs and replayed the original
+106-message continuation with those four images plus one new 1,408-by-960
+image. LLMConduit returned HTTP 200 with 21 SSE events, a terminal done event,
+no stream error, no Kimi control marker, and coherent image-dependent output.
+The EngineCore remained healthy with 1,016,293 physical target KV tokens.
+
+The replay receipt is recorded in
+[`validation/kimi-k3-upstream-aligned-r29-20260821.json`](validation/kimi-k3-upstream-aligned-r29-20260821.json).
+
 ## Per-cache DCP topology
 
 Each cache specification defines how many token-position shards it stores.
@@ -295,7 +324,7 @@ The corresponding official-vLLM implementation is maintained on branch
 The Docker source lock composes these pull requests in order:
 
 ```text
-vLLM: 414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460, 463
+vLLM: 414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460, 463, 464
 B12X: 227, 238
 ```
 
@@ -314,7 +343,7 @@ Check out the exact recipe commit to reproduce the published image metadata:
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 203e1a11a373a0486897a5a284409ba4417d0f7a
+git checkout bb3a4f954cfcc831dd4520a883a402eb09e66e62
 ./build-kimi-k3-vllm-python-refresh.sh
 ```
 
@@ -332,4 +361,4 @@ git checkout 203e1a11a373a0486897a5a284409ba4417d0f7a
   available in the image but is not the low-latency production default.
 
 The immutable rollback image is
-`voipmonitor/vllm@sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3`.
+`voipmonitor/vllm@sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71`.

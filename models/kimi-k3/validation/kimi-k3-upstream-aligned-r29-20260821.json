@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "Kimi-K3 TP16/DCP16 uneven vision-shard qualification",
+  "created_at": "2026-08-21T16:24:00Z",
+  "status": "qualified",
+  "published_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm036b9ad-b12xf006681-cu133-torch213-20260821-r29",
+    "digest": "sha256:f444688fafa4e4649481cec660a3941d20984a2792ca0da3e7b8df42a04135c9",
+    "image_id": "sha256:6c3c1514de7061562fe535679448138f59dbc19d67b6e582e678155b35c4322b",
+    "size_bytes": 30753045103,
+    "source_overlay": false,
+    "native_artifact_reuse": "Python-only source differences verified"
+  },
+  "source": {
+    "docker_recipe_commit": "bb3a4f954cfcc831dd4520a883a402eb09e66e62",
+    "docker_main_publication_commit": "bb3a4f954cfcc831dd4520a883a402eb09e66e62",
+    "vllm_base_commit": "b5f995e73e6b7fe27c9927477e277a151ebcc9e9",
+    "vllm_integration_commit": "16cf8c34428ab8006418067486e55cdf680a0403",
+    "vllm_tree": "036b9adf727ff9993335ef688531cdacdbe628a0",
+    "b12x_integration_commit": "f25c8bdd23aa45f0ba68161931e3417c6f008b3e",
+    "b12x_tree": "f0066813bd55e6e19b6a8d84ab47087510c12890",
+    "vllm_pull_requests_in_merge_order": [
+      414,
+      295,
+      294,
+      320,
+      413,
+      422,
+      310,
+      415,
+      418,
+      419,
+      459,
+      460,
+      463,
+      464
+    ],
+    "b12x_pull_requests_in_merge_order": [
+      227,
+      238
+    ]
+  },
+  "runtime": {
+    "target_checkpoint": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "draft_checkpoint": "Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "target_kv_dtype": "fp8",
+    "maximum_request_tokens": 1000000,
+    "physical_target_kv_tokens": 1016293,
+    "scheduler_chunk_tokens": 4096,
+    "maximum_images_per_prompt": 5,
+    "host_kv_backend": "native",
+    "host_kv_gib": 32
+  },
+  "collective_contract": {
+    "description": "A tensor-parallel vision all-gather allocates the sum of exact per-rank encoder rows, including zero-row ranks, instead of world size multiplied by the largest local row count.",
+    "world_size": 16,
+    "per_rank_rows": [1792, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "merge_factor": 4,
+    "hidden_size": 1024,
+    "dtype": "bfloat16",
+    "padded_output_rows": 28672,
+    "variable_output_rows": 1792,
+    "padded_output_bytes": 234881024,
+    "variable_output_bytes": 14680064,
+    "allocation_reduction_factor": 16,
+    "content_matches_padded_reference": true
+  },
+  "tests": {
+    "pynccl_all_gatherv_zero_rank": "passed on two GPUs",
+    "vision_single_image_with_empty_rank": "passed on two GPUs",
+    "vision_three_images": "passed on two GPUs",
+    "vision_five_images": "passed on two GPUs",
+    "vision_empty_input": "passed on two GPUs",
+    "vision_uneven_assignment": "passed on four GPUs"
+  },
+  "full_model_replay": {
+    "request_messages": 106,
+    "normalized_messages": 146,
+    "tool_calls": 62,
+    "image_count": 5,
+    "new_image_width": 1408,
+    "new_image_height": 960,
+    "maximum_completion_tokens": 32,
+    "http_status": 200,
+    "sse_event_count": 21,
+    "terminal_done_event": true,
+    "stream_error_count": 0,
+    "control_marker_count": 0,
+    "engine_healthy_after_replay": true,
+    "receipt_sha256": "b03236014cb845e5fe98bca4ff17f37d1799ca14be0a73cf1457cb1a7a50f84c",
+    "stream_sha256": "71a817bf4333f5c67805d832068ac8205d6c57c3e4989b8ae4280c02dda01ada",
+    "replayable_capture_sha256": "a4905d81d198295db5e9fcc025d4d0d0c26447aa1abc29cdf5b7a1837554d9b3"
+  },
+  "performance_reference": {
+    "receipt": "kimi-k3-upstream-aligned-r28-20260821.json",
+    "reason": "The r29 source delta executes only for vision requests. Text-only target-only, DSpark, DFlash, and prefill paths are unchanged."
+  },
+  "rollback_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme96c97b-b12xf006681-cu133-torch213-20260821-r28",
+    "digest": "sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71"
+  }
+}
