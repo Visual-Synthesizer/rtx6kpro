@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-22](2026-08/2026-08-22.md) | DGX Station early benchmarks: ~30-40 tok/s decode, 6000+ tok/s prefill on out-of-VRAM MoE models; DG |
 | [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
 | [2026-08-20](2026-08/2026-08-20.md) | DS4-Flash "Infernal Invocation r18" image released, fixing VLLM bugs introduced during GG→II migra |
 | [2026-08-19](2026-08/2026-08-19.md) | - DS4F "Infernal Invocation" r18 shipped, fixing a reproduced output-corruption bug (garbled tool ca |
@@ -184,6 +185,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-22](2026-08/2026-08-22.md) | DGX Station early benchmarks: ~30-40 tok/s decode, 6000+ tok/s prefill on out-of-VRAM MoE models; DG |
 | [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
 | [2026-08-20](2026-08/2026-08-20.md) | DS4-Flash "Infernal Invocation r18" image released, fixing VLLM bugs introduced during GG→II migra |
 | [2026-08-19](2026-08/2026-08-19.md) | - DS4F "Infernal Invocation" r18 shipped, fixing a reproduced output-corruption bug (garbled tool ca |
