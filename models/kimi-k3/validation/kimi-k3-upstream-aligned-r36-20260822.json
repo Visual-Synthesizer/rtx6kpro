@@ -1,0 +1,110 @@
+{
+  "schema": "kimi-k3-layered-runtime-qualification-v1",
+  "status": "qualified",
+  "image": {
+    "reference": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme755f87-b12x2d466e3-cu133-torch213-20260822-r36@sha256:c41bf15095b2316c7335d305115ad26bab14ec4234f3109b1d1ebb807895a3ea",
+    "local_id": "sha256:8fcc05178c94b38ecfc068c51cdaa7daaa0f1f13c5f00742c64581cc221dbc86",
+    "size_bytes": 33985657951,
+    "build_recipe_commit": "a892bb8c7ebf21f81ad2fec464705e36be56be75",
+    "runtime": {
+      "cuda": "13.3",
+      "pytorch": "2.13.0"
+    }
+  },
+  "foundation": {
+    "reference": "voipmonitor/vllm:kimi-k3-runtime-foundation-cu133-torch213-fi1ac6942-rust195-20260822-r1@sha256:03b67e53dda73c3fa317d4cb529ad38a220c51c7365ee8d54c16e5063fcc54e2",
+    "local_id": "sha256:d10dcc3a1dcb9beae96ed37ac9a72227cd3e6ebfbd79b4c6be1f3c6ade1de439",
+    "source_image": "voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338",
+    "source_packages_absent": [
+      "vllm",
+      "b12x",
+      "lmcache"
+    ],
+    "retained_dependencies": {
+      "flashinfer": "0.6.18+cu133@1ac6942776b383c6b03c7a5805a22e72a3e3349f",
+      "cutlass_dsl": "4.6.2",
+      "instanttensor": "0.1.9@49b4010afc1cae0441e71fe0b0bffc24fa05e932",
+      "rust": "1.95"
+    }
+  },
+  "source": {
+    "vllm": {
+      "commit": "e08d796fbe7987fc41683963c22740eaf2515a01",
+      "tree": "e755f87b8e00d76e1aeacfa0835a2c7608925390",
+      "lock": "patches/releases/kimi-k3-upstream-aligned-20260822/vllm/source.lock.json"
+    },
+    "b12x": {
+      "commit": "b8c7153c3e1ca13b1e0ef373d9a382a513ab892f",
+      "tree": "2d466e350e518193f9edd57809e050b3aa8b8dcb",
+      "lock": "patches/releases/kimi-k3-upstream-aligned-20260822/b12x/source.lock.json"
+    },
+    "lmcache": {
+      "commit": "a128b2e286ebb3556cb43124149e600ff99fe481",
+      "tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+      "lock": "patches/releases/kimi-k3-upstream-aligned-20260822/lmcache/source.lock.json"
+    }
+  },
+  "configuration": {
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "max_model_len": 1000000,
+    "max_num_batched_tokens": 4102,
+    "max_num_scheduled_tokens": 4096,
+    "max_num_seqs": 1,
+    "target_kv_cache_dtype": "fp8",
+    "vision_enabled_in_production_profile": true,
+    "native_host_kv_gib": 32
+  },
+  "comparison_control": {
+    "role": "Identical vLLM, B12X, and LMCache source trees built without the reusable dependency foundation",
+    "receipt": "validation/kimi-k3-upstream-aligned-r35-20260822.json",
+    "image": "voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338"
+  },
+  "static_equivalence": {
+    "status": "qualified",
+    "python_and_json_payload_sha256": "3f6d06dcc48a90d6a960e103b060d0b530a4941a5d1b20d0a7b27970ce7d9523",
+    "launcher_payload_sha256": "6013944cc0af4494c3855e0f0054cf5579fe76ffff50f4cc91028e38555d7314",
+    "normalized_sass": {
+      "dcp_lse_combine_sha256": "25b4fbfe4ea0e5de09cd6b70b8b0fbbded3fe6a94d1c6de7129d537aaeb2081b",
+      "dcp_kv_gather_sha256": "ae54cb65324bbba06fb95bd1d06aff8986e877ffaa7e14d439fac6eecdf4a4d5",
+      "dcp_q_gather_sha256": "e40dcaf254f4666467e8cb7face74334c05b756b872856abdd04704e2fda5d19"
+    },
+    "conclusion": "Installed package payloads, launchers, native dependency libraries, and normalized DCP kernel instructions match the comparison control. Raw DCP cubin identities differ only in compiler-generated internal source namespaces."
+  },
+  "profiles": {
+    "no_speculation": {
+      "status": "qualified",
+      "physical_target_kv_tokens": 1058823,
+      "normalized_decode_tokens_per_second_median": 55.80117462964622,
+      "benchmark_runs": 3,
+      "output_sha256": "d55ef2b797140202d4b4ea49b464d0285f53dee1ff6cbee6a2f65a76e90290da",
+      "relative_to_control_percent": -0.01018788630742229,
+      "server_log_sha256": "58dae254f8ce2b137601003e38ec48469121ac0f39eef295de871e6f71334583"
+    },
+    "dspark": {
+      "status": "qualified",
+      "physical_target_kv_tokens": 1016293,
+      "normalized_decode_tokens_per_second_median": 122.69487273312707,
+      "target_cycles_per_second_median": 31.423320289422573,
+      "draft_acceptance_rate_median": 0.4149400218102508,
+      "emitted_tokens_per_target_cycle_median": 3.904580152671756,
+      "benchmark_runs": 7,
+      "output_sha256": "b78af224f6a8789fe001c473a81a593b24bb5b73f7b3d350c652204bae278cf8",
+      "relative_to_control_percent": -0.009226881567669931,
+      "server_log_sha256": "8188c070adb11ff26b70d5e8c255fbb32de68b2d93cb1fe3e5e0254d7f0f79fe"
+    },
+    "dflash": {
+      "status": "qualified",
+      "physical_target_kv_tokens": 1022624,
+      "normalized_decode_tokens_per_second_median": 155.06857423732754,
+      "target_cycles_per_second_median": 29.084776314678535,
+      "draft_acceptance_rate_median": 0.61880088823094,
+      "emitted_tokens_per_target_cycle_median": 5.331606217616581,
+      "benchmark_runs": 7,
+      "output_sha256": "068a3bed7e94f0fdc4d87523cfe27754638535d8ebf087e2606a177a566b1db9",
+      "relative_to_control_percent": -0.17506567607443735,
+      "server_log_sha256": "f49a9b3df3938d9b76346ed94aad8f13b48f6318f6b593eb391aaab5a76cb793"
+    }
+  },
+  "artifacts": "/mnt/luke/kimi-k3-runs/r36-layered-source-equivalence-20260822"
+}

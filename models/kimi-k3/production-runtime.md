@@ -15,17 +15,18 @@ limit and 1,016,293 physical FP8 target-KV tokens while retaining 32 GiB of host
 RAM for native vLLM KV offload.
 
 The machine-readable evidence is
-[`validation/kimi-k3-upstream-aligned-r35-20260822.json`](validation/kimi-k3-upstream-aligned-r35-20260822.json).
+[`validation/kimi-k3-upstream-aligned-r36-20260822.json`](validation/kimi-k3-upstream-aligned-r36-20260822.json).
 
 ## Immutable artifacts
 
 | Component | Identity |
 |---|---|
-| vLLM image | `voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338` |
-| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme755f87-b12x2d466e3-cu133-torch213-20260822-r35` |
-| Image ID | `sha256:f0240cfe8ab56b435d7ea4bea9a67479406ee5636357719a15db98e34836add5` |
-| Docker recipe | `local-inference-lab/blackwell-llm-docker@daaaa0b` |
-| Qualification record | `local-inference-lab/blackwell-llm-docker@026955c` |
+| vLLM image | `voipmonitor/vllm@sha256:c41bf15095b2316c7335d305115ad26bab14ec4234f3109b1d1ebb807895a3ea` |
+| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme755f87-b12x2d466e3-cu133-torch213-20260822-r36` |
+| Image ID | `sha256:8fcc05178c94b38ecfc068c51cdaa7daaa0f1f13c5f00742c64581cc221dbc86` |
+| Docker recipe | `local-inference-lab/blackwell-llm-docker@a892bb8` |
+| Qualification record | `local-inference-lab/blackwell-llm-docker@3dd078a` |
+| Dependency foundation | `voipmonitor/vllm@sha256:03b67e53dda73c3fa317d4cb529ad38a220c51c7365ee8d54c16e5063fcc54e2` |
 | vLLM source tree | `e755f87b8e00d76e1aeacfa0835a2c7608925390` |
 | B12X source tree | `2d466e350e518193f9edd57809e050b3aa8b8dcb` |
 | FlashInfer wheels | `voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a3b55b973df48b08a6dfae4a2a1e64c975a990dda22f65e31acd5217b86bb` |
@@ -60,7 +61,7 @@ The Hugging Face cache must contain the pinned target and Inferact DSpark
 snapshots. Do not set `NCCL_GRAPH_FILE` to an empty value.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338
+IMAGE=voipmonitor/vllm@sha256:c41bf15095b2316c7335d305115ad26bab14ec4234f3109b1d1ebb807895a3ea
 CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-cu133-torch213
 
 mkdir -p "$CACHE_DIR"
@@ -176,14 +177,20 @@ execution speed from prompt-dependent speculative acceptance.
 
 | Profile | Runs | Emitted median | Acceptance median | Target cycles/s median | Physical target-KV tokens |
 |---|---:|---:|---:|---:|---:|
-| Target-only | 3 | 55.807 tok/s | not applicable | not applicable | 1,058,823 |
-| Inferact DSpark | 7 | 122.706 tok/s | 0.414940 | 31.426 | 1,016,293 |
-| modal-labs DFlash | 7 | 155.341 tok/s | 0.618801 | 29.136 | 1,022,624 |
+| Target-only | 3 | 55.801 tok/s | not applicable | not applicable | 1,058,823 |
+| Inferact DSpark | 7 | 122.695 tok/s | 0.414940 | 31.423 | 1,016,293 |
+| modal-labs DFlash | 7 | 155.069 tok/s | 0.618801 | 29.085 | 1,022,624 |
 
-Output hashes for all three profiles match their source-locked controls.
-Relative to the source composition without direct caller-owned DFlash output,
-target-only changed by -0.008%, DSpark by +0.012%, and natural DFlash by
-+4.969%.
+Output hashes for all three profiles match the independently built image with
+the same vLLM, B12X, and LMCache source trees. Relative to that image,
+target-only changed by -0.010%, DSpark by -0.009%, and DFlash by -0.175%.
+The differences are below one percent and preserve exact deterministic output.
+
+The installed Python and JSON payloads and all launcher files are byte-identical
+to the comparison image. ExLlama, NCCL, FlashKDA, Rust parser, CUDA memory, and
+filesystem-I/O native libraries are also byte-identical. The three rebuilt DCP
+cubins have identical normalized SASS; their raw files differ only in
+compiler-generated internal source namespaces.
 
 Long-context evidence:
 
@@ -303,13 +310,17 @@ The maintainer merge order and official-vLLM disposition are maintained in
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout daaaa0b
+git checkout 3dd078a
 ./build-kimi-k3-upstream-aligned-runtime.sh
 ```
 
-The build verifies every source-lock commit and tree before compiling. The
-FlashInfer wheel image is immutable and independent of vLLM and B12X source
-changes.
+The build verifies every source-lock commit and tree before compiling. It uses
+the immutable dependency foundation
+`voipmonitor/vllm@sha256:03b67e53dda73c3fa317d4cb529ad38a220c51c7365ee8d54c16e5063fcc54e2`.
+The foundation contains CUDA, PyTorch, FlashInfer, CUTLASS DSL, InstantTensor,
+Rust, and the remaining runtime dependencies, but does not contain vLLM, B12X,
+or LMCache. A source-only vLLM or B12X rebuild therefore does not rebuild
+FlashInfer.
 
 ## Operational limits
 
@@ -326,4 +337,4 @@ changes.
   packaged but is not the low-latency production default.
 
 The immutable rollback image is
-`voipmonitor/vllm@sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71`.
+`voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338`.
