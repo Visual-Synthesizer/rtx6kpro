@@ -1,0 +1,113 @@
+{
+  "schema": "kimi-k3-source-locked-runtime-qualification-v1",
+  "status": "qualified",
+  "image": {
+    "reference": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme755f87-b12x2d466e3-cu133-torch213-20260822-r35@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338",
+    "local_id": "sha256:f0240cfe8ab56b435d7ea4bea9a67479406ee5636357719a15db98e34836add5",
+    "size_bytes": 30753249644,
+    "build_recipe_commit": "daaaa0b4b58588f693c86298effef7d1626d8b0d",
+    "runtime": {
+      "cuda": "13.3",
+      "pytorch": "2.13.0"
+    }
+  },
+  "source": {
+    "vllm": {
+      "commit": "e08d796fbe7987fc41683963c22740eaf2515a01",
+      "tree": "e755f87b8e00d76e1aeacfa0835a2c7608925390"
+    },
+    "b12x": {
+      "commit": "b8c7153c3e1ca13b1e0ef373d9a382a513ab892f",
+      "tree": "2d466e350e518193f9edd57809e050b3aa8b8dcb"
+    },
+    "flashinfer_wheels": "voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a3b55b973df48b08a6dfae4a2a1e64c975a990dda22f65e31acd5217b86bb"
+  },
+  "configuration": {
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "max_model_len": 1000000,
+    "max_num_batched_tokens": 4102,
+    "max_num_scheduled_tokens": 4096,
+    "max_num_seqs": 1,
+    "target_kv_cache_dtype": "fp8",
+    "vision_enabled_in_production_profile": true,
+    "native_host_kv_gib": 32
+  },
+  "comparison_control": {
+    "role": "Source composition with staged MXFP8 input and a temporary dense DFlash projection output",
+    "receipt": "kimi-k3-upstream-aligned-r34-20260822.json"
+  },
+  "profiles": {
+    "no_speculation": {
+      "status": "qualified",
+      "physical_target_kv_tokens": 1058823,
+      "normalized_decode_tokens_per_second_median": 55.80686016911199,
+      "benchmark_runs": 3,
+      "output_sha256": "d55ef2b797140202d4b4ea49b464d0285f53dee1ff6cbee6a2f65a76e90290da",
+      "relative_to_control_percent": -0.008397
+    },
+    "dspark": {
+      "status": "qualified",
+      "physical_target_kv_tokens": 1016293,
+      "normalized_decode_tokens_per_second_median": 122.70619468838716,
+      "target_cycles_per_second_median": 31.426219949518508,
+      "draft_acceptance_rate_median": 0.4149400218102508,
+      "emitted_tokens_per_target_cycle_median": 3.904580152671756,
+      "benchmark_runs": 7,
+      "output_sha256": "b78af224f6a8789fe001c473a81a593b24bb5b73f7b3d350c652204bae278cf8",
+      "relative_to_control_percent": 0.011905,
+      "openai_api": {
+        "reasoning": "qualified",
+        "tool_calls": "qualified",
+        "native_vision": "qualified",
+        "vision_answer": "The fruit is a strawberry, and it is usually bright red when ripe."
+      },
+      "native_host_kv": {
+        "status": "qualified",
+        "backend": "vllm-native",
+        "configured_gib": 32,
+        "draft_tail_offload": false,
+        "restore_receipt": "/mnt/luke/kimi-k3-runs/r33-stable-route-source-locked-20260822/dspark/native-host-kv-repeat.json"
+      }
+    },
+    "dflash": {
+      "status": "qualified",
+      "physical_target_kv_tokens": 1022624,
+      "normalized_decode_tokens_per_second_median": 155.34052217268672,
+      "target_cycles_per_second_median": 29.13578307029012,
+      "draft_acceptance_rate_median": 0.61880088823094,
+      "emitted_tokens_per_target_cycle_median": 5.331606217616581,
+      "benchmark_runs": 7,
+      "output_sha256": "068a3bed7e94f0fdc4d87523cfe27754638535d8ebf087e2606a177a566b1db9",
+      "relative_to_control_percent": 4.969089,
+      "long_context": {
+        "prompt_tokens": 524288,
+        "completion_tokens": 64,
+        "http_status": 200
+      },
+      "staged_projection_activation": {
+        "status": "observed",
+        "scheduler_tokens": 4096,
+        "target_width": 7168,
+        "input_slices": 6
+      }
+    }
+  },
+  "staged_mxfp8_projection": {
+    "status": "qualified",
+    "geometry": {
+      "tokens": 4096,
+      "input_slices": 6,
+      "slice_width": 7168,
+      "output_width": 7168
+    },
+    "bitwise_equal_to_concatenated_projection": true,
+    "concatenated_peak_allocated_bytes": 1278083584,
+    "staged_peak_allocated_bytes": 663355904,
+    "peak_allocation_reduction_percent": 48.097612,
+    "concatenated_median_milliseconds": 5.9298878,
+    "staged_median_milliseconds": 5.843648,
+    "staged_latency_change_percent": -1.454324
+  },
+  "artifact_root": "/mnt/luke/kimi-k3-runs/r35-dflash-active-staged-source-locked-20260822"
+}

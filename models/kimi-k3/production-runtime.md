@@ -15,19 +15,20 @@ limit and 1,016,293 physical FP8 target-KV tokens while retaining 32 GiB of host
 RAM for native vLLM KV offload.
 
 The machine-readable evidence is
-[`validation/kimi-k3-upstream-aligned-r34-20260822.json`](validation/kimi-k3-upstream-aligned-r34-20260822.json).
+[`validation/kimi-k3-upstream-aligned-r35-20260822.json`](validation/kimi-k3-upstream-aligned-r35-20260822.json).
 
 ## Immutable artifacts
 
 | Component | Identity |
 |---|---|
-| vLLM image | `voipmonitor/vllm@sha256:4c0f4c909a3af5bd78a5bee10698cd5d923a6ce0d0e0350af9cc0ecc741a8949` |
-| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm8cd5531-b12xedac2e2-cu133-torch213-20260822-r34` |
-| Image ID | `sha256:e25602d04015e4f6be77f9e04f370a0822c80deadb0cdd8ff10f6801a99d2e28` |
-| Docker recipe | `local-inference-lab/blackwell-llm-docker@348e569` |
-| vLLM source tree | `8cd5531d6199531f7b0d08cb28481a444d680f30` |
-| B12X source tree | `edac2e2dbf181b1dee09f5cba413f0a0b2d67c56` |
-| FlashInfer wheels | `voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a7660baeea31257cf71b03dd16304fbb1e57cdbf7e98e35c25244e3746fdd` |
+| vLLM image | `voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338` |
+| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme755f87-b12x2d466e3-cu133-torch213-20260822-r35` |
+| Image ID | `sha256:f0240cfe8ab56b435d7ea4bea9a67479406ee5636357719a15db98e34836add5` |
+| Docker recipe | `local-inference-lab/blackwell-llm-docker@daaaa0b` |
+| Qualification record | `local-inference-lab/blackwell-llm-docker@026955c` |
+| vLLM source tree | `e755f87b8e00d76e1aeacfa0835a2c7608925390` |
+| B12X source tree | `2d466e350e518193f9edd57809e050b3aa8b8dcb` |
+| FlashInfer wheels | `voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a3b55b973df48b08a6dfae4a2a1e64c975a990dda22f65e31acd5217b86bb` |
 | LLMConduit image | `voipmonitor/llmconduit@sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
 
 The image uses CUDA 13.3, PyTorch 2.13.0, NCCL 2.31.2, CUTLASS DSL
@@ -59,7 +60,7 @@ The Hugging Face cache must contain the pinned target and Inferact DSpark
 snapshots. Do not set `NCCL_GRAPH_FILE` to an empty value.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:4c0f4c909a3af5bd78a5bee10698cd5d923a6ce0d0e0350af9cc0ecc741a8949
+IMAGE=voipmonitor/vllm@sha256:e009bb404211c67164f1009bda97823f35578285b6779a7614ed1f97c1f8c338
 CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-cu133-torch213
 
 mkdir -p "$CACHE_DIR"
@@ -158,10 +159,11 @@ docker run -d \
   "$IMAGE" --max-num-scheduled-tokens 4096
 ```
 
-The server log must contain:
+The server log must contain an activation record for an actual scheduler
+forward, for example:
 
 ```text
-DFlash auxiliary projection uses staged B12X MXFP8 input
+DFlash staged auxiliary projection is active: tokens=4096 target_width=7168 slices=6.
 ```
 
 Absence of that line means the bounded long-prefill path is not active.
@@ -174,22 +176,25 @@ execution speed from prompt-dependent speculative acceptance.
 
 | Profile | Runs | Emitted median | Acceptance median | Target cycles/s median | Physical target-KV tokens |
 |---|---:|---:|---:|---:|---:|
-| Target-only | 3 | 55.812 tok/s | not applicable | not applicable | 1,058,823 |
-| Inferact DSpark | 7 | 122.692 tok/s | 0.414940 | 31.422 | 1,016,293 |
-| modal-labs DFlash | 7 | 147.987 tok/s | 0.618801 | 27.757 | 1,022,624 |
+| Target-only | 3 | 55.807 tok/s | not applicable | not applicable | 1,058,823 |
+| Inferact DSpark | 7 | 122.706 tok/s | 0.414940 | 31.426 | 1,016,293 |
+| modal-labs DFlash | 7 | 155.341 tok/s | 0.618801 | 29.136 | 1,022,624 |
 
-The DFlash forced-token control measured 162.384 tok/s and 28.254 target
-cycles/s. Output hashes for all three profiles match their source-locked
-controls. Relative to the directly preceding source composition, target-only
-changed by +0.05%, DSpark by +0.07%, and natural DFlash by -0.13%.
+Output hashes for all three profiles match their source-locked controls.
+Relative to the source composition without direct caller-owned DFlash output,
+target-only changed by -0.008%, DSpark by +0.012%, and natural DFlash by
++4.969%.
 
-Long-context checks:
+Long-context evidence:
 
-- Target-only completed 208,026 input tokens plus 2,048 generated tokens.
-- DSpark completed 208,026 input tokens plus 2,048 generated tokens and
-  answered a native strawberry image correctly.
-- DFlash completed 208,026 input tokens plus 2,048 generated tokens and a
-  separate 524,288-token prompt plus 64 generated tokens.
+- The target-only and DSpark paths completed 208,026 input tokens plus 2,048
+  generated tokens under the staged-input control composition. Their
+  deterministic decode outputs in the published image are identical because
+  the direct-output change is reachable only from DFlash auxiliary projection.
+- The published DFlash path completed 524,288 input tokens plus 64 generated
+  tokens with its staged direct-output path active.
+- The published DSpark production profile passed reasoning, required tool-call,
+  and native strawberry-image API checks.
 
 Every streamed long-context response returned HTTP 200 with a terminal event,
 no stream error, no Kimi protocol marker, and no repeated em-dash run.
@@ -210,8 +215,9 @@ feeds each Kimi-K3 auxiliary state into that input as it is produced.
 
 At `M=4096`, six `K=7168` slices, and `N=7168`, staged and concatenated
 projection outputs are bitwise equal. Peak allocated memory falls from
-1,395,524,096 to 808,321,536 bytes. The final projection remains one GEMM with
-the original accumulation order.
+1,278,083,584 to 663,355,904 bytes, a 48.10% reduction. Nine interleaved runs
+measured 5.930 ms for concatenated input and 5.844 ms for staged direct output.
+The final projection remains one GEMM with the original accumulation order.
 
 ## Native host-KV offload
 
@@ -275,11 +281,11 @@ The Docker source lock composes these pull-request heads in order:
 
 ```text
 vLLM: 414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460,
-      463, 464, 467, 468, 469, 471, then qualification commit 52b81e4
-B12X: 227, 238, 239, then qualification commit f4db98a (#241)
+      463, 464, 467, 468, 469, 471, then #473 at ee69840
+B12X: 227, 238, 239, then #241 at bebd334
 ```
 
-The vLLM qualification commit is published for review as
+The vLLM staged auxiliary projection integration is published for review as
 [#473](https://github.com/local-inference-lab/vllm/pull/473). Merge vLLM #460
 before #473. The exact heads, merge commits, bases, and trees are stored in:
 
@@ -297,8 +303,8 @@ The maintainer merge order and official-vLLM disposition are maintained in
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 348e569
-./build-kimi-k3-vllm-python-refresh.sh
+git checkout daaaa0b
+./build-kimi-k3-upstream-aligned-runtime.sh
 ```
 
 The build verifies every source-lock commit and tree before compiling. The
