@@ -9,6 +9,7 @@ specifications.
 | Need | Page |
 |---|---|
 | Serve the 0731 DSpark checkpoint | [DeepSeek-V4-Flash-0731 Infernal Invocation r18](ds4dspark-infernal-invocation-r18.md) |
+| Test topology-calibrated B12X transport | [B12X PCIe transport calibration](ds4f-b12x-pcie-autotune.md) |
 | Inspect the Gilded Gnosis baseline | [DeepSeek-V4-Flash-0731 Gilded Gnosis r33](ds4dspark-v20-r33.md) |
 | Inspect the Fathomless TP2/TP4 sweep | [DeepSeek-V4-Flash v10 Fathomless Validation](ds4dspark-v10.md) |
 | Inspect the full DSpark and standard-MTP sweep | [DeepSeek-V4-Flash and DSpark v9](ds4dspark-v9.md) |
