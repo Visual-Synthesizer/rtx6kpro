@@ -8,12 +8,17 @@ tokens while retaining a 4,096-token prefill chunk.
 
 ## TL;DR
 
-Download the committed Compose profile and start the server:
+Download the committed Compose profile, pull the prebuilt image from Docker
+Hub, and start the server:
 
 ```bash
 curl -LO https://raw.githubusercontent.com/local-inference-lab/blackwell-llm-docker/main/examples/docker-compose-ds4-infernal-invocation-cu133-r19.yml
+docker compose -f docker-compose-ds4-infernal-invocation-cu133-r19.yml pull
 docker compose -f docker-compose-ds4-infernal-invocation-cu133-r19.yml up -d
 ```
+
+The Compose profile contains an `image` reference and no `build` section. It
+never compiles the runtime locally.
 
 The defaults use two GPUs, target-only decode, B12X W4A8 plus DGLIN, FP8
 compressed MLA KV, InstantTensor `BUFFERED`, `MAX_MODEL_LEN=1048576`,
