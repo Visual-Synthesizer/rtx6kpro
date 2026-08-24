@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-24](2026-08/2026-08-24.md) | Infernal Invocation r19 vLLM image released for DeepSeek-V4-Flash: TP2 now hits 2M KV cache (4096 ba |
 | [2026-08-23](2026-08/2026-08-23.md) | - el8 published an updated vLLM recipe for 2x DGX Spark DeepSeek V4 Flash — stable tool calling, d |
 | [2026-08-22](2026-08/2026-08-22.md) | DGX Station early benchmarks: ~30-40 tok/s decode, 6000+ tok/s prefill on out-of-VRAM MoE models; DG |
 | [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
@@ -186,6 +187,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-24](2026-08/2026-08-24.md) | Infernal Invocation r19 vLLM image released for DeepSeek-V4-Flash: TP2 now hits 2M KV cache (4096 ba |
 | [2026-08-23](2026-08/2026-08-23.md) | - el8 published an updated vLLM recipe for 2x DGX Spark DeepSeek V4 Flash — stable tool calling, d |
 | [2026-08-22](2026-08/2026-08-22.md) | DGX Station early benchmarks: ~30-40 tok/s decode, 6000+ tok/s prefill on out-of-VRAM MoE models; DG |
 | [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
