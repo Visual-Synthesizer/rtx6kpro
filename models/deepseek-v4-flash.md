@@ -8,6 +8,7 @@ specifications.
 
 | Need | Page |
 |---|---|
+| Serve the qualified fixed-K5 source composition | [DeepSeek-V4-Flash-0731 Infernal Invocation r21](ds4dspark-infernal-invocation-r21.md) |
 | Test the target-only 2.11M-KV capacity profile | [DeepSeek-V4-Flash-0731 Infernal Invocation r19 preview](ds4dspark-infernal-invocation-r19.md) |
 | Serve the 0731 DSpark checkpoint | [DeepSeek-V4-Flash-0731 Infernal Invocation r18](ds4dspark-infernal-invocation-r18.md) |
 | Test topology-calibrated B12X transport | [B12X PCIe transport calibration](ds4f-b12x-pcie-autotune.md) |
@@ -20,8 +21,8 @@ specifications.
 
 | Area | Specification |
 |---|---|
-| Target-only performance preview | Infernal Invocation r19 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
-| Qualified DSpark K5 image line | Infernal Invocation r18 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
+| Qualified DSpark K5 image line | Infernal Invocation r21 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
+| Target-only capacity study | Infernal Invocation r19 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | Standard-MTP checkpoint | `deepseek-ai/DeepSeek-V4-Flash` |
 | Archived DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-DSpark` |
@@ -34,7 +35,7 @@ specifications.
 
 | Source line | Revision namespace | Serving specification |
 |---|---|---|
-| `dev/infernal-invocation` | Infernal Invocation `r*` | [r19 preview](ds4dspark-infernal-invocation-r19.md), [r18 qualified DSpark K5](ds4dspark-infernal-invocation-r18.md) |
+| `dev/infernal-invocation` | Infernal Invocation `r*` | [r21 qualified source composition](ds4dspark-infernal-invocation-r21.md), [r19 capacity study](ds4dspark-infernal-invocation-r19.md) |
 | `dev/gilded-gnosis` | Gilded Gnosis `v20-r*` | [Gilded Gnosis r33](ds4dspark-v20-r33.md) |
 | Fathomless Firmament | `v9` and `v10` | [v10](ds4dspark-v10.md), [v9](ds4dspark-v9.md) |
 | Eldritch Enlightenment | DS4 Flash `v1-v6` | [v6](ds4-flash-v6.md), [v5](ds4-flash-v5.md), [v4](ds4-flash-v4.md), [v3](ds4-flash-v3.md), [v2](ds4-flash-v2.md), [v1](ds4-flash-v1.md) |
