@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-27](2026-08/2026-08-27.md) | GLM-5.3-Flash released (320B/18B active, native vision, MIT license, 1M context) — beats GLM-5.2 a |
 | [2026-08-26](2026-08/2026-08-26.md) | Qwen3.8-Flash-Next leaked/announced: first Qwen4-arch preview, 125B-A6B + 51B "engram" n-gram embedd |
 | [2026-08-25](2026-08/2026-08-25.md) | DFlash2 speculative decoding lands for Qwen3.8-27B: 20-40% decode speedup over MTP, but triggers a v |
 | [2026-08-24](2026-08/2026-08-24.md) | Infernal Invocation r19 vLLM image released for DeepSeek-V4-Flash: TP2 now hits 2M KV cache (4096 ba |
@@ -189,6 +190,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-27](2026-08/2026-08-27.md) | GLM-5.3-Flash released (320B/18B active, native vision, MIT license, 1M context) — beats GLM-5.2 a |
 | [2026-08-26](2026-08/2026-08-26.md) | Qwen3.8-Flash-Next leaked/announced: first Qwen4-arch preview, 125B-A6B + 51B "engram" n-gram embedd |
 | [2026-08-25](2026-08/2026-08-25.md) | DFlash2 speculative decoding lands for Qwen3.8-27B: 20-40% decode speedup over MTP, but triggers a v |
 | [2026-08-24](2026-08/2026-08-24.md) | Infernal Invocation r19 vLLM image released for DeepSeek-V4-Flash: TP2 now hits 2M KV cache (4096 ba |
