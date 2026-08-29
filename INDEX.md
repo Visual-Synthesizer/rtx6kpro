@@ -57,6 +57,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.1 MXFP4 Hybrid Native Checkpoint](models/glm-5.1-mxfp4.md) - `models/glm-5.1-mxfp4.md`
 - [GLM-5.1 Runbook Hub](models/glm-5.1.md) - `models/glm-5.1.md`
 - [GLM-5.2 Runbook Hub](models/glm-5.2.md) - `models/glm-5.2.md`
+- [GLM-5.3-Flash NVIDIA 4-bit floating-point (NVFP4) with DFlash2 Microscaling 8-bit floating-point (MXFP8)](models/glm-5.3-flash-dflash2.md) - `models/glm-5.3-flash-dflash2.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
 - [B12X W4A16 Regression Checkpoint - 2026-05-15](models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md) - `models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md`
