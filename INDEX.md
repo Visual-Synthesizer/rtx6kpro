@@ -13,7 +13,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
+- [INDEX](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
@@ -37,7 +37,9 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r15](models/ds4dspark-infernal-invocation-r15.md) - `models/ds4dspark-infernal-invocation-r15.md`
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r16](models/ds4dspark-infernal-invocation-r16.md) - `models/ds4dspark-infernal-invocation-r16.md`
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r18](models/ds4dspark-infernal-invocation-r18.md) - `models/ds4dspark-infernal-invocation-r18.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r19 Preview](models/ds4dspark-infernal-invocation-r19.md) - `models/ds4dspark-infernal-invocation-r19.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r2](models/ds4dspark-infernal-invocation-r2.md) - `models/ds4dspark-infernal-invocation-r2.md`
+- [DeepSeek-V4-Flash-0731 Infernal Invocation r21](models/ds4dspark-infernal-invocation-r21.md) - `models/ds4dspark-infernal-invocation-r21.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r4](models/ds4dspark-infernal-invocation-r4.md) - `models/ds4dspark-infernal-invocation-r4.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r7](models/ds4dspark-infernal-invocation-r7.md) - `models/ds4dspark-infernal-invocation-r7.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r9](models/ds4dspark-infernal-invocation-r9.md) - `models/ds4dspark-infernal-invocation-r9.md`
@@ -52,6 +54,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash-DSpark v7](models/ds4dspark-v7.md) - `models/ds4dspark-v7.md`
 - [DeepSeek-V4-Flash and DSpark v8](models/ds4dspark-v8.md) - `models/ds4dspark-v8.md`
 - [DeepSeek-V4-Flash and DSpark v9](models/ds4dspark-v9.md) - `models/ds4dspark-v9.md`
+- [DeepSeek-V4-Flash B12X PCIe Transport Calibration](models/ds4f-b12x-pcie-autotune.md) - `models/ds4f-b12x-pcie-autotune.md`
 - [DeepSeek-V4-Flash: empty `content` from an unclosed `<think>` block](models/ds4f-empty-think/README.md) - `models/ds4f-empty-think/README.md`
 - [Eldritch Enlightenment vLLM Docker](models/eldritch-enlightenment-docker.md) - `models/eldritch-enlightenment-docker.md`
 - [GLM-5.1 MXFP4 Hybrid Native Checkpoint](models/glm-5.1-mxfp4.md) - `models/glm-5.1-mxfp4.md`
@@ -204,6 +207,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [ASUS ESC8000A-E13P — PEX890xx Bug Report](troubleshooting/asus-esc8000a-e13p-pex890xx-bug-report.md) - `troubleshooting/asus-esc8000a-e13p-pex890xx-bug-report.md`
 - [Troubleshooting -- Common Issues on RTX 6000 Pro Blackwell](troubleshooting/common-issues.md) - `troubleshooting/common-issues.md`
 - [Intermittent GPU Bus Drops on Multi-PSU Open-Air Frames](troubleshooting/gpu-bus-drops-multi-psu-grounding.md) - `troubleshooting/gpu-bus-drops-multi-psu-grounding.md`
+- [PCIe Link Speed Flapping Behind c-payne Switches — Locking Gen5 Without Trapping a Card](troubleshooting/pcie-link-speed-flapping-cpayne.md) - `troubleshooting/pcie-link-speed-flapping-cpayne.md`
 
 ## Daily Summaries
 
@@ -393,6 +397,14 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-18](daily-summaries/2026-08/2026-08-19.md) - `daily-summaries/2026-08/2026-08-19.md`
 - [Daily Summary — 2026-08-19](daily-summaries/2026-08/2026-08-20.md) - `daily-summaries/2026-08/2026-08-20.md`
 - [Daily Summary — 2026-08-20](daily-summaries/2026-08/2026-08-21.md) - `daily-summaries/2026-08/2026-08-21.md`
+- [Daily Summary — 2026-08-21](daily-summaries/2026-08/2026-08-22.md) - `daily-summaries/2026-08/2026-08-22.md`
+- [Daily Summary — 2026-08-22](daily-summaries/2026-08/2026-08-23.md) - `daily-summaries/2026-08/2026-08-23.md`
+- [Daily Summary — 2026-08-23](daily-summaries/2026-08/2026-08-24.md) - `daily-summaries/2026-08/2026-08-24.md`
+- [Daily Summary — 2026-08-24](daily-summaries/2026-08/2026-08-25.md) - `daily-summaries/2026-08/2026-08-25.md`
+- [Daily Summary — 2026-08-25](daily-summaries/2026-08/2026-08-26.md) - `daily-summaries/2026-08/2026-08-26.md`
+- [Daily Summary — 2026-08-26](daily-summaries/2026-08/2026-08-27.md) - `daily-summaries/2026-08/2026-08-27.md`
+- [Daily Summary — 2026-08-27](daily-summaries/2026-08/2026-08-28.md) - `daily-summaries/2026-08/2026-08-28.md`
+- [Daily Summary — 2026-08-28](daily-summaries/2026-08/2026-08-29.md) - `daily-summaries/2026-08/2026-08-29.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

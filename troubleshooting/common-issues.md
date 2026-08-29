@@ -35,6 +35,7 @@
 - [PCIe and Stability Issues](#pcie-and-stability-issues)
   - [Intermittent GPU Bus Drops on Multi-PSU Frames](#intermittent-gpu-bus-drops-on-multi-psu-frames)
   - [Surprise Link Down (PCIe ASPM)](#surprise-link-down)
+  - [PCIe Link Speed Flapping (c-payne switches)](#pcie-link-speed-flapping)
   - [NCCL P2P Lockups (IOMMU/UVM)](#nccl-p2p-lockups)
   - [ZFS System Freezes](#zfs-system-freezes)
 - [Miscellaneous](#miscellaneous)
@@ -466,6 +467,29 @@ GRUB_CMDLINE_LINUX_DEFAULT="pcie_aspm=off pcie_port_pm=off"
 - `pcie_port_pm=off` disables PCIe port runtime power management (CRITICAL)
 
 Run `update-grub` and reboot.
+
+---
+
+### PCIe Link Speed Flapping
+
+**Symptom**: No error at all. GPU links renegotiate continuously between Gen1,
+Gen2 and Gen5 — 1415 transitions across 35 devices in two minutes were measured
+on a 17-GPU c-payne system at idle. A single `nvidia-smi` or `lspci` snapshot
+catches one phase of the cycle and looks healthy.
+
+**Check**: Sample once per second, not once.
+```bash
+watch -n1 'cat /sys/bus/pci/devices/0000:e3:00.0/current_link_speed'
+```
+
+**Fix**: Set Hardware Autonomous Speed Disable (Link Control 2, bit 5) on both
+ends of each link — but **only after verifying the link is at its maximum**. The
+bit blocks movement in both directions, so locking a card that happens to be at
+Gen2 traps it there permanently. A udev rule at enumeration cannot make that
+check and has left a production card at Gen2 x16 for hours.
+
+See [PCIe Link Speed Flapping Behind c-payne Switches](pcie-link-speed-flapping-cpayne.md)
+for the register map, the verify-then-lock supervisor, and the ×4-slot pitfall.
 
 ---
 
