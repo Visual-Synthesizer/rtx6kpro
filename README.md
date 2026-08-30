@@ -15,7 +15,7 @@ If you just want to run a model, use these stable hub pages first:
 
 | Model family | Start here | Scope |
 |---|---|---|
-| GLM-5.3-Flash | [GLM-5.3-Flash NVIDIA 4-bit floating-point with DFlash2 Microscaling 8-bit floating-point](models/glm-5.3-flash-dflash2.md) | Source-locked NVIDIA 4-bit floating-point (NVFP4) target, Microscaling 8-bit floating-point (MXFP8) draft, B12X kernel/backend stack with four-way tensor/decode-context parallelism, full compressed-KV prefill, and Docker launch. |
+| GLM-5.3-Flash | [Jovian Judgement Community DFlash2 — 20260830-r7](models/jovian-judgement-community-dflash2-20260830-r7.md) | Source-locked NVIDIA 4-bit floating-point (NVFP4) target with no-spec, MTP:3, and Microscaling 8-bit floating-point (MXFP8) DFlash2 modes, qualified TP4/DCP1 performance, optional DCP4 full-CKV prefill, and Docker launch. |
 | GLM-5.2 | [GLM-5.2 Runbook Hub](models/glm-5.2.md) | Fathomless vLLM, NVFP4, online FP8/MXFP8, B12X, DCP, MTP, KLD. |
 | DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Standard checkpoint, MTP, DSpark, B12X, Lucifer, CUTLASS. |
 | Kimi | [Kimi Runbook Hub](models/kimi.md) | Kimi-K2.7-Code, DFlash, parser/tool-call runtime. |
@@ -49,7 +49,7 @@ Need the complete map of every Markdown page?
 
 | Area | Page | Why it matters |
 |---|---|---|
-| GLM-5.3-Flash serving stack | [GLM-5.3-Flash NVIDIA 4-bit floating-point with DFlash2 Microscaling 8-bit floating-point](models/glm-5.3-flash-dflash2.md) | Qualified source-locked B12X TP4/DCP4 Docker image with replicated DFlash2 KV, page-aligned capacity, and exact backend evidence. |
+| GLM-5.3-Flash serving stack | [Jovian Judgement Community DFlash2 — 20260830-r7](models/jovian-judgement-community-dflash2-20260830-r7.md) | Qualified source-locked TP4 image with DCP1 no-spec, MTP:3, and MXFP8 DFlash2 measurements plus DCP4 full-CKV prefill evidence. |
 | GLM-5.2 serving stack | [GLM-5.2 Infernal Invocation r18](models/glm5.2-infernal-invocation-r18.md) | Source-qualified CUDA 13.3 profiles with sparse-prefill row validation, projection-mixed EXL3 TP4, online MCG K6, and NVFP4 TP8. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
 | DS4 serving profile | [DS4 DSpark Infernal Invocation r18](models/ds4dspark-infernal-invocation-r18.md) | 0731 checkpoint, fixed K5, FULL graph dispatch, strict-tool concurrency, and native plus LMCache filesystem replay. |

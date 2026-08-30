@@ -60,7 +60,6 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.1 MXFP4 Hybrid Native Checkpoint](models/glm-5.1-mxfp4.md) - `models/glm-5.1-mxfp4.md`
 - [GLM-5.1 Runbook Hub](models/glm-5.1.md) - `models/glm-5.1.md`
 - [GLM-5.2 Runbook Hub](models/glm-5.2.md) - `models/glm-5.2.md`
-- [GLM-5.3-Flash NVIDIA 4-bit floating-point (NVFP4) with DFlash2 Microscaling 8-bit floating-point (MXFP8)](models/glm-5.3-flash-dflash2.md) - `models/glm-5.3-flash-dflash2.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
 - [B12X W4A16 Regression Checkpoint - 2026-05-15](models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md) - `models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md`
@@ -108,6 +107,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 Gilded Gnosis r34](models/glm5.2_v20.md) - `models/glm5.2_v20.md`
 - [GLM-5.2 Gilded Gnosis release history through r33](models/glm5.2_v20_history.md) - `models/glm5.2_v20_history.md`
 - [GLM-5 on RTX PRO 6000 Blackwell (SM120)](models/glm5.md) - `models/glm5.md`
+- [Jovian Judgement Community DFlash2 — 20260830-r7](models/jovian-judgement-community-dflash2-20260830-r7.md) - `models/jovian-judgement-community-dflash2-20260830-r7.md`
 - [Kimi K2.5 on RTX PRO 6000 Blackwell](models/kimi-k25.md) - `models/kimi-k25.md`
 - [Kimi-K2.6 eagle3 MTP long-context perf — **STATUS: shippable**](models/kimi-k26-mtp-long-ctx-wip/README.md) - `models/kimi-k26-mtp-long-ctx-wip/README.md`
 - [Debugging methodology — finding μs losses in `triton_mla` under vLLM + MTP](models/kimi-k26-mtp-long-ctx-wip/debugging-methodology.md) - `models/kimi-k26-mtp-long-ctx-wip/debugging-methodology.md`
@@ -405,6 +405,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-26](daily-summaries/2026-08/2026-08-27.md) - `daily-summaries/2026-08/2026-08-27.md`
 - [Daily Summary — 2026-08-27](daily-summaries/2026-08/2026-08-28.md) - `daily-summaries/2026-08/2026-08-28.md`
 - [Daily Summary — 2026-08-28](daily-summaries/2026-08/2026-08-29.md) - `daily-summaries/2026-08/2026-08-29.md`
+- [Daily Summary — 2026-08-29](daily-summaries/2026-08/2026-08-30.md) - `daily-summaries/2026-08/2026-08-30.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
