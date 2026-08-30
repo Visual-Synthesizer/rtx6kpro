@@ -1,4 +1,15 @@
-# Jovian Judgement Community DFlash2 — 20260830-r7
+# GLM-5.3-Flash
+
+<p align="center">
+  <img src="../images/glm-5.3-flash-jovian-judgement-branch-logo.png"
+       width="520" alt="Gold Jovian Judgement emblem with an eye, scales, and a star">
+</p>
+<p align="center"><em>Jovian Judgement branch logo, published by Luke in the
+<a href="https://discord.com/channels/1466898002793857221/1476263308242714718/1543077243398393927">community Discord</a>.</em></p>
+
+This page is the stable deployment and performance reference for
+GLM-5.3-Flash on RTX PRO 6000 Blackwell. The qualified serving artifact is
+Jovian Judgement Community DFlash2 — 20260830-r7.
 
 Terminology used below:
 
@@ -13,7 +24,7 @@ Terminology used below:
   Peripheral Component Interconnect Express `PCIe`, and Streaming Multiprocessor 120 `SM120`
   name the runtime and hardware interfaces.
 
-This runbook serves `local-inference-lab/GLM-5.3-Flash-NVFP4` on four NVIDIA
+The runbook serves `local-inference-lab/GLM-5.3-Flash-NVFP4` on four NVIDIA
 RTX PRO 6000 Blackwell GPUs. The Jovian Judgement Community DFlash2 image
 supports ordinary decode, three-token Multi-Token Prediction (MTP), and a
 seven-token DFlash2 draft loaded from
