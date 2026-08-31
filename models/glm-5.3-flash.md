@@ -239,12 +239,13 @@ experts. DFlash2 adds `B12xMxfp8LinearKernel` and FlashAttention version 2.
 
 ## Measured performance
 
-The DCP1 table was measured on physical GPUs 4–7 with stock clocks and PCIe
-5.0 x16 links. Every server used TP4, DCP1, FP8 target KV, 512/512 cache pages,
-B12X PCIe all-reduce, 32 minimum and maximum NCCL channels, and
+The DCP1 table was measured on physical GPUs 4–7 with PCIe 5.0 x16 links. Rows
+use stock clocks unless their mode explicitly identifies the research-only
+`VRAM +6000` profile. Every server used TP4, DCP1, FP8 target KV, 512/512 cache
+pages, B12X PCIe all-reduce, 32 minimum and maximum NCCL channels, and
 `MAX_NUM_BATCHED_TOKENS=4096`. The Docker digest above changes only the target
-and DFlash2 repository locators plus source-lock metadata from the stock-clock
-measured image; all vLLM, B12X, CUDA, graph, and scheduler layers are identical.
+and DFlash2 repository locators plus source-lock metadata from the measured
+image; all vLLM, B12X, CUDA, graph, and scheduler layers are identical.
 The target repository's `main` branch has the same 49 runtime files as the
 qualified target revision; only its model card differs. A 2026-08-31 smoke test
 loaded the byte-identical MXFP8 draft weights through the canonical DFlash2
@@ -268,11 +269,17 @@ CC1 decode used `llm-decode-bench` 0.4.29, an empty-context decode cell,
 measurement. Three independent cells were measured and the table reports the
 median. Accepted length and engine steps per second are server metrics.
 
-| Mode | Speculative configuration | 32k TTFT | 32k prompt throughput | CC1 output | Engine rate | Accepted length |
-|---|---|---:|---:|---:|---:|---:|
-| No speculative decode | none | 2.0786 s | **15,549 tok/s** | **139.4 tok/s** | — | — |
-| MTP:3 | three built-in draft tokens | 2.1360 s | **15,131 tok/s** | **228.0 tok/s** | 90.47 steps/s | 2.52 |
-| DFlash2 MXFP8 | seven draft tokens | 2.1157 s | **15,276 tok/s** | **185.5 tok/s** | 74.19 steps/s | 2.49 |
+| Mode | Speculative configuration | 32k TTFT | 32k prompt throughput | CC1 output | Sieve median | Engine rate | Accepted length |
+|---|---|---:|---:|---:|---:|---:|---:|
+| No speculative decode | none | 2.0786 s | **15,549 tok/s** | **139.4 tok/s** | not measured | — | — |
+| MTP:3 | three built-in draft tokens | 2.1360 s | **15,131 tok/s** | **228.0 tok/s** | **287.87 tok/s** | 90.47 steps/s | 2.52 |
+| DFlash2 MXFP8 | seven draft tokens | 2.1157 s | **15,276 tok/s** | **185.5 tok/s** | **339.73 tok/s** | 74.19 steps/s | 2.49 |
+| DFlash2 MXFP8, VRAM +6000 (**research-only**) | seven draft tokens | 2.0508 s | **15,759.6 tok/s** | **200.87 tok/s** | not measured | 82.91 steps/s | 2.43 |
+
+The `VRAM +6000` row changes only the memory-clock offset on GPUs 4–7. Stock
+clocks remain the qualified deployment default; the
+[research profile](#vram-6000-research-profile) records its raw samples and
+clock state.
 
 Raw CC1 samples were:
 
