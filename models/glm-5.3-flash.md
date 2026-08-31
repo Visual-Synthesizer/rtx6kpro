@@ -47,7 +47,7 @@ require local checkpoint paths or source-code bind mounts.
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2` |
 | DFlash2 update policy | resolve the Hugging Face `main` branch at startup; no runtime revision pin |
 | DFlash2 weights | pre-serialized ModelOpt MXFP8; no online weight quantization |
-| Image default and qualified cache-page geometry | independent 512-token target and recurrent-state pages |
+| Cache page geometry | independent 512-token target and recurrent-state pages |
 | Scheduler limit | `MAX_NUM_BATCHED_TOKENS=4096` |
 | CUDA graphs | target and speculative decode are captured; Gated Delta Network (GDN) prefill is eager |
 | Qualification date | 2026-08-30 |
