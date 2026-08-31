@@ -28,7 +28,7 @@ The runbook serves `local-inference-lab/GLM-5.3-Flash-NVFP4` on four NVIDIA
 RTX PRO 6000 Blackwell GPUs. The Jovian Judgement Community DFlash2 image
 supports ordinary decode, three-token Multi-Token Prediction (MTP), and a
 seven-token DFlash2 draft loaded from
-`local-inference-lab/GLM-5.3-Flash-DFlash2-MXFP8`.
+`local-inference-lab/GLM-5.3-Flash-DFlash2`.
 
 The commands use Hugging Face model names and named Docker volumes. They do not
 require local checkpoint paths or source-code bind mounts.
@@ -43,12 +43,14 @@ require local checkpoint paths or source-code bind mounts.
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4@520de24eabf507659eaef7c70f14fd584527facc` |
 | Target routed experts | ModelOpt NVFP4, B12X 4-bit-weight/4-bit-activation (W4A4) |
 | Target key-value cache | FP8 compressed Multi-head Latent Attention (MLA) |
-| DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2-MXFP8@d982b94051c63a31f74a2331c714635de0d5cda9` |
+| DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2` |
+| DFlash2 update policy | resolve the Hugging Face `main` branch at startup; no runtime revision pin |
 | DFlash2 weights | pre-serialized ModelOpt MXFP8; no online weight quantization |
 | Cache page geometry | independent 512-token target and recurrent-state pages |
 | Scheduler limit | `MAX_NUM_BATCHED_TOKENS=4096` |
 | CUDA graphs | target and speculative decode are captured; Gated Delta Network (GDN) prefill is eager |
 | Qualification date | 2026-08-30 |
+| Canonical DFlash2 locator validation | **qualified** on 2026-08-31 with identical MXFP8 weights |
 
 ## Docker artifact
 
@@ -56,13 +58,13 @@ Use the digest for a byte-identical deployment:
 
 ```text
 voipmonitor/vllm:jovian-judgement-community-dflash2-20260830-r7
-voipmonitor/vllm@sha256:3a7cbc5833ed3d5390c5de2ec3c5a2737761a175123262cfdfd7b38638e1d5e6
+voipmonitor/vllm@sha256:ef53437759e3a41d5ee1c4e9045ffdd7df2972faad50d1dc687e3ab479c5867a
 ```
 
 The qualified local image ID is
-`sha256:eaba6a8a03f0eef449388658e89aaa1e00a564b8479e131eec2904040c0b7664`.
+`sha256:00e3bb782819e08c2ae15e97d92fce6277bf0be8da1f89e0a3ed896a082cf28b`.
 The embedded source-lock SHA-256 is
-`30da939ce855fd059c866b7f177e5f36abad73ad0618f14fc0cf49f50d58b80a`.
+`4e46e831fa9e97c049c8f5962db03948f99d717f6472e67d9880f618bd0501cb`.
 
 ## Source contract
 
@@ -138,7 +140,7 @@ name. The qualification host used GPUs 4, 5, 6, and 7; `0,1,2,3` below is a
 portable four-GPU example.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:3a7cbc5833ed3d5390c5de2ec3c5a2737761a175123262cfdfd7b38638e1d5e6
+IMAGE=voipmonitor/vllm@sha256:ef53437759e3a41d5ee1c4e9045ffdd7df2972faad50d1dc687e3ab479c5867a
 GPU_DEVICES=0,1,2,3
 ```
 
@@ -159,7 +161,12 @@ MODE_ARGS=(-e SPECULATOR=mtp -e MTP=3)
 ```bash
 # DFlash2 with its trained default of seven draft tokens.
 NAME=jovian-judgement-dflash2-dcp1
-MODE_ARGS=(-e SPECULATOR=dflash2 -e NUM_SPECULATIVE_TOKENS=7)
+MODE_ARGS=(
+  -e SPECULATOR=dflash2
+  -e NUM_SPECULATIVE_TOKENS=7
+  -e DFLASH_MODEL=local-inference-lab/GLM-5.3-Flash-DFlash2
+  -e DFLASH_MODEL_REVISION=
+)
 ```
 
 Run the selected mode:
@@ -196,13 +203,18 @@ docker run -d \
   "$IMAGE"
 ```
 
-For DFlash2 with DCP4 full-CKV prefill, use the DFlash2 mode above and replace
+For DCP4 full-CKV target prefill in any of the three serving modes, replace
 `-e DCP=1` with:
 
 ```bash
   -e DCP=4 \
   -e DCP_CKV_GATHER=1 \
 ```
+
+The launcher enables full-CKV gathering automatically when `DCP` is greater
+than one; the explicit `DCP_CKV_GATHER=1` documents the selected behavior.
+No-spec, MTP, and DFlash2 share this target-prefill mechanism. The DCP4
+performance result below qualifies the DFlash2 mode specifically.
 
 ## Verify startup
 
@@ -224,9 +236,19 @@ experts. DFlash2 adds `B12xMxfp8LinearKernel` and FlashAttention version 2.
 ## Measured performance
 
 The DCP1 table was measured on physical GPUs 4–7 with stock clocks and PCIe
-5.0 x16 links. Every server used the immutable Docker digest above, TP4,
-DCP1, FP8 target KV, 512/512 cache pages, B12X PCIe all-reduce, 32 minimum and
-maximum NCCL channels, and `MAX_NUM_BATCHED_TOKENS=4096`.
+5.0 x16 links. Every server used TP4, DCP1, FP8 target KV, 512/512 cache pages,
+B12X PCIe all-reduce, 32 minimum and maximum NCCL channels, and
+`MAX_NUM_BATCHED_TOKENS=4096`. The Docker digest above changes only the DFlash2
+repository locator and source-lock metadata from the measured image; all
+vLLM, B12X, CUDA, graph, and scheduler layers are identical. A 2026-08-31
+smoke test loaded the byte-identical MXFP8 weights through the canonical
+repository and completed speculative inference on GPUs 4–7.
+
+The measured DFlash2 checkpoint contents have `model.safetensors` SHA-256
+`c033e03d47c7d5608596c8fc4e9336a1fe086eb781c08fe031be2bdea1614e58`.
+The community launcher follows the canonical checkpoint's `main` branch, so a
+later checkpoint update requires fresh performance qualification and may not
+reproduce the DFlash2 rows below.
 
 The 32k prefill request contained exactly 32,320 supplied token IDs, used a
 unique `cache_salt`, streamed one generated token, and measured client
