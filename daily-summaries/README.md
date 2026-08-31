@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-31](2026-08/2026-08-31.md) | - GLM-5.3-Flash "Jovian Judgement" r8 hits 350-430 tok/s decode, 12-15k tok/s prefill, 12M+ token KV |
 | [2026-08-30](2026-08/2026-08-30.md) | GLM-5.3 & GLM-5.3-Flash launched — community scrambled to quantize/serve within hours. David Young |
 | [2026-08-29](2026-08/2026-08-29.md) | GLM-5.3 and **GLM-5.3-Flash** dropped, triggering a same-day quant race (NVFP4, EXL3, DFlash2) acros |
 | [2026-08-28](2026-08/2026-08-28.md) | GLM-5.3-Flash dropped and dominated the day — NVFP4 (Luke) and EXL3 (Brandon) quants shipped withi |
@@ -193,6 +194,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-31](2026-08/2026-08-31.md) | - GLM-5.3-Flash "Jovian Judgement" r8 hits 350-430 tok/s decode, 12-15k tok/s prefill, 12M+ token KV |
 | [2026-08-30](2026-08/2026-08-30.md) | GLM-5.3 & GLM-5.3-Flash launched — community scrambled to quantize/serve within hours. David Young |
 | [2026-08-29](2026-08/2026-08-29.md) | GLM-5.3 and **GLM-5.3-Flash** dropped, triggering a same-day quant race (NVFP4, EXL3, DFlash2) acros |
 | [2026-08-28](2026-08/2026-08-28.md) | GLM-5.3-Flash dropped and dominated the day — NVFP4 (Luke) and EXL3 (Brandon) quants shipped withi |
