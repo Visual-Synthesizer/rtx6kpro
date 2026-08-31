@@ -9,7 +9,7 @@
 
 This page is the stable deployment and performance reference for
 GLM-5.3-Flash on RTX PRO 6000 Blackwell. The qualified serving artifact is
-Jovian Judgement Community — 20260830-r7.
+Jovian Judgement Community — 20260831-r8.
 
 Terminology used below:
 
@@ -49,8 +49,9 @@ require local checkpoint paths or source-code bind mounts.
 | DFlash2 weights | pre-serialized ModelOpt MXFP8; no online weight quantization |
 | Cache page geometry | independent 512-token target and recurrent-state pages |
 | Scheduler limit | `MAX_NUM_BATCHED_TOKENS=4096` |
+| Concurrent prefill cadence | `PREFILL_SCHEDULE_INTERVAL=8`; active only while eligible decode work is running |
 | CUDA graphs | target and speculative decode are captured; Gated Delta Network (GDN) prefill is eager |
-| Qualification date | 2026-08-30 |
+| Qualification date | 2026-08-31 |
 | Canonical DFlash2 locator validation | **qualified** on 2026-08-31 with identical MXFP8 weights |
 
 ## Docker artifact
@@ -58,14 +59,12 @@ require local checkpoint paths or source-code bind mounts.
 Use the digest for byte-identical runtime layers:
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260830-r7
-voipmonitor/vllm@sha256:488ddf752938b5ab17e3083dd7d5bb84f418bc3f8856f93cc514c8b66abbe4c6
+voipmonitor/vllm:jovian-judgement-community-20260831-r8
+voipmonitor/vllm@sha256:827a64ce0cea267aad843b3d521a47d742a6e78b502eaec7c05b4ae8bf403194
 ```
 
-The qualified local image ID is
-`sha256:26e40eeb6506d7fcff64b0ac155dee4d08b702a455e689533ceb60efaa874f88`.
 The embedded source-lock SHA-256 is
-`9ba44bc15de374ae93a52e2751a39efe3773370d81c24ff827d7f04f8c1cac0d`.
+`5ca5c81dff7dcf1b864dbb11f230df9f6276ca46e88c3b2a81ebec15e09dd21a`.
 Both checkpoint locators follow their Hugging Face `main` branches. The image
 digest therefore fixes the runtime but intentionally does not pin mutable model
 revisions.
@@ -73,7 +72,7 @@ revisions.
 ## Source contract
 
 The vLLM package tree is
-`54fee66bc5cdba569493b8685fa262494ca1fdf0`. It is composed from
+`4daf199faeab2208c975433973adf5cefce6d2ce`. It is composed from
 `local-inference-lab/vllm` branch `dev/jovian-judgement` at
 `0b67266a0f37d6146a8403fb8482403c62f412d5` and the following non-draft pull
 request heads:
@@ -91,10 +90,11 @@ request heads:
 | [vLLM #536](https://github.com/local-inference-lab/vllm/pull/536) `9f27029f55fd` | Checkpoints target GDN state for MTP prefill. |
 | [vLLM #537](https://github.com/local-inference-lab/vllm/pull/537) `236032509531` | Compacts MTP prefill outputs before Mixture-of-Experts (MoE) compute. |
 | [vLLM #539](https://github.com/local-inference-lab/vllm/pull/539) `d59cea8e55f6` | Preserves the embedding of a valid MTP token at position zero. |
+| [vLLM #546](https://github.com/local-inference-lab/vllm/pull/546) `2412a6f34ab0` | Applies the configured prefill cadence to non-data-parallel engines, validates the scheduler step-counter contract, and avoids empty pipeline-parallel steps when decode is temporarily ineligible. |
 
 The reproducible vLLM composition commit is
-`voipmonitor/vllm@bb3f9c3a00af522af93478645ad391f51eb0225b` with tree
-`9cd4481415a8bae84e49f6e3da9f0e47c5ed0889`. Pull request #513 is not part of
+`voipmonitor/vllm@f311938fab3e7ffccfc0713d5518025c3c811725` with tree
+`f5e05de47a9e9ff77c73f623347675a11b7a0d02`. Pull request #513 is not part of
 this package tree.
 
 The B12X package tree is
@@ -144,7 +144,7 @@ name. The qualification host used GPUs 4, 5, 6, and 7; `0,1,2,3` below is a
 portable four-GPU example.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:488ddf752938b5ab17e3083dd7d5bb84f418bc3f8856f93cc514c8b66abbe4c6
+IMAGE=voipmonitor/vllm@sha256:827a64ce0cea267aad843b3d521a47d742a6e78b502eaec7c05b4ae8bf403194
 GPU_DEVICES=0,1,2,3
 ```
 
@@ -193,6 +193,7 @@ docker run -d \
   -e MAX_MODEL_LEN=262144 \
   -e MAX_NUM_SEQS=16 \
   -e MAX_NUM_BATCHED_TOKENS=4096 \
+  -e PREFILL_SCHEDULE_INTERVAL=8 \
   -e MAX_CUDAGRAPH_CAPTURE_SIZE=128 \
   -e GPU_MEMORY_UTILIZATION=0.90 \
   -e B12X_PCIE_ALLREDUCE=1 \
@@ -243,9 +244,10 @@ The DCP1 table was measured on physical GPUs 4–7 with PCIe 5.0 x16 links. Rows
 use stock clocks unless their mode explicitly identifies the research-only
 `VRAM +6000` profile. Every server used TP4, DCP1, FP8 target KV, 512/512 cache
 pages, B12X PCIe all-reduce, 32 minimum and maximum NCCL channels, and
-`MAX_NUM_BATCHED_TOKENS=4096`. The Docker digest above changes only the target
-and DFlash2 repository locators plus source-lock metadata from the measured
-image; all vLLM, B12X, CUDA, graph, and scheduler layers are identical.
+`MAX_NUM_BATCHED_TOKENS=4096`. These isolated benchmark cells were measured on
+the same kernel/backend composition as the r8 image. Pull request #546 changes
+only scheduler fairness while prefill and decode requests overlap; its cadence
+path is inactive during isolated CC1 decode or standalone prefill.
 The target repository's `main` branch has the same 49 runtime files as the
 qualified target revision; only its model card differs. A 2026-08-31 smoke test
 loaded the byte-identical MXFP8 draft weights through the canonical DFlash2
@@ -320,6 +322,26 @@ The same image at TP4/DCP4 with DFlash2, seven draft tokens, and full-CKV
 gather measured a 2.3803-second median TTFT, or **13,578 prompt tok/s**, for
 the same 32,320-token request. DCP1 and DCP4 numbers are separate deployment
 contracts and must not be compared as if only one kernel changed.
+
+### Concurrent long-prefill fairness
+
+The fairness qualification starts a TP4/DCP1 DFlash2 request with 4,094 prompt
+tokens and 8,192 requested output tokens. After 2,048 output tokens, it submits
+a second request with 65,535 prompt tokens and one requested output token. Both
+requests use greedy sampling, seed zero, `ignore_eos=true`, a unique cache salt,
+and stock clocks. The table reports the interval while the second request is
+prefilling.
+
+| Runtime | Prefill cadence | Decode target forwards | Decode throughput | Concurrent prefill throughput |
+|---|---:|---:|---:|---:|
+| r7 scheduler behavior | 1 | 34 | 43.2 tok/s | 14,166 prompt tok/s |
+| r8 qualified artifact | 8 | 154 | **199.5 tok/s** | **10,752 prompt tok/s** |
+
+The r8 request pair completed with exactly 8,192 decode output tokens and
+65,535 prefill prompt tokens, DFlash accepted length 7.0, and no API error. A
+standalone 65,535-token prefill on the r8 artifact measured **14,630 prompt
+tok/s**. The cadence trades some mixed-load prefill throughput for decode
+progress; it does not throttle prefill when no eligible decode request exists.
 
 ### VRAM +6000 research profile
 
