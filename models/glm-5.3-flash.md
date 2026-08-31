@@ -9,7 +9,7 @@
 
 This page is the stable deployment and performance reference for
 GLM-5.3-Flash on RTX PRO 6000 Blackwell. The qualified serving artifact is
-Jovian Judgement Community DFlash2 — 20260830-r7.
+Jovian Judgement Community — 20260830-r7.
 
 Terminology used below:
 
@@ -25,7 +25,7 @@ Terminology used below:
   name the runtime and hardware interfaces.
 
 The runbook serves `local-inference-lab/GLM-5.3-Flash-NVFP4` on four NVIDIA
-RTX PRO 6000 Blackwell GPUs. The Jovian Judgement Community DFlash2 image
+RTX PRO 6000 Blackwell GPUs. The Jovian Judgement Community image
 supports ordinary decode, three-token Multi-Token Prediction (MTP), and a
 seven-token DFlash2 draft loaded from
 `local-inference-lab/GLM-5.3-Flash-DFlash2`.
@@ -40,13 +40,14 @@ require local checkpoint paths or source-code bind mounts.
 | Runtime status | **qualified** for Tensor Parallelism 4 (TP4) with Decode Context Parallelism 1 (DCP1) in all three serving modes |
 | Additional qualification | **qualified** for TP4/DCP4 DFlash2 prefill with full compressed-key/value (CKV) gathering |
 | Hardware | four RTX PRO 6000 Blackwell Workstation Edition GPUs, PCIe 5.0 x16, stock clocks |
-| Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4@520de24eabf507659eaef7c70f14fd584527facc` |
+| Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4` |
+| Target update policy | resolve the Hugging Face `main` branch at startup; no runtime revision pin |
 | Target routed experts | ModelOpt NVFP4, B12X 4-bit-weight/4-bit-activation (W4A4) |
 | Target key-value cache | FP8 compressed Multi-head Latent Attention (MLA) |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2` |
 | DFlash2 update policy | resolve the Hugging Face `main` branch at startup; no runtime revision pin |
 | DFlash2 weights | pre-serialized ModelOpt MXFP8; no online weight quantization |
-| Cache page geometry | independent 512-token target and recurrent-state pages |
+| Image default and qualified cache-page geometry | independent 512-token target and recurrent-state pages |
 | Scheduler limit | `MAX_NUM_BATCHED_TOKENS=4096` |
 | CUDA graphs | target and speculative decode are captured; Gated Delta Network (GDN) prefill is eager |
 | Qualification date | 2026-08-30 |
@@ -54,17 +55,20 @@ require local checkpoint paths or source-code bind mounts.
 
 ## Docker artifact
 
-Use the digest for a byte-identical deployment:
+Use the digest for byte-identical runtime layers:
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-dflash2-20260830-r7
-voipmonitor/vllm@sha256:ef53437759e3a41d5ee1c4e9045ffdd7df2972faad50d1dc687e3ab479c5867a
+voipmonitor/vllm:jovian-judgement-community-20260830-r7
+voipmonitor/vllm@sha256:488ddf752938b5ab17e3083dd7d5bb84f418bc3f8856f93cc514c8b66abbe4c6
 ```
 
 The qualified local image ID is
-`sha256:00e3bb782819e08c2ae15e97d92fce6277bf0be8da1f89e0a3ed896a082cf28b`.
+`sha256:26e40eeb6506d7fcff64b0ac155dee4d08b702a455e689533ceb60efaa874f88`.
 The embedded source-lock SHA-256 is
-`4e46e831fa9e97c049c8f5962db03948f99d717f6472e67d9880f618bd0501cb`.
+`9ba44bc15de374ae93a52e2751a39efe3773370d81c24ff827d7f04f8c1cac0d`.
+Both checkpoint locators follow their Hugging Face `main` branches. The image
+digest therefore fixes the runtime but intentionally does not pin mutable model
+revisions.
 
 ## Source contract
 
@@ -140,7 +144,7 @@ name. The qualification host used GPUs 4, 5, 6, and 7; `0,1,2,3` below is a
 portable four-GPU example.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:ef53437759e3a41d5ee1c4e9045ffdd7df2972faad50d1dc687e3ab479c5867a
+IMAGE=voipmonitor/vllm@sha256:488ddf752938b5ab17e3083dd7d5bb84f418bc3f8856f93cc514c8b66abbe4c6
 GPU_DEVICES=0,1,2,3
 ```
 
@@ -238,17 +242,19 @@ experts. DFlash2 adds `B12xMxfp8LinearKernel` and FlashAttention version 2.
 The DCP1 table was measured on physical GPUs 4–7 with stock clocks and PCIe
 5.0 x16 links. Every server used TP4, DCP1, FP8 target KV, 512/512 cache pages,
 B12X PCIe all-reduce, 32 minimum and maximum NCCL channels, and
-`MAX_NUM_BATCHED_TOKENS=4096`. The Docker digest above changes only the DFlash2
-repository locator and source-lock metadata from the measured image; all
-vLLM, B12X, CUDA, graph, and scheduler layers are identical. A 2026-08-31
-smoke test loaded the byte-identical MXFP8 weights through the canonical
+`MAX_NUM_BATCHED_TOKENS=4096`. The Docker digest above changes only the target
+and DFlash2 repository locators plus source-lock metadata from the stock-clock
+measured image; all vLLM, B12X, CUDA, graph, and scheduler layers are identical.
+The target repository's `main` branch has the same 49 runtime files as the
+qualified target revision; only its model card differs. A 2026-08-31 smoke test
+loaded the byte-identical MXFP8 draft weights through the canonical DFlash2
 repository and completed speculative inference on GPUs 4–7.
 
 The measured DFlash2 checkpoint contents have `model.safetensors` SHA-256
 `c033e03d47c7d5608596c8fc4e9336a1fe086eb781c08fe031be2bdea1614e58`.
-The community launcher follows the canonical checkpoint's `main` branch, so a
-later checkpoint update requires fresh performance qualification and may not
-reproduce the DFlash2 rows below.
+The community launcher follows both checkpoints' `main` branches, so a later
+target or draft update requires fresh performance qualification and may not
+reproduce the rows below.
 
 The 32k prefill request contained exactly 32,320 supplied token IDs, used a
 unique `cache_salt`, streamed one generated token, and measured client
@@ -284,6 +290,34 @@ The same image at TP4/DCP4 with DFlash2, seven draft tokens, and full-CKV
 gather measured a 2.3803-second median TTFT, or **13,578 prompt tok/s**, for
 the same 32,320-token request. DCP1 and DCP4 numbers are separate deployment
 contracts and must not be compared as if only one kernel changed.
+
+### VRAM +6000 research profile
+
+Status: **research-only**. Stock clocks remain the qualified deployment
+default. The exact Jovian Judgement Community image ID
+`sha256:26e40eeb6506d7fcff64b0ac155dee4d08b702a455e689533ceb60efaa874f88`
+was measured in TP4/DCP1 DFlash2 mode with seven draft tokens. Only physical
+GPUs 4–7 received an NVML memory-clock voltage/frequency offset of `+6000`;
+NVIDIA reported a 13,365 MHz memory clock under load. The offset was returned
+to zero on all four GPUs after measurement.
+
+The stock and overclocked cells used the same 32,320-token prefill request and
+30-second CC1 method specified above. Each value is the median of three
+samples.
+
+| Metric | Stock clocks | VRAM +6000 | Change |
+|---|---:|---:|---:|
+| 32k TTFT | 2.1157 s | **2.0508 s** | -3.07% |
+| 32k prompt throughput | 15,276.1 tok/s | **15,759.6 tok/s** | +3.17% |
+| CC1 output | 185.49 tok/s | **200.87 tok/s** | +8.30% |
+| Engine rate | 74.19 steps/s | **82.91 steps/s** | +11.75% |
+| Accepted length | 2.49 | 2.43 | -2.57% |
+
+The overclocked TTFT samples were 2.04717, 2.05081, and 2.05165 seconds. Its
+CC1 output samples were 205.29, 200.13, and 200.87 tok/s; engine-rate samples
+were 82.91, 82.93, and 82.78 steps/s; accepted-length samples were 2.48, 2.41,
+and 2.43. Engine rate is the cleaner execution-speed comparison because
+speculative output throughput also changes with accepted length.
 
 The CC1 client command was:
 
