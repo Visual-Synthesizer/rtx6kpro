@@ -1,0 +1,48 @@
+{
+  "artifact_kind": "Kimi K3 AA-LCR generation execution receipt",
+  "artifact_filename": "generation-execution-receipt.json",
+  "status": "qualified",
+  "server_started_utc": "2026-08-14T19:19:50.395763995Z",
+  "generation_started_utc": "2026-08-14T19:25:18Z",
+  "last_response_completed_utc": "2026-08-14T22:24:40.172891Z",
+  "generation_client_exited_utc": "2026-08-14T22:24:51Z",
+  "container": {
+    "name": "kimi-k3-official-mxfp4-nospec-tp16-dcp16-concurrency8-fa2-20260814",
+    "id": "bf65afc0bb0b4e0c248c82dcea96a440b87d5787c272a9c86f9da44d59de4399",
+    "image_id": "sha256:f226a6fd788bb4af345a17b768654f1e5a7487a812746ccb117aa9b040a82294"
+  },
+  "runtime_manifest_sha256": "80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e",
+  "generation_config_sha256": "82f96e2e56e8393ff2023e998ab72c0df6b4195ec4eb57ab9b22c08061bb11c6",
+  "vllm_working_tree_patch_sha256": "54f5d2fb6692e65d61cf05b6c086c40bc383f4e6d568d168f4586fc63fe6a363",
+  "qualified_receipts_before_execution": 15,
+  "failure_sidecars_before_execution": 0,
+  "prefix_caching": false,
+  "client_concurrency": 16,
+  "server_max_num_seqs": 8,
+  "sampling": {
+    "reasoning_effort": "max",
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "max_tokens": 200000,
+    "seed": null,
+    "system_message": null
+  },
+  "continuation_contract": "Every pre-existing receipt matched the immutable prompt and generation-configuration hashes. Missing question-repeat pairs are written atomically without modifying qualified receipts.",
+  "result": {
+    "client_exit_code": 0,
+    "receipts_completed_by_execution": 285,
+    "compatible_receipts_skipped_by_execution": 15,
+    "qualified_receipts_after_execution": 300,
+    "failure_sidecars_after_execution": 0,
+    "server_restart_count": 0,
+    "server_oom_killed": false,
+    "server_request_preemptions": 1,
+    "server_running_requests_after_execution": 0,
+    "server_waiting_requests_after_execution": 0
+  },
+  "verification": {
+    "artifact": "generation-completeness.json",
+    "artifact_sha256": "fc3f0a27d36d61934755a012cb46b2f70217af5b6eb4126d488a40e11528afd9",
+    "status": "qualified"
+  }
+}

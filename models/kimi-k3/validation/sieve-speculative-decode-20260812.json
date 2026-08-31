@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "status": "qualified",
+  "qualification_date_utc": "2026-08-12",
+  "runtime": {
+    "image": "voipmonitor/vllm:kimi-k3-infernal-vllmde04f08-b12x2e6092a-cu133-torch213-20260812-r1",
+    "registry_digest": "sha256:974edc237f27a4eaa83a53ce4927dd176a5ad8ce4fbb8d3d689fce82348531a5",
+    "hardware": "16 NVIDIA RTX PRO 6000 Blackwell Workstation Edition GPUs",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "concurrent_requests": 1
+  },
+  "protocol": {
+    "harness_version": "llm_cjk_watchdog 0.1.0",
+    "qualification_host_path": "/mnt/test.py",
+    "qualification_harness_sha256": "5246883eaaada9bd93a361eaffcfb0ee0e2c3a331230c523967f3c36acabdc11",
+    "reference_repository": "https://github.com/local-inference-lab/llm-inference-bench",
+    "reference_repository_commit": "86cf05c2f42f4d21b909b6e684424ca1aab89fd5",
+    "reference_repository_path": "llm_cjk_watchdog.py",
+    "prompt": "Write a Python script that implements the Sieve of Eratosthenes.",
+    "synthetic_context_tokens": 0,
+    "max_completion_tokens": 2000,
+    "stream": true,
+    "include_continuous_usage": true,
+    "request_temperature_field": "omitted",
+    "request_seed_field": "omitted",
+    "reasoning_included_in_cjk_scan": true,
+    "discarded_warmup_requests": 1,
+    "measured_requests": 3,
+    "generation_rate_definition": "usage.completion_tokens / seconds from first streamed token through stream completion"
+  },
+  "validation": {
+    "cjk_definition": "CJK Unified Ideographs, extensions A-E, and Compatibility Ideographs",
+    "python_block": "first fenced Python block in final content",
+    "syntax_check": "compile(source, 'generated_sieve.py', 'exec')",
+    "functional_check": "sieve_of_eratosthenes(30) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]"
+  },
+  "profiles": {
+    "dspark_k7": {
+      "served_model": "Kimi-K3-MXFP4-DSpark7-DCP16-1M",
+      "reported_target_kv_tokens": 1057049,
+      "generation_tokens_per_second_median": 134.26235808990995,
+      "runs": [
+        {
+          "run": 1,
+          "completion_tokens": 2000,
+          "generation_tokens_per_second": 124.71798687644987,
+          "ttft_seconds": 0.2918860912322998,
+          "finish_reason": "length",
+          "cjk_ideographs": 0,
+          "python_syntax": "pass",
+          "python_function": "pass",
+          "evidence_json_sha256": "b4860502cf3d610c07dee0c0bbae8f5bdf1eee6ef61760796b324b515eeed7ed"
+        },
+        {
+          "run": 2,
+          "completion_tokens": 1885,
+          "generation_tokens_per_second": 134.26235808990995,
+          "ttft_seconds": 0.29330945014953613,
+          "finish_reason": "stop",
+          "cjk_ideographs": 0,
+          "python_syntax": "pass",
+          "python_function": "pass",
+          "evidence_json_sha256": "c9bc9010086c970c0afc5f4444a6f76518553145f960efe8abb0c4ea7355bed6"
+        },
+        {
+          "run": 3,
+          "completion_tokens": 1612,
+          "generation_tokens_per_second": 138.72525650367285,
+          "ttft_seconds": 0.2940552234649658,
+          "finish_reason": "stop",
+          "cjk_ideographs": 0,
+          "python_syntax": "pass",
+          "python_function": "pass",
+          "evidence_json_sha256": "655a6c03223b3af0487c86e954af9e142c481f37a03607161111c0c1eafa9424"
+        }
+      ]
+    },
+    "dflash_k7": {
+      "served_model": "Kimi-K3-MXFP4-DFlash-DCP16-1M",
+      "reported_target_kv_tokens": 1048576,
+      "generation_tokens_per_second_median": 146.95313413171868,
+      "runs": [
+        {
+          "run": 1,
+          "completion_tokens": 1190,
+          "generation_tokens_per_second": 146.95313413171868,
+          "ttft_seconds": 0.3009042739868164,
+          "finish_reason": "stop",
+          "cjk_ideographs": 0,
+          "python_syntax": "pass",
+          "python_function": "pass",
+          "evidence_json_sha256": "f08c57851130f0516a8a5639f159a77d0e0e7de4ddf4c77592a55045e2933c8b"
+        },
+        {
+          "run": 2,
+          "completion_tokens": 1116,
+          "generation_tokens_per_second": 150.0903205880762,
+          "ttft_seconds": 0.30107593536376953,
+          "finish_reason": "stop",
+          "cjk_ideographs": 0,
+          "python_syntax": "pass",
+          "python_function": "pass",
+          "evidence_json_sha256": "7e27467bc7ac0c7f597447f98d97d8bc05f2d2f07373e7a17c24d9b2ce3b9193"
+        },
+        {
+          "run": 3,
+          "completion_tokens": 1893,
+          "generation_tokens_per_second": 127.56008406049341,
+          "ttft_seconds": 0.30002760887145996,
+          "finish_reason": "stop",
+          "cjk_ideographs": 0,
+          "python_syntax": "pass",
+          "python_function": "pass",
+          "evidence_json_sha256": "d99036b1a349472bbaa862625024f6f9ab0f50fe5e875013c684e382cb27700b"
+        }
+      ]
+    }
+  },
+  "host_evidence_root": "/mnt/luke/kimi-k3-runs/infernal-release-20260812"
+}

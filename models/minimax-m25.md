@@ -412,7 +412,32 @@ Some users report crashes (`Exit code: -9`, scheduler dead) when loading NVFP4 o
 
 ### Speculative Decoding
 
-Not working with MiniMax M2.5 on either vLLM or SGLang as of March 2026.
+**Working on SGLang via EAGLE3** (verified 2026-05-21, 2× RTX Pro 6000, voipmonitor/sglang:cu130).
+
+MiniMax official checkpoints do **not** ship MTP weights (config has `use_mtp=true` but weight_map only contains layers 0-61), so the built-in NextN path (sgl-project/sglang#13981) cannot be used with public weights. Use an external EAGLE3 draft instead:
+
+```bash
+-e SGLANG_ENABLE_SPEC_V2=1 -e HF_HOME=/hfcache -v /mnt/hfcache:/hfcache \
+... \
+--speculative-algorithm EAGLE3 \
+--speculative-draft-model-path thoughtworks/MiniMax-M2.5-Eagle3 \
+--speculative-draft-model-quantization unquant \
+--speculative-num-steps 3 --speculative-eagle-topk 1 --speculative-num-draft-tokens 4 \
+--mem-fraction-static 0.80
+```
+
+| concurrency | dataset | accept_len | output tok/s (EAGLE3 / baseline) | speedup |
+|---|---|---|---|---|
+| 1 | random 2k/512 | 2.14 | 140.1 / 112.7 | **1.24×** |
+| 1 | sharegpt | 2.41 | 104.9 / 113.5 | 0.92× |
+| 8 | random 2k/512 | 2.15 | 388.6 / 378.3 | 1.03× |
+
+**Caveat:** accept_len ~2.2 (cross-version M2.5 draft → M2.7 target) is well below the ~3.4 reported in sgl-project/sglang#13981 with matched MTP weights. Net speedup is marginal — only single-stream fixed-length workloads see gains; ShareGPT variable-length inputs go negative due to draft prefill overhead. For production use, an M2.7-specific draft or the official MTP weights (not yet released) would be needed.
+
+**Gotchas:**
+- Draft path **must be an HF repo id**, not a local dir — `has_hf_quant_config()` raises `HFValidationError` on local paths without `hf_quant_config.json` (fix: sgl-project/sglang#25943).
+- `--speculative-draft-model-quantization unquant` is required, otherwise draft inherits target's `modelopt_fp4`.
+- Cross-version draft (M2.5-Eagle3 → M2.7 target) works since hidden_size/vocab/rope match.
 
 ### --trust-remote-code Security
 

@@ -1,6 +1,6 @@
 # Daily Summaries
 
-Automated daily summaries of the [RTX6kPRO Discord](https://discord.gg/FJye6yaWN3) community activity.
+Automated daily summaries of the [RTX6kPRO Discord](https://discord.gg/X54jjmcxWJ) community activity.
 Each highlight links directly to the relevant Discord message.
 
 *Auto-generated daily at 08:07 UTC. Source: Discord bot → Claude → Discord + wiki.*
@@ -10,6 +10,129 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-31](2026-08/2026-08-31.md) | - GLM-5.3-Flash "Jovian Judgement" r8 hits 350-430 tok/s decode, 12-15k tok/s prefill, 12M+ token KV |
+| [2026-08-30](2026-08/2026-08-30.md) | GLM-5.3 & GLM-5.3-Flash launched — community scrambled to quantize/serve within hours. David Young |
+| [2026-08-29](2026-08/2026-08-29.md) | GLM-5.3 and **GLM-5.3-Flash** dropped, triggering a same-day quant race (NVFP4, EXL3, DFlash2) acros |
+| [2026-08-28](2026-08/2026-08-28.md) | GLM-5.3-Flash dropped and dominated the day — NVFP4 (Luke) and EXL3 (Brandon) quants shipped withi |
+| [2026-08-27](2026-08/2026-08-27.md) | GLM-5.3-Flash released (320B/18B active, native vision, MIT license, 1M context) — beats GLM-5.2 a |
+| [2026-08-26](2026-08/2026-08-26.md) | Qwen3.8-Flash-Next leaked/announced: first Qwen4-arch preview, 125B-A6B + 51B "engram" n-gram embedd |
+| [2026-08-25](2026-08/2026-08-25.md) | DFlash2 speculative decoding lands for Qwen3.8-27B: 20-40% decode speedup over MTP, but triggers a v |
+| [2026-08-24](2026-08/2026-08-24.md) | Infernal Invocation r19 vLLM image released for DeepSeek-V4-Flash: TP2 now hits 2M KV cache (4096 ba |
+| [2026-08-23](2026-08/2026-08-23.md) | - el8 published an updated vLLM recipe for 2x DGX Spark DeepSeek V4 Flash — stable tool calling, d |
+| [2026-08-22](2026-08/2026-08-22.md) | DGX Station early benchmarks: ~30-40 tok/s decode, 6000+ tok/s prefill on out-of-VRAM MoE models; DG |
+| [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
+| [2026-08-20](2026-08/2026-08-20.md) | DS4-Flash "Infernal Invocation r18" image released, fixing VLLM bugs introduced during GG→II migra |
+| [2026-08-19](2026-08/2026-08-19.md) | - DS4F "Infernal Invocation" r18 shipped, fixing a reproduced output-corruption bug (garbled tool ca |
+| [2026-08-18](2026-08/2026-08-18.md) | - CDW quietly bumped RTX PRO 6000 Blackwell MSRP from $16,000 to $19,999; scalper prices reported at |
+| [2026-08-17](2026-08/2026-08-17.md) | - Qwen3.8-27B released; malaiwah's EXL3 K5K6 quant hits near-lossless KLD (0.008), though slower wit |
+| [2026-08-16](2026-08/2026-08-16.md) | - RTX PRO 6000 prices spiking hard — WS edition $13k→$16k in a week, MC raising prices overnight |
+| [2026-08-15](2026-08/2026-08-15.md) | Qwen3.8-27B released — dense (not MoE) 27B model with vision, built-in MTP, 3 reasoning-effort lev |
+| [2026-08-14](2026-08/2026-08-14.md) | Kimi-K3 2bpw QSRT quant (native MXFP4) scores 94.4–95.4% on GPQA Diamond, nearly matching the full |
+| [2026-08-13](2026-08/2026-08-13.md) | - DeepSeek-V4-Pro-0813 (GA) launched; mixed reviews — strong benchmarks but users found it slower/ |
+| [2026-08-12](2026-08/2026-08-12.md) | - RTX PRO 6000 prices spiking hard — Nvidia's own store jumped to $16K, Microcenter went $11.8K→ |
+| [2026-08-11](2026-08/2026-08-11.md) | B12X kernels heading upstream: Luke opened an official vLLM PR for native B12X support on SM120 —  |
+| [2026-08-10](2026-08/2026-08-10.md) | B12X owner-reduce patch for GLM-5.2 TP8: John's 3-level PCIe topology-aware all-reduce cut cross-swi |
+| [2026-08-09](2026-08/2026-08-09.md) | - New PCIe custom communication (ported from GLM tp8 work) pushes GLM-5.2 nvfp4 to 205 tok/s sustain |
+| [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
+| [2026-08-07](2026-08/2026-08-07.md) | ormandj's SGLang DS4-Flash build fixes looping/garbage-output bug that plagued DSpark; GSM8K bench n |
+| [2026-08-06](2026-08/2026-08-06.md) | - ormandj found & patched a major SGLang bug causing SWA/KV-cache retract loops on long generations  |
+| [2026-08-05](2026-08/2026-08-05.md) | DS4-Flash reasoning bug fixed: HIGH was silently rendering as MAX; r27 fix confirmed — LOW or MAX  |
+| [2026-08-04](2026-08/2026-08-04.md) | Critical DS4-Flash encoder bugs found: reasoning_effort MAX was mislabeled as HIGH (HIGH was a no-op |
+| [2026-08-03](2026-08/2026-08-03.md) | DS4-Flash-0731 "Gilded Gnosis" r24 published — fixes the long-standing "Workspace is locked" b12x  |
+| [2026-08-02](2026-08/2026-08-02.md) | DeepSeek-V4-Flash-0731 (GA) ships with a serious quality regression: multiple users (ormandj, RelayM |
+| [2026-08-01](2026-08/2026-08-01.md) | DeepSeek-V4-Flash-0731 officially released (successor to preview), same DSpark speculative-decode ar |
+| [2026-07-31](2026-07/2026-07-31.md) | DeepSeek V4 Flash-0731 dropped (API-only, weights pending) with post-trained-only update — claims  |
+| [2026-07-30](2026-07/2026-07-30.md) | MMLU-Pro accuracy showdown: NF3/EXL3 quants match or beat NVFP4 in several categories (business, bio |
+| [2026-07-29](2026-07/2026-07-29.md) | - GLM-5.2 "Gilded Gnosis" v20 saw rapid-fire docker releases (r5→r9) adding forked LMCache 0.5.2 w |
+| [2026-07-28](2026-07/2026-07-28.md) | Kimi-K3 released (753B total / 104B active params, 1.56TB weights, MXFP4-trained) — massive commun |
+| [2026-07-27](2026-07/2026-07-27.md) | Kimi-K3 released on HuggingFace; community immediately starts MoE kernel/quant work [(jump)](https:/ |
+| [2026-07-26](2026-07/2026-07-26.md) | - GLM-5.2 v20 image ships with DCP prefill collapse fixed — auto-policy composes query-split/CKV-g |
+| [2026-07-25](2026-07/2026-07-25.md) | DCP4 collapse root-caused & fixed: koush spotted GLM-5.2 vLLM fork was gathering topk scores/idx it  |
+| [2026-07-24](2026-07/2026-07-24.md) | - New GLM-5.2 vLLM image fixes DCP2/4/8 crashes (illegal memory access, tensor layout stride bug); u |
+| [2026-07-23](2026-07/2026-07-23.md) | - GLM-5.2 v20 Docker image ships, fixing the cuBLAS/Xid DCP read-ahead crash and adding an auto-enab |
+| [2026-07-22](2026-07/2026-07-22.md) | Poolside Laguna S 2.1 (118B MoE, 8B active, 1M ctx, single-GPU fit) launched but failed community te |
+| [2026-07-21](2026-07/2026-07-21.md) | - GLM-5.2 NVFP4 KV-cache bug found (outer scale unused) — fixed, KLD improved, merged as vLLM PR # |
+| [2026-07-20](2026-07/2026-07-20.md) | - b12x fused-indexer IMA crash (long-ctx + spec-decode) root-caused, fix merged [(jump)](https://dis |
+| [2026-07-19](2026-07/2026-07-19.md) | - New vLLM image v18→v19 (gilded-gnosis) adds CKV gather + fp8 KV-rope, pushing GLM-5.2 hybrid col |
+| [2026-07-18](2026-07/2026-07-18.md) | - koush's DCP CKV-gather patch (a general fix for any DSA-based model) delivers massive prefill gain |
+| [2026-07-17](2026-07/2026-07-17.md) | Kimi K3 (Moonshot) unveiled: 2.8T params, 896 experts (16 active), native MXFP4/MXFP8 training, Atte |
+| [2026-07-16](2026-07/2026-07-16.md) | Bug: DSpark v10 (lucifer-cutlass) shows a big regression vs v8 — JSON schema output error rate spi |
+| [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
+| [2026-07-14](2026-07/2026-07-14.md) | GLM-5.2 vLLM v1.3 released (davidsyoung/vllm-glm52): guarded B12X A2A decode +9-11%, hitting 83 tok/ |
+| [2026-07-13](2026-07/2026-07-13.md) | ds4dspark v10 released — fixes draft/acceptance randomness independence, prefix-cache token exclus |
+| [2026-07-12](2026-07/2026-07-12.md) | DS4-Flash "dspark" is 50%+ faster than MTP2 but unstable — random Chinese-language token spam unde |
+| [2026-07-11](2026-07/2026-07-11.md) | - New GLM-5.2-MXFP8-NVFP4-NF3-Hybrid v3.6 checkpoint hits 91.92% GPQA Diamond (up from 88.38% baseli |
+| [2026-07-10](2026-07/2026-07-10.md) | - GLM-5.2-MXFP8-NVFP4-NF3-Hybrid "healed" weights (KLD 0.15→0.12, GPQA +0.5) jumped aider-polyglot |
+| [2026-07-09](2026-07/2026-07-09.md) | GLM-5.2 MXFP8-NVFP4-NF3-Hybrid quant hits GPQA-Diamond 88.38% and beats REAP-504B on aider polyglot  |
+| [2026-07-08](2026-07/2026-07-08.md) | GLM-5.2 v14 image: new hybrid a2a backend fixes DCP decode regression — +10% prefill / +13% decode |
+| [2026-07-07](2026-07/2026-07-07.md) | GLM-5.2 v14 docker image released with new B12X backend (beats "lucifer" cutlass), instanttensor loa |
+| [2026-07-06](2026-07/2026-07-06.md) | - DeepSeek-V4-Flash-DSpark added FP4 indexer cache (7-token draft) — small KV gain (+18.6k tokens) |
+| [2026-07-05](2026-07/2026-07-05.md) | - jetha built a native NVFP4 attention kernel for sm120/121, speeding up Gemma 4 decode; wheels avai |
+| [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
+| [2026-07-03](2026-07/2026-07-03.md) | ACS redirect on c-payne PCIe switches nearly doubled token-gen throughput — clearing `ReqRedir/Cmp |
+| [2026-07-02](2026-07/2026-07-02.md) | DSpark v8 (lucifer+cutlass) hits >1M context on TP2: 500 tok/s aggregate gen, 9000 tok/s prefill, 20 |
+| [2026-07-01](2026-07/2026-07-01.md) | DS4-Flash v8 Docker released with b12x all-reduce enabled; real-world prefill on TP=2 lucifer-cutlas |
+| [2026-06-30](2026-06/2026-06-30.md) | vLLM v8 incoming with TP=4 fix for DS4F+DSpark — Festr fixed the `--tp4` crash and reported 374– |
+| [2026-06-29](2026-06/2026-06-29.md) | DSpark v7 released with prefix cache support — Festr published the v7 Docker image with DeepSpark  |
+| [2026-06-28](2026-06/2026-06-28.md) | DeepSeek releases DSpark / DeepSpec: New speculative decoding paper + code claiming **57–78% faste |
+| [2026-06-27](2026-06/2026-06-27.md) | New Docker image released: `eldritch-final-v1e8d565-b12x284a2ea-cu132-20260626` with all regressions |
+| [2026-06-26](2026-06/2026-06-26.md) | DS4-Flash v5 recipe is broken — regressions across all kernels, was accidentally published before  |
+| [2026-06-25](2026-06/2026-06-25.md) | DS4F v5 accidentally pushed — has a known crash bug in the b12x path; lucifer path unaffected. Do  |
+| [2026-06-24](2026-06/2026-06-24.md) | GLM-5.2 REAP 504B Aider Polyglot final score: 89.8% pass_rate_2 after rerunning context-exhausted ca |
+| [2026-06-23](2026-06/2026-06-23.md) | New Docker v12 fixes A16=1 VRAM bug, freeing 5–8GB/GPU; TP4 REAP KV cache jumps 400k → 1M tokens |
+| [2026-06-22](2026-06/2026-06-22.md) | GLM-5.2 v12 Docker released with DCP+MTP fixes, VLLM_DCP_SHARD_DRAFT=1 now default — peaks **160 t |
+| [2026-06-21](2026-06/2026-06-21.md) | GLM-5.2 REAP 504B aider polyglot benchmark: `pass_rate_2: 78.7` at "High" reasoning effort (225 test |
+| [2026-06-20](2026-06/2026-06-20.md) | GLM 5.2 DCP+MTP root cause fixed: MTP layers were replicated per DCP rank instead of sharded, breaki |
+| [2026-06-19](2026-06/2026-06-19.md) | GLM-5.2 NVFP4 on TP8 benchmarks: prefill 2,684 tok/s @ 8k ctx, 1,824 tok/s @ 128k ctx (200W power-li |
+| [2026-06-18](2026-06/2026-06-18.md) | GLM-5.2 NVFP4 quant by luke uploaded (`lukealonso/GLM-5.2-NVFP4`); Aider benchmark shows pass_rate_1 |
+| [2026-06-17](2026-06/2026-06-17.md) | GLM-5.2 released by zai-org: new IndexShare architecture (mandatory in 5.2, was experimental in 5.1) |
+| [2026-06-16](2026-06/2026-06-16.md) | b12x decode speed regression fixed — a Codex-introduced bug in `expected_m` kernel selection cause |
+| [2026-06-15](2026-06/2026-06-15.md) | Fable 5 scores 99.1% on Aider (223/225 after retry, 86.7% first-pass); Kimi K2.7 scores 91.6% for co |
+| [2026-06-14](2026-06/2026-06-14.md) | KV cache bug: `VLLM_PREFIX_CACHE_RETENTION_INTERVAL` must be set in vLLM or usable KV cache tops out |
+| [2026-06-13](2026-06/2026-06-13.md) | MiniMax M3 dropped (428B params, 26B active, multimodal with vision/video, 1M context, BF16 weights) |
+| [2026-06-12](2026-06/2026-06-12.md) | DFlash cracked in vLLM — Festr solved vLLM dflash with help from mythos; MiMo Pro 2.5 (1T model) n |
+| [2026-06-11](2026-06/2026-06-11.md) | DS4F empty-response bug confirmed reproducible: Model occasionally skips closing `</think>` tag, ret |
+| [2026-06-10](2026-06/2026-06-10.md) | CUDA 13.3 released — fixes critical WGMMA data race bug causing silent result corruption in B12X N |
+| [2026-06-09](2026-06/2026-06-09.md) | New Lucifer Docker image `hg436/vllm-public:lucifer-9d9a0a0` released: vLLM main + FlashInfer #3395  |
+| [2026-06-08](2026-06/2026-06-08.md) | a8 vs a16 accuracy test (900 runs): Jon ran Estonia, hotel-lights, and lavd benchmarks; a8 won or ti |
+| [2026-06-07](2026-06/2026-06-07.md) | DSV4-Flash prefix cache bug confirmed: On TP=4, the cache was evicting early and only utilizing ~200 |
+| [2026-06-06](2026-06/2026-06-06.md) | New Docker image `voipmonitor/vllm:abyssal-abjuration-611a842` released with rebased vllm + latest f |
+| [2026-06-05](2026-06/2026-06-05.md) | New image: `lavd/vllm:b12x-nameless-ascent-6-4-13.2-2` — Luke's latest `nameless-ascent` branch, d |
+| [2026-06-04](2026-06/2026-06-04.md) | New Docker image `voipmonitor/dsv4-flash:lucifer-mxfp4-cutlass-20260603` released — lucifer base w |
+| [2026-06-03](2026-06/2026-06-03.md) | DS4F prefix cache fix merged to vllm main ([PR #44082](https://github.com/vllm-project/vllm/pull/440 |
+| [2026-06-02](2026-06/2026-06-02.md) | luke's `apotheosis` vLLM branch hits 250.3 tok/s on DS4-Flash TP=2 c=1 with full AOT compilation, si |
+| [2026-06-01](2026-06/2026-06-01.md) | MiniMax M3 launched — multimodal (text/image/video→text), 1M-token context, MiniMax Sparse Atten |
+| [2026-05-31](2026-05/2026-05-31.md) | DS V4 Flash on tp=4 hits ~200 t/s decode, 94.6% prefix cache hit rate, ~3M KV cache with `cstechdev/ |
+| [2026-05-30](2026-05/2026-05-30.md) | DSv4 Flash hitting 245-250 tok/s on TP4 SM120 with luke's unholy-fusion branch + b12x MoE + MTP; luc |
+| [2026-05-29](2026-05/2026-05-29.md) | DSV4-Flash "unholy-fusion" branch hits 245 t/s decode (MTP off ~130, MTP on approaching 200): Luke m |
+| [2026-05-28](2026-05/2026-05-28.md) | DSV4-Flash SM120 breakthrough: `lucifer1004/dsv4-flash-sm120:latest` achieves full DeepGEMM prefill/ |
+| [2026-05-27](2026-05/2026-05-27.md) | Luke fixed a long-context bug in both sglang and vllm; took the jasl branch, stripped its kernels, s |
+| [2026-05-26](2026-05/2026-05-26.md) | DSv4-Flash docker `jasl-dsv4-5-23-13.2` (cu132): gen throughput ~35→55 tok/s; Lavd expects 70+ onc |
+| [2026-05-25](2026-05/2026-05-25.md) | b12x DS V4 Flash sglang push: luke released new b12x build with MTP support; early results show **~4 |
+| [2026-05-24](2026-05/2026-05-24.md) | DSV4 Flash: 82 tok/s C=1 MTP=OFF on sglang+b12x (TP=2), 79 tok/s at 128K context — C=2 near-linear |
+| [2026-05-23](2026-05/2026-05-23.md) | DSv4 Flash: 1400 t/s on GB10 at 128k context using w4a8 cutlass; sglang+b12x shows zero decode degra |
+| [2026-05-22](2026-05/2026-05-22.md) | RTX 6000 Pro price hike ~20% worldwide attributed to DDR7 memory costs; still selling [(jump)](https |
+| [2026-05-21](2026-05/2026-05-21.md) | vLLM PR #40082 merged — FlashInfer b12x backends for SM120/SM121 (RTX Pro 6000 Blackwell / DGX Spa |
+| [2026-05-20](2026-05/2026-05-20.md) | RTX Pro 6000 prices up 30-37% in South Korea and Europe vs. last week; members panic-buying at $9,99 |
+| [2026-05-19](2026-05/2026-05-19.md) | DGX Spark DSv4: 700-800 prefill t/s at 128-200k ctx, 32 t/s decode C=1 MTP=2 [(jump)](https://discor |
+| [2026-05-18](2026-05/2026-05-18.md) | DSv4-Flash MTP accuracy regression fixed in `lavd/vllm:jasl-dsv4-5-16-26`; prefix caching confirmed  |
+| [2026-05-17](2026-05/2026-05-17.md) | DeepSeek V4 Flash on 2× RTX PRO 6000: pangfather shared full vLLM config (TP=2, 393K ctx, MTP=2, FP |
+| [2026-05-16](2026-05/2026-05-16.md) | DSV4 Flash: 120 tok/s on TP=2; new `lavd/vllm:jasl-dsv4-5-15-26` image fixes cpasync import error fr |
+| [2026-05-15](2026-05/2026-05-15.md) | Qwen 27B runaway thinking discovery: unbounded thinking on GPQA Diamond gives only 40.4% accuracy be |
+| [2026-05-14](2026-05/2026-05-14.md) | infernix's GPT-5.5 autoresearch branch for DSv4 Flash on SM120 claims 4.8k prefill/s and 27/30 Eston |
+| [2026-05-13](2026-05/2026-05-13.md) | DSV4 Flash MTP2: 35→120 tok/s after jasl vllm fixes; new image `lavd/vllm:jasl-dsv4-5-12-26` hits  |
+| [2026-05-12](2026-05/2026-05-12.md) | repne/vllm:v3 released with tinygemm_bf16; Qwen3.6-27B FP8 TP=1 benchmarks: prefill 9,057 tok/s @8k  |
+| [2026-05-11](2026-05/2026-05-11.md) | MiniMax M2.7 reaches 145 tok/s (TP=2) with latest b12x 0.13.5 + `B12X_MOE_FORCE_A16=1`, double the o |
+| [2026-05-10](2026-05/2026-05-10.md) | DS4 Flash on 2x RTX Pro 6000 (FP8+FP4): 39 tok/s single, 79 tok/s dual. MTP + CUDA graph conflict � |
+| [2026-05-09](2026-05/2026-05-09.md) | GLM-5.1 DCP=4 fixed: `voipmonitor/vllm:glm51-kimi-comm-20260508` eliminates garbage output at DCP=4; |
+| [2026-05-08](2026-05/2026-05-08.md) | MiMo-V2.5 looping fix found: `do_sample=false` in generation_config.json disabled sampling params; f |
+| [2026-05-07](2026-05/2026-05-07.md) | MiMo V2.5 thought loops confirmed as model-level bug: Luke ruled out quantization, kernels, and MTP  |
+| [2026-05-06](2026-05/2026-05-06.md) | Gemma-4 MTP spec decode massive uplift: PR #41745 cherry-picked into vLLM nightly; single-stream 37  |
+| [2026-05-05](2026-05/2026-05-05.md) | GLM-5.1 MTP corruption fixed in new Docker image (`voipmonitor/vllm:glm51-mtp-b12xsparse-ficutlass-t |
+| [2026-05-04](2026-05/2026-05-04.md) | Luke cracked MiMo V2.5 MTP — root cause was TP tensors internally shuffled in a "dastardly rearran |
+| [2026-05-03](2026-05/2026-05-03.md) | GLM-5.1 OOV loop bug: token IDs ≥154870 unmapped in tokenizer → infinite decode loops at temp=0; |
+| [2026-05-02](2026-05/2026-05-02.md) | MiMo-V2.5 stream-race bug fixed: b12x/SGLang schedule/forward stream race on `req_to_token`; `jumper |
+| [2026-05-01](2026-05/2026-05-01.md) | MiMo-V2.5 NVFP4 now runnable on TP=2 via luke's b12x 0.11.0 + sglang fork; ~80 tok/s single-batch, f |
 | [2026-04-25](2026-04/2026-04-25.md) | DS V4/Flash blocked on SM120: DeepGEMM explicitly confirmed no SM120 support planned. Both DS V4 Pro |
 | [2026-04-24](2026-04/2026-04-24.md) | DeepSeek V4 dropped (MIT): V4-Pro 1.6T params/49B active, Flash 284B. Flash fits 2× RTX 6000 Pro (~ |
 | [2026-04-23](2026-04/2026-04-23.md) | Qwen 3.6 27B + FP8 released — 40–130 tok/s on single RTX 6k with MTP3, 70–90% acceptance rate; |
@@ -71,6 +194,129 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-08-31](2026-08/2026-08-31.md) | - GLM-5.3-Flash "Jovian Judgement" r8 hits 350-430 tok/s decode, 12-15k tok/s prefill, 12M+ token KV |
+| [2026-08-30](2026-08/2026-08-30.md) | GLM-5.3 & GLM-5.3-Flash launched — community scrambled to quantize/serve within hours. David Young |
+| [2026-08-29](2026-08/2026-08-29.md) | GLM-5.3 and **GLM-5.3-Flash** dropped, triggering a same-day quant race (NVFP4, EXL3, DFlash2) acros |
+| [2026-08-28](2026-08/2026-08-28.md) | GLM-5.3-Flash dropped and dominated the day — NVFP4 (Luke) and EXL3 (Brandon) quants shipped withi |
+| [2026-08-27](2026-08/2026-08-27.md) | GLM-5.3-Flash released (320B/18B active, native vision, MIT license, 1M context) — beats GLM-5.2 a |
+| [2026-08-26](2026-08/2026-08-26.md) | Qwen3.8-Flash-Next leaked/announced: first Qwen4-arch preview, 125B-A6B + 51B "engram" n-gram embedd |
+| [2026-08-25](2026-08/2026-08-25.md) | DFlash2 speculative decoding lands for Qwen3.8-27B: 20-40% decode speedup over MTP, but triggers a v |
+| [2026-08-24](2026-08/2026-08-24.md) | Infernal Invocation r19 vLLM image released for DeepSeek-V4-Flash: TP2 now hits 2M KV cache (4096 ba |
+| [2026-08-23](2026-08/2026-08-23.md) | - el8 published an updated vLLM recipe for 2x DGX Spark DeepSeek V4 Flash — stable tool calling, d |
+| [2026-08-22](2026-08/2026-08-22.md) | DGX Station early benchmarks: ~30-40 tok/s decode, 6000+ tok/s prefill on out-of-VRAM MoE models; DG |
+| [2026-08-21](2026-08/2026-08-21.md) | - Catid benchmarked DGX Station vs 4x/8x Pro6000 across Qwen3.8-27B, DS4F, GLM-5.2, MiniMax-M3, H3-V |
+| [2026-08-20](2026-08/2026-08-20.md) | DS4-Flash "Infernal Invocation r18" image released, fixing VLLM bugs introduced during GG→II migra |
+| [2026-08-19](2026-08/2026-08-19.md) | - DS4F "Infernal Invocation" r18 shipped, fixing a reproduced output-corruption bug (garbled tool ca |
+| [2026-08-18](2026-08/2026-08-18.md) | - CDW quietly bumped RTX PRO 6000 Blackwell MSRP from $16,000 to $19,999; scalper prices reported at |
+| [2026-08-17](2026-08/2026-08-17.md) | - Qwen3.8-27B released; malaiwah's EXL3 K5K6 quant hits near-lossless KLD (0.008), though slower wit |
+| [2026-08-16](2026-08/2026-08-16.md) | - RTX PRO 6000 prices spiking hard — WS edition $13k→$16k in a week, MC raising prices overnight |
+| [2026-08-15](2026-08/2026-08-15.md) | Qwen3.8-27B released — dense (not MoE) 27B model with vision, built-in MTP, 3 reasoning-effort lev |
+| [2026-08-14](2026-08/2026-08-14.md) | Kimi-K3 2bpw QSRT quant (native MXFP4) scores 94.4–95.4% on GPQA Diamond, nearly matching the full |
+| [2026-08-13](2026-08/2026-08-13.md) | - DeepSeek-V4-Pro-0813 (GA) launched; mixed reviews — strong benchmarks but users found it slower/ |
+| [2026-08-12](2026-08/2026-08-12.md) | - RTX PRO 6000 prices spiking hard — Nvidia's own store jumped to $16K, Microcenter went $11.8K→ |
+| [2026-08-11](2026-08/2026-08-11.md) | B12X kernels heading upstream: Luke opened an official vLLM PR for native B12X support on SM120 —  |
+| [2026-08-10](2026-08/2026-08-10.md) | B12X owner-reduce patch for GLM-5.2 TP8: John's 3-level PCIe topology-aware all-reduce cut cross-swi |
+| [2026-08-09](2026-08/2026-08-09.md) | - New PCIe custom communication (ported from GLM tp8 work) pushes GLM-5.2 nvfp4 to 205 tok/s sustain |
+| [2026-08-08](2026-08/2026-08-08.md) | DS4-Flash rapid-fire releases (r29→r31): fixed compressed-MLA verifier corruption above C24, nativ |
+| [2026-08-07](2026-08/2026-08-07.md) | ormandj's SGLang DS4-Flash build fixes looping/garbage-output bug that plagued DSpark; GSM8K bench n |
+| [2026-08-06](2026-08/2026-08-06.md) | - ormandj found & patched a major SGLang bug causing SWA/KV-cache retract loops on long generations  |
+| [2026-08-05](2026-08/2026-08-05.md) | DS4-Flash reasoning bug fixed: HIGH was silently rendering as MAX; r27 fix confirmed — LOW or MAX  |
+| [2026-08-04](2026-08/2026-08-04.md) | Critical DS4-Flash encoder bugs found: reasoning_effort MAX was mislabeled as HIGH (HIGH was a no-op |
+| [2026-08-03](2026-08/2026-08-03.md) | DS4-Flash-0731 "Gilded Gnosis" r24 published — fixes the long-standing "Workspace is locked" b12x  |
+| [2026-08-02](2026-08/2026-08-02.md) | DeepSeek-V4-Flash-0731 (GA) ships with a serious quality regression: multiple users (ormandj, RelayM |
+| [2026-08-01](2026-08/2026-08-01.md) | DeepSeek-V4-Flash-0731 officially released (successor to preview), same DSpark speculative-decode ar |
+| [2026-07-31](2026-07/2026-07-31.md) | DeepSeek V4 Flash-0731 dropped (API-only, weights pending) with post-trained-only update — claims  |
+| [2026-07-30](2026-07/2026-07-30.md) | MMLU-Pro accuracy showdown: NF3/EXL3 quants match or beat NVFP4 in several categories (business, bio |
+| [2026-07-29](2026-07/2026-07-29.md) | - GLM-5.2 "Gilded Gnosis" v20 saw rapid-fire docker releases (r5→r9) adding forked LMCache 0.5.2 w |
+| [2026-07-28](2026-07/2026-07-28.md) | Kimi-K3 released (753B total / 104B active params, 1.56TB weights, MXFP4-trained) — massive commun |
+| [2026-07-27](2026-07/2026-07-27.md) | Kimi-K3 released on HuggingFace; community immediately starts MoE kernel/quant work [(jump)](https:/ |
+| [2026-07-26](2026-07/2026-07-26.md) | - GLM-5.2 v20 image ships with DCP prefill collapse fixed — auto-policy composes query-split/CKV-g |
+| [2026-07-25](2026-07/2026-07-25.md) | DCP4 collapse root-caused & fixed: koush spotted GLM-5.2 vLLM fork was gathering topk scores/idx it  |
+| [2026-07-24](2026-07/2026-07-24.md) | - New GLM-5.2 vLLM image fixes DCP2/4/8 crashes (illegal memory access, tensor layout stride bug); u |
+| [2026-07-23](2026-07/2026-07-23.md) | - GLM-5.2 v20 Docker image ships, fixing the cuBLAS/Xid DCP read-ahead crash and adding an auto-enab |
+| [2026-07-22](2026-07/2026-07-22.md) | Poolside Laguna S 2.1 (118B MoE, 8B active, 1M ctx, single-GPU fit) launched but failed community te |
+| [2026-07-21](2026-07/2026-07-21.md) | - GLM-5.2 NVFP4 KV-cache bug found (outer scale unused) — fixed, KLD improved, merged as vLLM PR # |
+| [2026-07-20](2026-07/2026-07-20.md) | - b12x fused-indexer IMA crash (long-ctx + spec-decode) root-caused, fix merged [(jump)](https://dis |
+| [2026-07-19](2026-07/2026-07-19.md) | - New vLLM image v18→v19 (gilded-gnosis) adds CKV gather + fp8 KV-rope, pushing GLM-5.2 hybrid col |
+| [2026-07-18](2026-07/2026-07-18.md) | - koush's DCP CKV-gather patch (a general fix for any DSA-based model) delivers massive prefill gain |
+| [2026-07-17](2026-07/2026-07-17.md) | Kimi K3 (Moonshot) unveiled: 2.8T params, 896 experts (16 active), native MXFP4/MXFP8 training, Atte |
+| [2026-07-16](2026-07/2026-07-16.md) | Bug: DSpark v10 (lucifer-cutlass) shows a big regression vs v8 — JSON schema output error rate spi |
+| [2026-07-15](2026-07/2026-07-15.md) | - vLLM KLD benchmarks compromised: PR #26682's fused/combo kernels cause run-to-run rounding varianc |
+| [2026-07-14](2026-07/2026-07-14.md) | GLM-5.2 vLLM v1.3 released (davidsyoung/vllm-glm52): guarded B12X A2A decode +9-11%, hitting 83 tok/ |
+| [2026-07-13](2026-07/2026-07-13.md) | ds4dspark v10 released — fixes draft/acceptance randomness independence, prefix-cache token exclus |
+| [2026-07-12](2026-07/2026-07-12.md) | DS4-Flash "dspark" is 50%+ faster than MTP2 but unstable — random Chinese-language token spam unde |
+| [2026-07-11](2026-07/2026-07-11.md) | - New GLM-5.2-MXFP8-NVFP4-NF3-Hybrid v3.6 checkpoint hits 91.92% GPQA Diamond (up from 88.38% baseli |
+| [2026-07-10](2026-07/2026-07-10.md) | - GLM-5.2-MXFP8-NVFP4-NF3-Hybrid "healed" weights (KLD 0.15→0.12, GPQA +0.5) jumped aider-polyglot |
+| [2026-07-09](2026-07/2026-07-09.md) | GLM-5.2 MXFP8-NVFP4-NF3-Hybrid quant hits GPQA-Diamond 88.38% and beats REAP-504B on aider polyglot  |
+| [2026-07-08](2026-07/2026-07-08.md) | GLM-5.2 v14 image: new hybrid a2a backend fixes DCP decode regression — +10% prefill / +13% decode |
+| [2026-07-07](2026-07/2026-07-07.md) | GLM-5.2 v14 docker image released with new B12X backend (beats "lucifer" cutlass), instanttensor loa |
+| [2026-07-06](2026-07/2026-07-06.md) | - DeepSeek-V4-Flash-DSpark added FP4 indexer cache (7-token draft) — small KV gain (+18.6k tokens) |
+| [2026-07-05](2026-07/2026-07-05.md) | - jetha built a native NVFP4 attention kernel for sm120/121, speeding up Gemma 4 decode; wheels avai |
+| [2026-07-04](2026-07/2026-07-04.md) | DS4-Flash v9 released — new B12X A16/A8 modes beat "lucifer-cutlass" on prefill and decode; A8 fas |
+| [2026-07-03](2026-07/2026-07-03.md) | ACS redirect on c-payne PCIe switches nearly doubled token-gen throughput — clearing `ReqRedir/Cmp |
+| [2026-07-02](2026-07/2026-07-02.md) | DSpark v8 (lucifer+cutlass) hits >1M context on TP2: 500 tok/s aggregate gen, 9000 tok/s prefill, 20 |
+| [2026-07-01](2026-07/2026-07-01.md) | DS4-Flash v8 Docker released with b12x all-reduce enabled; real-world prefill on TP=2 lucifer-cutlas |
+| [2026-06-30](2026-06/2026-06-30.md) | vLLM v8 incoming with TP=4 fix for DS4F+DSpark — Festr fixed the `--tp4` crash and reported 374– |
+| [2026-06-29](2026-06/2026-06-29.md) | DSpark v7 released with prefix cache support — Festr published the v7 Docker image with DeepSpark  |
+| [2026-06-28](2026-06/2026-06-28.md) | DeepSeek releases DSpark / DeepSpec: New speculative decoding paper + code claiming **57–78% faste |
+| [2026-06-27](2026-06/2026-06-27.md) | New Docker image released: `eldritch-final-v1e8d565-b12x284a2ea-cu132-20260626` with all regressions |
+| [2026-06-26](2026-06/2026-06-26.md) | DS4-Flash v5 recipe is broken — regressions across all kernels, was accidentally published before  |
+| [2026-06-25](2026-06/2026-06-25.md) | DS4F v5 accidentally pushed — has a known crash bug in the b12x path; lucifer path unaffected. Do  |
+| [2026-06-24](2026-06/2026-06-24.md) | GLM-5.2 REAP 504B Aider Polyglot final score: 89.8% pass_rate_2 after rerunning context-exhausted ca |
+| [2026-06-23](2026-06/2026-06-23.md) | New Docker v12 fixes A16=1 VRAM bug, freeing 5–8GB/GPU; TP4 REAP KV cache jumps 400k → 1M tokens |
+| [2026-06-22](2026-06/2026-06-22.md) | GLM-5.2 v12 Docker released with DCP+MTP fixes, VLLM_DCP_SHARD_DRAFT=1 now default — peaks **160 t |
+| [2026-06-21](2026-06/2026-06-21.md) | GLM-5.2 REAP 504B aider polyglot benchmark: `pass_rate_2: 78.7` at "High" reasoning effort (225 test |
+| [2026-06-20](2026-06/2026-06-20.md) | GLM 5.2 DCP+MTP root cause fixed: MTP layers were replicated per DCP rank instead of sharded, breaki |
+| [2026-06-19](2026-06/2026-06-19.md) | GLM-5.2 NVFP4 on TP8 benchmarks: prefill 2,684 tok/s @ 8k ctx, 1,824 tok/s @ 128k ctx (200W power-li |
+| [2026-06-18](2026-06/2026-06-18.md) | GLM-5.2 NVFP4 quant by luke uploaded (`lukealonso/GLM-5.2-NVFP4`); Aider benchmark shows pass_rate_1 |
+| [2026-06-17](2026-06/2026-06-17.md) | GLM-5.2 released by zai-org: new IndexShare architecture (mandatory in 5.2, was experimental in 5.1) |
+| [2026-06-16](2026-06/2026-06-16.md) | b12x decode speed regression fixed — a Codex-introduced bug in `expected_m` kernel selection cause |
+| [2026-06-15](2026-06/2026-06-15.md) | Fable 5 scores 99.1% on Aider (223/225 after retry, 86.7% first-pass); Kimi K2.7 scores 91.6% for co |
+| [2026-06-14](2026-06/2026-06-14.md) | KV cache bug: `VLLM_PREFIX_CACHE_RETENTION_INTERVAL` must be set in vLLM or usable KV cache tops out |
+| [2026-06-13](2026-06/2026-06-13.md) | MiniMax M3 dropped (428B params, 26B active, multimodal with vision/video, 1M context, BF16 weights) |
+| [2026-06-12](2026-06/2026-06-12.md) | DFlash cracked in vLLM — Festr solved vLLM dflash with help from mythos; MiMo Pro 2.5 (1T model) n |
+| [2026-06-11](2026-06/2026-06-11.md) | DS4F empty-response bug confirmed reproducible: Model occasionally skips closing `</think>` tag, ret |
+| [2026-06-10](2026-06/2026-06-10.md) | CUDA 13.3 released — fixes critical WGMMA data race bug causing silent result corruption in B12X N |
+| [2026-06-09](2026-06/2026-06-09.md) | New Lucifer Docker image `hg436/vllm-public:lucifer-9d9a0a0` released: vLLM main + FlashInfer #3395  |
+| [2026-06-08](2026-06/2026-06-08.md) | a8 vs a16 accuracy test (900 runs): Jon ran Estonia, hotel-lights, and lavd benchmarks; a8 won or ti |
+| [2026-06-07](2026-06/2026-06-07.md) | DSV4-Flash prefix cache bug confirmed: On TP=4, the cache was evicting early and only utilizing ~200 |
+| [2026-06-06](2026-06/2026-06-06.md) | New Docker image `voipmonitor/vllm:abyssal-abjuration-611a842` released with rebased vllm + latest f |
+| [2026-06-05](2026-06/2026-06-05.md) | New image: `lavd/vllm:b12x-nameless-ascent-6-4-13.2-2` — Luke's latest `nameless-ascent` branch, d |
+| [2026-06-04](2026-06/2026-06-04.md) | New Docker image `voipmonitor/dsv4-flash:lucifer-mxfp4-cutlass-20260603` released — lucifer base w |
+| [2026-06-03](2026-06/2026-06-03.md) | DS4F prefix cache fix merged to vllm main ([PR #44082](https://github.com/vllm-project/vllm/pull/440 |
+| [2026-06-02](2026-06/2026-06-02.md) | luke's `apotheosis` vLLM branch hits 250.3 tok/s on DS4-Flash TP=2 c=1 with full AOT compilation, si |
+| [2026-06-01](2026-06/2026-06-01.md) | MiniMax M3 launched — multimodal (text/image/video→text), 1M-token context, MiniMax Sparse Atten |
+| [2026-05-31](2026-05/2026-05-31.md) | DS V4 Flash on tp=4 hits ~200 t/s decode, 94.6% prefix cache hit rate, ~3M KV cache with `cstechdev/ |
+| [2026-05-30](2026-05/2026-05-30.md) | DSv4 Flash hitting 245-250 tok/s on TP4 SM120 with luke's unholy-fusion branch + b12x MoE + MTP; luc |
+| [2026-05-29](2026-05/2026-05-29.md) | DSV4-Flash "unholy-fusion" branch hits 245 t/s decode (MTP off ~130, MTP on approaching 200): Luke m |
+| [2026-05-28](2026-05/2026-05-28.md) | DSV4-Flash SM120 breakthrough: `lucifer1004/dsv4-flash-sm120:latest` achieves full DeepGEMM prefill/ |
+| [2026-05-27](2026-05/2026-05-27.md) | Luke fixed a long-context bug in both sglang and vllm; took the jasl branch, stripped its kernels, s |
+| [2026-05-26](2026-05/2026-05-26.md) | DSv4-Flash docker `jasl-dsv4-5-23-13.2` (cu132): gen throughput ~35→55 tok/s; Lavd expects 70+ onc |
+| [2026-05-25](2026-05/2026-05-25.md) | b12x DS V4 Flash sglang push: luke released new b12x build with MTP support; early results show **~4 |
+| [2026-05-24](2026-05/2026-05-24.md) | DSV4 Flash: 82 tok/s C=1 MTP=OFF on sglang+b12x (TP=2), 79 tok/s at 128K context — C=2 near-linear |
+| [2026-05-23](2026-05/2026-05-23.md) | DSv4 Flash: 1400 t/s on GB10 at 128k context using w4a8 cutlass; sglang+b12x shows zero decode degra |
+| [2026-05-22](2026-05/2026-05-22.md) | RTX 6000 Pro price hike ~20% worldwide attributed to DDR7 memory costs; still selling [(jump)](https |
+| [2026-05-21](2026-05/2026-05-21.md) | vLLM PR #40082 merged — FlashInfer b12x backends for SM120/SM121 (RTX Pro 6000 Blackwell / DGX Spa |
+| [2026-05-20](2026-05/2026-05-20.md) | RTX Pro 6000 prices up 30-37% in South Korea and Europe vs. last week; members panic-buying at $9,99 |
+| [2026-05-19](2026-05/2026-05-19.md) | DGX Spark DSv4: 700-800 prefill t/s at 128-200k ctx, 32 t/s decode C=1 MTP=2 [(jump)](https://discor |
+| [2026-05-18](2026-05/2026-05-18.md) | DSv4-Flash MTP accuracy regression fixed in `lavd/vllm:jasl-dsv4-5-16-26`; prefix caching confirmed  |
+| [2026-05-17](2026-05/2026-05-17.md) | DeepSeek V4 Flash on 2× RTX PRO 6000: pangfather shared full vLLM config (TP=2, 393K ctx, MTP=2, FP |
+| [2026-05-16](2026-05/2026-05-16.md) | DSV4 Flash: 120 tok/s on TP=2; new `lavd/vllm:jasl-dsv4-5-15-26` image fixes cpasync import error fr |
+| [2026-05-15](2026-05/2026-05-15.md) | Qwen 27B runaway thinking discovery: unbounded thinking on GPQA Diamond gives only 40.4% accuracy be |
+| [2026-05-14](2026-05/2026-05-14.md) | infernix's GPT-5.5 autoresearch branch for DSv4 Flash on SM120 claims 4.8k prefill/s and 27/30 Eston |
+| [2026-05-13](2026-05/2026-05-13.md) | DSV4 Flash MTP2: 35→120 tok/s after jasl vllm fixes; new image `lavd/vllm:jasl-dsv4-5-12-26` hits  |
+| [2026-05-12](2026-05/2026-05-12.md) | repne/vllm:v3 released with tinygemm_bf16; Qwen3.6-27B FP8 TP=1 benchmarks: prefill 9,057 tok/s @8k  |
+| [2026-05-11](2026-05/2026-05-11.md) | MiniMax M2.7 reaches 145 tok/s (TP=2) with latest b12x 0.13.5 + `B12X_MOE_FORCE_A16=1`, double the o |
+| [2026-05-10](2026-05/2026-05-10.md) | DS4 Flash on 2x RTX Pro 6000 (FP8+FP4): 39 tok/s single, 79 tok/s dual. MTP + CUDA graph conflict � |
+| [2026-05-09](2026-05/2026-05-09.md) | GLM-5.1 DCP=4 fixed: `voipmonitor/vllm:glm51-kimi-comm-20260508` eliminates garbage output at DCP=4; |
+| [2026-05-08](2026-05/2026-05-08.md) | MiMo-V2.5 looping fix found: `do_sample=false` in generation_config.json disabled sampling params; f |
+| [2026-05-07](2026-05/2026-05-07.md) | MiMo V2.5 thought loops confirmed as model-level bug: Luke ruled out quantization, kernels, and MTP  |
+| [2026-05-06](2026-05/2026-05-06.md) | Gemma-4 MTP spec decode massive uplift: PR #41745 cherry-picked into vLLM nightly; single-stream 37  |
+| [2026-05-05](2026-05/2026-05-05.md) | GLM-5.1 MTP corruption fixed in new Docker image (`voipmonitor/vllm:glm51-mtp-b12xsparse-ficutlass-t |
+| [2026-05-04](2026-05/2026-05-04.md) | Luke cracked MiMo V2.5 MTP — root cause was TP tensors internally shuffled in a "dastardly rearran |
+| [2026-05-03](2026-05/2026-05-03.md) | GLM-5.1 OOV loop bug: token IDs ≥154870 unmapped in tokenizer → infinite decode loops at temp=0; |
+| [2026-05-02](2026-05/2026-05-02.md) | MiMo-V2.5 stream-race bug fixed: b12x/SGLang schedule/forward stream race on `req_to_token`; `jumper |
+| [2026-05-01](2026-05/2026-05-01.md) | MiMo-V2.5 NVFP4 now runnable on TP=2 via luke's b12x 0.11.0 + sglang fork; ~80 tok/s single-batch, f |
 | [2026-04-25](2026-04/2026-04-25.md) | DS V4/Flash blocked on SM120: DeepGEMM explicitly confirmed no SM120 support planned. Both DS V4 Pro |
 | [2026-04-24](2026-04/2026-04-24.md) | DeepSeek V4 dropped (MIT): V4-Pro 1.6T params/49B active, Flash 284B. Flash fits 2× RTX 6000 Pro (~ |
 | [2026-04-23](2026-04/2026-04-23.md) | Qwen 3.6 27B + FP8 released — 40–130 tok/s on single RTX 6k with MTP3, 70–90% acceptance rate; |

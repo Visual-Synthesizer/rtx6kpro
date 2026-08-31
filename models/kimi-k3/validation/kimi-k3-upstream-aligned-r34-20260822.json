@@ -1,0 +1,92 @@
+{
+  "schema": "kimi-k3-source-locked-runtime-qualification-v1",
+  "status": "qualified",
+  "image": {
+    "reference": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm8cd5531-b12xedac2e2-cu133-torch213-20260822-r34@sha256:4c0f4c909a3af5bd78a5bee10698cd5d923a6ce0d0e0350af9cc0ecc741a8949",
+    "local_id": "sha256:e25602d04015e4f6be77f9e04f370a0822c80deadb0cdd8ff10f6801a99d2e28",
+    "size_bytes": 30753198862,
+    "build_recipe_commit": "95764fe",
+    "runtime": {
+      "cuda": "13.3",
+      "pytorch": "2.13.0"
+    }
+  },
+  "source": {
+    "vllm": {
+      "commit": "b8ec39c45aea97522431739d35d0f39b702ca125",
+      "tree": "8cd5531d6199531f7b0d08cb28481a444d680f30"
+    },
+    "b12x": {
+      "commit": "6971029deaed17f97e623a4e8de879b5973f4ebe",
+      "tree": "edac2e2dbf181b1dee09f5cba413f0a0b2d67c56"
+    },
+    "flashinfer_wheels": "voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a7660baeea31257cf71b03dd16304fbb1e57cdbf7e98e35c25244e3746fdd"
+  },
+  "configuration": {
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "max_model_len": 1000000,
+    "max_num_batched_tokens": 4102,
+    "max_num_scheduled_tokens": 4096,
+    "max_num_seqs": 1,
+    "target_kv_cache_dtype": "fp8",
+    "vision_enabled_for_dspark": true,
+    "native_host_kv_gib": 32
+  },
+  "profiles": {
+    "no_speculation": {
+      "physical_target_kv_tokens": 1058823,
+      "normalized_decode_tokens_per_second_median": 55.811546768160774,
+      "benchmark_runs": 3,
+      "long_context_prompt_tokens": 208026,
+      "long_context_completion_tokens": 2048
+    },
+    "dspark": {
+      "physical_target_kv_tokens": 1016293,
+      "normalized_decode_tokens_per_second_median": 122.69158802305996,
+      "target_cycles_per_second_median": 31.422479044029043,
+      "draft_acceptance_rate_median": 0.4149400218102508,
+      "emitted_tokens_per_target_cycle_median": 3.904580152671756,
+      "benchmark_runs": 7,
+      "long_context_prompt_tokens": 208026,
+      "long_context_completion_tokens": 2048,
+      "vision_answer": "The fruit is a strawberry, and it is usually bright red when ripe.",
+      "native_host_kv_reference": "/mnt/luke/kimi-k3-runs/r33-stable-route-source-locked-20260822/dspark/native-host-kv-repeat.json"
+    },
+    "dflash": {
+      "physical_target_kv_tokens": 1022624,
+      "normalized_decode_tokens_per_second_median": 147.98692033927173,
+      "target_cycles_per_second_median": 27.75653607918313,
+      "draft_acceptance_rate_median": 0.61880088823094,
+      "emitted_tokens_per_target_cycle_median": 5.331606217616581,
+      "benchmark_runs": 7,
+      "forced_token_decode_tokens_per_second_median": 162.3837176709651,
+      "long_context_requests": [
+        {
+          "prompt_tokens": 208026,
+          "completion_tokens": 2048,
+          "http_status": 200
+        },
+        {
+          "prompt_tokens": 524288,
+          "completion_tokens": 64,
+          "http_status": 200
+        }
+      ]
+    }
+  },
+  "staged_mxfp8_projection": {
+    "geometry": {
+      "tokens": 4096,
+      "input_slices": 6,
+      "slice_width": 7168,
+      "output_width": 7168
+    },
+    "bitwise_equal_to_concatenated_projection": true,
+    "concatenated_peak_allocated_bytes": 1395524096,
+    "staged_peak_allocated_bytes": 808321536,
+    "concatenated_median_milliseconds": 5.9759,
+    "staged_median_milliseconds": 5.8268
+  },
+  "artifact_root": "/mnt/luke/kimi-k3-runs/r34-dflash-staged-source-locked-20260822"
+}

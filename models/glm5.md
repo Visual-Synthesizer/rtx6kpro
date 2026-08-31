@@ -1,7 +1,274 @@
 # GLM-5 on RTX PRO 6000 Blackwell (SM120)
 
+> Current note, 2026-05-08: the older sections below document the original
+> GLM-5/SGLang bring-up and historical vLLM limitations. The current working
+> path for GLM-5.1 is vLLM with B12X sparse MLA, FlashInfer CUTLASS MoE,
+> GLM-5.1 MTP, and the DCP coherence fixes described in this section.
+
+## Current vLLM GLM-5.1 DCP Benchmark (2026-05-08)
+
+### Docker image
+
+Current pushed image:
+
+```bash
+voipmonitor/vllm:glm51-kimi-20260509
+```
+
+The container entrypoint serves `lukealonso/GLM-5.1-NVFP4-MTP` as `GLM-5`.
+
+This image includes the GLM-5.1 B12X sparse MLA port, DCP full-graph
+block-table coherence fix, inline split-decode LSE support, FlashInfer CUTLASS
+MoE backend, patched NCCL, and the communication selector used by the Kimi and
+GLM tests.
+
+The same image is also used by the Kimi-K2.6 v3 recipe. GLM-specific behavior is
+enabled by this launch recipe, not by global image env: the command below
+explicitly sets `VLLM_USE_B12X_SPARSE_INDEXER=1`,
+`VLLM_B12X_MLA_DECODE_INLINE_LSE=1`, and the GLM MTP/speculative settings.
+
+### Recommended launch
+
+This is the canonical launch wrapper used for the measurements below. Defaults
+are DCP1, MTP enabled, vLLM C++ PCIe allreduce enabled.
+
+```bash
+cat >/tmp/glm <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+IMAGE="${IMAGE:-voipmonitor/vllm:glm51-kimi-20260509}"
+NAME="${NAME:-glm51-vllm}"
+PORT="${PORT:-5288}"
+DCP_SIZE="${DCP_SIZE:-1}"
+GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.865}"
+GLM51_DISABLE_MTP="${GLM51_DISABLE_MTP:-0}"
+
+if [[ -z "${VLLM_ENABLE_PCIE_ALLREDUCE+x}" ]]; then
+  if [[ "${DCP_SIZE}" == "1" ]]; then
+    VLLM_ENABLE_PCIE_ALLREDUCE=1
+  else
+    VLLM_ENABLE_PCIE_ALLREDUCE=0
+  fi
+fi
+
+docker rm -f "${NAME}" >/dev/null 2>&1 || true
+
+exec docker run -d \
+  --gpus all \
+  --ipc=host \
+  --network host \
+  --privileged \
+  --name "${NAME}" \
+  --entrypoint /usr/local/bin/run-glm51-vllm \
+  -e CUDA_DEVICE_ORDER=PCI_BUS_ID \
+  -e CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+  -e OMP_NUM_THREADS=16 \
+  -e CUTE_DSL_ARCH=sm_120a \
+  -e CUDA_DEVICE_MAX_CONNECTIONS=32 \
+  -e NCCL_P2P_LEVEL=SYS \
+  -e NCCL_PROTO=LL,LL128,Simple \
+  -e NCCL_IB_DISABLE=1 \
+  -e USE_NCCL_XML=0 \
+  -e PORT="${PORT}" \
+  -e DCP_SIZE="${DCP_SIZE}" \
+  -e MAX_MODEL_LEN=202752 \
+  -e MAX_NUM_SEQS=64 \
+  -e MAX_NUM_BATCHED_TOKENS=8192 \
+  -e MAX_CUDAGRAPH_CAPTURE_SIZE=256 \
+  -e GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION}" \
+  -e GLM51_DISABLE_MTP="${GLM51_DISABLE_MTP}" \
+  -e VLLM_USE_B12X_SPARSE_INDEXER=1 \
+  -e VLLM_B12X_MLA_DECODE_INLINE_LSE=1 \
+  -e VLLM_ENABLE_PCIE_ALLREDUCE="${VLLM_ENABLE_PCIE_ALLREDUCE}" \
+  -e VLLM_PCIE_ALLREDUCE_BACKEND=cpp \
+  -e VLLM_CPP_AR_1STAGE_NCCL_CUTOFF=56KB \
+  -e VLLM_RTX6K_FUSED_ALLREDUCE_ADD=0 \
+  -e VLLM_RTX6K_FUSED_ALLREDUCE_ADD_END_BARRIER=1 \
+  -e VLLM_B12X_MLA_SPEC_SERIAL_DECODE=0 \
+  -e VLLM_MTP_RETURN_NORMALIZED_HIDDEN=1 \
+  -e VLLM_SPEC_ACCEPT_THRESHOLD_ACC=1.0 \
+  -e VLLM_SPEC_ACCEPT_THRESHOLD_SINGLE=1.0 \
+  -e VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0 \
+  -e VLLM_DISABLED_KERNELS=MarlinFP8ScaledMMLinearKernel \
+  -e XDG_CACHE_HOME=/cache/jit \
+  -e CUDA_CACHE_PATH=/cache/jit \
+  -e VLLM_CACHE_DIR=/cache/jit/vllm \
+  -e TVM_FFI_CACHE_DIR=/cache/jit/tvm-ffi \
+  -e FLASHINFER_WORKSPACE_BASE=/cache/jit/flashinfer \
+  -e VLLM_CACHE_ROOT=/root/.cache/vllm \
+  -e TRITON_CACHE_DIR=/root/.cache/triton \
+  -e TORCHINDUCTOR_CACHE_DIR=/root/.cache/torchinductor \
+  -e TORCH_EXTENSIONS_DIR=/cache/jit/torch_extensions \
+  -e CUTE_DSL_CACHE_DIR=/root/.cache/cutlass_dsl \
+  -v "${HOME}/.cache/huggingface:/root/.cache/huggingface" \
+  -v "${HOME}/.cache/vllm-glm51/jit:/cache/jit" \
+  -v "${HOME}/.cache/vllm-glm51/cutlass_dsl:/root/.cache/cutlass_dsl" \
+  -v "${HOME}/.cache/vllm-glm51/triton:/root/.cache/triton" \
+  -v "${HOME}/.cache/vllm-glm51/torchinductor:/root/.cache/torchinductor" \
+  -v "${HOME}/.cache/vllm-glm51/vllm:/root/.cache/vllm" \
+  "${IMAGE}"
+EOF
+chmod +x /tmp/glm
+PORT=5264 DCP_SIZE=1 /tmp/glm
+```
+
+Useful variants:
+
+```bash
+# Disable MTP.
+PORT=5264 DCP_SIZE=1 GLM51_DISABLE_MTP=1 /tmp/glm
+
+# DCP4 baseline used in the table.
+PORT=5264 DCP_SIZE=4 VLLM_ENABLE_PCIE_ALLREDUCE=0 /tmp/glm
+
+# DCP4 explicit PCIe allreduce A/B.
+PORT=5264 DCP_SIZE=4 VLLM_ENABLE_PCIE_ALLREDUCE=1 /tmp/glm
+
+# DCP8 MTP on was measured at lower memory utilization.
+PORT=5264 DCP_SIZE=8 GPU_MEMORY_UTILIZATION=0.82 /tmp/glm
+```
+
+### Benchmark method
+
+Decode benchmark:
+
+```bash
+python3 /root/llm-inference-bench/llm_decode_bench.py \
+  --port 5264 \
+  --model GLM-5 \
+  --concurrency 1,2,4,8,16,32,64 \
+  --contexts 0,16k,32k,64k,128k \
+  --duration 10 \
+  --decode-warmup-seconds 0 \
+  --skip-prefill \
+  --kv-budget <reported_gpu_kv_cache_tokens> \
+  --display-mode plain \
+  --no-hw-monitor
+```
+
+Before every measured decode run, a separate cc1 ctx0 30 second warmup was run.
+Cold prefill was measured separately by sending unique prompts with
+`max_tokens=1`, so prefix-cache hits do not contaminate TTFT.
+
+Result directory:
+
+```bash
+/root/bench-results/glm5-vllm-20260508/dcp-matrix-20260508T040740Z
+```
+
+### KV cache budgets
+
+| DCP | MTP | mem util | AR | GPU KV cache tokens |
+|---:|:---:|---:|---:|---:|
+| 1 | on | 0.865 | 1 | 371456 |
+| 1 | off | 0.865 | 1 | 396288 |
+| 2 | on | 0.865 | 0 | 743040 |
+| 2 | off | 0.865 | 0 | 792576 |
+| 4 | on | 0.865 | 0 | 1485824 |
+| 4 | off | 0.865 | 0 | 1585152 |
+| 8 | on | 0.820 | 0 | 2381824 |
+| 8 | off | 0.865 | 0 | 3170304 |
+
+### Decode throughput, MTP on
+
+| DCP | AR | mem | Context | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 | cc64 |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 1 | 0.865 | 0 | 90.6 | 157.7 | 271.1 | 397.5 | 622.5 | 882.6 | 1165.1 |
+| 1 | 1 | 0.865 | 16k | 85.9 | 154.2 | 227.8 | 342.3 | 468.7 | skip | skip |
+| 1 | 1 | 0.865 | 32k | 83.9 | 143.8 | 216.7 | 289.2 | skip | skip | skip |
+| 1 | 1 | 0.865 | 64k | 79.1 | 131.9 | 197.1 | skip | skip | skip | skip |
+| 1 | 1 | 0.865 | 128k | 78.0 | 119.0 | skip | skip | skip | skip | skip |
+| 2 | 0 | 0.865 | 0 | 74.8 | 132.8 | 220.9 | 312.7 | 499.7 | 677.3 | 970.5 |
+| 2 | 0 | 0.865 | 16k | 67.8 | 126.9 | 203.7 | 285.4 | 442.1 | 632.5 | skip |
+| 2 | 0 | 0.865 | 32k | 75.3 | 121.6 | 182.6 | 266.1 | 418.5 | skip | skip |
+| 2 | 0 | 0.865 | 64k | 69.4 | 119.6 | 174.5 | 256.4 | skip | skip | skip |
+| 2 | 0 | 0.865 | 128k | 68.2 | 112.5 | 171.9 | skip | skip | skip | skip |
+| 4 | 0 | 0.865 | 0 | 71.3 | 122.6 | 195.4 | 280.1 | 396.1 | 549.9 | 753.2 |
+| 4 | 0 | 0.865 | 16k | 72.6 | 115.2 | 176.0 | 268.2 | 370.8 | 526.5 | 701.7 |
+| 4 | 0 | 0.865 | 32k | 72.1 | 122.5 | 166.2 | 243.8 | 369.2 | 526.3 | skip |
+| 4 | 0 | 0.865 | 64k | 68.6 | 105.1 | 166.8 | 235.6 | 352.4 | skip | skip |
+| 4 | 0 | 0.865 | 128k | 65.9 | 111.9 | 158.5 | 233.7 | skip | skip | skip |
+| 8 | 0 | 0.820 | 0 | 65.7 | 103.9 | 161.4 | 214.4 | 291.8 | 417.5 | 595.9 |
+| 8 | 0 | 0.820 | 16k | 62.8 | 98.2 | 149.5 | 199.7 | 287.4 | 365.6 | 455.4 |
+| 8 | 0 | 0.820 | 32k | 63.7 | 96.9 | 140.6 | 205.0 | 285.0 | 378.8 | 461.4 |
+| 8 | 0 | 0.820 | 64k | 62.5 | 98.6 | 148.5 | 211.8 | 281.9 | 367.2 | skip |
+| 8 | 0 | 0.820 | 128k | 56.9 | 95.8 | 156.8 | 200.6 | 273.4 | skip | skip |
+
+### Decode throughput, MTP off
+
+| DCP | AR | mem | Context | cc1 | cc2 | cc4 | cc8 | cc16 | cc32 | cc64 |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 1 | 0.865 | 0 | 50.0 | 84.7 | 153.4 | 260.9 | 426.2 | 649.0 | 1068.7 |
+| 1 | 1 | 0.865 | 16k | 48.1 | 81.4 | 145.5 | 244.0 | 378.5 | skip | skip |
+| 1 | 1 | 0.865 | 32k | 47.6 | 79.5 | 141.5 | 234.4 | skip | skip | skip |
+| 1 | 1 | 0.865 | 64k | 46.7 | 78.4 | 136.7 | skip | skip | skip | skip |
+| 1 | 1 | 0.865 | 128k | 45.6 | 75.5 | skip | skip | skip | skip | skip |
+| 2 | 0 | 0.865 | 0 | 42.3 | 72.9 | 136.7 | 230.4 | 367.3 | 546.6 | 896.4 |
+| 2 | 0 | 0.865 | 16k | 41.7 | 70.7 | 132.2 | 221.7 | 346.5 | 508.1 | skip |
+| 2 | 0 | 0.865 | 32k | 41.3 | 70.1 | 129.9 | 219.4 | 340.2 | skip | skip |
+| 2 | 0 | 0.865 | 64k | 40.9 | 68.5 | 127.1 | 209.8 | skip | skip | skip |
+| 2 | 0 | 0.865 | 128k | 40.2 | 67.9 | 123.5 | skip | skip | skip | skip |
+| 4 | 0 | 0.865 | 0 | 42.0 | 71.3 | 131.0 | 215.3 | 327.3 | 483.0 | 762.5 |
+| 4 | 0 | 0.865 | 16k | 41.3 | 69.1 | 126.8 | 206.6 | 309.7 | 464.0 | 705.2 |
+| 4 | 0 | 0.865 | 32k | 41.1 | 68.7 | 125.6 | 202.6 | 308.2 | 451.4 | skip |
+| 4 | 0 | 0.865 | 64k | 40.6 | 67.9 | 122.8 | 200.3 | 301.8 | skip | skip |
+| 4 | 0 | 0.865 | 128k | 40.0 | 66.5 | 120.7 | 195.4 | skip | skip | skip |
+| 8 | 0 | 0.865 | 0 | 40.2 | 66.7 | 117.5 | 184.3 | 278.0 | 403.5 | 584.8 |
+| 8 | 0 | 0.865 | 16k | 39.3 | 64.5 | 112.9 | 176.4 | 266.9 | 381.4 | invalid |
+| 8 | 0 | 0.865 | 32k | 39.1 | invalid | invalid | invalid | invalid | invalid | invalid |
+| 8 | 0 | 0.865 | 64k | 39.0 | invalid | invalid | invalid | invalid | invalid | skip |
+| 8 | 0 | 0.865 | 128k | 37.9 | invalid | invalid | invalid | invalid | skip | skip |
+
+The DCP8 MTP-off run is not valid for long-context reporting. ctx0 completed,
+but long-context cells produced benchmark errors/zero-token cells and the
+server refused connections immediately afterward, so cold prefill did not run.
+
+### Cold prefill throughput
+
+Cold prefill sends unique prompts and reports prompt tokens per second. Columns
+are contexts `8k / 16k / 32k / 64k / 128k`.
+
+| DCP | MTP | AR | mem | 8k | 16k | 32k | 64k | 128k |
+|---:|:---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | on | 1 | 0.865 | 4333 | 4296 | 3288 | 3711 | 3170 |
+| 1 | off | 1 | 0.865 | 4398 | 4354 | 4191 | 3800 | 3224 |
+| 2 | on | 0 | 0.865 | 3690 | 3637 | 3542 | 3396 | 3133 |
+| 2 | off | 0 | 0.865 | 3762 | 3701 | 3602 | 3455 | 3191 |
+| 4 | on | 0 | 0.865 | 2769 | 2570 | 2458 | 2382 | 2096 |
+| 4 | off | 0 | 0.865 | 2818 | 2612 | 2499 | 2423 | 2138 |
+| 8 | on | 0 | 0.820 | 1887 | 1678 | 1511 | 1435 | 1391 |
+| 8 | off | 0 | 0.865 | invalid | invalid | invalid | invalid | invalid |
+
+### DCP4 PCIe allreduce A/B
+
+DCP4 was re-run with `VLLM_ENABLE_PCIE_ALLREDUCE=1` after the baseline matrix.
+It is not a clear global win. ctx0 single-stream improves, cc32 is mixed, and
+prefill is effectively unchanged.
+
+| Mode | AR | ctx0 cc1 | ctx0 cc32 | ctx0 cc64 | 128k cc1 | prefill 8k | prefill 128k |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| DCP4 MTP on | 0 | 71.3 | 549.9 | 753.2 | 65.9 | 2769 | 2096 |
+| DCP4 MTP on | 1 | 79.9 | 535.4 | 786.1 | 67.0 | 2766 | 2095 |
+| DCP4 MTP off | 0 | 42.0 | 483.0 | 762.5 | 40.0 | 2818 | 2138 |
+| DCP4 MTP off | 1 | 44.5 | 486.7 | 756.6 | 42.3 | 2814 | 2133 |
+
+### Current interpretation
+
+- `DCP1 + MTP` remains the fastest short-context decode profile.
+- `DCP2` roughly doubles KV cache while preserving reasonable decode
+  throughput.
+- `DCP4` gives much larger KV cache, but decode and prefill cost is visible.
+- `DCP8 + MTP` works and gives the largest valid long-context coverage tested
+  here, but decode and prefill are substantially slower.
+- `DCP8 + MTP off` at `mem=0.865` is not a stable long-context configuration
+  in this run and needs separate debugging before reporting as supported.
+- For DCP4, `AR=1` is useful for cc1 and sometimes cc64, but not a clear win
+  for cc32. Keep `AR=0` as the DCP>1 default until a per-shape selector exists.
+
 ## Table of Contents
 
+- [Current vLLM GLM-5.1 DCP Benchmark (2026-05-08)](#current-vllm-glm-51-dcp-benchmark-2026-05-08)
 - [Overview](#overview)
 - [Hardware Requirements](#hardware-requirements)
 - [NVFP4 Quantization](#nvfp4-quantization)

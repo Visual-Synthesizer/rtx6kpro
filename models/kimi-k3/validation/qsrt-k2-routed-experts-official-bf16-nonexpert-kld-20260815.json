@@ -1,0 +1,62 @@
+{
+  "artifact_kind": "kimi_k3_qsrt_k2_routed_experts_official_bf16_nonexpert_distribution_fidelity",
+  "status": "qualified",
+  "candidate": {
+    "official_repository": "moonshotai/Kimi-K3",
+    "official_revision": "2496450e92e425c886db095102a52a6682ca3970",
+    "qsrt_repository": "lukealonso/Kimi-K3-QSRT-K2",
+    "qsrt_revision": "3b98114115f1d41ce7963ba346c3fca19918b0bd",
+    "quantized_tensors": "routed experts",
+    "nonexpert_storage": "official BF16",
+    "model_view_config_sha256": "acc824f0733f1c4f97f0e4955711d75559a6748f98add5c52028affe295d55fb",
+    "model_view_index_sha256": "84e894f10fa6249afaa11fbe9d32f441f1cdba55e7859805de4aa13670438556",
+    "model_view_manifest_sha256": "c4fea51a5477c0d78c49ba4f94b3c314e3d8aa58a45a20eecfe5b8773233dfbd",
+    "nonexpert_overlay_manifest_sha256": "4e129eb833cf4fe571254df125c312aa1b1bb0085ae3d6dd1a36bc531b3d98bd"
+  },
+  "evaluation_suite": {
+    "repository": "festr2/kimi-k3-distribution-fidelity-1024x2048-v1",
+    "revision": "89d19bee77a0af8885cab2db01efb43b979fdf2e",
+    "manifest_sha256": "f3a79f7f28365d406a19a82cf210c25adf18974c4b9b607ab3754e9939f941cf",
+    "token_set_sha256": "70cd72175fcb4574123b90a83e2b71bb460b8c2938cec9573645dc8c9a46a3bd",
+    "contexts": 1024,
+    "positions": 2096128
+  },
+  "published_results": {
+    "repository": "festr2/kimi-k3-distribution-fidelity-1024x2048-v1",
+    "repository_type": "dataset",
+    "revision": "402919ae70d61396087571b63fe9185d95491afb",
+    "path": "results/qsrt-k2-routed-experts-official-bf16-nonexpert"
+  },
+  "routed_experts_with_official_bf16_nonexpert": {
+    "report_sha256": "10e203e1f1ea0a9944b2bddb99243fcfbd18e16d35102155f5f32d20ba4724fe",
+    "micro_token_kld": 0.06538553548906033,
+    "macro_allocation_stratum_kld": 0.06617214448258328,
+    "top1_agreement": 0.9342215742550073,
+    "micro_kld_stratified_source_cluster_ci95": [
+      0.06102082745311803,
+      0.07075219752250643
+    ]
+  },
+  "routed_experts_with_mxfp8_nonexpert": {
+    "report_sha256": "7da1524e534caeb236b6c1ed3d562861c53101848728505590c997ac7bb92397",
+    "micro_token_kld": 0.0670208756633171,
+    "macro_allocation_stratum_kld": 0.06780095444060645,
+    "top1_agreement": 0.9329573384831461
+  },
+  "paired_difference": {
+    "direction": "official_bf16_nonexpert_kld_minus_mxfp8_nonexpert_kld",
+    "receipt_sha256": "5e43926ed7912dc978350899fefb2c9e225b26905768ddcf018a7887b172dbcf",
+    "micro_token_kld": -0.0016353401742567747,
+    "macro_allocation_stratum_kld": -0.001628809958023157,
+    "context_mean": -0.0016353401742567777,
+    "context_median": -0.0014041256030774656,
+    "stratified_source_cluster_bootstrap_samples": 10000,
+    "stratified_source_cluster_ci95": [
+      -0.0017714322688197033,
+      -0.0015119849779474102
+    ],
+    "bf16_context_wins": 884,
+    "mxfp8_context_wins": 140,
+    "ties": 0
+  }
+}

@@ -8,6 +8,7 @@ Measured PCIe peer-to-peer bandwidth, latency, and NCCL AllReduce performance on
 - [P2P Latency Measurements](#p2p-latency-measurements)
 - [NCCL AllReduce Bus Bandwidth](#nccl-allreduce-bus-bandwidth)
 - [BAR1 Configuration](#bar1-configuration)
+- [NVIDIA P2P Driver Override (ForceP2P)](#nvidia-p2p-driver-override-forcep2p)
 - [How PCIe Bandwidth Affects Inference](#how-pcie-bandwidth-affects-inference)
 - [GRUB Kernel Parameters for PCIe Stability](#grub-kernel-parameters-for-pcie-stability)
 - [Debugging Tools](#debugging-tools)
@@ -17,6 +18,13 @@ Measured PCIe peer-to-peer bandwidth, latency, and NCCL AllReduce performance on
 ## P2P Bandwidth Measurements
 
 All measurements taken using the CUDA `p2pBandwidthLatencyTest` sample or luke's `p2pmark` tool.
+
+Before comparing numbers, verify both:
+
+- BAR1 / Resizable BAR is correctly sized; see [BAR1 Configuration](#bar1-configuration).
+- The NVIDIA P2P driver override is active when testing direct SM remote-load paths such as PCIe oneshot/custom allreduce; see [NVIDIA P2P Driver Override](#nvidia-p2p-driver-override-forcep2p).
+
+`cudaMemcpy` P2P bandwidth can look healthy even when CUDA kernels that directly load from peer GPU memory still fall back to slow SysMem staging. This is why `p2pmark`/allreduce diagnostics and the driver override matter.
 
 ### 2-GPU PLX vs direct-attach: what the switch actually does (counterintuitive)
 
@@ -392,6 +400,63 @@ Sanity check: if you see `256 MiB` here, Resizable BAR is disabled or BIOS cappe
 
 ---
 
+## NVIDIA P2P Driver Override (ForceP2P)
+
+This is a critical prerequisite for PCIe oneshot/custom allreduce on direct-attach RTX PRO 6000 systems where `nvidia-smi topo -m` shows `NODE` between GPUs. Without it, CUDA kernels that issue direct remote-GPU loads through IPC/BAR1 can silently route through SysMem staging and become an order of magnitude slower.
+
+This is separate from the `nvidia_uvm uvm_disable_hmm=1` fix below; use both on multi-GPU RTX PRO 6000 hosts.
+
+Create `/etc/modprobe.d/nvidia-p2p-override.conf`:
+
+```bash
+options nvidia NVreg_RegistryDwords="ForceP2P=0x11;RMForceP2PType=1;RMPcieP2PType=2;GrdmaPciTopoCheckOverride=1;EnableResizableBar=1"
+```
+
+Reload the driver or reboot:
+
+```bash
+# Stop all GPU users first: vLLM/SGLang, Docker containers, persistence daemon, etc.
+fuser -v /dev/nvidia* || true
+systemctl stop nvidia-persistenced 2>/dev/null || true
+
+modprobe -r nvidia_uvm nvidia_drm nvidia_modeset nvidia
+modprobe nvidia
+modprobe nvidia_uvm
+
+# Verify the loaded driver parameters, not just the file on disk:
+grep -E 'RegistryDwords|ForceP2P|RMForceP2PType|RMPcieP2PType|GrdmaPciTopoCheckOverride|EnableResizableBar|DmaRemapPeerMmio' /proc/driver/nvidia/params
+```
+
+Expected runtime signal:
+
+```text
+RegistryDwords: "ForceP2P=0x11;RMForceP2PType=1;RMPcieP2PType=2;GrdmaPciTopoCheckOverride=1;EnableResizableBar=1"
+EnableResizableBar: 1
+DmaRemapPeerMmio: 1
+GrdmaPciTopoCheckOverride: 1
+```
+
+What it affects:
+
+| Path | Needs ForceP2P? | Notes |
+|------|-----------------|-------|
+| PCIe oneshot/custom allreduce | **Yes on NODE/direct-attach** | Direct SM loads from peer GPU memory via IPC/BAR1 |
+| CUDA `cudaMemcpy` P2P | Usually no | Uses copy-engine path, so it can look fast even without this override |
+| NCCL collectives | Usually no | NCCL may use its own transport choices; still set `NCCL_P2P_LEVEL=SYS` for cross-NUMA |
+| PCIe switch topologies (`PIX`/`PXB`) | Often no | Driver usually enables BAR1 P2P by default, but verify with `p2pmark` |
+
+For the full allreduce setup and crossover explanation, see [PCIe Oneshot AllReduce — Critical Prerequisite](../optimization/pcie-oneshot-allreduce.md#critical-prerequisite-nvidia-p2p-driver-config).
+
+The [`llm-inference-bench`](https://github.com/local-inference-lab/llm-inference-bench) tool also reports this at startup:
+
+```bash
+python3 llm_decode_bench.py --p2pmark-only
+```
+
+Look for `NVIDIA P2P Override: Effective: yes`.
+
+---
+
 ## How PCIe Bandwidth Affects Inference
 
 ### Tensor Parallel Decode
@@ -468,12 +533,23 @@ cat /proc/cmdline
 
 ### Modprobe Configuration
 
+NVIDIA kernel module P2P override for direct SM remote-load paths:
+
+```bash
+# /etc/modprobe.d/nvidia-p2p-override.conf
+options nvidia NVreg_RegistryDwords="ForceP2P=0x11;RMForceP2PType=1;RMPcieP2PType=2;GrdmaPciTopoCheckOverride=1;EnableResizableBar=1"
+```
+
+See [NVIDIA P2P Driver Override](#nvidia-p2p-driver-override-forcep2p) for reload and verification commands.
+
+UVM HMM disable:
+
 ```bash
 # /etc/modprobe.d/uvm.conf
 options nvidia_uvm uvm_disable_hmm=1
 ```
 
-Without this, NCCL P2P operations lock up. This is required on virtually all RTX PRO 6000 multi-GPU setups.
+Without `uvm_disable_hmm=1`, NCCL P2P operations can lock up. This is required on virtually all RTX PRO 6000 multi-GPU setups.
 
 ### BIOS Settings (PRO WS WRX90E-SAGE SE)
 

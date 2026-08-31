@@ -1,0 +1,101 @@
+{
+  "schema": "kimi-k3-production-qualification-v2",
+  "status": "qualified",
+  "hardware": {
+    "gpu_count": 16,
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "topology": "TP16/DCP16"
+  },
+  "target": {
+    "checkpoint": "moonshotai/Kimi-K3",
+    "revision": "2496450e92e425c886db095102a52a6682ca3970",
+    "routed_expert_format": "MXFP4",
+    "activation_dtype": "BF16",
+    "kv_cache_dtype": "FP8",
+    "max_model_len": 1000000,
+    "physical_kv_tokens": 1033126
+  },
+  "draft": {
+    "checkpoint": "Inferact/Kimi-K3-DSpark",
+    "revision": "cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "speculative_tokens": 7
+  },
+  "runtime_image": {
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllmdf13924-b12xec6edd9-cu133-torch213-20260817-r6",
+    "digest": "sha256:ffb25774eaa90850b4cacfb88ed9e55072818e99bad977f1315c7118e7a730b2",
+    "vllm_tree": "df13924cb12279f8144019800fad7e27640acaea",
+    "b12x_tree": "ec6edd9da4687f83519fd37bd7322ea0800f0ace",
+    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f",
+    "docker_image_recipe_commit": "2cbc2e58e094ffbbd517afeec1619b391b998438",
+    "docker_merge_commit": "26642da52049a41a25e425c630f94de113ea9e6a"
+  },
+  "llmconduit_image": {
+    "name": "voipmonitor/llmconduit:kimi-k3-5e07aec-20260817-r3",
+    "digest": "sha256:a0d7416ebaed984fea33646b57a54d80b250a2f4e1257e08cfc4c07cb6699c7d",
+    "source_commit": "5e07aec44f48d8ac5ac64749ce1884083631fb5f"
+  },
+  "startup": {
+    "target_weight_load_seconds": 154.33,
+    "complete_model_load_seconds": 168.5,
+    "model_allocation_gib_per_gpu": 90.48,
+    "graph_capture_seconds": 48,
+    "graph_allocation_gib_per_gpu": 0.29
+  },
+  "decode_protocol": {
+    "prompt_tokens": 256,
+    "completion_tokens": 1024,
+    "measured_runs": 8,
+    "sampling_temperature": 0,
+    "active_requests": 1
+  },
+  "decode_profiles": {
+    "official_mxfp4_nospec": {
+      "served_model": "Kimi-K3-MXFP4-DCP16-1M",
+      "physical_kv_tokens": 1460937,
+      "median_tokens_per_second": 56.14912083764279,
+      "minimum_tokens_per_second": 56.02297342232063,
+      "maximum_tokens_per_second": 56.18418082406845
+    },
+    "official_mxfp4_inferact_dspark_k7": {
+      "served_model": "Kimi-K3-MXFP4-DSpark7-DCP16-1M",
+      "physical_kv_tokens": 1033126,
+      "median_tokens_per_second": 118.77253245776615,
+      "median_target_cycles_per_second": 31.429715523226186,
+      "median_emitted_tokens_per_target_cycle": 3.781307868023735,
+      "median_acceptance_rate": 0.39732969543196217
+    },
+    "official_mxfp4_modal_dflash_k7": {
+      "served_model": "Kimi-K3-MXFP4-DFlash-DCP16-1M",
+      "physical_kv_tokens": 1048576,
+      "median_tokens_per_second": 90.96204650828257,
+      "median_target_cycles_per_second": 27.846829959139434,
+      "median_emitted_tokens_per_target_cycle": 3.268547352995054,
+      "median_acceptance_rate": 0.32407819328500775
+    }
+  },
+  "lmcache": {
+    "process_has_cuda_visibility": false,
+    "transfer_mode": "engine_driven",
+    "chunk_tokens": 12288,
+    "prompt_24576_restored_tokens": 12288,
+    "prompt_24576_cold_seconds": 14.303850864060223,
+    "prompt_24576_restored_seconds": 8.297203947906382,
+    "prompt_49152_restored_tokens": 36864,
+    "prompt_49152_cold_seconds": 28.25942098593805,
+    "prompt_49152_restored_seconds": 10.566911276080646
+  },
+  "interfaces": {
+    "vllm_reasoning": "qualified",
+    "vllm_required_tool_call": "qualified",
+    "vllm_native_vision": "qualified",
+    "llmconduit_chat": "qualified",
+    "llmconduit_responses": "qualified",
+    "llmconduit_anthropic": "qualified",
+    "llmconduit_streaming": "qualified",
+    "omp_version": "17.3.5",
+    "omp_reasoning_controls": "qualified",
+    "omp_tool_loop": "qualified",
+    "omp_native_vision": "qualified"
+  },
+  "host_receipts": "/mnt/luke/kimi-k3-runs/qualification-df13924-ec6edd9-20260817"
+}

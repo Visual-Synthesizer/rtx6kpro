@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "status": "qualified",
+  "qualified_at_utc": "2026-08-19",
+  "image": {
+    "name": "voipmonitor/vllm:kimi-k3-production-dspark-lmcache-vllm12776c0-b12x468c312-cu133-torch213-20260819-source-overlay",
+    "digest": "sha256:a54da4e2432138d42334cac54555f3a51188489cb66029da0d96e4b39162d726",
+    "local_image_id": "sha256:e5950412b5f95f1dbf1720998af51c0c824265d4ee08d75934dbd150b699b909",
+    "size_bytes": 31058501689,
+    "recipe_commit": "f9cc49c187f7525453b65ed8b4a1733f6d97471a"
+  },
+  "source": {
+    "vllm_base": "dev/infernal-invocation@6dc2f516688fe6f84c6994dcd20fddf296853a6c",
+    "vllm_tree": "12776c0df15ca4087b636c43004b5bc1fde61434",
+    "vllm_pull_requests": [
+      310,
+      413,
+      414,
+      415,
+      418,
+      419,
+      422,
+      427,
+      428,
+      433
+    ],
+    "vllm_base_contains_merged_pull_request": 401,
+    "b12x_base": "master@c25cdba2c1df7a69b2d7771e4243e12a8fbf19d5",
+    "b12x_tree": "468c31256b585c8078782c63ba723e404c04eb76",
+    "b12x_pull_request": 227,
+    "lmcache_tree": "e045d729bc5c4c63a40e13d032f42923de97812f"
+  },
+  "runtime": {
+    "target": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "target_weight_format": "official MXFP4",
+    "draft": "Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "maximum_model_length_tokens": 1000000,
+    "physical_kv_tokens": 1033126,
+    "kv_cache_dtype": "FP8",
+    "load_format": "instanttensor",
+    "target_weight_load_seconds": 164.32,
+    "draft_weight_load_seconds": 1.6,
+    "vision_warmup_workers": 16,
+    "container_restarts": 0,
+    "fatal_runtime_markers": 0
+  },
+  "source_activation": {
+    "global": true,
+    "lazy": true,
+    "vllm_import_path": "/opt/kimi-k3-qsrt/vllm/vllm/__init__.py",
+    "b12x_import_path": "/opt/kimi-k3-qsrt/b12x/b12x/__init__.py",
+    "binary_extension_fallback": "/opt/infernal-invocation/vllm/vllm",
+    "custom_command_smoke_test": "passed"
+  },
+  "tests": {
+    "dcp_hybrid_local_prefix_cache": {
+      "passed": 2,
+      "failed": 0
+    },
+    "hybrid_kv_load_failure": {
+      "passed": 6,
+      "failed": 0
+    },
+    "cached_logits_processing": {
+      "passed": 26,
+      "failed": 0
+    },
+    "b12x_w4a16_routing_and_packaging": {
+      "passed": 329,
+      "skipped": 18,
+      "failed": 0
+    }
+  },
+  "prefix_cache_runtime": {
+    "producer_prompt_tokens": 44449,
+    "producer_elapsed_seconds": 30.91897300898563,
+    "consumer_prompt_tokens": 44609,
+    "consumer_local_hit_tokens": 43008,
+    "consumer_external_hit_tokens": 0,
+    "consumer_elapsed_seconds": 1.7410800389479846
+  },
+  "coding_decode": {
+    "prompt_tokens": 119,
+    "completion_tokens": 512,
+    "measurement_window": "first streamed output token through last streamed output token",
+    "tokens_per_second": [
+      133.55250999206902,
+      118.71812053347531,
+      91.05369924939329
+    ],
+    "median_tokens_per_second": 118.71812053347531
+  },
+  "multimodal": {
+    "one_image_http_status": 200,
+    "five_image_http_status": 200,
+    "five_image_count_confirmed": true
+  },
+  "service": {
+    "container": "kimi-k3-production-dspark-lmcache-12776c0",
+    "vllm": "http://127.0.0.1:8001",
+    "llmconduit": "http://127.0.0.1:8003"
+  }
+}

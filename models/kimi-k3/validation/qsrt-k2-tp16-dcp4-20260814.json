@@ -1,0 +1,71 @@
+{
+  "artifact_kind": "Kimi K3 QSRT-K2 TP16/DCP4 numerical and decode qualification",
+  "checkpoint": {
+    "quantization": "K2 QSRT routed experts with MXFP8 dense tensors",
+    "repository": "lukealonso/Kimi-K3-QSRT-K2",
+    "revision": "3b98114115f1d41ce7963ba346c3fca19918b0bd"
+  },
+  "conclusion": "TP16/DCP4 is numerically qualified with a full-decode CUDA graph. Its measured 20.29 tok/s target-only decode rate does not qualify it as the default serving profile.",
+  "decode_benchmark": {
+    "completion_tokens": 384,
+    "formula": "(completion_tokens - 1) / (last_token_time - first_token_time)",
+    "maximum_tokens_per_second": 20.300684267724584,
+    "mean_time_to_first_token_seconds": 0.25175984879024327,
+    "mean_tokens_per_second": 20.294454501678093,
+    "measured_runs": 5,
+    "minimum_tokens_per_second": 20.28670650480492,
+    "prompt_tokens": 256,
+    "tokens_per_second": [
+      20.291759447238647,
+      20.294117925720993,
+      20.28670650480492,
+      20.2990043629013,
+      20.300684267724584
+    ],
+    "warmup_runs": 1
+  },
+  "numerical_validation": {
+    "coding_generation_tokens": 256,
+    "contexts": 16,
+    "finite_contexts": 16,
+    "result": "All replay responses had finite top-logprob values and the coding generation was coherent.",
+    "suite": "festr2/kimi-k3-distribution-fidelity-1024x2048-v1",
+    "summary_sha256": "faa275507553be86b6267fa2d2e7ec04f87dd5fd1bbc3847bd2a6a7981fc1041",
+    "tokens_per_context": 2048
+  },
+  "runtime": {
+    "b12x_revision": "e7469f59302e7d0bf2ac3dc0a80e1b55db6dfdd4",
+    "image": "voipmonitor/vllm:infernal-invocation-vllm908522a-b12x5d648d9-fi1ac6942-cu133-torch213-20260813-r11",
+    "image_digest": "voipmonitor/vllm@sha256:01b973d1ae132882bcc1bf62ea232f6aabe649dd4a89b961d81f3c41cc53f971",
+    "image_id": "sha256:f226a6fd788bb4af345a17b768654f1e5a7487a812746ccb117aa9b040a82294",
+    "launcher_sha256": "277968669d74e10889fb66702f2f45ee4c5153cc01bc363dbca01555fa17ddc3",
+    "vllm_revision": "fbcf2de2771307101f2125f113b179331f579a10"
+  },
+  "serving_configuration": {
+    "activation_dtype": "bfloat16",
+    "attention_backend": "B12X_MLA",
+    "cuda_graph_capture_sizes": [
+      1
+    ],
+    "cuda_graph_mode": "FULL_DECODE_ONLY",
+    "dcp_comm_backend": "a2a",
+    "decode_context_parallel_size": 4,
+    "kda_prefill_backend": "triton",
+    "kv_cache_dtype": "fp8",
+    "kv_cache_memory_bytes_per_rank": 500000000,
+    "linear_backend": "b12x",
+    "max_model_len": 8192,
+    "max_num_batched_tokens": 2048,
+    "max_num_seqs": 1,
+    "moe_backend": "b12x",
+    "physical_kv_tokens": 64170,
+    "tensor_parallel_size": 16,
+    "weight_loader": "instanttensor"
+  },
+  "startup": {
+    "cuda_graph_capture_seconds": 11.97,
+    "rank_zero_instanttensor_bytes": 65800000000,
+    "rank_zero_weight_load_seconds": 8.15
+  },
+  "status": "qualified"
+}

@@ -1,0 +1,36 @@
+{
+  "artifact_kind": "AA-LCR frozen Kimi-K3 equality-checker repeatability receipt",
+  "status": "qualified",
+  "created_utc": "2026-08-14T22:55:00Z",
+  "judge": {
+    "model": "Kimi-K3-Official-MXFP4-NoSpec-TP16-DCP16-1M-CC8-FA2",
+    "protocol": "frozen-official-kimi-k3",
+    "judge_config_sha256": "8692b0beb6852b4b4bd6a5bfd4df67dfe180760ee7cebc4cf97bacd2132d1a17",
+    "runtime_manifest_sha256": "80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e",
+    "reasoning_effort": "max",
+    "temperature": 0,
+    "max_tokens": 32768
+  },
+  "inputs": {
+    "generation_manifest_sha256": "daea3c83c1ec421f7501fb8e4b267977fde611a7313330e1a7f53939034a5b15",
+    "generation_config_sha256": "82f96e2e56e8393ff2023e998ab72c0df6b4195ec4eb57ab9b22c08061bb11c6",
+    "generation_repeat": 0,
+    "question_ids": "1-100",
+    "fixed_candidate_answers": 100
+  },
+  "independent_executions": {
+    "first_judge_manifest_sha256": "b3038ab264cefdb816fd616f01639345f27266e3fc397d9ed6eddc31d844c828",
+    "first_complete_receipt_manifest_sha256": "ba4b2d2e28e143a4499a60b598c9d6568f60b0fd93cf0d1fb8d43155708cdaf8",
+    "second_judge_manifest_sha256": "16ae50358368627f216e985a61c24e7f3474f8655c5594575efee6bf0941f07f",
+    "second_repeat_00_receipt_manifest_sha256": "38915b94bafced2f92ed0d20e2f9cfd357b20278f6a2221e897a7f0cce300bce"
+  },
+  "comparison": {
+    "pairs": 100,
+    "label_matches": 100,
+    "final_content_matches": 100,
+    "reasoning_text_matches": 29,
+    "completion_token_count_matches": 34,
+    "label_mismatches": []
+  },
+  "conclusion": "The frozen Kimi-K3 equality checker reproduced every binary label. Internal reasoning text and length are not deterministic and are not scoring artifacts."
+}

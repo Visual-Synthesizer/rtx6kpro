@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "Kimi-K3 no-speculation runtime recheck",
+  "status": "qualified",
+  "captured_at_utc": "2026-08-16T10:37:59Z",
+  "image": {
+    "tag": "voipmonitor/vllm:kimi-k3-ii-vllmf21a391-b12x3be8bc7-cu133-torch213-20260816-r2",
+    "registry_digest": "sha256:9230c19c6b16ca6216613360619b0cca2356dba65c2297c99817750b3f9e4b83",
+    "local_image_id": "sha256:7e8c1877b689665aca74b9cde8bfcab65634ac6be5f171a66e162e3d7ef2dd14",
+    "vllm_tree": "f21a391de0a1b127c93ac718fd7d1818f025317b",
+    "b12x_tree": "3be8bc74d6813223b5be732a4c865401a693f5f5"
+  },
+  "hardware": {
+    "gpu_count": 16,
+    "gpu_model": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "driver_version": "610.57.04",
+    "pcie": "Gen5 x16 on every GPU",
+    "pre_request_pstate": "P8 on all 16 GPUs",
+    "pre_request_sm_clock_mhz": 180
+  },
+  "profile": {
+    "served_model": "Kimi-K3-MXFP4-DCP16-1M",
+    "entrypoint": "/usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "physical_target_kv_tokens": 1460937,
+    "max_model_len": 1048576,
+    "max_num_seqs": 1,
+    "max_num_batched_tokens": 2048
+  },
+  "protocol": {
+    "prompt_tokens": 256,
+    "generated_tokens": 1024,
+    "warmups": 2,
+    "measured_runs": 8,
+    "allowed_token_id": 13,
+    "token_file": "models/kimi-k3/tools/decode-baseline-256-token-ids.json",
+    "token_file_sha256": "64c2ff11a83dda71caea12ea10b16511b0114c15973b949cde3ebd2bc4c712af",
+    "decode_rate_formula": "(completion_tokens - 1) / (last_token_time - first_token_time)"
+  },
+  "results": {
+    "decode_tokens_per_second_median": 55.275382392545644,
+    "decode_tokens_per_second_min": 55.163846830399265,
+    "decode_tokens_per_second_max": 55.32501414543429,
+    "decode_tokens_per_second_samples": [
+      55.217881039499396,
+      55.32501414543429,
+      55.27332149912158,
+      55.163846830399265,
+      55.27906988450632,
+      55.27744328596971,
+      55.2843800511143,
+      55.1664855248615
+    ],
+    "output_sha256": "ca33403cfcb21bae20f21507475a3525c7f4bd36bb2a7074891e3307c5fd47d5",
+    "local_summary_sha256": "81740cdaaf2ec537319422fc93984df76865949704f57530479be0c6f16905dc"
+  },
+  "comparison": {
+    "initial_qualification_tokens_per_second_median": 52.94972850155503,
+    "same_window_control_tokens_per_second_median": 52.96561074756509,
+    "recheck_relative_to_initial_percent": 4.392192286542729
+  },
+  "conclusion": "The exact published image sustains 55.275 tok/s under the recorded startup condition. The 52.95 tok/s qualification result is valid functional evidence but is not representative throughput because the same immutable source and output produced a 4.39 percent higher median in the recheck.",
+  "limitations": [
+    "The recheck covers one host, one active sequence, and one forced-token decode stream.",
+    "The measurement proves execution-state sensitivity but does not isolate its hardware, driver, scheduler, or clock-state cause.",
+    "P8 describes the pre-request idle state; it does not imply that decode executes in P8."
+  ]
+}

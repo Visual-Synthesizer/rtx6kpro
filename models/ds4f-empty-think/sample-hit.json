@@ -1,0 +1,9 @@
+{
+  "_note": "Real production capture on voipmonitor/vllm:lucifer (TP2). The reasoning_text is a verbatim model output containing only generic legal info about consumer dispute-resolution bodies (no personal or customer data). Schema matches what repro.py writes to ./hits/. Note content_chars==0 while reasoning_text is a complete, citation-bearing answer that should have been the content.",
+  "empty": true,
+  "finish": "stop",
+  "content_chars": 0,
+  "reasoning_chars": 552,
+  "compl_tokens": 197,
+  "reasoning_text": "Jako spotřebitel můžete řešit spor mimosoudní cestou s Finančním arbitrem (finarbitr.cz) nebo s Českou obchodní inspekcí (coi.cz). [1] U doplňkového penzijního spoření uzavřeného online je možné využít také on-line platformu pro řešení spotřebitelských sporů na webových stránkách Evropské unie (ec.europa.eu/consumers/odr). [1]\n\nVe verzi VOP z dubna 2025 je uveden pouze Finanční arbitr (finarbitr.cz) a Česká obchodní inspekce již není zmíněna. [2] Dohledovým orgánem je Česká národní banka (cnb.cz/cs), u které lze podat stížnost nebo podnět. [1][2]"
+}

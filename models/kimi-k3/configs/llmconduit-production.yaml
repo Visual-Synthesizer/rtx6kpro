@@ -1,0 +1,41 @@
+# LLMConduit endpoint for the Kimi-K3 vLLM service on host port 8001.
+bind_addr: "0.0.0.0:8003"
+upstream_base_url: "http://127.0.0.1:8001/v1"
+upstream_model: "Kimi-K3-MXFP4-DSpark7-DCP16-1M"
+request_timeout_secs: 3600
+connect_timeout_secs: 30
+max_request_body_bytes: 67108864
+flatten_content: false
+turn_capture_dir: "/captures/turns"
+debug_log_max_age_hours: 72
+
+model_profiles:
+  Kimi-K3-MXFP4-DSpark7-DCP16-1M:
+    template_family: kimi
+    native_vision: true
+    upstream_chat_kwargs:
+      max_completion_tokens: 128000
+    roles:
+      "*": { action: reject }
+      user: {}
+      assistant: {}
+      tool: {}
+      system: {}
+      developer: { action: rewrite, target_role: system }
+    reasoning_effort:
+      map:
+        none: none
+        minimal: low
+        low: low
+        medium: high
+        high: high
+        xhigh: max
+        max: max
+        "*": high
+    capabilities:
+      thinking:
+        types: [adaptive, enabled]
+      effort:
+        levels: [max, xhigh, high, medium, low, minimal, none]
+      image_input: true
+      structured_outputs: true

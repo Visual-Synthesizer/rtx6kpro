@@ -1,0 +1,13 @@
+modelRoles:
+  default: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  smol: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  slow: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  plan: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  commit: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  vision: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  designer: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  task: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+  advisor: kimi-k3-conduit-chat/production-mxfp4-dspark-dcp16
+defaultThinkingLevel: high
+startup:
+  quiet: true

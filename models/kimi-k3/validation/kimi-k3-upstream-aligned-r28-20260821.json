@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "Kimi-K3 TP16/DCP16 recurrent prefix-hit qualification",
+  "created_at": "2026-08-21T12:55:00Z",
+  "status": "qualified",
+  "published_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme96c97b-b12xf006681-cu133-torch213-20260821-r28",
+    "digest": "sha256:e0a7d6f9f7e0ce7587d024520557b4b4399c04314623a7c5d78a3bf1882ecf71",
+    "image_id": "sha256:84853004dc748d7945b3f2b72bb7e4a823523747d1bd78ee23b16d8451fb20c5",
+    "size_bytes": 31500212111,
+    "source_overlay": false,
+    "native_artifact_reuse": "Python-only source differences verified"
+  },
+  "source": {
+    "docker_recipe_commit": "203e1a11a373a0486897a5a284409ba4417d0f7a",
+    "docker_main_publication_commit": "203e1a11a373a0486897a5a284409ba4417d0f7a",
+    "vllm_base_commit": "b5f995e73e6b7fe27c9927477e277a151ebcc9e9",
+    "vllm_integration_commit": "fbe29aa9fcf4e5eeeac266df5560f3a240b8d022",
+    "vllm_tree": "e96c97b7ff8556a26fda87b6a3e7fe1cb4891e7f",
+    "b12x_integration_commit": "f25c8bdd23aa45f0ba68161931e3417c6f008b3e",
+    "b12x_tree": "f0066813bd55e6e19b6a8d84ab47087510c12890",
+    "vllm_pull_requests_in_merge_order": [
+      414,
+      295,
+      294,
+      320,
+      413,
+      422,
+      310,
+      415,
+      418,
+      419,
+      459,
+      460,
+      463
+    ],
+    "b12x_pull_requests_in_merge_order": [227, 238]
+  },
+  "runtime": {
+    "target_checkpoint": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "draft_checkpoint": "Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "target_kv_dtype": "fp8",
+    "maximum_request_tokens": 1000000,
+    "physical_target_kv_tokens": 1016293,
+    "scheduler_chunk_tokens": 4096,
+    "maximum_images_per_prompt": 5,
+    "host_kv_backend": "native",
+    "host_kv_gib": 32,
+    "attention_page_tokens": 768,
+    "recurrent_checkpoint_tokens": 12288,
+    "cuda": "13.3",
+    "pytorch": "2.13.0",
+    "nccl": "2.31.2",
+    "cutlass_dsl": "4.6.2",
+    "instanttensor": "0.1.9"
+  },
+  "correctness_contract": {
+    "description": "A resumed align-mode recurrent request indexes its state block table on the logical recurrent checkpoint cadence, independently of the physical attention-page width.",
+    "computed_tokens": 110592,
+    "unmodified_state_index": 143,
+    "qualified_state_index": 8
+  },
+  "qualification": {
+    "five_image_omp_llmconduit_replay": {
+      "input_capture_sha256": "2af81f48afcb0abcc87f058b09bad803a71d89791dfb04e952251e86dbc59ed1",
+      "prompt_tokens": 112301,
+      "image_count": 5,
+      "reused_checkpoint_tokens": 110592,
+      "recomputed_tokens": 1709,
+      "cold_elapsed_seconds": 48.691,
+      "cached_elapsed_seconds": 6.225,
+      "cold_http_status": 200,
+      "cached_http_status": 200,
+      "cold_finish_reason": "tool_calls",
+      "cached_finish_reason": "tool_calls",
+      "cold_control_marker_count": 0,
+      "cached_control_marker_count": 0,
+      "cold_receipt_sha256": "408e574bba427138fe5d057f2dcdbe13104f7321fdc6b9f218c461ef3fa56e6c",
+      "cached_receipt_sha256": "236f81c8bd422fa7af280c8a6e5fb13e0aad245615cb2eea18f59b87c1e926b2",
+      "cold_stream_sha256": "6ce56bededcf252eb1d83c37e754dc3a2553ff4cf0b923232d0142c5129fc34b",
+      "cached_stream_sha256": "63d562ae95167993b6d5268f443e05fdf0e16ed1f589e597008ac6b89190e335"
+    },
+    "long_context_recurrent_replay": {
+      "prompt_tokens": 500224,
+      "reused_checkpoint_tokens": 491520,
+      "recomputed_tokens": 8704,
+      "completion_tokens": 16,
+      "cold_elapsed_seconds": 230.3758080630796,
+      "cached_elapsed_seconds": 8.394120855024084,
+      "sampled_tokens_match": true,
+      "decoded_text_matches": true,
+      "maximum_sampled_token_logprob_absolute_difference": 0.00010393776756245643,
+      "receipt_sha256": "3772baf182a833aca0c467243ead1d40e37d961d32cf3d16979be015686447fa"
+    }
+  },
+  "performance_reference": {
+    "receipt": "kimi-k3-upstream-aligned-r27-20260821.json",
+    "reason": "The r28 source delta changes only recurrent-state index selection after an align-mode prefix-cache hit. Cache-miss target-only, DSpark, DFlash, and prefill performance use the unchanged r27 source composition and native artifacts."
+  },
+  "rollback_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm9680645-b12xf006681-cu133-torch213-20260821-r27",
+    "digest": "sha256:acdfb8460672c730c4df470a81eb86ca83995390e7f74360615dacc1e5ca2fb3"
+  }
+}

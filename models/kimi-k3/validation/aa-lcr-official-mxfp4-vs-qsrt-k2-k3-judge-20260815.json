@@ -1,0 +1,77 @@
+{
+  "artifact_kind": "Kimi-K3 AA-LCR paired score comparison",
+  "candidate": {
+    "attempts": 300,
+    "correct": 245,
+    "identity": {
+      "generation_manifest_sha256": "5e65d03f737f017e73ea5adbaaa67a8a632e99520f4c9a9d4515ab599f70b2be",
+      "judge": {
+        "api_url": "http://127.0.0.1:8001/v1/chat/completions",
+        "max_tokens": 32768,
+        "model": "Kimi-K3-Official-MXFP4-NoSpec-TP16-DCP16-1M-CC8-FA2",
+        "prompt_contract": "Compare the candidate answer with the official answer and emit only CORRECT or INCORRECT.",
+        "protocol": "frozen-official-kimi-k3",
+        "protocol_description": "Frozen official Kimi-K3 checkpoint used as a common equality checker",
+        "reasoning_effort": "max",
+        "runtime_manifest_sha256": "80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e",
+        "temperature": 0.0
+      },
+      "judge_manifest_sha256": "d96babcfef1988df2df8b1cd53d8560bd67c4258aba5c254b9445cbf0599012d",
+      "receipt_manifest_sha256": "e5f3b68c4034faea9c3ba4598d5c188633ce4e18389f201bf11acc30374fec0c",
+      "root": "/mnt/luke/evals/kimi-k3-aa-lcr/qsrt-k2-nospec-tp16-dcp8-aa-lcr-cc8-mbt4096-20260814/judges/frozen-official-kimi-k3-max-temp0-20260815",
+      "summary_sha256": "9375683692d147329f7e66e6196a9a0654d0b3b58f22854c769ee40c7f687fa7"
+    },
+    "label": "qsrt-k2-nospec-tp16-dcp8",
+    "pass_at_1": 0.8166666666666667
+  },
+  "created_utc": "2026-08-15T05:47:15.444443Z",
+  "interpretation_limit": "The question-cluster bootstrap treats the three observed generations per checkpoint and question as fixed. It estimates variation across questions and does not include additional free-running generation or equality-checker repeat variation.",
+  "paired": {
+    "attempts": 300,
+    "both_correct": 236,
+    "both_incorrect": 37,
+    "candidate_minus_reference": -0.03,
+    "candidate_only_correct": 9,
+    "exact_mcnemar_two_sided_p": 0.12207812070846558,
+    "per_question_difference_counts": {
+      "-0.333333": 8,
+      "-0.666667": 2,
+      "0.000000": 87,
+      "0.333333": 3
+    },
+    "question_cluster_bootstrap_95": {
+      "high": -0.003333333333333333,
+      "low": -0.06,
+      "replicates": 200000,
+      "sampling_unit": "AA-LCR question with all three attempts",
+      "seed": 20260815
+    },
+    "reference_only_correct": 18
+  },
+  "reference": {
+    "attempts": 300,
+    "correct": 254,
+    "identity": {
+      "generation_manifest_sha256": "daea3c83c1ec421f7501fb8e4b267977fde611a7313330e1a7f53939034a5b15",
+      "judge": {
+        "api_url": "http://127.0.0.1:8001/v1/chat/completions",
+        "max_tokens": 32768,
+        "model": "Kimi-K3-Official-MXFP4-NoSpec-TP16-DCP16-1M-CC8-FA2",
+        "prompt_contract": "Compare the candidate answer with the official answer and emit only CORRECT or INCORRECT.",
+        "protocol": "frozen-official-kimi-k3",
+        "protocol_description": "Frozen official Kimi-K3 checkpoint used as a common equality checker",
+        "reasoning_effort": "max",
+        "runtime_manifest_sha256": "80ef33848eedd6a123648698864d439e4f65ce2b57f575ec220f35982968a34e",
+        "temperature": 0.0
+      },
+      "judge_manifest_sha256": "b3038ab264cefdb816fd616f01639345f27266e3fc397d9ed6eddc31d844c828",
+      "receipt_manifest_sha256": "ba4b2d2e28e143a4499a60b598c9d6568f60b0fd93cf0d1fb8d43155708cdaf8",
+      "root": "/mnt/luke/evals/kimi-k3-aa-lcr/official-mxfp4-nospec-tp16-dcp16-aa-lcr-ws4096-20260814/judges/frozen-official-kimi-k3-max-temp0-20260814",
+      "summary_sha256": "113399528496ab1964904fb7b5acd5815455db406a25d29142b376d316e2282e"
+    },
+    "label": "official-mxfp4-nospec-tp16-dcp16",
+    "pass_at_1": 0.8466666666666667
+  },
+  "scoring": "Mean equality-checker correctness across 300 attempts",
+  "status": "qualified"
+}

@@ -1,0 +1,85 @@
+{
+  "artifact_kind": "Kimi-K3 AA-LCR paired score comparison",
+  "candidate": {
+    "attempts": 300,
+    "correct": 237,
+    "identity": {
+      "generation_manifest_sha256": "5e65d03f737f017e73ea5adbaaa67a8a632e99520f4c9a9d4515ab599f70b2be",
+      "judge": {
+        "codex_cli_version": "codex-cli 0.147.0",
+        "dataset_revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+        "execution_isolation": {
+          "ephemeral_session": true,
+          "sandbox": "read-only",
+          "user_config_loaded": false,
+          "workspace": "empty"
+        },
+        "generation_manifest_sha256": "5e65d03f737f017e73ea5adbaaa67a8a632e99520f4c9a9d4515ab599f70b2be",
+        "model": "gpt-5.6-sol",
+        "prompt_contract": "Frozen AA-LCR equality-checker prompt; emit only CORRECT or INCORRECT",
+        "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+        "reasoning_effort": "max"
+      },
+      "judge_manifest_sha256": "304a7dfd2b3185ecc5932ca7aada41878f492c8f0dda8d591a786db4f8dbcd63",
+      "receipt_manifest_sha256": "bcb178eaac7668a3a7854c72ed785c0b7c5974104ecb13c87aad0aa1b06a6839",
+      "root": "/mnt/luke/evals/kimi-k3-aa-lcr/qsrt-k2-nospec-tp16-dcp8-aa-lcr-cc8-mbt4096-20260814/judges/gpt-5.6-sol-max-codex-chatgpt-20260815",
+      "summary_sha256": "a2625708e8d4f98b9e1a853cea8ee771258a34f8b6987533826a88d5e42ba333"
+    },
+    "label": "qsrt-k2",
+    "pass_at_1": 0.79
+  },
+  "created_utc": "2026-08-15T06:01:28.870505Z",
+  "interpretation_limit": "The question-cluster bootstrap treats the three observed generations per checkpoint and question as fixed. It estimates variation across questions and does not include additional free-running generation or equality-checker repeat variation.",
+  "paired": {
+    "attempts": 300,
+    "both_correct": 230,
+    "both_incorrect": 44,
+    "candidate_minus_reference": -0.04,
+    "candidate_only_correct": 7,
+    "exact_mcnemar_two_sided_p": 0.028959274291992188,
+    "per_question_difference_counts": {
+      "-0.333333": 8,
+      "-0.666667": 4,
+      "0.000000": 84,
+      "0.333333": 4
+    },
+    "question_cluster_bootstrap_95": {
+      "high": -0.006666666666666666,
+      "low": -0.07666666666666666,
+      "replicates": 200000,
+      "sampling_unit": "AA-LCR question with all three attempts",
+      "seed": 20260815
+    },
+    "reference_only_correct": 19
+  },
+  "reference": {
+    "attempts": 300,
+    "correct": 249,
+    "identity": {
+      "generation_manifest_sha256": "daea3c83c1ec421f7501fb8e4b267977fde611a7313330e1a7f53939034a5b15",
+      "judge": {
+        "codex_cli_version": "codex-cli 0.147.0",
+        "dataset_revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+        "execution_isolation": {
+          "ephemeral_session": true,
+          "sandbox": "read-only",
+          "user_config_loaded": false,
+          "workspace": "empty"
+        },
+        "generation_manifest_sha256": "daea3c83c1ec421f7501fb8e4b267977fde611a7313330e1a7f53939034a5b15",
+        "model": "gpt-5.6-sol",
+        "prompt_contract": "Frozen AA-LCR equality-checker prompt; emit only CORRECT or INCORRECT",
+        "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+        "reasoning_effort": "max"
+      },
+      "judge_manifest_sha256": "d17693d63f61188540f229ac806e229898186d7da99a5da6349aef41dfa41aa3",
+      "receipt_manifest_sha256": "64c590f772790ec4fbe349978ad1714be533ba23f314f6a60271c997a6af542b",
+      "root": "/mnt/luke/evals/kimi-k3-aa-lcr/official-mxfp4-nospec-tp16-dcp16-aa-lcr-ws4096-20260814/judges/gpt-5.6-sol-max-codex-chatgpt-20260815",
+      "summary_sha256": "98b74eb38588135e4384c478c9c244926e534e9e0781d12b7c8df6d1ca865c80"
+    },
+    "label": "official-mxfp4",
+    "pass_at_1": 0.83
+  },
+  "scoring": "Mean equality-checker correctness across 300 attempts",
+  "status": "qualified"
+}

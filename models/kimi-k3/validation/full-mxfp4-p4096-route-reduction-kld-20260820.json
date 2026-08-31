@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "artifact_role": "Kimi-K3 full-MXFP4 bounded prefill route-reduction fidelity receipt",
+  "created_at": "2026-08-20T07:01:35Z",
+  "implementation_status": "implemented",
+  "measurement_status": "qualified",
+  "conclusion": "The 64-context paired sentinel comparison does not detect KLD attributable to bounded FP32 route accumulation beyond runtime repeat variation.",
+  "comparison_contract": {
+    "metric": "teacher-forced KL(materialized route reduction || bounded FP32 route accumulation)",
+    "representation": "BF16 hidden states after final RMSNorm and before the shared LM head",
+    "full_contexts": 1024,
+    "sentinel_contexts": 64,
+    "tokens_per_context": 2048,
+    "scored_positions_per_context": 2047,
+    "full_scored_positions": 2096128,
+    "lm_head_shape": [163840, 7168],
+    "lm_head_sha256": "c282a205aed4d19fbbe4ff907feff979c50b24723e8f552ddc141ef008c5de11",
+    "full_vocabulary_replay": true,
+    "topology": "TP16/DCP16",
+    "activation_dtype": "BF16",
+    "kv_cache_dtype": "FP8",
+    "attention_backend": "B12X_MLA",
+    "kda_prefill_backend": "triton",
+    "scheduler_tokens": 4096,
+    "capture_context_tokens": 2048,
+    "capture_kv_cache_bytes_per_rank": 300000000,
+    "capture_max_model_len": 4096,
+    "capture_memory_note": "The reduced KV allocation leaves enough device memory to execute both route-reduction implementations. KV allocation does not participate in the 2048-token transformer calculation."
+  },
+  "checkpoint": {
+    "target": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "routed_experts": "official MXFP4",
+    "dense_linear_overlay": "online MXFP8",
+    "draft": "Inferact/Kimi-K3-DSpark@cf6b8244620e7ea4b0651d214f28e89eac75bed6"
+  },
+  "runtime": {
+    "image": "voipmonitor/vllm@sha256:bd8a4be5e87c89f37548ee0502c1a0dc186e9058d57f3278927c1ef5d01e65fa",
+    "pytorch": "2.13.0",
+    "cuda": "13.3",
+    "vllm_capture_repository": "https://github.com/voipmonitor/vllm",
+    "vllm_capture_branch": "research/ii-kimi-p4096-kld-capture-20260820",
+    "vllm_capture_revision": "b6507fdbb47ff99fdeeaead1b3c59cb01e64324b",
+    "vllm_capture_tree": "bd210e345e214d1cf4dccbebe654d972fe0204a3",
+    "b12x_revision": "90e722fc67be33d1e5752b68ec5e0a6759954602",
+    "b12x_tree": "4757592885f764593625d19f99bfba8d7c973b6b"
+  },
+  "full_comparison": {
+    "kld_mean": 0.0031356316642368372,
+    "kld_median": 0.00020103972391576763,
+    "kld_p95": 0.011897738824241291,
+    "kld_p99": 0.039854054849565466,
+    "kld_p99_9": 0.17943944654063868,
+    "kld_max": 7.069249359031227,
+    "js_mean": 0.0007583344029970883,
+    "top1_agreement": 0.9842085025341963,
+    "context_bootstrap_ci95": [0.0029795938701298714, 0.003296208343868963]
+  },
+  "sentinel_controls": {
+    "bounded_vs_materialized": {
+      "kld_mean": 0.0033044426965887588,
+      "js_mean": 0.0008062904957176326,
+      "top1_agreement": 0.9833216292134831
+    },
+    "materialized_repeat": {
+      "kld_mean": 0.0032550397621935482,
+      "js_mean": 0.0007944850646942527,
+      "top1_agreement": 0.9839399120664387
+    },
+    "bounded_repeat": {
+      "kld_mean": 0.0032693513399631295,
+      "js_mean": 0.0007978730636404249,
+      "top1_agreement": 0.983497191011236
+    },
+    "paired_bounded_excess_over_materialized_repeat": {
+      "micro_token_kld_difference": 0.00004940293439521055,
+      "mean_context_difference": 0.0000494029343952103,
+      "median_context_difference": -0.000011860660260510123,
+      "stratified_source_cluster_bootstrap_ci95": [-0.0001110224936497335, 0.00025728791423694486],
+      "bounded_lower_kld_contexts": 34,
+      "materialized_repeat_lower_kld_contexts": 30,
+      "interpretation": "The confidence interval crosses zero. The measured excess is not distinguishable from runtime repeat variation."
+    }
+  },
+  "artifacts": [
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/comparison-full/result.json",
+      "sha256": "4a5df80264f39eb0449d26599a0f2cbca61c3ffb3e1d4c54dfed62b0a1ed353e"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/comparison-route-sentinel/result.json",
+      "sha256": "469e067d9b2046fef434798763b7eda753071b648e861e9d00619a40536740cb"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/comparison-materialized-repeat/result.json",
+      "sha256": "24730bb52e668d0bb8603a36bb1f8faa8a8d3b8364bfaf56b71c3dc8111dd4df"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/comparison-bounded-repeat/result.json",
+      "sha256": "b37ee97909667b865a62e32bd198b1e37e6e7e24a071b9114da9478adfa1698a"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/comparison-route-vs-noise-paired.json",
+      "sha256": "2ee5a768cefae77ccb97bd4b76c470ec86397fbbad288ce2d7ff0ce4695c9c34"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/materialized/hidden/manifest.json",
+      "sha256": "0e91c282db92be95bdbcc296679789b3e3f9b046e500e41d790a4fb1d85d1c5b"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/bounded/hidden/manifest.json",
+      "sha256": "fc04b79bccea4f9e5569b045894b7b9150b54824a6c42a583fd4c1ca90d9bf76"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/materialized/repeat-hidden/manifest.json",
+      "sha256": "003cbc3aabd338613ca74e082b8e48a8ccf1f1396bb9c1a444c06c68cc8a93d6"
+    },
+    {
+      "path": "/mnt/luke/kimi-k3-runs/p4096-kld-20260820/bounded/repeat-hidden/manifest.json",
+      "sha256": "9010fb6b1b785b015ce38f4e59e18f448046c7c5913f54e6c92d427dbbd7d20b"
+    }
+  ],
+  "tooling": {
+    "comparator_sha256": "c03b938b4770b3612effa0b07cb11fa59ff032c4e294d4ee5de7b87d29d3a03e",
+    "shard_merger_sha256": "1e66443ba02f67503ce4cdaf0878be46e9cb969744529cfd1f667e883061250d",
+    "sharded_runner_sha256": "4e54111329f843073c5bc3c8756d830a6589ea2b0baceb44a08837e956803889"
+  },
+  "limitations": [
+    "The comparison measures teacher-forced next-token distributions for 2048-token contexts, not free-running generation or contexts longer than 2048 tokens.",
+    "The two route-reduction modes require separate model loads. Sentinel repeats quantify within-mode runtime variation but do not eliminate every source of cross-load variation.",
+    "The full-comparison KLD includes runtime variation and must not be interpreted as bounded-reduction error without the sentinel controls."
+  ]
+}

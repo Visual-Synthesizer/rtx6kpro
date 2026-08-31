@@ -33,7 +33,9 @@
   - [Docker Build OOM / System Hang](#docker-build-oom)
   - [Custom Allreduce Breaks GLM-5](#custom-allreduce-breaks-glm-5)
 - [PCIe and Stability Issues](#pcie-and-stability-issues)
+  - [Intermittent GPU Bus Drops on Multi-PSU Frames](#intermittent-gpu-bus-drops-on-multi-psu-frames)
   - [Surprise Link Down (PCIe ASPM)](#surprise-link-down)
+  - [PCIe Link Speed Flapping (c-payne switches)](#pcie-link-speed-flapping)
   - [NCCL P2P Lockups (IOMMU/UVM)](#nccl-p2p-lockups)
   - [ZFS System Freezes](#zfs-system-freezes)
 - [Miscellaneous](#miscellaneous)
@@ -438,6 +440,20 @@ Custom allreduce is optimized for NVLink or PCIe switch topologies. On dual-CPU 
 
 ## PCIe and Stability Issues
 
+### Intermittent GPU Bus Drops on Multi-PSU Frames
+
+**Symptom**: GPUs intermittently disappear from `nvidia-smi`, sometimes under
+load and sometimes at idle, across more than one PCIe-switch group.
+
+**Check**: In addition to cables, retimers, switch power, and Xid/AER logs, have
+a qualified electrician verify the protective-earth path and bonding for every
+PSU and the shared metal frame. One 16-GPU field report traced repeated drops to
+outlets that did not provide PE to four chassis-mounted PSUs.
+
+See [Intermittent GPU Bus Drops on Multi-PSU Open-Air Frames](gpu-bus-drops-multi-psu-grounding.md)
+for the evidence, safe diagnostic sequence, and important limitations. Do not
+copy improvised outlet or chassis-ground modifications.
+
 ### Surprise Link Down
 
 **Symptom**: System lockups with AER error `aer_uncor_status: 0x00000020` (Surprise Link Down). GPU DynamicPowerManagement=3 causes the root port to suspend during GPU link retrain Gen1<->Gen5.
@@ -451,6 +467,29 @@ GRUB_CMDLINE_LINUX_DEFAULT="pcie_aspm=off pcie_port_pm=off"
 - `pcie_port_pm=off` disables PCIe port runtime power management (CRITICAL)
 
 Run `update-grub` and reboot.
+
+---
+
+### PCIe Link Speed Flapping
+
+**Symptom**: No error at all. GPU links renegotiate continuously between Gen1,
+Gen2 and Gen5 — 1415 transitions across 35 devices in two minutes were measured
+on a 17-GPU c-payne system at idle. A single `nvidia-smi` or `lspci` snapshot
+catches one phase of the cycle and looks healthy.
+
+**Check**: Sample once per second, not once.
+```bash
+watch -n1 'cat /sys/bus/pci/devices/0000:e3:00.0/current_link_speed'
+```
+
+**Fix**: Set Hardware Autonomous Speed Disable (Link Control 2, bit 5) on both
+ends of each link — but **only after verifying the link is at its maximum**. The
+bit blocks movement in both directions, so locking a card that happens to be at
+Gen2 traps it there permanently. A udev rule at enumeration cannot make that
+check and has left a production card at Gen2 x16 for hours.
+
+See [PCIe Link Speed Flapping Behind c-payne Switches](pcie-link-speed-flapping-cpayne.md)
+for the register map, the verify-then-lock supervisor, and the ×4-slot pitfall.
 
 ---
 

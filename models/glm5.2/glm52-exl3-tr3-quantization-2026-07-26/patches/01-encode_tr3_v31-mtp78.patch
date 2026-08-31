@@ -1,0 +1,49 @@
+--- a/calibration_encoder/encode_tr3_v31.py
++++ b/calibration_encoder/encode_tr3_v31.py
+@@ -43,7 +43,7 @@
+ Builds the KLC hybrid checkpoint from lukealonso/GLM-5.2-NVFP4 (ModelOpt-style
+ NVFP4, 87 shards):
+ 
+-  * per MoE layer (3..77): encode ALL 256 routed experts with EXL3 trellis at
++  * per MoE layer (3..78, incl. the MTP layer 78): encode ALL 256 routed experts with EXL3 trellis at
+     exactly 3.0 bpw via the exllamav3 v0.0.43 CALIBRATED path (finalize_capture_H
+     -> block LDL -> ldlq blocked quantization with error feedback), TP4 per-slice
+     (gate/up N-sliced 4x[512,6144], down K-sliced 4x[6144,512], each slice its
+@@ -158,7 +158,7 @@
+ HCHUNK = 65536                # row chunk for H accumulation matmuls
+ 
+ FIRST_MOE_LAYER = 3           # config.first_k_dense_replace
+-NUM_LAYERS = 78               # config.num_hidden_layers (layer 78 = MTP, carried)
++NUM_LAYERS = 78               # config.num_hidden_layers (layer 78 = MTP; experts trellis-encoded like 3..77)
+ NUM_EXPERTS = 256             # config.n_routed_experts
+ HIDDEN = 6144                 # config.hidden_size
+ MOE_INTER = 2048              # config.moe_intermediate_size
+@@ -361,7 +361,7 @@
+         return self._readers[p]
+ 
+     def moe_layers(self):
+-        return list(range(FIRST_MOE_LAYER, NUM_LAYERS))  # 3..77 (78 = MTP, carried)
++        return list(range(FIRST_MOE_LAYER, NUM_LAYERS + 1))  # 3..78 (incl. MTP layer 78 experts)
+ 
+ 
+ def expert_key(L, E, proj, suffix):
+@@ -2060,7 +2060,7 @@
+         elif part:
+             out.append(int(part))
+     for L in out:
+-        assert FIRST_MOE_LAYER <= L < NUM_LAYERS, f"layer {L} is not a main MoE layer"
++        assert FIRST_MOE_LAYER <= L <= NUM_LAYERS, f"layer {L} is not a MoE layer (3..{NUM_LAYERS} incl. MTP)"
+     return sorted(set(out))
+ 
+ 
+@@ -2750,8 +2750,8 @@
+     ap.add_argument("--work", default=DEF_WORK)
+     ap.add_argument("--out", default=DEF_OUT)
+     ap.add_argument("--repo", default=DEF_REPO)
+-    ap.add_argument("--layers", default=f"{FIRST_MOE_LAYER}-{NUM_LAYERS-1}",
+-                    help="e.g. '3-77' or '3,5,10-12'")
++    ap.add_argument("--layers", default=f"{FIRST_MOE_LAYER}-{NUM_LAYERS}",
++                    help="e.g. '3-78' or '3,5,10-12' (78 = MTP layer)")
+     ap.add_argument("--workers", type=int, default=4)
+     ap.add_argument("--gpus", type=int, default=4,
+                     help="physical GPU count; workers are assigned round-robin (worker r -> GPU r%%gpus)")

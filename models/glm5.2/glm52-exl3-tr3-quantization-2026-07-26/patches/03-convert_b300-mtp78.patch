@@ -1,0 +1,42 @@
+--- a/calibration_encoder/convert_b300.sh
++++ b/calibration_encoder/convert_b300.sh
+@@ -113,6 +113,23 @@
+         --layers "$LAYERS" --workers 8 --gpus 8
+ }
+ 
++mtp78_import() {
++    # Import a serving-time MTP layer-78 capture (mtp78_xcapture.py vLLM plugin)
++    # into the b300 capture layout: CAPTURE_DIR/layer_078/{x.bin,ids.bin,
++    # layer_manifest.json}. The MTP layer never executes during the offline
++    # prefill capture pass, so its expert inputs are captured while SERVING the
++    # corpus with speculative decoding enabled, then imported here.
++    local src_dir="${MTP78_CAPTURE_SRC:?set MTP78_CAPTURE_SRC=<dir with x.bin/ids.bin/capture_done.json>}"
++    [[ -f "$SCRIPT_DIR/finalize_mtp78_capture.py" ]] || \
++        die "finalize_mtp78_capture.py missing next to convert_b300.sh; copy it from the page's scripts/ dir"
++    "$PYTHON" -m py_compile "$SCRIPT_DIR/finalize_mtp78_capture.py"
++    local payload
++    payload=$(( $(stat -c '%s' "${src_dir}/x.bin") + $(stat -c '%s' "${src_dir}/ids.bin") ))
++    ram_guard "$CAPTURE_DIR" "$payload" "mtp78 import"
++    "$PYTHON" "$SCRIPT_DIR/finalize_mtp78_capture.py" \
++        --src-dir "$src_dir" --capture-dir "$CAPTURE_DIR" --corpus "$OWNER_CORPUS"
++}
++
+ assemble_output() {
+     disk_guard "$OUT_DIR" 549755813888 "assembled checkpoint"
+     "$PYTHON" "$SCRIPT_DIR/encode_b300.py" --assemble \
+@@ -125,6 +142,7 @@
+     ext) build_ext ;;
+     plan) build_plan ;;
+     capture-window) capture_window ;;
++    mtp78-import) mtp78_import ;;
+     encode-window) encode_window ;;
+     assemble) assemble_output ;;
+     status)
+@@ -132,6 +150,6 @@
+         df -h /workspace /dev/shm
+         ;;
+     *)
+-        die "usage: $0 {preflight|ext|plan|capture-window|encode-window|assemble|status}; set LAYERS to an <=8-layer comma list"
++        die "usage: $0 {preflight|ext|plan|capture-window|mtp78-import|encode-window|assemble|status}; set LAYERS to an <=8-layer comma list (78 = MTP layer, capture via mtp78-import)"
+         ;;
+ esac

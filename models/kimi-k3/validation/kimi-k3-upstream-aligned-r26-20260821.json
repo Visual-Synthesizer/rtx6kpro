@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "Kimi-K3 TP16/DCP16 production runtime qualification",
+  "created_at": "2026-08-21T02:47:05Z",
+  "status": "qualified",
+  "published_image": {
+    "tag": "voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllmddf87d6-b12xf006681-cu133-torch213-20260821-r26",
+    "digest": "sha256:60ddcb1ebae94c21d66c8a0433952538c3a77feb6712eb2c907c0e727426c8b2",
+    "image_id": "sha256:24675acf9976b770dce9d937e81fbce7621b15d305771d847f3fa4b2e6fb9f73",
+    "size_bytes": 31494077134,
+    "source_overlay": false,
+    "native_artifact_reuse": "python-only source differences verified"
+  },
+  "source": {
+    "docker_recipe_commit": "7b3cedb9d8a2a9f45624940e6e63c52b4fd6dcf1",
+    "docker_main_publication_commit": "fb0ecfed677ea60c020f0d141c987aa5fd258ca8",
+    "vllm_base_commit": "b5f995e73e6b7fe27c9927477e277a151ebcc9e9",
+    "vllm_integration_commit": "9ac2aaad9c81d3cc48d3a26b3154b6cd0c6dacbd",
+    "vllm_tree": "ddf87d676505d4e1c920357d4f9da2a58e2c8ec7",
+    "b12x_base_commit": "36bce2c1552ba2d47dc09f20a6f64fbfc8ec4ff8",
+    "b12x_integration_commit": "f25c8bdd23aa45f0ba68161931e3417c6f008b3e",
+    "b12x_tree": "f0066813bd55e6e19b6a8d84ab47087510c12890",
+    "vllm_pull_requests_in_merge_order": [414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460],
+    "b12x_pull_requests_in_merge_order": [227, 238]
+  },
+  "runtime": {
+    "target_checkpoint": "moonshotai/Kimi-K3@2496450e92e425c886db095102a52a6682ca3970",
+    "tensor_parallel_size": 16,
+    "decode_context_parallel_size": 16,
+    "target_kv_dtype": "fp8",
+    "maximum_request_tokens": 1000000,
+    "scheduler_chunk_tokens": 4096,
+    "maximum_images_per_prompt": 5,
+    "host_kv_backend": "native",
+    "host_kv_gib": 32,
+    "cuda": "13.3",
+    "pytorch": "2.13.0",
+    "nccl": "2.31.2",
+    "cutlass_dsl": "4.6.2",
+    "instanttensor": "0.1.9"
+  },
+  "qualification": {
+    "nccl_collective": {
+      "image_revision": "r26",
+      "ranks": 16,
+      "result": "pass"
+    },
+    "production_dspark": {
+      "executable_source_tree": "ddf87d676505d4e1c920357d4f9da2a58e2c8ec7",
+      "physical_kv_tokens": 1016293,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 7,
+      "decode_tokens_per_second_median": 121.43931044602756,
+      "draft_acceptance_rate_median": 0.413961038961039,
+      "target_cycles_per_second_median": 31.41718832287668,
+      "summary_sha256": "843207b16a1fe031ad03286943001db64e34145a64fb3cda9451da2019592388"
+    },
+    "published_image_dspark_sanity": {
+      "image_revision": "r26",
+      "physical_kv_tokens": 1016293,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 3,
+      "decode_tokens_per_second_median": 147.94094979308812,
+      "draft_acceptance_rate_median": 0.5275229357798165,
+      "target_cycles_per_second_median": 31.526028401655147,
+      "summary_sha256": "44e94add8d43aa25daee3d6bdccd2e365e691e91113168a01040a2ef0730458a"
+    },
+    "target_only": {
+      "executable_source_tree": "ddf87d676505d4e1c920357d4f9da2a58e2c8ec7",
+      "physical_kv_tokens": 1458823,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 7,
+      "decode_tokens_per_second_median": 55.69294489096649,
+      "summary_sha256": "61482c9e25aeb7881bc3947d24e54655ebc2cb2ee45182ce80bce46e83f1244c"
+    },
+    "dflash": {
+      "image_revision": "r26",
+      "physical_kv_tokens": 1048576,
+      "decode_prompt_tokens": 256,
+      "decode_completion_tokens": 1024,
+      "decode_runs": 7,
+      "decode_tokens_per_second_median": 139.18679763444857,
+      "draft_acceptance_rate_median": 0.533245556287031,
+      "target_cycles_per_second_median": 29.441557488230313,
+      "summary_sha256": "187a00dad6ec83765f325917a8997aaa34678e0b48122f8aaf275486110df39f"
+    },
+    "prefill": {
+      "executable_source_tree": "ddf87d676505d4e1c920357d4f9da2a58e2c8ec7",
+      "cache_isolation": "unique cache salt and per-request host offload disabled",
+      "runs_per_length": 3,
+      "tokens_per_second_median": {
+        "8192": 3641.1032818475537,
+        "32768": 3693.8938885500766,
+        "65535": 3531.3034629496265
+      },
+      "receipt_sha256": "b7d5522588fb77685ace1fb39cb58f367aec7bdb104b031b5bf461cefc635216"
+    },
+    "five_image_long_context": {
+      "executable_source_tree": "ddf87d676505d4e1c920357d4f9da2a58e2c8ec7",
+      "prompt_tokens": 134209,
+      "images": 5,
+      "cold_http_status": 200,
+      "cold_stream_complete": true,
+      "cold_protocol_marker_count": 0,
+      "cold_receipt_sha256": "374b6e5841a1b9a9dd27012ce7542710d5515d0438a84b126e74a6acf1ff5654",
+      "repeat_http_status": 200,
+      "repeat_stream_complete": true,
+      "repeat_protocol_marker_count": 0,
+      "native_host_kv_hit_tokens": 122880,
+      "repeat_receipt_sha256": "1a3e3470d0b0a43a77e154d2bafbbda7e6499a9b0269f7f75b85d46f8751717f"
+    }
+  },
+  "source_tree_equivalence": {
+    "qualification_image_revision": "r25",
+    "published_image_revision": "r26",
+    "vllm_tree_equal": true,
+    "b12x_tree_equal": true,
+    "native_artifact_base_equal": true,
+    "reason": "The vision pull request was rebased onto its target branch without changing file content; r26 records the merge-ready commit identity."
+  }
+}

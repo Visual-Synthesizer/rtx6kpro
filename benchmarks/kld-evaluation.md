@@ -1,5 +1,10 @@
 # KLD Evaluation for Quantized Models
 
+> Current GLM-5.2/vLLM KLD runs are documented in
+> [GLM-5.2 KLD Evaluation](glm52-kld-evaluation.md). The rest of this page is
+> the older Qwen/SGLang workflow and should not be used for GLM-5.2 v14
+> reproduction.
+
 Measure how much quality is lost in quantized models (NVFP4, AWQ, etc.) compared to a higher-precision reference (FP8) using KL divergence over full vocabulary logit distributions.
 
 ## Table of Contents
