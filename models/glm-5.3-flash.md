@@ -286,6 +286,29 @@ DFlash2 raw output throughput varies with accepted length. Engine rate remained
 within 0.4% across the three DFlash2 samples, so acceptance rather than target
 execution speed explains the wider raw tok/s range.
 
+### Sieve coding-prompt decode
+
+The Sieve test is a prompt-specific, sequential CC1 measurement rather than a
+sustained empty-context engine cell. It used `llm-decode-bench` 0.4.29 with the
+prompt `Write a Python script that implements the Sieve of Eratosthenes.`, no
+synthetic context, streaming output, the server/model temperature default, and
+at most 2,000 generated tokens. Throughput is completion tokens divided by the
+time from the first streamed token through the final stream event. Five
+sequential samples ran on the exact image ID documented above, TP4/DCP1,
+physical GPUs 4–7, and stock clocks.
+
+| Mode | Generation tok/s samples | Median | Mean |
+|---|---|---:|---:|
+| MTP:3 | 292.02, 287.22, 290.74, 287.87, 278.03 | **287.87 tok/s** | 287.17 tok/s |
+| DFlash2 MXFP8, seven drafts | 339.73, 332.98, 365.87, 325.04, 353.52 | **339.73 tok/s** | 343.43 tok/s |
+
+DFlash2 was 18.01% faster by median on this prompt. This difference is not a
+prompt-independent decode claim: Sieve output is highly predictable, and
+speculative throughput changes with the accepted draft length. The sustained
+CC1 table above remains the backend regression signal; the Sieve table captures
+the interactive coding-prompt behavior users observe with `test.py`-style
+clients.
+
 The same image at TP4/DCP4 with DFlash2, seven draft tokens, and full-CKV
 gather measured a 2.3803-second median TTFT, or **13,578 prompt tok/s**, for
 the same 32,320-token request. DCP1 and DCP4 numbers are separate deployment
