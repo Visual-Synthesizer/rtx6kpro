@@ -35,7 +35,7 @@ Comparing 2x RTX PRO 6000 Blackwell on two platforms across vLLM, SGLang, and ll
 | **Motherboard** | AsRock Rack B650D4U-2L2T/BCM | TRX40 (direct attach) |
 | **CPU** | AMD EPYC 4564P (16c Zen4c) | AMD Threadripper |
 | **PCIe Topology** | PIX (through c-payne PM50100 Gen5 PLX) | NODE (ForceP2P) |
-| **P2P Bandwidth** | 48.7 GB/s | 27.9 GB/s |
+| **P2P Bandwidth** | 54.3 uni / 103.0 bi GB/s (ACS cleared) | 26.6 uni / 46.6 bi GB/s |
 | **P2P Latency** | 0.37 us | 0.37 us |
 | **NCCL AllReduce** | 25 GB/s | 24 GB/s |
 | **Kernel Tuning** | pci=noacs, uvm_disable_hmm=1, no ForceP2P | ForceP2P required |
@@ -92,7 +92,7 @@ Test venv (dev86) wins on 6/9 models. Nightly wins on DFlash 2GPU, M2.5, Gemma4 
 - **Checkpoint format matters** — modelopt_fp4 (txn545) enables b12x kernels + SGLang NEXTN. compressed-tensors (Sehyo) is limited to vLLM MTP at 127 tok/s
 - **DFlash speculative decoding** — 170 tok/s on 27B 2GPU, 123 on 1GPU. 3x faster than no-spec
 - **397B runs at 79 tok/s** on llama.cpp fully in VRAM (167GB GGUF Q3)
-- **PLX P2P is 1.7x faster** than TRX40 NODE+ForceP2P (48.7 vs 27.9 GB/s)
+- **PLX P2P is 2x faster uni and 2.2x faster bi** than TRX40 NODE+ForceP2P (54.3/103.0 vs 26.6/46.6 GB/s) — but only once ACS redirect is cleared on the switch downstream ports; `pci=noacs` alone leaves it at 51 GB/s bi (see hardware/pcie-bandwidth.md)
 - **Custom allreduce works on PIX topology** — no `--disable-custom-all-reduce` needed
 - **TRITON_ATTN required for MTP** on SM120 (FlashInfer crashes during cudagraph capture)
 - **`--language-model-only` crashes 122B MTP** during cudagraph capture

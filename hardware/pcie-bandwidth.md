@@ -169,8 +169,8 @@ P2P=Disabled Latency Matrix (us)
 ```
 
 **Summary:**
-- Unidirectional P2P: **52.3 GB/s** (~83% of Gen5 x16 theoretical 63 GB/s)
-- Bidirectional P2P: **51.0 GB/s** -- note this is essentially identical to unidirectional, not 2x. On multi-GPU-behind-single-switch topologies, the bidirectional benchmark saturates the single upstream PLX port, so both streams share one link's worth of bandwidth. Direct-attached topologies (Festr/purplepow3r) see ~2x bidirectional because each GPU has its own CPU root port.
+- Unidirectional P2P: **52.3–54.3 GB/s** (~83-86% of Gen5 x16 theoretical 63 GB/s)
+- Bidirectional P2P: **103.0 GB/s** (~1.9x uni) once ACS redirect is cleared on the switch downstream ports (re-measured 2026-08-31, raw: [`benchmarks/p2p/2026-08-31_b650d4u_acs-cleared_p2pBandwidthLatencyTest.txt`](../benchmarks/p2p/2026-08-31_b650d4u_acs-cleared_p2pBandwidthLatencyTest.txt)). **Correction:** the 2026-04-10 run measured 51.0 GB/s (bi ≈ uni) and this page attributed it to the PLX crossbar. That was wrong. The PM50100 firmware sets `ACSCtl: ReqRedir+ CmpltRedir+ UpstreamFwd+` on its downstream ports, and `pci=noacs` on the kernel command line does not clear firmware-set bits — so every GPU↔GPU transaction was being redirected up to the CPU root port and back, sharing the single upstream x16. `setpci -s <port> ECAP_ACS+6.w=0x0000` on each downstream port fixes it at runtime (must be reapplied every boot). Check with `lspci -vvv -s <port> | grep ACSCtl`.
 - P2P enabled latency: **0.38-0.44 us** (cross-GPU)
 - P2P disabled latency: **14.35-14.68 us** (~36x penalty when falling back to host-mediated copy)
 - Same-GPU self-bandwidth: ~1500 GB/s (HBM/GDDR7 local, sanity check)
@@ -228,7 +228,7 @@ Same GPU silicon (2x RTX PRO 6000 Blackwell), opposite topologies.
 | Metric | TRX40 (CPU root, Gen4) | B650D4U (PLX, Gen5) | Delta |
 |---|---|---|---|
 | Unidirectional P2P | 26.6 GB/s | **52.3 GB/s** | **B650 +96%** |
-| Bidirectional P2P | **46.6 GB/s** | 51.0 GB/s | B650 +10% |
+| Bidirectional P2P | 46.6 GB/s | **103.0 GB/s** (51.0 with ACS redirect active) | **B650 +121%** |
 | P2P-enabled latency | 0.38 us | 0.38-0.44 us | tie |
 | P2P-disabled latency | 14.42 us | 14.35 us | tie |
 | Disabled bi (host bounce) | **29.5 GB/s** | 23.8 GB/s | TRX40 +24% |
@@ -236,13 +236,13 @@ Same GPU silicon (2x RTX PRO 6000 Blackwell), opposite topologies.
 **Architectural interpretation:**
 
 - **Unidirectional:** B650D4U wins 2x because Gen5 x16 (~63 GB/s theoretical) vs Gen4 x16 (~32 GB/s). Both platforms hit the same ~83% efficiency; the gap is pure PCIe generation.
-- **Bidirectional:** The PLX advantage collapses from 2x to 10%. On TRX40, each GPU has its own CPU root port, so bidirectional traffic flows on two independent full-duplex links (46.6 ≈ 1.75x uni). On B650D4U, even though peer-to-peer traffic stays behind the PLX switch and shouldn't touch the upstream port, the measured bi ≈ uni (51.0 ≈ 1.0x) -- the PLX internal crossbar appears to serialize simultaneous bidirectional P2P rather than running it full-duplex.
+- **Bidirectional:** With ACS redirect cleared on the PLX downstream ports, B650D4U bi is 103 GB/s (~1.9x uni) vs TRX40 46.6 GB/s (1.75x uni): the switch forwards peer traffic locally on two full-duplex Gen5 links. The earlier "collapses to 10%" reading (51.0 GB/s) was an ACS artefact — with `ReqRedir+` set the switch redirects every P2P TLP to the root complex, so both streams shared the one upstream x16. If you see bi ≈ uni behind a switch, check `ACSCtl` before blaming the fabric.
 - **Latency:** Identical (0.38 us enabled, ~14 us disabled). This is a silicon/driver property, not a platform one. The ~36x enabled/disabled ratio is why `uvm_disable_hmm=1` and NCCL P2P config are critical -- without them traffic silently falls back to the 14 us host-mediated path.
 - **Disabled fallback bidirectional:** TRX40 actually wins (29.5 vs 23.8 GB/s) because when P2P is off, traffic routes through host RAM -- and TRX40's dual root complexes give each GPU its own independent DMA path to memory, while B650D4U still bottlenecks on the shared PLX upstream.
 
 **Implications for tensor-parallel inference:**
 
-Tensor-parallel allreduce is inherently bidirectional (ring scatter-reduce + all-gather: each GPU sends and receives concurrently). The bi P2P number is the relevant ceiling, not uni. That's why NCCL allreduce caps around ~25 GB/s on both machines -- both are bumping against their respective bi ceilings minus NCCL overhead.
+Tensor-parallel allreduce is inherently bidirectional (ring scatter-reduce + all-gather: each GPU sends and receives concurrently). The bi P2P number is the relevant ceiling, not uni. The TRX40 ~25 GB/s NCCL allreduce ceiling is consistent with its 46.6 GB/s bi ceiling minus ring overhead. The B650D4U ~25 GB/s figure was measured with ACS redirect active (bi 51 GB/s) and needs re-measuring at 103 GB/s bi — expect a materially higher ceiling.
 
 The PLX's big uni advantage only shows up in workloads whose cross-GPU traffic is more one-way: MTP/speculative decode (drafter -> verifier), prefill streaming, KV cache migration. This matches the observed inference deltas -- 122B MTP +30% on B650D4U (uni-friendly), while non-MTP dense decode is only +5-10%.
 
