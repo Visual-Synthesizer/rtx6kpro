@@ -9,8 +9,10 @@
 
 This page specifies the qualified GLM-5.3-Flash deployment for four NVIDIA RTX
 PRO 6000 Blackwell GPUs. The serving artifact is Jovian Judgement Community
-`20260901-r11`. It supports ordinary decode, three-token Multi-Token
-Prediction (MTP), and a seven-token DFlash2 draft.
+`20260901-r12`. It supports ordinary decode, three-token Multi-Token
+Prediction (MTP), and a seven-token DFlash2 draft. LMCache is an opt-in
+extension that adds a DRAM prefix tier and a persistent native-filesystem
+prefix tier without changing the default serving command.
 
 The commands use Hugging Face repository names and named Docker volumes. They
 do not require checkpoint paths or source-code bind mounts.
@@ -19,10 +21,10 @@ do not require checkpoint paths or source-code bind mounts.
 
 | Field | Value |
 |---|---|
-| Runtime status | **qualified** for Tensor Parallelism 4 (TP4) with Decode Context Parallelism 1 (DCP1) in all three serving modes |
-| DCP2 | **implemented**; no independent R11 performance qualification |
-| DCP4 full compressed-key/value prefill | **qualified** for the GLM-5.3 target path; the R11/R8 performance tables below use DCP1 |
-| Hardware | four RTX PRO 6000 Blackwell Workstation Edition GPUs, PCIe 5.0 x16, stock clocks |
+| Runtime status | **qualified** for Tensor Parallelism 4 (TP4) with Decode Context Parallelism 1 (DCP1) in all three serving modes, with or without LMCache |
+| DCP2 | **implemented**; no independent R12 LMCache qualification |
+| DCP4 full compressed-key/value prefill | **qualified** for the GLM-5.3 target path; LMCache byte integrity and DRAM/filesystem restoration are qualified with DFlash2 |
+| Hardware | four RTX PRO 6000 Blackwell Workstation Edition GPUs, PCIe 5.0 x16; R12 performance uses a +6000 MHz VRAM offset |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4` |
 | Target update policy | resolve Hugging Face `main` at startup unless `MODEL_REVISION` is set |
 | Target experts | ModelOpt NVFP4 with B12X 4-bit weights and 4-bit activations |
@@ -33,39 +35,45 @@ do not require checkpoint paths or source-code bind mounts.
 | Cache page geometry | separate 512-token target and recurrent-state pages |
 | Scheduler | 4,096 maximum batched tokens; concurrent-prefill interval 8 |
 | CUDA graphs | target and speculative decode captured; Gated Delta Network prefill eager |
-| Root filesystem | one Docker layer; compatible with standard overlay2 depth limits |
+| LMCache | **implemented and qualified**, disabled by default; 4,096-token objects, DRAM L1, persistent native-filesystem L2, shareable-cuMem CUDA IPC |
+| Root filesystem | two Docker layers; compatible with standard overlay2 depth limits |
 | Qualification date | 2026-09-01 |
 
 ## Docker artifact
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260901-r11
-voipmonitor/vllm@sha256:93ac5228f1cbde2182ca294d8b479259144742af2756a49ff207dd245429bf43
+voipmonitor/vllm:jovian-judgement-community-20260901-r12
+voipmonitor/vllm@sha256:80dc3c3481255c123b3fe9ff164a879b7a141292389d29b0fd04a8472e6bf15d
 ```
 
 The local qualified image ID is
-`sha256:1e3718f0836998e0d5f6e8c4da2bce9c10092301dab10932cfe8b35df0139b3d`.
+`sha256:79781ec7cc054c228ef812acf9128384561a18d0aa2ba99404129d1047af5bf7`.
 The embedded source-lock SHA-256 is
-`c3e6dcc60c0e668d0d38ce4d59d17af1c4c1e0326e0f8e1b7c6fc4c33fc8c3ac`.
+`523ec31dfb757583a0b18ae98a6f11704add967cd411489ef4e0d4a639da3507`.
 The Docker digest fixes the runtime. Model repository names follow their
 `main` branches unless the optional revision variables are set.
 
 ## Source contract
 
-The vLLM runtime is composed from
-`local-inference-lab/vllm` branch `dev/jovian-judgement` at
-`54f6e9826c20ef06ed65d838c0ad497ad0abdecf` plus two open pull-request
-heads:
+The vLLM runtime preserves the R11 GLM-5.3 package at
+`a02841bcf218b067ca352d97be514e0e8fedb896` and adds six open pull-request
+heads. Their upstream base is `local-inference-lab/vllm` branch
+`dev/jovian-judgement` at
+`54f6e9826c20ef06ed65d838c0ad497ad0abdecf`.
 
 | Pull request | Resulting behavior |
 |---|---|
 | [vLLM #550](https://github.com/local-inference-lab/vllm/pull/550) | Removes redundant B12X sparse-decode metadata work and emits physical cache rows directly. |
 | [vLLM #552](https://github.com/local-inference-lab/vllm/pull/552) | Fuses and retunes GLM query scaling inside the fast Walsh-Hadamard-transform and FP8 quantization kernel. |
+| [vLLM #553](https://github.com/local-inference-lab/vllm/pull/553) | Allows expandable CUDA segments when an external KV connector uses the engine-driven transfer mode. |
+| [vLLM #554](https://github.com/local-inference-lab/vllm/pull/554) | Stops multiprocess workers cleanly when the supervised server exits. |
+| [vLLM #555](https://github.com/local-inference-lab/vllm/pull/555) | Restricts the manual shareable-cuMem allocator to KV-cache allocation instead of all CUDA allocations. |
+| [vLLM #557](https://github.com/local-inference-lab/vllm/pull/557) | Exposes exact recurrent-cache retention boundaries to external stores, schedules those boundaries deterministically, and guards external block allocation from negative requests. |
 
 The reproducible vLLM composition commit is
-`a02841bcf218b067ca352d97be514e0e8fedb896`, its source tree is
-`7c51a8c7958780895a1f8f8d74de0908aec97849`, and the installed `vllm/`
-package tree is `75316c408d3fea4306518402d3027d06f4352806`.
+`7d8a09c42c7ba743b9e936562aa9205f9d0fda9d`, its source tree is
+`237bc2b7bb297ab69b83704fad0b9f6628bfcde8`, and the installed `vllm/`
+package tree is `12a88973c99db8b51937ac9b4f81dac0a5a6706b`.
 
 The B12X runtime is composed from `local-inference-lab/b12x`
 `master@139e04048bc3bb4f7210c99e7184d8d2f0e345e7` plus these open
@@ -84,6 +92,20 @@ The reproducible B12X composition commit is
 `aace94c2fcc0657c1aa255e9480277c8f30240fc`, and the installed `b12x/`
 package tree is `c9384d70bd581897a16425efd43fa79374c589e3`.
 
+The optional LMCache runtime is composed from
+`local-inference-lab/LMCache` at
+`801b6ce335a46628bd87b70b8c1c263f45a380f3`:
+
+| Pull request | Resulting behavior |
+|---|---|
+| [LMCache #33](https://github.com/local-inference-lab/LMCache/pull/33) | Shares KV-cache cuMem allocations with the LMCache sidecar through CUDA IPC and closes every imported and exported allocation through an explicit ownership lifecycle. |
+| [LMCache #34](https://github.com/local-inference-lab/LMCache/pull/34) | Uses vLLM scheduler block tables and exact recurrent boundaries as store sources, assigns every store its own completion identity, and pins source blocks until all TP ranks finish the asynchronous store. |
+
+The installed LMCache package tree is
+`2136aada94fd5780d50fa84baaad4f5fb709305c`. Recurrent-cache objects require
+eager source admission; LMCache lazy-store mode is unsupported for this model
+because it cannot guarantee that recurrent source states remain live.
+
 ## Runtime backends
 
 | Operation | Selected implementation |
@@ -100,17 +122,23 @@ package tree is `c9384d70bd581897a16425efd43fa79374c589e3`.
 | DFlash2 fused context key/value projection | `B12xMxfp8LinearKernel` |
 | DFlash2 local attention | FlashAttention 2 |
 | Sampling | FlashInfer |
+| Prefix reuse before external lookup | vLLM Automatic Prefix Caching |
+| External prefix cache L1 | LMCache process-local DRAM |
+| External prefix cache L2 | LMCache native filesystem |
+| External cache transfer | shareable-cuMem CUDA IPC between vLLM workers and the LMCache sidecar |
 
 DeepGEMM and TileLang are installed dependencies but are not selected for the
 target, MTP, or DFlash2 hot paths in this serving contract.
 
 ## Start a DCP1 server
 
-Set the four physical GPUs and select one mode:
+Pull the qualified image, set the four physical GPUs, and select one serving
+mode:
 
 ```bash
-IMAGE=voipmonitor/vllm:jovian-judgement-community-20260901-r11
+IMAGE=voipmonitor/vllm:jovian-judgement-community-20260901-r12
 GPU_DEVICES=0,1,2,3
+docker pull "$IMAGE"
 ```
 
 ```bash
@@ -132,6 +160,27 @@ MODE_ARGS=(
   -e SPECULATOR=dflash2
   -e NUM_SPECULATIVE_TOKENS=7
   -e DFLASH_MODEL=local-inference-lab/GLM-5.3-Flash-DFlash2
+)
+```
+
+Select whether external prefix reuse is disabled or enabled. The disabled
+selection executes the base image's qualified serving command unchanged. The
+enabled selection starts and health-checks the LMCache sidecar before vLLM,
+allocates up to 64 GiB for the DRAM tier, and persists up to 512 GiB in a named
+Docker volume:
+
+```bash
+# LMCache disabled.
+CACHE_ARGS=()
+```
+
+```bash
+# LMCache enabled with DRAM L1 and persistent native-filesystem L2.
+CACHE_ARGS=(
+  -e LMCACHE_ENABLED=1
+  -e LMCACHE_L1_SIZE_GB=64
+  -e LMCACHE_L2_MAX_CAPACITY_GB=512
+  -v jovian-judgement-lmcache-l2:/lmcache-l2
 )
 ```
 
@@ -165,9 +214,15 @@ docker run -d \
   -e NCCL_P2P_LEVEL=SYS \
   -e NCCL_PROTO=LL,LL128,Simple \
   -e OMP_NUM_THREADS=2 \
+  "${CACHE_ARGS[@]}" \
   "${MODE_ARGS[@]}" \
   "$IMAGE"
 ```
+
+When LMCache is enabled, the launcher stores complete 4,096-token prefix
+objects. DFlash2 reserves its draft-query rows separately, so the launcher
+keeps the target work budget at 4,096 tokens while raising only the internal
+input-row capacity. No additional scheduler argument is required.
 
 For DCP2, replace `DCP=1` with `DCP=2`. For DCP4 full-CKV prefill, use:
 
@@ -188,8 +243,11 @@ the Hugging Face `main` branches.
 ```bash
 curl -fsS http://127.0.0.1:5001/health
 
+# This endpoint exists only when LMCACHE_ENABLED=1.
+curl -fsS http://127.0.0.1:8085/healthcheck
+
 docker logs "$NAME" 2>&1 | grep -E \
-  'B12X PCIe|B12xMxfp8|HUMMING|split GLM-5.3 cache pages|Graph capturing finished|Application startup complete'
+  'LMCache|B12X PCIe|B12xMxfp8|HUMMING|split GLM-5.3 cache pages|Graph capturing finished|Application startup complete'
 
 curl -fsS http://127.0.0.1:5001/v1/chat/completions \
   -H 'Content-Type: application/json' \
@@ -198,9 +256,44 @@ curl -fsS http://127.0.0.1:5001/v1/chat/completions \
 
 Common markers include B12X NVFP4 MoE, B12X PCIe all-reduce, and 512-token
 target plus recurrent pages. MTP adds Humming for its MXFP8 experts. DFlash2
-adds `B12xMxfp8LinearKernel` and FlashAttention 2.
+adds `B12xMxfp8LinearKernel` and FlashAttention 2. With LMCache enabled, the
+logs also identify the multiprocess connector, the 4,096-token retention
+interval, and the native-filesystem L2 adapter.
 
-## R11 performance and R8 comparison
+## R12 LMCache qualification
+
+Status: **qualified**. The qualification used the published R12 source
+composition on physical GPUs 4–7 with TP4/DCP1, FP8 target KV, 512-token
+target and recurrent pages, a 4,096-token target scheduler budget, B12X PCIe
+all-reduce, 32 NCCL channels, and a +6000 MHz VRAM offset. LMCache used a
+4,096-token object size, 64 GiB DRAM L1, and native-filesystem L2.
+
+`llm-decode-bench` 0.4.30 measured 30-second sustained context-zero decode and
+twelve standalone cold 32k-prefill requests over 30 seconds. Sieve uses the
+coding prompt `Write a Python script that implements the Sieve of
+Eratosthenes.` and reports the median output rate across repeated runs.
+
+| Mode | 32k prefill | CC1 output | Sieve median | Verifier steps/s | Accepted length |
+|---|---:|---:|---:|---:|---:|
+| No speculation | 15,078 tok/s | 167.5 tok/s | 168.9 tok/s | — | — |
+| MTP:3 | 14,788 tok/s | 254.3 tok/s | 333.6 tok/s | 107.09 | 2.37 |
+| DFlash2:7 | 14,757 tok/s | 187.4 tok/s | 403.6 tok/s | 88.42 | 2.12 |
+
+The same R12 image with LMCache disabled measured 15,434 tok/s for no-spec
+32k prefill and 167.6 tok/s for no-spec CC1 decode. Active external stores
+therefore cost 2.31% in the cold-prefill cell and no measurable sustained
+decode throughput. Prefix hits amortize that store cost by restoring complete
+4,096-token objects.
+
+Correctness qualification compared every live byte in each restored target
+attention group and all four recurrent-state groups across all four TP ranks.
+It covered no-spec, MTP:3, and DFlash2 at DCP1 and DFlash2 full-CKV at DCP4.
+Cold, vLLM APC, LMCache DRAM L1, LMCache native-filesystem L2, and a complete
+sidecar-plus-vLLM restart from L2 all restored the expected prefix. The final
+Docker digest independently restored 8,192 external tokens from disjoint
+source and destination blocks.
+
+## Historical R11 and R8 comparison
 
 Status: **qualified**. R8 and R11 ran sequentially on physical GPUs 8–11 at
 stock clocks with the same target and draft revisions, TP4/DCP1, FP8 target KV,
@@ -276,8 +369,8 @@ measured 13,578 prompt tokens/s for a 32,320-token request.
 
 `local-inference-lab/GLM-5.3-Flash-DFlash2` is an offline MXFP8 conversion of
 `incoai/GLM-5.3-Flash-DFlash2` revision
-`bf582e4eacc1810f76656d1811693ff6c6737d2a`. The published conversion commit
-is `cc006ae7801b80c8f845aa5990d183aaa4bd1cff`.
+`dc77ff1c99eeb2df044ee3d4f0094eb033fee410`. The published conversion commit
+is `aea0ac8a05624512ca9e106c09c16087da998426`.
 
 The converter serialized 47 two-dimensional linear weights as FP8 E4M3 values
 with one biased E8M0 `uint8` scale per 32 input values. It preserved 34
@@ -297,6 +390,10 @@ automatic checkpoint updates.
   decode capture, not full prefill capture.
 - Speculative raw output throughput depends on accepted length. Engine steps
   per second is the cleaner runtime-regression metric.
-- DCP2 is implemented but has no independent R11 performance table.
+- DCP2 is implemented but has no independent R12 LMCache qualification.
+- Recurrent-state objects require eager LMCache source admission. Do not
+  enable LMCache lazy-store mode for GLM-5.3-Flash.
+- A prefix shorter than 4,096 tokens, or a non-matching tail after the final
+  complete object, remains target-model work rather than an external-cache hit.
 - Mutable Hugging Face `main` branches can change model behavior without
   changing the Docker digest. Pin revisions for reproducible evaluation.
