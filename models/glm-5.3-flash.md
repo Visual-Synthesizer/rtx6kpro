@@ -42,13 +42,13 @@ do not require checkpoint paths or source-code bind mounts.
 
 ```text
 voipmonitor/vllm:jovian-judgement-community-20260902-r17
-voipmonitor/vllm@sha256:159beeb5414a2fa8210ba06ef9831fc861017bd3197b408668a374c10d7e845a
+voipmonitor/vllm@sha256:f5035a402e9c4cf9ff59245c5f9b2f6ea7fe159c1a2a0cfa7275327969f67e1a
 ```
 
 The local qualified image ID is
-`sha256:baf83e2287602dd5a6401e5cd22296afa70f98b44251d6bfc182c57f52157e65`.
+`sha256:9bf393df8dae2cf36f516e5b477410f603b64f5eaab83886d9bfc5fe21e35caa`.
 The embedded source-lock SHA-256 is
-`8aa996413a9fdb403f047ea8f5579cb2d8bbf39e01d22f7c67ce2792e67fa21a`.
+`ab2360774cfd274b98981932ed54b8cb893da2b98dcbc655341f0416db70bc97`.
 The Docker digest fixes the runtime. Model repository names follow their
 `main` branches unless the optional revision variables are set.
 
@@ -80,13 +80,16 @@ and these open, non-draft pull requests:
 
 | Pull request | Resulting behavior |
 |---|---|
-| [B12X #290](https://github.com/local-inference-lab/b12x/pull/290) | Adds public lossless BF16 PCIe reduce-scatter, all-gather, and all-reduce for the 128–768 KiB TP4 range, with explicit alias, lifecycle, capacity, and CUDA-graph replay contracts. |
+| [B12X #290](https://github.com/local-inference-lab/b12x/pull/290) | Adds public single-rounding BF16 PCIe reduce-scatter, all-gather, and all-reduce for the 128–768 KiB TP4 range, with explicit alias, lifecycle, capacity, and rank-synchronized CUDA-graph replay contracts. |
 | [B12X #284](https://github.com/local-inference-lab/b12x/pull/284) | Selects the measured SM120 multipath-hyperconnection source split and 192-row prefill crossover. |
 
 The reproducible B12X integration commit is
-`01cd70513d48c700432d377495ddd7097d02897f`, its source tree is
-`68d5e9ba53c3484dea6c76675d2e20d689c99db3`, and the installed `b12x/`
-package tree is `94f6a995796297f1857a7e78f29e3838d4fd12e0`.
+`6232b6a46337a642b681c085f74f16e3d375bf8e`, its source tree is
+`40c5b91ee13d2184b61bbb12e3e560c3e2192498`, and the installed `b12x/`
+package tree is `14af0441e38b1ec429e62ce69fa20354aa3b9999`. B12X #290 has pull-request
+head `aa01cba0cfb882f6bb72c30e10303bca0df9dabc`; its runtime implementation is
+`d17325c88f18bb7adb37cc8db5812a564baecdba`. The documentation-only PR head
+leaves the installed package tree unchanged.
 
 The LMCache package is installed from integration commit
 `d6e402b2fcc771c364e9ec15fe26dec0acfe0a1d`; its source tree is
@@ -328,12 +331,23 @@ a discarded 30-second warmup:
 | MTP, 3 drafts | 14,274 | 14,272 | -0.01% |
 | DFlash2, 7 drafts | 14,332 | 14,323 | -0.06% |
 
-All prefill differences are below 0.1 percent. The exact published package was
-also started from a fresh JIT cache in DFlash2 K7 mode. Three additional runs
-produced medians of 242.207 output tok/s and 88.381 target forwards/s at C1,
-767.036 output tok/s and 292.852 target forwards/s at C8, and 14,342 prompt
-tok/s for 32k prefill. Output throughput varies with accepted length; target
-forward rate is the stable runtime-regression metric.
+All prefill differences are below 0.1 percent. The image at digest
+`sha256:f5035a402e9c4cf9ff59245c5f9b2f6ea7fe159c1a2a0cfa7275327969f67e1a`
+includes rank-synchronized B12X CUDA-graph slot selection and completed this
+clean post-warmup qualification on physical GPUs 4–7 at stock clocks:
+
+| Mode | C1 output tok/s | C1 target forwards/s | C8 output tok/s | C8 target forwards/s | 32k prompt tok/s |
+|---|---:|---:|---:|---:|---:|
+| No speculation | 163.788 | — | 732.583 | — | 14,703 |
+| MTP, 3 drafts | 265.105 | 102.835 | 951.620 | 374.180 | 14,312 |
+| DFlash2, 7 drafts | 224.254 | 89.921 | 747.571 | 295.495 | 14,304 |
+
+Each decode cell used a 15-second warmup followed by a 30-second measurement;
+each 32k result followed a discarded 30-second warmup. Every cell completed
+with zero API errors, exact requested running concurrency, and no queued
+requests. The exact registry image also completed a DFlash2 C1 smoke at 90.113
+target forwards/s. Its accepted length was 2.363, yielding 212.964 output
+tok/s; target-forward rate is the stable runtime-regression metric.
 
 ## Historical `20260901-r12` LMCache qualification
 
