@@ -345,18 +345,11 @@ Within Local Inference Lab, the contribution history is:
 - Phaelon's full-vocabulary vLLM score-mode work, documented in
   [vLLM pull request 35961](https://github.com/vllm-project/vllm/pull/35961),
   was the direct engineering inspiration for the lab's initial KLD captures.
-  The community record includes Phaelon's
-  [full-vocabulary, every-position procedure](https://discord.com/channels/1466898002793857221/1473975364727476224/1482736877143592990)
-  and Martin Vit's
-  [explicit acknowledgement of that inspiration](https://discord.com/channels/1466898002793857221/1473975364727476224/1482753156181131414).
 - Luke Alonso requested and methodologically directed the Kimi K3 fidelity
   program, including the teacher/candidate comparison and shared-head
   hidden-state workflow. He later established the lab's requirement to
   separate fixed-baseline-route `B×Q` from natural-route `Q×Q` when ranking MoE
-  quantization formats; the decisive community records are the
-  [route-confounding analysis](https://discord.com/channels/1466898002793857221/1543201428523196458/1543657053623685312),
-  [route-freezing requirement](https://discord.com/channels/1466898002793857221/1543201428523196458/1543659028872298527),
-  and [comparison recommendation](https://discord.com/channels/1466898002793857221/1543681985535541369/1543727329354850374).
+  quantization formats.
 - Martin Vit (`Festr`) constructed and validated the Kimi K3 corpus,
   implemented the capture, replay, comparison, and receipt tooling, executed
   the qualification runs, and assembled and published the artifact and its
