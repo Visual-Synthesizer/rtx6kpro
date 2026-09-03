@@ -27,6 +27,7 @@ do not require checkpoint paths or source-code bind mounts.
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4` |
 | Target update policy | resolve Hugging Face `main` at startup unless `MODEL_REVISION` is set |
 | Target experts | ModelOpt NVFP4 with B12X 4-bit weights and 4-bit activations |
+| Distribution fidelity | **research-only**; the [BF16-to-NVFP4 KLD report](../kld/glm-5.3-flash-bf16-nvfp4.md) measures the reproducible `FLASHINFER_CUTLASS` path, not this page's B12X serving path |
 | Target KV cache | FP8 compressed Multi-head Latent Attention |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2` |
 | DFlash2 update policy | resolve Hugging Face `main` at startup unless `DFLASH_MODEL_REVISION` is set |
