@@ -81,20 +81,57 @@ The measurements used four stock-clock RTX PRO 6000 Blackwell Workstation
 Edition GPUs with PCIe Gen5 x16 links, tensor parallelism of four, FP8 target
 KV cache, a 4,096-token scheduler budget, full and piecewise decode graphs,
 exactly 16 NCCL channels, and a 2 MiB NCCL buffer. Prefill values are medians of
-three cold 32K-token requests. Decode values are medians of three 30-second
-context-zero, concurrency-one samples.
+three cold 32K-token requests. C1 and C8 decode values are coordinate-wise
+medians of three 30-second context-zero samples. Each C8 run was followed by a
+short C1 request to validate the transition from an eight-request CUDA graph to
+a one-request graph.
 
-| Decode-context ranks | Serving mode | 32K prefill tok/s | C1 output tok/s | Target steps/s | Accepted/step |
-|---:|---|---:|---:|---:|---:|
-| 1 | No speculation | 14,908 | 169.76 | — | — |
-| 1 | MTP, depth 3 | 14,507 | 256.33 | 105.15 | 2.438 |
-| 1 | DFlash2, depth 7 | 14,691 | 214.27 | 89.46 | 2.436 |
-| 4 | No speculation | 13,019 | 151.46 | — | — |
-| 4 | MTP, depth 3 | 12,838 | 234.70 | 93.67 | 2.513 |
-| 4 | DFlash2, depth 7 | 13,028 | 207.92 | 81.12 | 2.563 |
+| DCP | Serving mode | 32K prefill tok/s | C1 output tok/s | C1 steps/s | C1 accepted/step | C8 output tok/s | C8 steps/s | C8 accepted/step |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|
+| 1 | No speculation | 14,908 | 169.76 | — | — | 735.86 | — | — |
+| 1 | MTP, depth 3 | 14,507 | 256.33 | 105.15 | 2.438 | 894.96 | 370.06 | 2.440 |
+| 1 | DFlash2, depth 7 | 14,691 | 214.27 | 89.46 | 2.436 | 689.35 | 291.12 | 2.370 |
+| 4 | No speculation | 13,019 | 151.46 | — | — | 666.02 | — | — |
+| 4 | MTP, depth 3 | 12,838 | 234.70 | 93.67 | 2.513 | 843.97 | 341.79 | 2.471 |
+| 4 | DFlash2, depth 7 | 13,028 | 207.92 | 81.12 | 2.563 | 645.85 | 263.11 | 2.456 |
 
 Speculative output throughput varies with accepted length. Target steps per
 second isolates target-model execution speed.
+
+### Complete-KV prefill
+
+With four decode-context ranks, every rank must select sparse-attention
+candidates from the complete target KV sequence rather than its rank-local
+quarter. The qualified implementation gathers the complete target KV view and
+keeps recurrent-state cache ownership independent. On DFlash2 depth 7, the
+implementation measured 12,999 prompt tok/s versus 9,858 prompt tok/s for
+rank-local selection, a 31.86% increase. The packaged configuration measured
+13,028 prompt tok/s in the three-run qualification above.
+
+### Comparison with the 2026-09-02 community artifact
+
+The public `jovian-judgement-community-20260902-r17` artifact used the same
+stock GPU quartet and TP4/DCP1, but used 32 NCCL channels and 512-token split
+cache pages. The comparison therefore measures complete artifacts rather than
+one isolated source change.
+
+| Workload | 20260902-r17 | 20260903-r20 | Change |
+|---|---:|---:|---:|
+| No-spec 32K prefill | 14,663 tok/s | 14,908 tok/s | +1.67% |
+| MTP, depth 3, 32K prefill | 14,272 tok/s | 14,507 tok/s | +1.65% |
+| DFlash2, depth 7, 32K prefill | 14,323 tok/s | 14,691 tok/s | +2.57% |
+| No-spec C1 output | 163.43 tok/s | 169.76 tok/s | +3.87% |
+| No-spec C8 output | 734.96 tok/s | 735.86 tok/s | +0.12% |
+| MTP, depth 3, C1 target steps | 102.53 steps/s | 105.15 steps/s | +2.56% |
+| MTP, depth 3, C8 target steps | 374.58 steps/s | 370.06 steps/s | -1.21% |
+| DFlash2, depth 7, C1 target steps | 89.78 steps/s | 89.46 steps/s | -0.36% |
+| DFlash2, depth 7, C8 target steps | 294.22 steps/s | 291.12 steps/s | -1.05% |
+
+Speculative C8 output rates are 894.96 tok/s for MTP depth 3 and 689.35 tok/s
+for DFlash2 depth 7. They are respectively 5.41% and 10.83% below the earlier
+artifact because the measured accepted lengths fell from 2.538 to 2.440 and
+from 2.613 to 2.370. Target-step throughput, which isolates runtime execution
+from data-dependent proposal acceptance, changed by -1.21% and -1.05%.
 
 ### Gated-delta-network prefill backend
 
