@@ -35,6 +35,7 @@ Both Compose files contain an `image` reference and no `build` section.
 | Registry digest | `sha256:9e8cbbe80423510ad77b35fc7414101e2a5d4529ccf6d8c7ee08ab874483bac7` |
 | Image ID | `sha256:25bb133dbe37004a7f1b2289c111966357905f6b4c1cbd2bedcc04464c8c0c29` |
 | Docker source | `local-inference-lab/blackwell-llm-docker@c95b15f7d7df708745a380f415068c292925c834` |
+| Source merge contract | [`rtx6kpro` issue #94](https://github.com/local-inference-lab/rtx6kpro/issues/94) |
 | Model revision | `deepseek-ai/DeepSeek-V4-Flash-0731@9e165c30e2704aec5d9d593cce3eebd58bbef1cb` |
 | vLLM base | `dev/jovian-judgement@c085b910ebd4a8c89c2c4085cbf17ccaf15a384c` |
 | vLLM integration tree | `28bc825a1321bb480fc3294179fd34afeb468389` |
