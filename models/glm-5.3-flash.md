@@ -200,6 +200,7 @@ docker run -d \
   -e MODEL=local-inference-lab/GLM-5.3-Flash-NVFP4 \
   -e CACHE_MODE=vram \
   -e KV_CACHE_QUANT=fp8_ds_mla \
+  -e CUDAGRAPH_MODE=FULL_AND_PIECEWISE \
   -e PORT="$PORT" \
   -e TP=4 \
   -e DCP=1 \
