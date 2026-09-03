@@ -82,9 +82,9 @@ Edition GPUs with PCIe Gen5 x16 links, tensor parallelism of four, FP8 target
 KV cache, a 4,096-token scheduler budget, full and piecewise decode graphs,
 exactly 16 NCCL channels, and a 2 MiB NCCL buffer. Prefill values are medians of
 three cold 32K-token requests. C1 and C8 decode values are coordinate-wise
-medians of three 30-second context-zero samples. Each C8 run was followed by a
-short C1 request to validate the transition from an eight-request CUDA graph to
-a one-request graph.
+medians of three 30-second context-zero samples. Each DCP4 C8 run was followed
+by a short C1 request to validate the transition from an eight-request CUDA
+graph to a one-request graph.
 
 | DCP | Serving mode | 32K prefill tok/s | C1 output tok/s | C1 steps/s | C1 accepted/step | C8 output tok/s | C8 steps/s | C8 accepted/step |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|
