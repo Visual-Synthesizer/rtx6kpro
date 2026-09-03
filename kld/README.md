@@ -19,6 +19,7 @@ measure of correctness, capability, generation stability, or user preference.
 | Kimi K3 natural-route candidate comparison | qualified | The published comparison measures the official MXFP4 reference against QSRT K2 under each checkpoint's natural routes |
 | Generic exact route-controlled replay in vLLM | unsupported | The Local Inference Lab vLLM source at commit [`47ccf6c`](https://github.com/local-inference-lab/vllm/tree/47ccf6c57d92f03630ebcbad3809450545825488) can capture selected expert IDs, but it does not capture consumed route weights or provide an exact route-replay interface |
 | GLM-5.3-Flash route-controlled KLD result | research-only | The [BF16-to-NVFP4 four-cell report](glm-5.3-flash-bf16-nvfp4.md) publishes analysis and held-out results; it has no acceptance threshold and measures `FLASHINFER_CUTLASS`, not the nondeterministic B12X NVFP4 MoE path |
+| GLM-5.3-Flash QAD checkpoint comparison | research-only | The [QAD step 1,750 report](glm-5.3-flash-qad-step1750.md) finds lower aggregate BF16-to-candidate KLD than the published NVFP4 comparator under pre-specified fixed-route and natural-route criteria; the gain is heterogeneous and concentrated in dialogue/instruction data |
 
 The status of one model artifact does not qualify the same capture path,
 runtime, dataset, or acceptance threshold for another model.

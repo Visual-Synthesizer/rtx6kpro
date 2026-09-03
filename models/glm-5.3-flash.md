@@ -25,6 +25,7 @@ do not require checkpoint paths or source-code bind mounts.
 | Two decode-context ranks | **implemented**; not independently performance-qualified for this artifact |
 | Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
+| QAD research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution-fidelity measurement only, not a qualified serving target |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
@@ -38,7 +39,8 @@ do not require checkpoint paths or source-code bind mounts.
 | Qualification date | 2026-09-03 |
 
 The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md)
-is research-only. It measures a reproducible FlashInfer CUTLASS path rather
+and [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md)
+are research-only. They measure a reproducible FlashInfer CUTLASS path rather
 than the B12X serving path specified here.
 
 ## Docker artifact
