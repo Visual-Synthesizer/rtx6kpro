@@ -15,6 +15,7 @@ SECTION_ORDER = [
     ("docs", "Contributor And Onboarding Guides"),
     ("models", "Model Runbooks"),
     ("benchmarks", "Benchmarks And Quality"),
+    ("kld", "Distribution Fidelity"),
     ("optimization", "Optimization Notes"),
     ("hardware", "Hardware And Topology"),
     ("inference-engines", "Inference Engines"),
@@ -44,7 +45,7 @@ def section_for(path: Path) -> str:
     if len(rel.parts) == 1 and rel.name in {"README.md", "INDEX.md", "GLOSSARY.md"}:
         return "landing"
     top = rel.parts[0]
-    if top in {"docs", "models", "benchmarks", "optimization", "hardware",
+    if top in {"docs", "models", "benchmarks", "kld", "optimization", "hardware",
                "inference-engines", "troubleshooting", "daily-summaries"}:
         return top
     return "other"

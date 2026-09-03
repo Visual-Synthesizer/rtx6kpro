@@ -39,7 +39,7 @@ Need the complete map of every Markdown page?
 | Copy/paste production launch commands | Model hubs and current versioned model pages. |
 | Rebuild the Docker image | [Eldritch Docker](models/eldritch-enlightenment-docker.md), current model image sections, and build scripts in [scripts](scripts/). |
 | Compare backend speed | Model benchmark tables plus [Benchmark Results](benchmarks/results.md). |
-| Check quantization quality | [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), [KLD Evaluation](benchmarks/kld-evaluation.md), and model-specific KLD sections. |
+| Check quantization fidelity | [General KLD methodology](kld/README.md), [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), and model-specific KLD sections. |
 | Understand MTP, DSpark, or DFlash | [Speculative Decoding](optimization/speculative-decoding.md), DS4/Kimi/MiMo pages. |
 | Debug topology or PCIe behavior | [Topology](hardware/topology.md), [PCIe Bandwidth](hardware/pcie-bandwidth.md), [GPU Configurations](hardware/gpu-configs.md). |
 | Avoid known runtime footguns | [Common Issues](troubleshooting/common-issues.md), model caveats, and daily summaries. |
@@ -82,7 +82,7 @@ family unless you are reproducing a specific old result.
 | Consolidated throughput | [Benchmark Results](benchmarks/results.md) |
 | vLLM vs SGLang throughput | [Inference throughput](benchmarks/inference-throughput/README.md) |
 | GLM-5.2 KLD and quant quality | [GLM-5.2 KLD Evaluation](benchmarks/glm52-kld-evaluation.md) |
-| General KLD methodology | [KLD Evaluation](benchmarks/kld-evaluation.md) |
+| General KLD methodology | [Measuring quantization distribution fidelity in vLLM](kld/README.md) |
 | MTP quality checks | [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) |
 | NVFP4 quantization comparison | [NVFP4 Quantization Comparison](benchmarks/nvfp4-quantization-comparison.md) |
 

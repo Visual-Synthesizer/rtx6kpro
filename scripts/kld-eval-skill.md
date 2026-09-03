@@ -1,14 +1,27 @@
 ---
 name: kld-eval
-description: Run KLD (KL divergence) evaluation for quantized models. Measures quality loss vs FP8 reference using full vocabulary logit distributions on WikiText-2. Use when the user asks to measure KLD, compare model quality, or evaluate quantization.
+description: Reproduce the archived Qwen3.5 SGLang full-vocabulary KLD workflow on WikiText-2. Do not use it as the general vLLM or route-controlled MoE protocol.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Grep, Glob, Agent
 argument-hint: [action] [model-or-backend]
 ---
 
-# KLD Evaluation Skill
+# Qwen3.5 SGLang KLD reproduction skill
 
-Measures KL divergence between a quantized model and an FP8 reference using full vocabulary logit distributions captured during prefill on WikiText-2.
+## Status
+
+| Use | Status |
+|---|---|
+| Reproduce the recorded Qwen3.5 SGLang workflow | implemented |
+| General vLLM KLD evaluation | unsupported |
+| Route-controlled MoE comparison | unsupported |
+| Exact AWQ-to-FP8 full-vocabulary comparison | unsupported |
+
+Use [`kld/README.md`](../kld/README.md) as the canonical measurement contract.
+This skill measures KL divergence between a quantized Qwen3.5 model and the
+declared FP8 reference using full-vocabulary distributions captured during
+prefill on WikiText-2. It does not replay expert routes and does not establish
+model-independent quality thresholds.
 
 ## Arguments
 
@@ -61,7 +74,7 @@ If 0, apply the patch:
 docker exec <container> python /tmp/sglang-kld-logit-capture.py
 ```
 
-### Phase 1: FP8 Reference (TP8, 8 GPUs)
+### Capture the FP8 reference (TP8, 8 GPUs)
 
 ```bash
 docker exec <container> mkdir -p /mnt/kld_ref
@@ -89,7 +102,7 @@ docker exec <container> bash -c 'cd /workspace && python3 sglang_kld_eval.py \
 
 Expected: 100 files, each ~1188 MB (float32), shape [2048, 152064].
 
-### Phase 2: Test Model (TP4, 4 GPUs)
+### Capture the candidate model (TP4, 4 GPUs)
 
 Kill the ref server first (use `docker top` + `kill` specific PIDs, NOT `pkill`).
 
@@ -150,7 +163,7 @@ docker exec <container> bash -c 'cd /workspace && python3 sglang_kld_eval.py \
 
 Expected: 100 files (MTP heads are auto-filtered by the patch).
 
-### Phase 3: Compute KLD
+### Compute KLD
 
 Kill the server. Use a free GPU (e.g., GPU 4-7 if server used 0-3):
 
@@ -190,7 +203,7 @@ docker exec <container> bash -c 'CUDA_VISIBLE_DEVICES=4 python3 /workspace/sglan
 
 ### File Alignment
 - If ref has N files numbered 0..N-1 and test has N files numbered 0..N-1, they align directly.
-- If ref was captured with old patch (200 files, MTP contaminated), use even files only:
+- If the reference has the MTP-contaminated 200-file layout, use even files only:
   `ref file i*2` corresponds to `test file i`.
 
 ### Expected Results (Qwen3.5-397B-A17B)
@@ -201,14 +214,16 @@ docker exec <container> bash -c 'CUDA_VISIBLE_DEVICES=4 python3 /workspace/sglan
 | nvidia/NVFP4 | ~0.035 |
 | lukealonso/NVFP4 | ~0.036 |
 
+The AWQ value is conditioned on the shared 152,064 token-ID prefix because the
+candidate and reference have different native vocabulary sizes. It is not an
+exact full-vocabulary value and does not belong in a qualified ranking with the
+two reference-aligned NVFP4 values.
+
 ### Interpretation
 
-| Mean KLD | Quality |
-|----------|---------|
-| < 0.01 | Near-lossless |
-| 0.01 - 0.05 | Good, minimal loss |
-| 0.05 - 0.1 | Noticeable loss |
-| > 0.1 | Significant loss |
+The recorded values are comparable only within the exact Qwen3.5 reference,
+corpus, tokenizer, and runtime contract. Do not assign universal quality labels
+or use natural-route values as fixed-route MoE codec rankings.
 
 ## Patching SGLang (if not using voipmonitor/sglang:test-cu132)
 

@@ -9,6 +9,7 @@
 | Official MXFP4 reference hidden states | implemented | 1,024 BF16 tensors with shape `[2047, 7168]`; file hashes are recorded in `reference-hidden/manifest.json` |
 | Runtime-repeat sentinels | implemented | 64 stratified contexts captured three times as hidden states and live BF16 logits |
 | Candidate comparison | qualified | QSRT K2 routed experts with official BF16 non-expert tensors: micro KLD `0.06538554`, top-1 agreement `0.934222`; full-vocabulary and paired receipts are published at immutable dataset revision `402919ae70d61396087571b63fe9185d95491afb` |
+| Route-controlled MoE decomposition | unsupported | Reference and candidate captures used natural routes; no exact reference-route replay was performed |
 | Capability and long-context evaluation | unsupported | The artifact measures teacher-forced distribution fidelity at a 2,048-token context only |
 
 The downloadable artifact is
@@ -27,6 +28,14 @@ immediately before the language-model head. One shared BF16 language-model head
 then reconstructs complete 163,840-token distributions for both operands. This
 removes approximately 612 GiB of reference storage relative to retaining BF16
 full-vocabulary logits for every position.
+
+Both operands follow their natural MoE routes. The qualified candidate result
+therefore measures deployed-path divergence, conventionally `Q×Q`, relative to
+the official MXFP4 reference. It is not a fixed-reference-route `R×Q`
+measurement, where `R` denotes the non-BF16 reference, and must not be used to
+isolate routed-expert arithmetic from route changes. The
+[general KLD protocol](../../kld/README.md) defines the route-controlled
+four-cell design.
 
 The artifact does not measure free-running generation, benchmark correctness,
 multimodal behavior, tool execution, or behavior beyond 2,048 input tokens.
@@ -291,6 +300,10 @@ The complete reports, runtime identity, and file hashes are published at
 The repository receipt is
 [`validation/qsrt-k2-routed-experts-official-bf16-nonexpert-kld-20260815.json`](validation/qsrt-k2-routed-experts-official-bf16-nonexpert-kld-20260815.json).
 
+The result includes any natural route differences caused by the candidate
+trajectory. The matched non-expert comparison controls the declared tensor and
+runtime differences, but neither row is an exact route-pinned experiment.
+
 ## Hidden-state replay qualification
 
 The replay path was checked against the 32-context live-logit qualification
@@ -343,3 +356,32 @@ different model, corpus, tokenizer, vocabulary, or serving runtime. KLD ranks
 Kimi K3 candidates only within this artifact's frozen identities and does not
 replace coding, reasoning, long-context, multimodal, tool-use, or free-running
 generation evaluation.
+
+## Technical provenance and attribution
+
+Luke Alonso requested and methodologically directed the Kimi K3
+distribution-fidelity program, including its teacher/candidate framing and the
+shared-language-model-head hidden-state workflow. Martin Vit (`Festr`)
+constructed and validated the corpus, implemented the capture, replay,
+comparison, and receipt tooling, executed the qualification runs, and assembled
+and published the artifact and this specification. AI tools assisted corpus
+construction and documentation; dataset choices, validation, implementation,
+measurements, and publication remained human-directed and human-reviewed.
+
+Phaelon's [vLLM full-vocabulary score-mode KLD work](https://github.com/vllm-project/vllm/pull/35961)
+was the direct engineering inspiration for Local Inference Lab's initial KLD
+captures. Phaelon's role is prior implementation and community inspiration, not
+authorship of the Kimi K3 corpus or artifact.
+
+The broader method has independent scholarly precedent. Dutta et al.
+established KLD as a complementary compression metric in
+[*Accuracy is Not All You Need*](https://proceedings.neurips.cc/paper_files/paper/2024/hash/e0e956681b04ac126679e8c7dd706b2e-Abstract-Conference.html).
+The Poolside team documents final-hidden-state caching and shared-head logit
+reconstruction in the
+[*Laguna M.1/XS.2 Technical Report*](https://arxiv.org/abs/2605.27605).
+Parvel Gu's
+[*Causal Route-Mediated Damage in Quantized Mixture-of-Experts*](https://arxiv.org/abs/2608.11212)
+is direct scholarly precedent for exact route pinning, route transplantation,
+and a non-additive four-run route-by-compute design. These citations distinguish
+the Kimi K3 engineering and artifact contribution from invention claims about
+KLD, hidden-state caching, or route-controlled causal decomposition.

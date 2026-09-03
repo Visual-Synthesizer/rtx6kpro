@@ -160,10 +160,14 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 KLD Evaluation](benchmarks/glm52-kld-evaluation.md) - `benchmarks/glm52-kld-evaluation.md`
 - [Inference Throughput: Qwen3.5-397B-A17B Quantizations](benchmarks/inference-throughput/README.md) - `benchmarks/inference-throughput/README.md`
 - [vLLM vs SGLang Throughput: lukealonso/Qwen3.5-397B-A17B-NVFP4](benchmarks/inference-throughput/vllm-vs-sglang.md) - `benchmarks/inference-throughput/vllm-vs-sglang.md`
-- [KLD Evaluation for Quantized Models](benchmarks/kld-evaluation.md) - `benchmarks/kld-evaluation.md`
+- [Qwen3.5 SGLang KLD reproduction record](benchmarks/kld-evaluation.md) - `benchmarks/kld-evaluation.md`
 - [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) - `benchmarks/mtp-quality-evaluation.md`
 - [Qwen3.5-397B-A17B Quantization Comparison: AWQ vs NVFP4](benchmarks/nvfp4-quantization-comparison.md) - `benchmarks/nvfp4-quantization-comparison.md`
 - [Benchmark Results -- RTX 6000 Pro Blackwell](benchmarks/results.md) - `benchmarks/results.md`
+
+## Distribution Fidelity
+
+- [Measuring quantization distribution fidelity in vLLM](kld/README.md) - `kld/README.md`
 
 ## Optimization Notes
 
@@ -406,8 +410,12 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-27](daily-summaries/2026-08/2026-08-28.md) - `daily-summaries/2026-08/2026-08-28.md`
 - [Daily Summary — 2026-08-28](daily-summaries/2026-08/2026-08-29.md) - `daily-summaries/2026-08/2026-08-29.md`
 - [Daily Summary — 2026-08-29](daily-summaries/2026-08/2026-08-30.md) - `daily-summaries/2026-08/2026-08-30.md`
+- [Daily Summary — 2026-08-30](daily-summaries/2026-08/2026-08-31.md) - `daily-summaries/2026-08/2026-08-31.md`
+- [Daily Summary — 2026-08-31](daily-summaries/2026-09/2026-09-01.md) - `daily-summaries/2026-09/2026-09-01.md`
+- [Daily Summary — 2026-09-01](daily-summaries/2026-09/2026-09-02.md) - `daily-summaries/2026-09/2026-09-02.md`
+- [Daily Summary — 2026-09-02](daily-summaries/2026-09/2026-09-03.md) - `daily-summaries/2026-09/2026-09-03.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
 
-- [KLD Evaluation Skill](scripts/kld-eval-skill.md) - `scripts/kld-eval-skill.md`
+- [Qwen3.5 SGLang KLD reproduction skill](scripts/kld-eval-skill.md) - `scripts/kld-eval-skill.md`
