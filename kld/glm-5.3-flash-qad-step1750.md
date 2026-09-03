@@ -22,6 +22,13 @@ The pre-specified secondary natural-route endpoint also passes. KLD decreases
 from `0.162164` to `0.144644` nats/token, a `10.804%` reduction, with paired
 95% interval `-0.022871` to `-0.012784`.
 
+The separate
+[AA-LCR capability comparison](../models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md)
+scores the published NVFP4 checkpoint at 74.00% and QAD step 1,750 at 73.00%.
+Its paired interval includes zero. The distribution-fidelity improvement
+therefore does not establish a measurable AA-LCR improvement on the evaluated
+100-question sample.
+
 These aggregate results do not define a deployment-quality threshold. The
 improvement is heterogeneous and concentrated in dialogue/instruction data.
 QAD has lower per-position KLD on fewer than half of scored positions, so the

@@ -1,0 +1,166 @@
+{
+  "artifact_kind": "AA-LCR serving-runtime pool manifest",
+  "status": "qualified",
+  "checkpoint": {
+    "repository": "/data/models/GLM-5.3-Flash-NVFP4-QAD-step1750",
+    "revision": "quatrain-step-00001750",
+    "index_sha256": "b43d25a280d02bfd2a58c046386e24baad78fcce355ea2d48cc0c4c78671686b",
+    "materialization_manifest_sha256": "4c8439a5e8891f0dc7f22134803e44aebd4296284e356ae0a8bb2cf76e4ee937",
+    "file_manifest_sha256": "12362645b613f625f5e7bc008050db51181cb3b50fcc5e066b97a8494f9fcf33",
+    "source_checkpoint_manifest_sha256": "ed76ada3ee9e4bf10d74554fb62a8d0e1767e8d5b22ee15f4940cc10cbf2da5c",
+    "template_index_sha256": "0d1d9e6b226e76520e182de10d4e7194cc885c5cb1bf885bb90de1916ce312cb",
+    "materialization": {
+      "kind": "Quatrain GLM-5.3-Flash NVFP4 materialization",
+      "checkpoint_step": 1750,
+      "indexed_tensor_bytes": 198042331512,
+      "tensor_count": 148498,
+      "routed_expert_format": "NVFP4 E2M1 with finite E4M3 block-16 scales and trained FP32 tensor scales",
+      "base_text_routed_expert_layers": "3-44",
+      "mtp_routed_expert_layer": 45,
+      "mtp_routed_expert_format": "MXFP8 with 32-value blocks",
+      "trained_non_routed_replacements": 217
+    }
+  },
+  "container": {
+    "image": "voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340",
+    "image_id": "sha256:09cac4d0e2b1b4155ea27989c21c12aa5fa9f4d4d356ae5ca623f128a6836388",
+    "registry_digest": "voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340",
+    "source_lock_path": "/opt/glm53-flash/source.lock",
+    "source_lock_sha256": "9a6167d415d824e1707ba7df0dd5906e05c004f1ed2666f80f2f9e1ea9fde4be"
+  },
+  "source": {
+    "vllm_revision": "7015eb6949a93247df02fb6f9101d17c40bd83e8",
+    "vllm_tree": "456231387f6f5adc2d1a5241428f1226b29ea835",
+    "vllm_package_tree": "83e4480f930da37a26f893871a55bcbf54493b3b",
+    "b12x_revision": "1e59a1fd09f782d302b1068b15c8a0bd66103894",
+    "b12x_tree": "f322c804eec1c58a63bd4fe6e7901a95a678a575",
+    "b12x_package_tree": "aaa5f189acae0206d886553421f6e9044f4c458a"
+  },
+  "topology": {
+    "replicas": 3,
+    "tensor_parallel_size": 4,
+    "decode_context_parallel_size": 1,
+    "pipeline_parallel_size": 1
+  },
+  "serving": {
+    "served_model_name": "GLM-5.3-Flash-NVFP4-QAD-step1750-MTP3-AA-LCR",
+    "activation_dtype": "bfloat16",
+    "kv_cache_dtype": "fp8",
+    "attention_backend": "B12X",
+    "kda_prefill_backend": "flashkda",
+    "kda_decode_backend": "auto",
+    "moe_backend": "b12x",
+    "linear_backend": "b12x",
+    "weight_loader": "instanttensor",
+    "max_model_len": 1048576,
+    "max_num_batched_tokens": 4096,
+    "max_num_seqs": 24,
+    "prefill_schedule_interval": 8,
+    "kv_cache_memory_bytes": 32212254720,
+    "physical_kv_cache_tokens_per_replica": 4621648,
+    "prefix_caching": true,
+    "cache_mode": "vram",
+    "target_cache_page_tokens": 2048,
+    "recurrent_cache_page_tokens": 2048,
+    "speculative_decoding": {
+      "method": "mtp",
+      "num_speculative_tokens": 3,
+      "draft_sample_method": "probabilistic",
+      "rejection_sample_method": "standard",
+      "attention_backend": "B12X",
+      "moe_backend": "marlin"
+    },
+    "compilation_config": {
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "capture_sizes": [1, 2, 4, 8, 16, 32, 40, 48, 64, 96, 128, 192, 256]
+    }
+  },
+  "instances": [
+    {
+      "instance_index": 0,
+      "container_name": "glm53-aa-lcr-qad-step1750-mtp3-gpu4-7",
+      "container_id": "7166f8a1e2de2edb533696d5cc737203813bd3436fa8cf6d5eed70f566163fc2",
+      "host_gpu_indices": [4, 5, 6, 7],
+      "host_gpu_uuids": [
+        "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+        "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+        "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+        "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e"
+      ],
+      "port": 5051,
+      "api_url": "http://127.0.0.1:5051/v1/chat/completions",
+      "jit_cache_volume": "glm53-aa-lcr-qad-step1750-mtp3-cache-gpu4-7",
+      "docker_inspect_artifact": "runtime-artifacts/docker-inspect-gpu4-7.json",
+      "server_argv_artifact": "runtime-artifacts/server-argv-gpu4-7.txt"
+    },
+    {
+      "instance_index": 1,
+      "container_name": "glm53-aa-lcr-qad-step1750-mtp3-gpu8-11",
+      "container_id": "4f025b3466c0ed2e6edd137b0646217a7591837d416c743dfeaac6df9d6867c8",
+      "host_gpu_indices": [8, 9, 10, 11],
+      "host_gpu_uuids": [
+        "GPU-2a2cd7c3-b91f-092c-309d-cda7e408f659",
+        "GPU-8a5f7d96-6e51-82c0-3b02-bfea7f14d2d7",
+        "GPU-6171baff-cc22-608e-4029-507f67c392ff",
+        "GPU-e7376e80-d7a4-1d1f-6554-49876db72e37"
+      ],
+      "port": 5052,
+      "api_url": "http://127.0.0.1:5052/v1/chat/completions",
+      "jit_cache_volume": "glm53-aa-lcr-qad-step1750-mtp3-cache-gpu8-11",
+      "docker_inspect_artifact": "runtime-artifacts/docker-inspect-gpu8-11.json",
+      "server_argv_artifact": "runtime-artifacts/server-argv-gpu8-11.txt"
+    },
+    {
+      "instance_index": 2,
+      "container_name": "glm53-aa-lcr-qad-step1750-mtp3-gpu12-15",
+      "container_id": "2c38f8e2a4f6135c03d0d38a283b6009e9b77d19826aeac4f9d5b7c88f23d588",
+      "host_gpu_indices": [12, 13, 14, 15],
+      "host_gpu_uuids": [
+        "GPU-3304d777-8f0e-2767-419a-d72ffa553141",
+        "GPU-61b4b68d-9529-ef3e-184c-e19488aac9b7",
+        "GPU-a2f726b2-60db-8102-abef-abf76c457fe0",
+        "GPU-cd323562-fdc3-78c3-012e-86e281433050"
+      ],
+      "port": 5053,
+      "api_url": "http://127.0.0.1:5053/v1/chat/completions",
+      "jit_cache_volume": "glm53-aa-lcr-qad-step1750-mtp3-cache-gpu12-15",
+      "docker_inspect_artifact": "runtime-artifacts/docker-inspect-gpu12-15.json",
+      "server_argv_artifact": "runtime-artifacts/server-argv-gpu12-15.txt"
+    }
+  ],
+  "server_arguments": [
+    "/opt/venv/bin/vllm", "serve", "/model",
+    "--served-model-name", "GLM-5.3-Flash-NVFP4-QAD-step1750-MTP3-AA-LCR",
+    "--tensor-parallel-size", "4",
+    "--decode-context-parallel-size", "1",
+    "--max-num-seqs", "24",
+    "--max-model-len", "1048576",
+    "--max-num-batched-tokens", "4096",
+    "--dtype", "bfloat16",
+    "--kv-cache-dtype", "fp8",
+    "--quantization", "modelopt_mixed",
+    "--load-format", "instanttensor",
+    "--attention-backend", "B12X",
+    "--moe-backend", "b12x",
+    "--linear-backend", "b12x",
+    "--enable-prefix-caching",
+    "--speculative-config", "{\"method\":\"mtp\",\"num_speculative_tokens\":3,\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"moe_backend\":\"marlin\",\"attention_backend\":\"B12X\"}",
+    "--kv-cache-memory-bytes", "32212254720"
+  ],
+  "relevant_environment": {
+    "CACHE_MODE": "vram",
+    "KV_CACHE_QUANT": "fp8_ds_mla",
+    "SPECULATOR": "mtp",
+    "MTP_DEPTH": "3",
+    "GLM53_KDA_PREFILL_BACKEND": "flashkda",
+    "VLLM_ENABLE_PCIE_ALLREDUCE": "1",
+    "NCCL_MIN_NCHANNELS": "16",
+    "NCCL_MAX_NCHANNELS": "16",
+    "NCCL_BUFFSIZE": "2097152",
+    "NCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
+    "NCCL_GRAPH_FILE": "unset by launcher",
+    "OMP_NUM_THREADS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

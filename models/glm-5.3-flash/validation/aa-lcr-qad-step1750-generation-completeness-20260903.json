@@ -1,0 +1,68 @@
+{
+  "artifact_kind": "AA-LCR generation completeness receipt",
+  "created_utc": "2026-09-03T22:02:38.175565Z",
+  "dataset": {
+    "prompt_manifest_sha256": "13f8fdc097679d5ead0c4bba6044b254a1fcd80f8e5afb9555c68bd3d0abd09d",
+    "questions": 100,
+    "repository": "ArtificialAnalysis/AA-LCR",
+    "revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+    "token_count_manifest_sha256": "50e14a70edf97449b04745e2f65ac12aa4e86f07d6cc38f3a26a6a9acf62f3e1"
+  },
+  "generation": {
+    "configuration_sha256": "c9cae90dfe14a4dee1efb4a1799bf0edb6a66f8da089bd3e9ab35d80b3cff227",
+    "failure_sidecars": 0,
+    "finish_reasons": {
+      "stop": 300
+    },
+    "generation_manifest_sha256": "e3c45e98b92935834533b4831783409260e87de1775958c25099308cec4a6faa",
+    "model": "GLM-5.3-Flash-NVFP4-QAD-step1750-MTP3-AA-LCR",
+    "per_repeat_receipts": {
+      "0": 100,
+      "1": 100,
+      "2": 100
+    },
+    "questions": 100,
+    "receipts": 300,
+    "repeats": 3,
+    "runtime_manifest_sha256": "aac82d4c21b74826d0a1672c1783b805abbe73d6fcb587de8082f6e3f7613f1c"
+  },
+  "qualification": {
+    "all_candidate_answer_hashes_match": true,
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_dataset_prompts_and_documents": true,
+    "all_receipts_match_generation_configuration": true,
+    "all_response_prompt_token_counts_match_pinned_tokenizer": true,
+    "all_responses_finished_with_stop": true
+  },
+  "receipt_manifest_sha256": "092f7dd71f7fb331bc8d092572e6e33b7f1f104735627311643571d9dd77cc37",
+  "status": "qualified",
+  "usage": {
+    "completion_tokens": {
+      "maximum": 50085,
+      "mean": 5160.92,
+      "median": 1870.0,
+      "minimum": 207,
+      "p95": 20109.6,
+      "p99": 38581.3,
+      "sum": 1548276
+    },
+    "prompt_tokens": {
+      "maximum": 114611,
+      "mean": 97318.11,
+      "median": 100972.0,
+      "minimum": 76820,
+      "p95": 113694.05,
+      "p99": 114607.04,
+      "sum": 29195433
+    },
+    "request_elapsed_seconds": {
+      "maximum": 1044.299068548018,
+      "mean": 178.20439174602546,
+      "median": 118.54711242899066,
+      "minimum": 5.005170647986233,
+      "p95": 581.389244,
+      "p99": 825.634961,
+      "sum": 53461.31752380764
+    }
+  }
+}
