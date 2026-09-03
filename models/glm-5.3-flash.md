@@ -33,7 +33,7 @@ do not require checkpoint paths or source-code bind mounts.
 | GPU prefix cache | **qualified** with independently sized target and recurrent allocations |
 | Native DRAM offload | **qualified** and opt-in with `CACHE_MODE=native` |
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache` |
-| CUDA graphs | Full and piecewise target and speculative decode graphs |
+| CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
 | Scheduler | 4,096 target tokens per step; concurrent-prefill interval 8 |
 | Root filesystem | Two layers, within standard Docker overlay2 limits |
 | Qualification date | 2026-09-03 |
@@ -149,8 +149,9 @@ because it is tied with one decode-context rank and faster with four.
 ## Start the server
 
 Select a serving mode and run the common command. The image already contains
-the qualified B12X, CUDA graph, FlashInfer sampler, 16-channel NCCL, 2 MiB NCCL
-buffer, and one-thread OpenMP defaults.
+the qualified B12X, full-and-piecewise CUDA graph, FlashInfer sampler,
+16-channel NCCL, 2 MiB NCCL buffer, and one-thread OpenMP defaults. No
+`CUDAGRAPH_MODE` override is required.
 
 ```bash
 IMAGE=voipmonitor/vllm:jovian-judgement-community-20260903-r20
