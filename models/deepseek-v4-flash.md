@@ -8,7 +8,7 @@ specifications.
 
 | Need | Page |
 |---|---|
-| Serve text and image requests with DeepSeek-V4-Flash-Vision-Exp | [DeepSeek-V4-Flash Vision Jovian Judgement r2](ds4-vision-jovian-judgement-r2.md) |
+| Serve text and image requests with DeepSeek-V4-Flash-Vision-Exp | [DeepSeek-V4-Flash Vision Jovian Judgement r3](ds4-vision-jovian-judgement-r3.md) |
 | Serve the qualified Jovian Judgement source composition | [DeepSeek-V4-Flash-0731 Jovian Judgement r1](ds4dspark-jovian-judgement-r1.md) |
 | Serve the qualified fixed-K5 source composition | [DeepSeek-V4-Flash-0731 Infernal Invocation r21](ds4dspark-infernal-invocation-r21.md) |
 | Test the target-only 2.11M-KV capacity profile | [DeepSeek-V4-Flash-0731 Infernal Invocation r19 preview](ds4dspark-infernal-invocation-r19.md) |
@@ -38,7 +38,7 @@ specifications.
 
 | Source line | Revision namespace | Serving specification |
 |---|---|---|
-| `dev/jovian-judgement` | Jovian Judgement `r*` | [Vision r2](ds4-vision-jovian-judgement-r2.md), [DS4-0731 r1](ds4dspark-jovian-judgement-r1.md) |
+| `dev/jovian-judgement` | Jovian Judgement `r*` | [Vision r3](ds4-vision-jovian-judgement-r3.md), [DS4-0731 r1](ds4dspark-jovian-judgement-r1.md) |
 | `dev/infernal-invocation` | Infernal Invocation `r*` | [r21 qualified source composition](ds4dspark-infernal-invocation-r21.md), [r19 capacity study](ds4dspark-infernal-invocation-r19.md) |
 | `dev/gilded-gnosis` | Gilded Gnosis `v20-r*` | [Gilded Gnosis r33](ds4dspark-v20-r33.md) |
 | Fathomless Firmament | `v9` and `v10` | [v10](ds4dspark-v10.md), [v9](ds4dspark-v9.md) |
