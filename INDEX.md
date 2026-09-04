@@ -13,7 +13,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [INDEX](INDEX.md) - `INDEX.md`
+- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
@@ -31,6 +31,8 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v4 Chthonic B12X](models/ds4-flash-v4.md) - `models/ds4-flash-v4.md`
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
+- [DeepSeek-V4-Flash Jovian Judgement r4](models/ds4-jovian-judgement-r4.md) - `models/ds4-jovian-judgement-r4.md`
+- [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r3](models/ds4-vision-jovian-judgement-r3.md) - `models/ds4-vision-jovian-judgement-r3.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r12](models/ds4dspark-infernal-invocation-r12.md) - `models/ds4dspark-infernal-invocation-r12.md`
