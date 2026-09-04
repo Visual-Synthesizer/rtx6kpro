@@ -25,8 +25,9 @@ do not require checkpoint paths or source-code bind mounts.
 | Two decode-context ranks | **implemented**; not independently performance-qualified for this artifact |
 | Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
-| QAD research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity and AA-LCR are measured, but the checkpoint is not a qualified serving target |
+| QAD research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity, verifier-backed behavior, and AA-LCR are measured, but the checkpoint is not a qualified serving target |
 | AA-LCR capability evaluation | **qualified** for the exact BF16, published-NVFP4, and QAD checkpoint-and-runtime configurations in the [three-configuration report](glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) |
+| Verifier-backed behavioral fidelity | **qualified execution; inconclusive one-point decision** for the topology-matched BF16, published-NVFP4, and QAD checkpoints in the [VBF report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
@@ -52,6 +53,13 @@ QAD scores 73.00%, and BF16 scores 71.67%; paired evidence does not distinguish
 the three complete configurations. The accompanying
 [reproduction specification](glm-5.3-flash/aa-lcr-reproduction.md) fixes the
 dataset, prompt, sampling, runtime, equality checker, and receipt validation.
+
+The [Verifier-Backed Behavioral Fidelity report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md)
+uses 224 deterministic tasks with executable answer keys and no language-model
+judge. BF16 scores 93.11%, published NVFP4 scores 91.63%, and QAD step 1,750
+scores 92.35% on the primary fractional metric. All paired one-point decisions
+are inconclusive; the report separates qualified execution provenance from the
+statistical power required to claim behavioral equivalence or improvement.
 
 ## Docker artifact
 

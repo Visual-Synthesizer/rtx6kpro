@@ -86,6 +86,7 @@ family unless you are reproducing a specific old result.
 | General KLD methodology | [Measuring quantization distribution fidelity in vLLM](kld/README.md) |
 | MTP quality checks | [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) |
 | NVFP4 quantization comparison | [NVFP4 Quantization Comparison](benchmarks/nvfp4-quantization-comparison.md) |
+| GLM-5.3-Flash behavioral fidelity | [Verifier-backed BF16, NVFP4, and QAD comparison](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
 
 KLD is a regression and quantization-sanity tool, not a complete quality metric.
 Use it together with long-context decode, coding probes, acceptance-rate checks,

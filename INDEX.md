@@ -65,6 +65,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.3-Flash AA-LCR: BF16, published NVFP4, and QAD step 1,750](models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) - `models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md`
 - [GLM-5.3-Flash AA-LCR: published NVFP4 versus QAD step 1,750](models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md) - `models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md`
 - [GLM-5.3-Flash AA-LCR reproduction specification](models/glm-5.3-flash/aa-lcr-reproduction.md) - `models/glm-5.3-flash/aa-lcr-reproduction.md`
+- [GLM-5.3-Flash verifier-backed behavioral fidelity](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
@@ -421,6 +422,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-31](daily-summaries/2026-09/2026-09-01.md) - `daily-summaries/2026-09/2026-09-01.md`
 - [Daily Summary — 2026-09-01](daily-summaries/2026-09/2026-09-02.md) - `daily-summaries/2026-09/2026-09-02.md`
 - [Daily Summary — 2026-09-02](daily-summaries/2026-09/2026-09-03.md) - `daily-summaries/2026-09/2026-09-03.md`
+- [Daily Summary — 2026-09-03](daily-summaries/2026-09/2026-09-04.md) - `daily-summaries/2026-09/2026-09-04.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

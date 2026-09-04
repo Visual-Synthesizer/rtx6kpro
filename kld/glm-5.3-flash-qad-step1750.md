@@ -35,6 +35,14 @@ QAD has lower per-position KLD on fewer than half of scored positions, so the
 mean reduction is driven by the magnitude and tail of the errors rather than a
 uniform token-level improvement.
 
+The separate
+[Verifier-Backed Behavioral Fidelity comparison](../models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md)
+scores BF16 at 93.11%, published NVFP4 at 91.63%, and QAD step 1,750 at 92.35%
+on deterministic tasks with executable answer keys. QAD has the closer
+fractional point estimate, but the paired interval does not establish
+behavioral improvement, non-inferiority, or equivalence within one percentage
+point.
+
 ## Checkpoint identity and contents
 
 | Role | Artifact identity |
