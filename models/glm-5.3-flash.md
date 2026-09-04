@@ -26,7 +26,7 @@ do not require checkpoint paths or source-code bind mounts.
 | Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
 | QAD research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity and AA-LCR are measured, but the checkpoint is not a qualified serving target |
-| AA-LCR capability evaluation | **qualified** for the exact published-NVFP4 and QAD checkpoint-and-runtime configurations in the [paired report](glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md) |
+| AA-LCR capability evaluation | **qualified** for the exact BF16, published-NVFP4, and QAD checkpoint-and-runtime configurations in the [three-configuration report](glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
@@ -44,11 +44,11 @@ and [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md)
 are research-only. They measure a reproducible FlashInfer CUTLASS path rather
 than the B12X serving path specified here.
 
-The [AA-LCR result](glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md)
-qualifies the published NVFP4 and QAD configurations on 100 long-context
-questions with three independent generations each. The published checkpoint
-scores 74.00% and QAD scores 73.00%; the paired evidence does not distinguish
-their accuracy. The accompanying
+The [AA-LCR result](glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) qualifies the BF16,
+published NVFP4, and QAD configurations on 100 long-context questions with
+three independent generations each. The published checkpoint scores 74.00%,
+QAD scores 73.00%, and BF16 scores 71.67%; paired evidence does not distinguish
+the three complete configurations. The accompanying
 [reproduction specification](glm-5.3-flash/aa-lcr-reproduction.md) fixes the
 dataset, prompt, sampling, runtime, equality checker, and receipt validation.
 

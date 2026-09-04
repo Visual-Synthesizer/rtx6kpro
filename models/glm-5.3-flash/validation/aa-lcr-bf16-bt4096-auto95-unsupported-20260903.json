@@ -1,0 +1,25 @@
+{
+  "artifact_kind": "AA-LCR serving-runtime qualification result",
+  "status": "unsupported",
+  "runtime_manifest_sha256": "ae790810ca3ea35c35cc7302c8977f843bc3cc0636566a2692c7c2a9e2e16979",
+  "workload": {
+    "dataset_revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+    "question_id": 1,
+    "repeat": 0,
+    "reasoning_effort": "max",
+    "max_tokens": 163840
+  },
+  "failure": {
+    "completed_utc": "2026-09-03T22:36:16.793786Z",
+    "kind": "CUDA out of memory during long-context prefill",
+    "operation": "B12X MHC temporary tensor allocation",
+    "attempted_allocations_mib": [
+      32,
+      128
+    ],
+    "server_http_status": 500,
+    "candidate_response_created": false,
+    "container_oom_killed": false
+  },
+  "conclusion": "The TP8 BF16 server passed a short smoke request but does not qualify for AA-LCR with a 4096-token prefill batch and 0.95 automatic GPU-memory allocation. The retained server log and generation failure receipt are the evidence for this result."
+}

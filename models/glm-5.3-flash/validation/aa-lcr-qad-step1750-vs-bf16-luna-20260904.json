@@ -1,0 +1,85 @@
+{
+  "artifact_kind": "AA-LCR paired score comparison",
+  "candidate": {
+    "attempts": 300,
+    "correct": 215,
+    "identity": {
+      "generation_manifest_sha256": "456822fe9b53e893ed789cdfe4f88597cb91938bdc6d29edf9216291b42288a7",
+      "judge": {
+        "codex_cli_version": "codex-cli 0.152.1",
+        "dataset_revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+        "execution_isolation": {
+          "ephemeral_session": true,
+          "sandbox": "read-only",
+          "user_config_loaded": false,
+          "workspace": "empty"
+        },
+        "generation_manifest_sha256": "456822fe9b53e893ed789cdfe4f88597cb91938bdc6d29edf9216291b42288a7",
+        "model": "gpt-5.6-luna",
+        "prompt_contract": "Frozen AA-LCR equality-checker prompt; emit only CORRECT or INCORRECT",
+        "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+        "reasoning_effort": "medium"
+      },
+      "judge_manifest_sha256": "bccba34d15ac51bf8471faeadc7f2205af9b5ba5faef0b5a65a71f0760a74c4b",
+      "receipt_manifest_sha256": "6809e3b050f3568b91c65653de0f13903768ce878310d3381845534cbb88175a",
+      "root": "/mnt/luke/evals/glm-5.3-flash-aa-lcr/bf16-mtp3-tp8-bt2048-kv9g-20260903/judges/gpt-5.6-luna-medium-codex-chatgpt",
+      "summary_sha256": "63ec7b2f6c63e18c3eb202d872177d80cf6611cbdbf11dcfa9f1cce6ae0af8ef"
+    },
+    "label": "BF16, MTP3, TP8/DCP1",
+    "pass_at_1": 0.7166666666666667
+  },
+  "created_utc": "2026-09-04T00:27:35.942168Z",
+  "interpretation_limit": "The question-cluster bootstrap treats the three observed generations per checkpoint and question as fixed. It estimates variation across questions and does not include additional free-running generation or equality-checker repeat variation.",
+  "paired": {
+    "attempts": 300,
+    "both_correct": 198,
+    "both_incorrect": 64,
+    "candidate_minus_reference": -0.013333333333333334,
+    "candidate_only_correct": 17,
+    "exact_mcnemar_two_sided_p": 0.6271025701571489,
+    "per_question_difference_counts": {
+      "-0.333333": 17,
+      "0.000000": 71,
+      "0.333333": 11,
+      "0.666667": 1
+    },
+    "question_cluster_bootstrap_95": {
+      "high": 0.02333333333333333,
+      "low": -0.05,
+      "replicates": 200000,
+      "sampling_unit": "AA-LCR question with all three attempts",
+      "seed": 20260903
+    },
+    "reference_only_correct": 21
+  },
+  "reference": {
+    "attempts": 300,
+    "correct": 219,
+    "identity": {
+      "generation_manifest_sha256": "e3c45e98b92935834533b4831783409260e87de1775958c25099308cec4a6faa",
+      "judge": {
+        "codex_cli_version": "codex-cli 0.152.1",
+        "dataset_revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+        "execution_isolation": {
+          "ephemeral_session": true,
+          "sandbox": "read-only",
+          "user_config_loaded": false,
+          "workspace": "empty"
+        },
+        "generation_manifest_sha256": "e3c45e98b92935834533b4831783409260e87de1775958c25099308cec4a6faa",
+        "model": "gpt-5.6-luna",
+        "prompt_contract": "Frozen AA-LCR equality-checker prompt; emit only CORRECT or INCORRECT",
+        "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+        "reasoning_effort": "medium"
+      },
+      "judge_manifest_sha256": "1e8b2ac1d553a0d8564859cfb621a92611799c332c177c0ecd76fe986196bec2",
+      "receipt_manifest_sha256": "3f345c207bb2c4777db720607e9a5d5cc51ef9bc14614d27e2be55976767c9e6",
+      "root": "/mnt/luke/evals/glm-5.3-flash-aa-lcr/qad-step1750-mtp3-tp4x3-20260903/judges/gpt-5.6-luna-medium-codex-chatgpt",
+      "summary_sha256": "19cfa3dac2ede80cce6fb3a3ec2f42b0cbeafc25e7a6b02691f784cc9dfa220a"
+    },
+    "label": "QAD step 1750, MTP3, TP4/DCP1",
+    "pass_at_1": 0.73
+  },
+  "scoring": "Mean equality-checker correctness across 300 attempts",
+  "status": "qualified"
+}
