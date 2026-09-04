@@ -37,7 +37,7 @@ do not require checkpoint paths or source-code bind mounts.
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache`; asynchronous engine-driven pinned shared memory is the default transfer path |
 | CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
 | Scheduler | 4,096 target tokens per step; execution-time compute-share fairness assigns 40% of contended model execution to prefill; scheduling interval 1 |
-| Root filesystem | Two layers, within standard Docker overlay2 limits |
+| Root filesystem | Three layers, within standard Docker overlay2 limits |
 | FlashKDA numerical stability | **qualified** with the stable FP32 forward-substitution inverse |
 | Qualification date | 2026-09-04 |
 
@@ -64,14 +64,18 @@ statistical power required to claim behavioral equivalence or improvement.
 ## Docker artifact
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260904-r24
-voipmonitor/vllm@sha256:ab4ff9d6fef85c49d372714e89f014fcb66c6b247c0e3f341eb56dc798fdd0cd
+voipmonitor/vllm:jovian-judgement-community-20260904-r25
+voipmonitor/vllm@sha256:89376e9aa49442a90754662ca1bb281bffbeca29bb7393e6e8281506e5ac4804
 ```
 
 The embedded source-lock SHA-256 is
-`5ef0481267b0e672c13ffb2c8ffe914d927a02eb652f5112e1c0fbbea6e84d49`.
+`8d99c847855c32bb2348cd58f8a3a72f97df9c5fbeb38223f94a3bdfb590d9d0`.
 The Docker digest fixes the runtime. Model repository names follow Hugging Face
 `main` unless an optional revision variable is supplied.
+
+The vLLM and B12X packages are byte-identical to the qualified R24 package
+trees. The R25 package replaces the LMCache Python control plane with the
+retrieve fast path specified below; native extensions are unchanged.
 
 ## Runtime backends
 
@@ -100,7 +104,7 @@ Workstation Edition host at stock clocks, PCIe Gen5 x16 links, tensor
 parallelism of four, FP8 target KV cache, a 4,096-token scheduler budget, full
 and piecewise decode graphs, exactly 16 NCCL channels, and a 2 MiB NCCL buffer.
 The measured vLLM tree, B12X tree, and model launcher are byte-identical to the
-R24 artifact. Each prefill value is a 30-second 32K-token measurement after a
+R25 artifact. Each prefill value is a 30-second 32K-token measurement after a
 30-second warmup. C1 and C8 are 30-second sustained context-zero decode cells.
 Other serving workloads were active on the host, so the table gives
 conservative rather than isolated peak throughput.
@@ -117,10 +121,11 @@ conservative rather than isolated peak throughput.
 Speculative output throughput varies with accepted length. Target steps per
 second isolates target-model execution speed.
 
-The published two-layer R24 image additionally completed a packaging smoke on
-the same four stock-clock GPUs. DCP4 DFlash2 with packed-NVFP4 cache and the
-2,048-token GPU page measured 12,769 prompt tok/s and 80.6 verifier steps/s;
-the observed 192.1 output tok/s corresponds to an accepted length of 2.38.
+The published three-layer image additionally completed a package-level
+full-CKV smoke on the same four stock-clock GPUs. DCP4 DFlash2 with
+packed-NVFP4 cache and 1,024-token LMCache pages measured 12,394 prompt tok/s
+and 81.1 verifier steps/s. The byte-identical R24 vLLM/B12X control measured
+12,397 prompt tok/s and 81.45 verifier steps/s under matched conditions.
 
 ### Complete-KV prefill
 
@@ -182,7 +187,7 @@ the qualified B12X, full-and-piecewise CUDA graph, FlashInfer sampler,
 `CUDAGRAPH_MODE` override is required.
 
 ```bash
-IMAGE=voipmonitor/vllm:jovian-judgement-community-20260904-r24
+IMAGE=voipmonitor/vllm:jovian-judgement-community-20260904-r25
 GPU_DEVICES=0,1,2,3
 PORT=8000
 docker pull "$IMAGE"
@@ -315,10 +320,20 @@ size, preventing incompatible cache objects from being reused.
 Qualification covered cold compute, vLLM automatic prefix reuse, LMCache DRAM
 restore, and filesystem restore for FP8 and NVFP4. External bytes were compared
 on every tensor-parallel rank across target attention, recurrent state, and
-DFlash sliding attention. A one-million-token request restored 999,424 tokens
-and recomputed the 576-token suffix in 1.14 to 1.54 seconds, depending on
-serving mode and cache format. Full-container restart tests also restored the
-expected chunk-aligned prefix from filesystem storage.
+DFlash sliding attention. Five matched one-million-token filesystem replays
+restored 999,424 tokens, recomputed the 576-token suffix, and completed in
+1.028 to 1.048 seconds; the median was 1.041 seconds. The R24 control median was
+1.274 seconds, so compact lookup-session references reduced replay latency by
+18.3%. The exact published image also passed a full-process restart restore in
+1.215 seconds with DCP4 full-CKV enabled and zero local-prefix-cache tokens.
+
+The retrieve path reads each reserved shared-memory tensor view once. It also
+references chunk hashes retained by the active lookup session instead of
+serializing and decoding the complete token sequence for prepare and commit on
+every worker. Capability negotiation retains complete retrieve keys when the
+server does not advertise session-reference support. Failure cleanup is
+idempotent: a failed prepare releases one lookup reader, while unregister owns
+pending-read cleanup before a rejected late commit.
 
 The matched TP4/DCP4 performance test used packed-NVFP4 KV cache, 1,024-token
 per-rank LMCache pages, stock clocks, and the same vLLM and B12X package trees
@@ -343,7 +358,7 @@ a cache execution cost.
 | vLLM | [R24 integration source](https://github.com/local-inference-lab/vllm/tree/integration/glm53-r23-lmcache-parser-20260904); commit `d49385468458cf97dff0fc8d9c8863f8082abf4f`; tree `e2c687bb823dbe1b37c3d9f9742a0ae54419fdb0`; package tree `17acb470467c1a6d4b318a3c4a0960794fb4da6a` |
 | FlashKDA | commit `3b225bf26bb8e218928a1fe14751cb48cf31d11b`; extension SHA-256 `16aece5ffb83c2dfb0355758bbbc9d6e0ea50a2cfc36ecee4936607d445aba0a` |
 | B12X | [R24 integration source](https://github.com/local-inference-lab/b12x/tree/integration/glm53-r23-lmcache-parser-20260904); commit `e3d0ae067f607538e3709ac3c30c7042276c6f88`; tree `d93cd222b027ed1df7f7df221007196994c80354`; package tree `fc977aa2b732935cd0f70c365d7f767b449d21da` |
-| LMCache | [PR 43](https://github.com/local-inference-lab/LMCache/pull/43) preserves complete DFlash pages; [PR 45](https://github.com/local-inference-lab/LMCache/pull/45) adds stride-correct asynchronous engine-driven hybrid stores; commit `415c5d60bd7b57e85f20c34a6f5a3e51f6018136`; tree `311de681786928048d9975db07bc81c70141668d`; package tree `6685246954c3e83d95dc1c1deff2ec82b5d430cc` |
+| LMCache | [PR 43](https://github.com/local-inference-lab/LMCache/pull/43) preserves complete DFlash pages; [PR 45](https://github.com/local-inference-lab/LMCache/pull/45) adds stride-correct asynchronous engine-driven hybrid stores; [PR 47](https://github.com/local-inference-lab/LMCache/pull/47) reuses retrieve tensor views; [PR 48](https://github.com/local-inference-lab/LMCache/pull/48) adds validated lookup-session references; [source mirror](https://github.com/local-inference-lab/LMCache/tree/artifact/jovian-judgement-community-20260904-r25-lmcache-source); commit `cf52fc51418c6b0146e1fcea0690c25ef4e947a0`; tree `f1f38f35c3e4975810d1e1c03d4fb8f845bf5cb3`; package tree `9cf07ca20e1dc7d11bb14e460662faa563f1c10d` |
 
 The [vLLM merge checklist](https://github.com/local-inference-lab/vllm/issues/590)
 lists each open pull request, dependency, resulting behavior, attribution, and
