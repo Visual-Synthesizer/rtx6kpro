@@ -1,0 +1,23 @@
+{
+  "artifact_kind": "AA-LCR Codex equality-checker run",
+  "client_concurrency": 4,
+  "created_utc": "2026-09-03T22:03:00.482784Z",
+  "judge": {
+    "codex_cli_version": "codex-cli 0.152.1",
+    "dataset_revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+    "execution_isolation": {
+      "ephemeral_session": true,
+      "sandbox": "read-only",
+      "user_config_loaded": false,
+      "workspace": "empty"
+    },
+    "generation_manifest_sha256": "e3c45e98b92935834533b4831783409260e87de1775958c25099308cec4a6faa",
+    "model": "gpt-5.6-luna",
+    "prompt_contract": "Frozen AA-LCR equality-checker prompt; emit only CORRECT or INCORRECT",
+    "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+    "reasoning_effort": "medium"
+  },
+  "judge_config_sha256": "3518373582f34122b274dce202a2d175404bbd577dd3158a5c2692776f5fb1ec",
+  "status": "implemented",
+  "timeout_seconds": 600.0
+}

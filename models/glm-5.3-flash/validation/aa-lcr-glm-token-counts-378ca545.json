@@ -1,0 +1,619 @@
+{
+  "artifact_kind": "AA-LCR prompt token counts",
+  "contexts": [
+    {
+      "chat": 95407,
+      "question_id": 1,
+      "raw": 95395,
+      "reported_cl100k": 94494
+    },
+    {
+      "chat": 95398,
+      "question_id": 2,
+      "raw": 95386,
+      "reported_cl100k": 94485
+    },
+    {
+      "chat": 95389,
+      "question_id": 3,
+      "raw": 95377,
+      "reported_cl100k": 94476
+    },
+    {
+      "chat": 113694,
+      "question_id": 4,
+      "raw": 113682,
+      "reported_cl100k": 113263
+    },
+    {
+      "chat": 113695,
+      "question_id": 5,
+      "raw": 113683,
+      "reported_cl100k": 113266
+    },
+    {
+      "chat": 76838,
+      "question_id": 6,
+      "raw": 76826,
+      "reported_cl100k": 71709
+    },
+    {
+      "chat": 76848,
+      "question_id": 7,
+      "raw": 76836,
+      "reported_cl100k": 71719
+    },
+    {
+      "chat": 76886,
+      "question_id": 8,
+      "raw": 76874,
+      "reported_cl100k": 71757
+    },
+    {
+      "chat": 76820,
+      "question_id": 9,
+      "raw": 76808,
+      "reported_cl100k": 71691
+    },
+    {
+      "chat": 78787,
+      "question_id": 10,
+      "raw": 78775,
+      "reported_cl100k": 73588
+    },
+    {
+      "chat": 78797,
+      "question_id": 11,
+      "raw": 78785,
+      "reported_cl100k": 73598
+    },
+    {
+      "chat": 78797,
+      "question_id": 12,
+      "raw": 78785,
+      "reported_cl100k": 73597
+    },
+    {
+      "chat": 78771,
+      "question_id": 13,
+      "raw": 78759,
+      "reported_cl100k": 73572
+    },
+    {
+      "chat": 79129,
+      "question_id": 14,
+      "raw": 79117,
+      "reported_cl100k": 74026
+    },
+    {
+      "chat": 83860,
+      "question_id": 15,
+      "raw": 83848,
+      "reported_cl100k": 78868
+    },
+    {
+      "chat": 83970,
+      "question_id": 16,
+      "raw": 83958,
+      "reported_cl100k": 78978
+    },
+    {
+      "chat": 83879,
+      "question_id": 17,
+      "raw": 83867,
+      "reported_cl100k": 78887
+    },
+    {
+      "chat": 80554,
+      "question_id": 18,
+      "raw": 80542,
+      "reported_cl100k": 75667
+    },
+    {
+      "chat": 101356,
+      "question_id": 19,
+      "raw": 101344,
+      "reported_cl100k": 96079
+    },
+    {
+      "chat": 101357,
+      "question_id": 20,
+      "raw": 101345,
+      "reported_cl100k": 96080
+    },
+    {
+      "chat": 101312,
+      "question_id": 21,
+      "raw": 101300,
+      "reported_cl100k": 96038
+    },
+    {
+      "chat": 102060,
+      "question_id": 22,
+      "raw": 102048,
+      "reported_cl100k": 95299
+    },
+    {
+      "chat": 102008,
+      "question_id": 23,
+      "raw": 101996,
+      "reported_cl100k": 95247
+    },
+    {
+      "chat": 102060,
+      "question_id": 24,
+      "raw": 102048,
+      "reported_cl100k": 95299
+    },
+    {
+      "chat": 101990,
+      "question_id": 25,
+      "raw": 101978,
+      "reported_cl100k": 95229
+    },
+    {
+      "chat": 102038,
+      "question_id": 26,
+      "raw": 102026,
+      "reported_cl100k": 95277
+    },
+    {
+      "chat": 99921,
+      "question_id": 27,
+      "raw": 99909,
+      "reported_cl100k": 93737
+    },
+    {
+      "chat": 99942,
+      "question_id": 28,
+      "raw": 99930,
+      "reported_cl100k": 93758
+    },
+    {
+      "chat": 99944,
+      "question_id": 29,
+      "raw": 99932,
+      "reported_cl100k": 93760
+    },
+    {
+      "chat": 99999,
+      "question_id": 30,
+      "raw": 99987,
+      "reported_cl100k": 93815
+    },
+    {
+      "chat": 79039,
+      "question_id": 31,
+      "raw": 79027,
+      "reported_cl100k": 74160
+    },
+    {
+      "chat": 79037,
+      "question_id": 32,
+      "raw": 79025,
+      "reported_cl100k": 74158
+    },
+    {
+      "chat": 103394,
+      "question_id": 33,
+      "raw": 103382,
+      "reported_cl100k": 97540
+    },
+    {
+      "chat": 103395,
+      "question_id": 34,
+      "raw": 103383,
+      "reported_cl100k": 97541
+    },
+    {
+      "chat": 103408,
+      "question_id": 35,
+      "raw": 103396,
+      "reported_cl100k": 97554
+    },
+    {
+      "chat": 82094,
+      "question_id": 36,
+      "raw": 82082,
+      "reported_cl100k": 80428
+    },
+    {
+      "chat": 82072,
+      "question_id": 37,
+      "raw": 82060,
+      "reported_cl100k": 80406
+    },
+    {
+      "chat": 82089,
+      "question_id": 38,
+      "raw": 82077,
+      "reported_cl100k": 80423
+    },
+    {
+      "chat": 82079,
+      "question_id": 39,
+      "raw": 82067,
+      "reported_cl100k": 80413
+    },
+    {
+      "chat": 82088,
+      "question_id": 40,
+      "raw": 82076,
+      "reported_cl100k": 80422
+    },
+    {
+      "chat": 97924,
+      "question_id": 41,
+      "raw": 97912,
+      "reported_cl100k": 93610
+    },
+    {
+      "chat": 97950,
+      "question_id": 42,
+      "raw": 97938,
+      "reported_cl100k": 93636
+    },
+    {
+      "chat": 84460,
+      "question_id": 43,
+      "raw": 84448,
+      "reported_cl100k": 84446
+    },
+    {
+      "chat": 84450,
+      "question_id": 44,
+      "raw": 84438,
+      "reported_cl100k": 84436
+    },
+    {
+      "chat": 84446,
+      "question_id": 45,
+      "raw": 84434,
+      "reported_cl100k": 84432
+    },
+    {
+      "chat": 84510,
+      "question_id": 46,
+      "raw": 84498,
+      "reported_cl100k": 84496
+    },
+    {
+      "chat": 84454,
+      "question_id": 47,
+      "raw": 84442,
+      "reported_cl100k": 84440
+    },
+    {
+      "chat": 84489,
+      "question_id": 48,
+      "raw": 84477,
+      "reported_cl100k": 84475
+    },
+    {
+      "chat": 84456,
+      "question_id": 49,
+      "raw": 84444,
+      "reported_cl100k": 84442
+    },
+    {
+      "chat": 84454,
+      "question_id": 50,
+      "raw": 84442,
+      "reported_cl100k": 84440
+    },
+    {
+      "chat": 84450,
+      "question_id": 51,
+      "raw": 84438,
+      "reported_cl100k": 84436
+    },
+    {
+      "chat": 84453,
+      "question_id": 52,
+      "raw": 84441,
+      "reported_cl100k": 84439
+    },
+    {
+      "chat": 84450,
+      "question_id": 53,
+      "raw": 84438,
+      "reported_cl100k": 84436
+    },
+    {
+      "chat": 84465,
+      "question_id": 54,
+      "raw": 84453,
+      "reported_cl100k": 84451
+    },
+    {
+      "chat": 103412,
+      "question_id": 55,
+      "raw": 103400,
+      "reported_cl100k": 103414
+    },
+    {
+      "chat": 103407,
+      "question_id": 56,
+      "raw": 103395,
+      "reported_cl100k": 103409
+    },
+    {
+      "chat": 103407,
+      "question_id": 57,
+      "raw": 103395,
+      "reported_cl100k": 103409
+    },
+    {
+      "chat": 103418,
+      "question_id": 58,
+      "raw": 103406,
+      "reported_cl100k": 103420
+    },
+    {
+      "chat": 103434,
+      "question_id": 59,
+      "raw": 103422,
+      "reported_cl100k": 103436
+    },
+    {
+      "chat": 109364,
+      "question_id": 60,
+      "raw": 109352,
+      "reported_cl100k": 107452
+    },
+    {
+      "chat": 109359,
+      "question_id": 61,
+      "raw": 109347,
+      "reported_cl100k": 107447
+    },
+    {
+      "chat": 109350,
+      "question_id": 62,
+      "raw": 109338,
+      "reported_cl100k": 107441
+    },
+    {
+      "chat": 103414,
+      "question_id": 63,
+      "raw": 103402,
+      "reported_cl100k": 103416
+    },
+    {
+      "chat": 103399,
+      "question_id": 64,
+      "raw": 103387,
+      "reported_cl100k": 103401
+    },
+    {
+      "chat": 90852,
+      "question_id": 65,
+      "raw": 90840,
+      "reported_cl100k": 89459
+    },
+    {
+      "chat": 90834,
+      "question_id": 66,
+      "raw": 90822,
+      "reported_cl100k": 89438
+    },
+    {
+      "chat": 90844,
+      "question_id": 67,
+      "raw": 90832,
+      "reported_cl100k": 89448
+    },
+    {
+      "chat": 90831,
+      "question_id": 68,
+      "raw": 90819,
+      "reported_cl100k": 89435
+    },
+    {
+      "chat": 114611,
+      "question_id": 69,
+      "raw": 114599,
+      "reported_cl100k": 114563
+    },
+    {
+      "chat": 114602,
+      "question_id": 70,
+      "raw": 114590,
+      "reported_cl100k": 114554
+    },
+    {
+      "chat": 114604,
+      "question_id": 71,
+      "raw": 114592,
+      "reported_cl100k": 114556
+    },
+    {
+      "chat": 114607,
+      "question_id": 72,
+      "raw": 114595,
+      "reported_cl100k": 114559
+    },
+    {
+      "chat": 100632,
+      "question_id": 73,
+      "raw": 100620,
+      "reported_cl100k": 100518
+    },
+    {
+      "chat": 100604,
+      "question_id": 74,
+      "raw": 100592,
+      "reported_cl100k": 100490
+    },
+    {
+      "chat": 112630,
+      "question_id": 75,
+      "raw": 112618,
+      "reported_cl100k": 112016
+    },
+    {
+      "chat": 112608,
+      "question_id": 76,
+      "raw": 112596,
+      "reported_cl100k": 111994
+    },
+    {
+      "chat": 112635,
+      "question_id": 77,
+      "raw": 112623,
+      "reported_cl100k": 112020
+    },
+    {
+      "chat": 112660,
+      "question_id": 78,
+      "raw": 112648,
+      "reported_cl100k": 112046
+    },
+    {
+      "chat": 112623,
+      "question_id": 79,
+      "raw": 112611,
+      "reported_cl100k": 112009
+    },
+    {
+      "chat": 109261,
+      "question_id": 80,
+      "raw": 109249,
+      "reported_cl100k": 109057
+    },
+    {
+      "chat": 109290,
+      "question_id": 81,
+      "raw": 109278,
+      "reported_cl100k": 109091
+    },
+    {
+      "chat": 106999,
+      "question_id": 82,
+      "raw": 106987,
+      "reported_cl100k": 106804
+    },
+    {
+      "chat": 106991,
+      "question_id": 83,
+      "raw": 106979,
+      "reported_cl100k": 106796
+    },
+    {
+      "chat": 106995,
+      "question_id": 84,
+      "raw": 106983,
+      "reported_cl100k": 106800
+    },
+    {
+      "chat": 107017,
+      "question_id": 85,
+      "raw": 107005,
+      "reported_cl100k": 106822
+    },
+    {
+      "chat": 106155,
+      "question_id": 86,
+      "raw": 106143,
+      "reported_cl100k": 106087
+    },
+    {
+      "chat": 106158,
+      "question_id": 87,
+      "raw": 106146,
+      "reported_cl100k": 106090
+    },
+    {
+      "chat": 106155,
+      "question_id": 88,
+      "raw": 106143,
+      "reported_cl100k": 106087
+    },
+    {
+      "chat": 106167,
+      "question_id": 89,
+      "raw": 106155,
+      "reported_cl100k": 106099
+    },
+    {
+      "chat": 89018,
+      "question_id": 90,
+      "raw": 89006,
+      "reported_cl100k": 88622
+    },
+    {
+      "chat": 110875,
+      "question_id": 91,
+      "raw": 110863,
+      "reported_cl100k": 110894
+    },
+    {
+      "chat": 110895,
+      "question_id": 92,
+      "raw": 110883,
+      "reported_cl100k": 110914
+    },
+    {
+      "chat": 96681,
+      "question_id": 93,
+      "raw": 96669,
+      "reported_cl100k": 96559
+    },
+    {
+      "chat": 110840,
+      "question_id": 94,
+      "raw": 110828,
+      "reported_cl100k": 110550
+    },
+    {
+      "chat": 110840,
+      "question_id": 95,
+      "raw": 110828,
+      "reported_cl100k": 110550
+    },
+    {
+      "chat": 110836,
+      "question_id": 96,
+      "raw": 110824,
+      "reported_cl100k": 110546
+    },
+    {
+      "chat": 110838,
+      "question_id": 97,
+      "raw": 110826,
+      "reported_cl100k": 110548
+    },
+    {
+      "chat": 113623,
+      "question_id": 98,
+      "raw": 113611,
+      "reported_cl100k": 113491
+    },
+    {
+      "chat": 113632,
+      "question_id": 99,
+      "raw": 113620,
+      "reported_cl100k": 113500
+    },
+    {
+      "chat": 94792,
+      "question_id": 100,
+      "raw": 94780,
+      "reported_cl100k": 94652
+    }
+  ],
+  "dataset": {
+    "prompt_manifest_sha256": "13f8fdc097679d5ead0c4bba6044b254a1fcd80f8e5afb9555c68bd3d0abd09d",
+    "repository": "ArtificialAnalysis/AA-LCR",
+    "revision": "bdae010bbce259820c0e34c1d7cce210d966fb75"
+  },
+  "maximum": 114611,
+  "maximum_question_id": 69,
+  "mean": 97318.11,
+  "median": 100972.0,
+  "minimum": 76820,
+  "questions": 100,
+  "status": "implemented",
+  "tokenizer_checkpoint": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+  "tokenizer_revision": "378ca54585c46542bad1f3cb3ed0d73ae51cdb62"
+}

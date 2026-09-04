@@ -4,180 +4,199 @@
   <img src="../images/glm-5.3-flash-jovian-judgement-branch-logo.png"
        width="520" alt="Gold Jovian Judgement emblem with an eye, scales, and a star">
 </p>
-<p align="center"><em>Jovian Judgement branch logo, published by Luke in the
-<a href="https://discord.com/channels/1466898002793857221/1476263308242714718/1543077243398393927">community Discord</a>.</em></p>
+<p align="center"><em>Jovian Judgement branch logo, published by Luke for
+Local Inference Lab.</em></p>
 
-This page is the stable deployment and performance reference for
-GLM-5.3-Flash on RTX PRO 6000 Blackwell. The qualified serving artifact is
-Jovian Judgement Community — 20260831-r8.
+This page specifies the qualified GLM-5.3-Flash deployment for four NVIDIA RTX
+PRO 6000 Blackwell Workstation Edition GPUs. The runtime serves the
+`local-inference-lab/GLM-5.3-Flash-NVFP4` target checkpoint without
+speculation, with three-token Multi-Token Prediction (MTP), or with the
+`local-inference-lab/GLM-5.3-Flash-DFlash2` draft checkpoint.
 
-Terminology used below:
-
-- The vLLM inference engine `vLLM` integrates the B12X kernel/backend stack
-  `B12X`.
-- 4-bit floating-point `FP4`, NVIDIA FP4 `NVFP4`, 8-bit floating-point `FP8`,
-  and Microscaling FP8 `MXFP8` name numeric formats.
-- Multi-Token Prediction `MTP`, Decode Context Parallelism `DCP`, Multi-head Latent Attention `MLA`,
-  Mixture of Experts `MoE`, and Time To First Token `TTFT` name model or serving
-  operations.
-- Compute Unified Device Architecture `CUDA`, NVIDIA Collective Communications Library `NCCL`,
-  Peripheral Component Interconnect Express `PCIe`, and Streaming Multiprocessor 120 `SM120`
-  name the runtime and hardware interfaces.
-
-The runbook serves `local-inference-lab/GLM-5.3-Flash-NVFP4` on four NVIDIA
-RTX PRO 6000 Blackwell GPUs. The Jovian Judgement Community image
-supports ordinary decode, three-token Multi-Token Prediction (MTP), and a
-seven-token DFlash2 draft loaded from
-`local-inference-lab/GLM-5.3-Flash-DFlash2`.
-
-The commands use Hugging Face model names and named Docker volumes. They do not
-require local checkpoint paths or source-code bind mounts.
+The commands use Hugging Face repository names and named Docker volumes. They
+do not require checkpoint paths or source-code bind mounts.
 
 ## Status
 
-| Field | Value |
+| Capability | Status |
 |---|---|
-| Runtime status | **qualified** for Tensor Parallelism 4 (TP4) with Decode Context Parallelism 1 (DCP1) in all three serving modes |
-| Additional qualification | **qualified** for TP4/DCP4 DFlash2 prefill with full compressed-key/value (CKV) gathering |
-| Hardware | four RTX PRO 6000 Blackwell Workstation Edition GPUs, PCIe 5.0 x16, stock clocks |
-| Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4` |
-| Target update policy | resolve the Hugging Face `main` branch at startup; no runtime revision pin |
-| Target routed experts | ModelOpt NVFP4, B12X 4-bit-weight/4-bit-activation (W4A4) |
-| Target key-value cache | FP8 compressed Multi-head Latent Attention (MLA) |
-| DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2` |
-| DFlash2 update policy | resolve the Hugging Face `main` branch at startup; no runtime revision pin |
-| DFlash2 weights | pre-serialized ModelOpt MXFP8; no online weight quantization |
-| Cache page geometry | independent 512-token target and recurrent-state pages |
-| Scheduler limit | `MAX_NUM_BATCHED_TOKENS=4096` |
-| Concurrent prefill cadence | `PREFILL_SCHEDULE_INTERVAL=8`; active only while eligible decode work is running |
-| CUDA graphs | target and speculative decode are captured; Gated Delta Network (GDN) prefill is eager |
-| Qualification date | 2026-08-31 |
-| Canonical DFlash2 locator validation | **qualified** on 2026-08-31 with identical MXFP8 weights |
+| Tensor parallelism of four with one decode-context rank | **qualified** for no speculation, MTP depth 3, and DFlash2 depth 7 |
+| Tensor parallelism of four with four decode-context ranks | **qualified** for the same three serving modes, including complete-KV prefill |
+| Two decode-context ranks | **implemented**; not independently performance-qualified for this artifact |
+| Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
+| Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
+| QAD research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity and AA-LCR are measured, but the checkpoint is not a qualified serving target |
+| AA-LCR capability evaluation | **qualified** for the exact published-NVFP4 and QAD checkpoint-and-runtime configurations in the [paired report](glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md) |
+| DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
+| Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
+| DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
+| Target KV cache | FP8 by default; packed NVFP4 is selectable |
+| GPU prefix cache | **qualified** with independently sized target and recurrent allocations |
+| Native DRAM offload | **qualified** and opt-in with `CACHE_MODE=native` |
+| LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache` |
+| CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
+| Scheduler | 4,096 target tokens per step; concurrent-prefill interval 8 |
+| Root filesystem | Two layers, within standard Docker overlay2 limits |
+| Qualification date | 2026-09-03 |
+
+The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md)
+and [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md)
+are research-only. They measure a reproducible FlashInfer CUTLASS path rather
+than the B12X serving path specified here.
+
+The [AA-LCR result](glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md)
+qualifies the published NVFP4 and QAD configurations on 100 long-context
+questions with three independent generations each. The published checkpoint
+scores 74.00% and QAD scores 73.00%; the paired evidence does not distinguish
+their accuracy. The accompanying
+[reproduction specification](glm-5.3-flash/aa-lcr-reproduction.md) fixes the
+dataset, prompt, sampling, runtime, equality checker, and receipt validation.
 
 ## Docker artifact
 
-Use the digest for byte-identical runtime layers:
-
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260831-r8
-voipmonitor/vllm@sha256:827a64ce0cea267aad843b3d521a47d742a6e78b502eaec7c05b4ae8bf403194
+voipmonitor/vllm:jovian-judgement-community-20260903-r20
+voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340
 ```
 
 The embedded source-lock SHA-256 is
-`5ca5c81dff7dcf1b864dbb11f230df9f6276ca46e88c3b2a81ebec15e09dd21a`.
-Both checkpoint locators follow their Hugging Face `main` branches. The image
-digest therefore fixes the runtime but intentionally does not pin mutable model
-revisions.
-
-## Source contract
-
-The vLLM package tree is
-`4daf199faeab2208c975433973adf5cefce6d2ce`. It is composed from
-`local-inference-lab/vllm` branch `dev/jovian-judgement` at
-`0b67266a0f37d6146a8403fb8482403c62f412d5` and the following non-draft pull
-request heads:
-
-| Pull request | Resulting behavior |
-|---|---|
-| [vLLM #515](https://github.com/local-inference-lab/vllm/pull/515) `3bcb90163d9f` | Retains CUDA-graph profiling resources until teardown. |
-| [vLLM #516](https://github.com/local-inference-lab/vllm/pull/516) `db0f14444e8c` | Makes the B12X profiling warmup lifetime-safe. |
-| [vLLM #517](https://github.com/local-inference-lab/vllm/pull/517) `92d807af333b` | Gathers full C4 CKV for DCP prefill. |
-| [vLLM #530](https://github.com/local-inference-lab/vllm/pull/530) `3609a3db4986` | Uses FlashKDA recurrent checkpoints for GLM-5.3 prefill. |
-| [vLLM #531](https://github.com/local-inference-lab/vllm/pull/531) `b8edca554d21` | Reuses immutable B12X C4 indexer plans. |
-| [vLLM #532](https://github.com/local-inference-lab/vllm/pull/532) `71054201ae23` | Parallelizes C4 pool writes and bounds visible pages. |
-| [vLLM #533](https://github.com/local-inference-lab/vllm/pull/533) `d6ace9116f9c` | Preserves replicated DFlash2 cache geometry under DCP. |
-| [vLLM #535](https://github.com/local-inference-lab/vllm/pull/535) `5f8e00d6c33a` | Separates target and recurrent cache pages at 512 tokens. |
-| [vLLM #536](https://github.com/local-inference-lab/vllm/pull/536) `9f27029f55fd` | Checkpoints target GDN state for MTP prefill. |
-| [vLLM #537](https://github.com/local-inference-lab/vllm/pull/537) `236032509531` | Compacts MTP prefill outputs before Mixture-of-Experts (MoE) compute. |
-| [vLLM #539](https://github.com/local-inference-lab/vllm/pull/539) `d59cea8e55f6` | Preserves the embedding of a valid MTP token at position zero. |
-| [vLLM #546](https://github.com/local-inference-lab/vllm/pull/546) `2412a6f34ab0` | Applies the configured prefill cadence to non-data-parallel engines, validates the scheduler step-counter contract, and avoids empty pipeline-parallel steps when decode is temporarily ineligible. |
-
-The reproducible vLLM composition commit is
-`voipmonitor/vllm@f311938fab3e7ffccfc0713d5518025c3c811725` with tree
-`f5e05de47a9e9ff77c73f623347675a11b7a0d02`. Pull request #513 is not part of
-this package tree.
-
-The B12X package tree is
-`6de9871d15dab093340695518fec0f744289e676`. It is composed from B12X
-`master@fc1d4b68f7a5b0cfdb88bf06abccd869f5c589d5` and two non-draft
-performance pull requests:
-
-| Pull request | Scope | Qualified kernel result |
-|---|---|---:|
-| [B12X #259](https://github.com/local-inference-lab/b12x/pull/259) `e5509cc95b8f` | Selects a wider SM120 TF32 multi-head-connection projection for hidden size 4096 and 2,304–3,583 prefill rows. This operation is shared by all three target-serving modes. | 31.67% projection-throughput increase at 3,072 rows |
-| [B12X #260](https://github.com/local-inference-lab/b12x/pull/260) `b68c197262d5` | Increases device-bounded shared candidate capacity and omits unused score output in the paged C4 top-k selector. This operation is shared by all three target-prefill modes. | 2.01% selector-throughput increase at 4,080 query rows |
-
-Those percentages qualify the named fixed-work kernels, not end-to-end server
-throughput. The reproducible B12X composition commit is
-`voipmonitor/b12x@6255090a03b12c3f7d552102a02fac0b542fb8c9` with tree
-`0bb58d0dcc10e29e00ff9850c0d719fca1aba5ad`.
+`9a6167d415d824e1707ba7df0dd5906e05c004f1ed2666f80f2f9e1ea9fde4be`.
+The Docker digest fixes the runtime. Model repository names follow Hugging Face
+`main` unless an optional revision variable is supplied.
 
 ## Runtime backends
 
 | Operation | Selected implementation |
 |---|---|
-| Target sparse MLA attention and C4 indexer | B12X |
-| Target GDN prefill | FlashKDA recurrent checkpoints |
-| Target GDN decode | B12X live-tensor KDA when eligible; automatic resolver retains the Triton fallback |
+| Target sparse attention and C4 index selection | B12X |
+| Target gated-delta-network prefill | FlashKDA by default; B12X KDA is explicitly selectable |
+| Target gated-delta-network decode | B12X when eligible, with Triton fallback |
 | Target routed experts | B12X NVFP4 W4A4 |
 | Target linear layers | B12X |
-| Tensor-parallel all-reduce | B12X PCIe first; PyNCCL outside the B12X dispatch range |
+| Tensor-parallel all-reduce | B12X PCIe one-shot/two-shot first; PyNCCL outside the qualified B12X ranges |
 | MTP attention | B12X |
-| MTP MXFP8 experts | Humming |
-| DFlash2 MXFP8 linear layers | `B12xMxfp8LinearKernel` |
-| DFlash2 fused context key/value projection | `B12xMxfp8LinearKernel` |
-| DFlash2 local attention | FlashAttention 2 |
+| MTP experts | Marlin |
+| DFlash2 MXFP8 linear and fused key/value projections | B12X |
+| DFlash2 local attention | Graph-safe split-KV FlashAttention |
 | Sampling | FlashInfer |
+| External cache | LMCache DRAM L1 and native-filesystem L2 when selected |
 
 DeepGEMM and TileLang are installed dependencies but are not selected for the
-target, MTP, or DFlash2 hot paths in this serving contract.
+target, MTP, or DFlash2 hot paths.
 
-`CUDAGRAPH_MODE=FULL` is requested. The GLM GDN backend supports uniform-batch
-decode capture but not full prefill capture, so vLLM resolves target execution
-to `FULL_DECODE_ONLY`. MTP and DFlash2 decode graphs are captured. Prefill is
-eager.
+## Qualified performance
 
-## Start one of the three DCP1 modes
+The measurements used four stock-clock RTX PRO 6000 Blackwell Workstation
+Edition GPUs with PCIe Gen5 x16 links, tensor parallelism of four, FP8 target
+KV cache, a 4,096-token scheduler budget, full and piecewise decode graphs,
+exactly 16 NCCL channels, and a 2 MiB NCCL buffer. Prefill values are medians of
+three cold 32K-token requests. C1 and C8 decode values are coordinate-wise
+medians of three 30-second context-zero samples. Each DCP4 C8 run was followed
+by a short C1 request to validate the transition from an eight-request CUDA
+graph to a one-request graph.
 
-Set the immutable image, the four desired physical GPUs, and a unique container
-name. The qualification host used GPUs 4, 5, 6, and 7; `0,1,2,3` below is a
-portable four-GPU example.
+| DCP | Serving mode | 32K prefill tok/s | C1 output tok/s | C1 steps/s | C1 accepted/step | C8 output tok/s | C8 steps/s | C8 accepted/step |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|
+| 1 | No speculation | 14,908 | 169.76 | — | — | 735.86 | — | — |
+| 1 | MTP, depth 3 | 14,507 | 256.33 | 105.15 | 2.438 | 894.96 | 370.06 | 2.440 |
+| 1 | DFlash2, depth 7 | 14,691 | 214.27 | 89.46 | 2.436 | 689.35 | 291.12 | 2.370 |
+| 4 | No speculation | 13,019 | 151.46 | — | — | 666.02 | — | — |
+| 4 | MTP, depth 3 | 12,838 | 234.70 | 93.67 | 2.513 | 843.97 | 341.79 | 2.471 |
+| 4 | DFlash2, depth 7 | 13,028 | 207.92 | 81.12 | 2.563 | 645.85 | 263.11 | 2.456 |
+
+Speculative output throughput varies with accepted length. Target steps per
+second isolates target-model execution speed.
+
+### Complete-KV prefill
+
+With four decode-context ranks, every rank must select sparse-attention
+candidates from the complete target KV sequence rather than its rank-local
+quarter. The qualified implementation gathers the complete target KV view and
+keeps recurrent-state cache ownership independent. On DFlash2 depth 7, the
+implementation measured 12,999 prompt tok/s versus 9,858 prompt tok/s for
+rank-local selection, a 31.86% increase. The packaged configuration measured
+13,028 prompt tok/s in the three-run qualification above.
+
+### Comparison with the 2026-09-02 community artifact
+
+The public `jovian-judgement-community-20260902-r17` artifact used the same
+stock GPU quartet and TP4/DCP1, but used 32 NCCL channels and 512-token split
+cache pages. The comparison therefore measures complete artifacts rather than
+one isolated source change.
+
+| Workload | 20260902-r17 | 20260903-r20 | Change |
+|---|---:|---:|---:|
+| No-spec 32K prefill | 14,663 tok/s | 14,908 tok/s | +1.67% |
+| MTP, depth 3, 32K prefill | 14,272 tok/s | 14,507 tok/s | +1.65% |
+| DFlash2, depth 7, 32K prefill | 14,323 tok/s | 14,691 tok/s | +2.57% |
+| No-spec C1 output | 163.43 tok/s | 169.76 tok/s | +3.87% |
+| No-spec C8 output | 734.96 tok/s | 735.86 tok/s | +0.12% |
+| MTP, depth 3, C1 target steps | 102.53 steps/s | 105.15 steps/s | +2.56% |
+| MTP, depth 3, C8 target steps | 374.58 steps/s | 370.06 steps/s | -1.21% |
+| DFlash2, depth 7, C1 target steps | 89.78 steps/s | 89.46 steps/s | -0.36% |
+| DFlash2, depth 7, C8 target steps | 294.22 steps/s | 291.12 steps/s | -1.05% |
+
+Speculative C8 output rates are 894.96 tok/s for MTP depth 3 and 689.35 tok/s
+for DFlash2 depth 7. They are respectively 5.41% and 10.83% below the earlier
+artifact because the measured accepted lengths fell from 2.538 to 2.440 and
+from 2.613 to 2.370. Target-step throughput, which isolates runtime execution
+from data-dependent proposal acceptance, changed by -1.21% and -1.05%.
+
+### Gated-delta-network prefill backend
+
+The B12X KDA comparison used the same source tree, hardware, clocks, scheduler,
+and three 32K-token samples per cell.
+
+| Decode-context configuration | B12X KDA | FlashKDA | B12X change |
+|---|---:|---:|---:|
+| One rank per request | 14,899 prompt tok/s | 14,900 prompt tok/s | -0.01% |
+| Four ranks with complete-KV gathering | 13,106 prompt tok/s | 13,242 prompt tok/s | -1.03% |
+
+B12X KDA is qualified as an explicit backend. FlashKDA remains the default
+because it is tied with one decode-context rank and faster with four.
+
+## Start the server
+
+Select a serving mode and run the common command. The image already contains
+the qualified B12X, full-and-piecewise CUDA graph, FlashInfer sampler,
+16-channel NCCL, 2 MiB NCCL buffer, and one-thread OpenMP defaults. No
+`CUDAGRAPH_MODE` override is required.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:827a64ce0cea267aad843b3d521a47d742a6e78b502eaec7c05b4ae8bf403194
+IMAGE=voipmonitor/vllm:jovian-judgement-community-20260903-r20
 GPU_DEVICES=0,1,2,3
+PORT=8000
+docker pull "$IMAGE"
 ```
 
-Select exactly one mode:
+Ordinary serving without speculative tokens:
 
 ```bash
-# Ordinary decode without speculative tokens.
-NAME=jovian-judgement-nomtp-dcp1
-MODE_ARGS=(-e SPECULATOR=mtp -e MTP=0)
+NAME=jovian-judgement-nospec
+MODE_ARGS=(-e SPECULATOR=mtp -e MTP_DEPTH=0)
 ```
 
-```bash
-# Three-token built-in MTP.
-NAME=jovian-judgement-mtp3-dcp1
-MODE_ARGS=(-e SPECULATOR=mtp -e MTP=3)
-```
+Three-token MTP:
 
 ```bash
-# DFlash2 with its trained default of seven draft tokens.
-NAME=jovian-judgement-dflash2-dcp1
+NAME=jovian-judgement-mtp3
+MODE_ARGS=(-e SPECULATOR=mtp -e MTP_DEPTH=3)
+```
+
+DFlash2 with its trained seven-draft-token configuration:
+
+```bash
+NAME=jovian-judgement-dflash2
 MODE_ARGS=(
   -e SPECULATOR=dflash2
-  -e NUM_SPECULATIVE_TOKENS=7
+  -e DFLASH_DEPTH=7
   -e DFLASH_MODEL=local-inference-lab/GLM-5.3-Flash-DFlash2
-  -e DFLASH_MODEL_REVISION=
 )
 ```
 
-Run the selected mode:
+Common GPU-cache command:
 
 ```bash
-docker rm -f "$NAME" 2>/dev/null || true
-
 docker run -d \
   --name "$NAME" \
   --init \
@@ -185,222 +204,102 @@ docker run -d \
   --network host \
   --ipc host \
   --shm-size 32g \
-  -v jovian-judgement-vllm-cache:/cache \
+  -v jovian-judgement-runtime-cache:/cache \
   -v jovian-judgement-huggingface-cache:/root/.cache/huggingface \
-  -e PORT=5001 \
+  -e MODEL=local-inference-lab/GLM-5.3-Flash-NVFP4 \
+  -e CACHE_MODE=vram \
+  -e KV_CACHE_QUANT=fp8_ds_mla \
+  -e CUDAGRAPH_MODE=FULL_AND_PIECEWISE \
+  -e PORT="$PORT" \
   -e TP=4 \
   -e DCP=1 \
-  -e MAX_MODEL_LEN=262144 \
-  -e MAX_NUM_SEQS=16 \
+  -e MAX_MODEL_LEN=1048576 \
+  -e MAX_NUM_SEQS=32 \
   -e MAX_NUM_BATCHED_TOKENS=4096 \
   -e PREFILL_SCHEDULE_INTERVAL=8 \
-  -e MAX_CUDAGRAPH_CAPTURE_SIZE=128 \
-  -e GPU_MEMORY_UTILIZATION=0.90 \
-  -e B12X_PCIE_ALLREDUCE=1 \
-  -e NCCL_MIN_NCHANNELS=32 \
-  -e NCCL_MAX_NCHANNELS=32 \
-  -e NCCL_CUMEM_ENABLE=0 \
-  -e NCCL_IB_DISABLE=1 \
-  -e NCCL_P2P_LEVEL=SYS \
-  -e NCCL_PROTO=LL,LL128,Simple \
-  -e OMP_NUM_THREADS=2 \
+  -e GPU_MEMORY_UTILIZATION=0.93 \
   "${MODE_ARGS[@]}" \
   "$IMAGE"
 ```
 
-For DCP4 full-CKV target prefill in any of the three serving modes, replace
-`-e DCP=1` with:
+For two or four decode-context ranks, replace `DCP=1` with `DCP=2` or `DCP=4`.
+The launcher enables complete-KV gathering automatically when DCP is greater
+than one. This applies to no speculation, MTP, and DFlash2.
+
+To test the qualified B12X gated-delta-network prefill backend, add:
 
 ```bash
-  -e DCP=4 \
-  -e DCP_CKV_GATHER=1 \
+-e GLM53_KDA_PREFILL_BACKEND=b12x
 ```
 
-The launcher enables full-CKV gathering automatically when `DCP` is greater
-than one; the explicit `DCP_CKV_GATHER=1` documents the selected behavior.
-No-spec, MTP, and DFlash2 share this target-prefill mechanism. The DCP4
-performance result below qualifies the DFlash2 mode specifically.
+The default `GLM53_KDA_PREFILL_BACKEND=flashkda` is faster or equal in the
+qualified configurations.
 
-## Verify startup
+### Cache page geometry
+
+The launcher owns cache page geometry; normal deployments should not pass a
+page-size argument. GPU-only and native-offload modes use 2,048-token target
+and recurrent pages. LMCache derives per-rank pages from its 4,096-token object
+size and the selected DCP value. A DFlash2 sliding window smaller than one
+engine page is transferred as one complete engine page so no live cache bytes
+are omitted.
+
+The 2,048-token GPU page increases usable KV capacity without a measurable
+prefill or decode regression. It does not change the public vLLM attention
+block size, which remains 256 tokens.
+
+## Native DRAM offload
+
+Use the common server command with these cache settings:
 
 ```bash
-curl -fsS http://127.0.0.1:5001/health
-
-docker logs "$NAME" 2>&1 | grep -E \
-  'speculative_config|B12X PCIe|B12xMxfp8|HUMMING|FlashAttention version 2|split GLM-5.3 cache pages|GPU KV cache size|Graph capturing finished|Application startup complete'
-
-curl -fsS http://127.0.0.1:5001/v1/chat/completions \
-  -H 'Content-Type: application/json' \
-  -d '{"model":"GLM-5.3-Flash-NVFP4","messages":[{"role":"user","content":"Reply with exactly READY."}],"temperature":0,"max_tokens":64}'
+-e CACHE_MODE=native
+-e NATIVE_KV_OFFLOADING_SIZE_GB=64
 ```
 
-Expected common markers include B12X NVFP4 MoE, B12X PCIe all-reduce, and
-512-token target plus recurrent pages. MTP adds `HUMMING` for its MXFP8
-experts. DFlash2 adds `B12xMxfp8LinearKernel` and FlashAttention version 2.
+The launcher enables the shareable cuMem allocator required by the native
+offload backend.
 
-## Measured performance
+## LMCache DRAM and filesystem storage
 
-The DCP1 table was measured on physical GPUs 4–7 with PCIe 5.0 x16 links. Rows
-use stock clocks unless their mode explicitly identifies the research-only
-`VRAM +6000` profile. Every server used TP4, DCP1, FP8 target KV, 512/512 cache
-pages, B12X PCIe all-reduce, 32 minimum and maximum NCCL channels, and
-`MAX_NUM_BATCHED_TOKENS=4096`. These isolated benchmark cells were measured on
-the same kernel/backend composition as the r8 image. Pull request #546 changes
-only scheduler fairness while prefill and decode requests overlap; its cadence
-path is inactive during isolated CC1 decode or standalone prefill.
-The target repository's `main` branch has the same 49 runtime files as the
-qualified target revision; only its model card differs. A 2026-08-31 smoke test
-loaded the byte-identical MXFP8 draft weights through the canonical DFlash2
-repository and completed speculative inference on GPUs 4–7.
+LMCache uses a sidecar process in the same container. It stores complete
+4,096-token objects in DRAM and optionally in a mounted filesystem. Use a
+shared-memory allocation of at least 96 GiB; 128 GiB is the qualified setting.
 
-The measured DFlash2 checkpoint contents have `model.safetensors` SHA-256
-`c033e03d47c7d5608596c8fc4e9336a1fe086eb781c08fe031be2bdea1614e58`.
-The community launcher follows both checkpoints' `main` branches, so a later
-target or draft update requires fresh performance qualification and may not
-reproduce the rows below.
-
-The 32k prefill request contained exactly 32,320 supplied token IDs, used a
-unique `cache_salt`, streamed one generated token, and measured client
-time-to-first-token (TTFT). One unreported warmup preceded three samples; the
-table reports their median. This is an end-to-end TTFT measurement. For
-speculative modes it includes the work required to emit the first verified
-token, not only isolated target-kernel time.
-
-CC1 decode used `llm-decode-bench` 0.4.29, an empty-context decode cell,
-`max_tokens=8192`, greedy sampling, a three-second warmup, and a 30-second
-measurement. Three independent cells were measured and the table reports the
-median. Accepted length and engine steps per second are server metrics.
-
-| Mode | Speculative configuration | 32k TTFT | 32k prompt throughput | CC1 output | Sieve median | Engine rate | Accepted length |
-|---|---|---:|---:|---:|---:|---:|---:|
-| No speculative decode | none | 2.0786 s | **15,549 tok/s** | **139.4 tok/s** | not measured | — | — |
-| MTP:3 | three built-in draft tokens | 2.1360 s | **15,131 tok/s** | **228.0 tok/s** | **287.87 tok/s** | 90.47 steps/s | 2.52 |
-| DFlash2 MXFP8 | seven draft tokens | 2.1157 s | **15,276 tok/s** | **185.5 tok/s** | **339.73 tok/s** | 74.19 steps/s | 2.49 |
-| DFlash2 MXFP8, VRAM +6000 (**research-only**) | seven draft tokens | 2.0508 s | **15,759.6 tok/s** | **200.87 tok/s** | not measured | 82.91 steps/s | 2.43 |
-
-The `VRAM +6000` row changes only the memory-clock offset on GPUs 4–7. Stock
-clocks remain the qualified deployment default; the
-[research profile](#vram-6000-research-profile) records its raw samples and
-clock state.
-
-Raw CC1 samples were:
-
-| Mode | Output tok/s samples | Engine steps/s samples | Accepted-length samples |
-|---|---|---|---|
-| No speculative decode | 139.53, 139.41, 139.38 | — | — |
-| MTP:3 | 228.14, 226.01, 228.03 | 90.47, 90.47, 90.48 | 2.52, 2.50, 2.52 |
-| DFlash2 MXFP8 | 192.94, 185.49, 178.23 | 74.18, 74.47, 74.19 | 2.60, 2.49, 2.40 |
-
-DFlash2 raw output throughput varies with accepted length. Engine rate remained
-within 0.4% across the three DFlash2 samples, so acceptance rather than target
-execution speed explains the wider raw tok/s range.
-
-### Sieve coding-prompt decode
-
-The Sieve test is a prompt-specific, sequential CC1 measurement rather than a
-sustained empty-context engine cell. It used `llm-decode-bench` 0.4.29 with the
-prompt `Write a Python script that implements the Sieve of Eratosthenes.`, no
-synthetic context, streaming output, the server/model temperature default, and
-at most 2,000 generated tokens. Throughput is completion tokens divided by the
-time from the first streamed token through the final stream event. Five
-sequential samples ran on the exact image ID documented above, TP4/DCP1,
-physical GPUs 4–7, and stock clocks.
-
-| Mode | Generation tok/s samples | Median | Mean |
-|---|---|---:|---:|
-| MTP:3 | 292.02, 287.22, 290.74, 287.87, 278.03 | **287.87 tok/s** | 287.17 tok/s |
-| DFlash2 MXFP8, seven drafts | 339.73, 332.98, 365.87, 325.04, 353.52 | **339.73 tok/s** | 343.43 tok/s |
-
-DFlash2 was 18.01% faster by median on this prompt. This difference is not a
-prompt-independent decode claim: Sieve output is highly predictable, and
-speculative throughput changes with the accepted draft length. The sustained
-CC1 table above remains the backend regression signal; the Sieve table captures
-the interactive coding-prompt behavior users observe with `test.py`-style
-clients.
-
-The same image at TP4/DCP4 with DFlash2, seven draft tokens, and full-CKV
-gather measured a 2.3803-second median TTFT, or **13,578 prompt tok/s**, for
-the same 32,320-token request. DCP1 and DCP4 numbers are separate deployment
-contracts and must not be compared as if only one kernel changed.
-
-### Concurrent long-prefill fairness
-
-The fairness qualification starts a TP4/DCP1 DFlash2 request with 4,094 prompt
-tokens and 8,192 requested output tokens. After 2,048 output tokens, it submits
-a second request with 65,535 prompt tokens and one requested output token. Both
-requests use greedy sampling, seed zero, `ignore_eos=true`, a unique cache salt,
-and stock clocks. The table reports the interval while the second request is
-prefilling.
-
-| Runtime | Prefill cadence | Decode target forwards | Decode throughput | Concurrent prefill throughput |
-|---|---:|---:|---:|---:|
-| r7 scheduler behavior | 1 | 34 | 43.2 tok/s | 14,166 prompt tok/s |
-| r8 qualified artifact | 8 | 154 | **199.5 tok/s** | **10,752 prompt tok/s** |
-
-The r8 request pair completed with exactly 8,192 decode output tokens and
-65,535 prefill prompt tokens, DFlash accepted length 7.0, and no API error. A
-standalone 65,535-token prefill on the r8 artifact measured **14,630 prompt
-tok/s**. The cadence trades some mixed-load prefill throughput for decode
-progress; it does not throttle prefill when no eligible decode request exists.
-
-### VRAM +6000 research profile
-
-Status: **research-only**. Stock clocks remain the qualified deployment
-default. The exact Jovian Judgement Community image ID
-`sha256:26e40eeb6506d7fcff64b0ac155dee4d08b702a455e689533ceb60efaa874f88`
-was measured in TP4/DCP1 DFlash2 mode with seven draft tokens. Only physical
-GPUs 4–7 received an NVML memory-clock voltage/frequency offset of `+6000`;
-NVIDIA reported a 13,365 MHz memory clock under load. The offset was returned
-to zero on all four GPUs after measurement.
-
-The stock and overclocked cells used the same 32,320-token prefill request and
-30-second CC1 method specified above. Each value is the median of three
-samples.
-
-| Metric | Stock clocks | VRAM +6000 | Change |
-|---|---:|---:|---:|
-| 32k TTFT | 2.1157 s | **2.0508 s** | -3.07% |
-| 32k prompt throughput | 15,276.1 tok/s | **15,759.6 tok/s** | +3.17% |
-| CC1 output | 185.49 tok/s | **200.87 tok/s** | +8.30% |
-| Engine rate | 74.19 steps/s | **82.91 steps/s** | +11.75% |
-| Accepted length | 2.49 | 2.43 | -2.57% |
-
-The overclocked TTFT samples were 2.04717, 2.05081, and 2.05165 seconds. Its
-CC1 output samples were 205.29, 200.13, and 200.87 tok/s; engine-rate samples
-were 82.91, 82.93, and 82.78 steps/s; accepted-length samples were 2.48, 2.41,
-and 2.43. Engine rate is the cleaner execution-speed comparison because
-speculative output throughput also changes with accepted length.
-
-The CC1 client command was:
+Replace the cache settings and shared-memory size in the common command with:
 
 ```bash
-python3 llm_decode_bench.py \
-  --host 127.0.0.1 \
-  --port 5001 \
-  --model GLM-5.3-Flash-NVFP4 \
-  --concurrency 1 \
-  --contexts 0 \
-  --duration 30 \
-  --max-tokens 8192 \
-  --temperature 0 \
-  --decode-warmup-seconds 3 \
-  --skip-prefill \
-  --no-hw-monitor \
-  --show-capacity-limited-values \
-  --no-resume \
-  --output jovian-judgement-cc1.json
+--shm-size 128g
+-v jovian-judgement-lmcache-l2:/lmcache-l2
+-e CACHE_MODE=lmcache
+-e KV_CACHE_QUANT=fp8_ds_mla
+-e LMCACHE_CHUNK_SIZE=4096
+-e LMCACHE_TARGET_TOKEN_BUDGET=4096
+-e LMCACHE_L1_SIZE_GB=64
+-e LMCACHE_L2_ENABLED=1
+-e LMCACHE_L2_ROOT=/lmcache-l2
 ```
 
-## Limitations
+`KV_CACHE_QUANT=nvfp4_ds_mla` selects the qualified packed-NVFP4 target cache
+instead. The filesystem namespace includes the target and draft revisions,
+cache format, parallelism, DCP gathering policy, speculation mode, and object
+size, preventing incompatible cache objects from being reused.
 
-- The source pull requests in the source contract are open review units. Use
-  the image digest until the required heads are merged and a merged-only image
-  is separately qualified.
-- Full prefill CUDA-graph capture is unsupported by the GLM GDN backend in this
-  source tree. Decode remains graph-captured.
-- B12X is the main target backend, but the complete runtime intentionally uses
-  PyNCCL outside B12X all-reduce sizes, Humming for MTP experts,
-  FlashAttention 2 for DFlash2 local attention, FlashKDA for target prefill,
-  and FlashInfer for sampling.
-- Raw speculative tok/s is prompt- and acceptance-dependent. Record engine
-  steps per second and accepted length with every MTP or DFlash2 comparison.
+Qualification covered cold compute, vLLM automatic prefix reuse, LMCache DRAM
+restore, and filesystem restore after restarting both vLLM and the LMCache
+sidecar. DFlash2 restored 12,288 prompt tokens from filesystem storage after a
+full restart. External bytes were compared on every tensor-parallel rank across
+the target attention, recurrent-state, and DFlash sliding-attention groups.
+
+## Source and review contract
+
+| Component | Qualified source |
+|---|---|
+| vLLM | commit `7015eb6949a93247df02fb6f9101d17c40bd83e8`; tree `456231387f6f5adc2d1a5241428f1226b29ea835`; package tree `83e4480f930da37a26f893871a55bcbf54493b3b` |
+| B12X | commit `1e59a1fd09f782d302b1068b15c8a0bd66103894`; tree `f322c804eec1c58a63bd4fe6e7901a95a678a575`; package tree `aaa5f189acae0206d886553421f6e9044f4c458a` |
+| LMCache | commit `aefe3ab701ab7a835532e701be89f5055b13ec0f`; tree `683ab2c165a9aa0e2d1a1ab757af4a8b193688c5`; package tree `976a97f22c0497f34db089dc5f02a713dd0b5888` |
+
+The [vLLM merge checklist](https://github.com/local-inference-lab/vllm/issues/590)
+lists each open pull request, dependency, resulting behavior, attribution, and
+qualification result. The image embeds the same source contract at
+`/opt/glm53-flash/source.lock`.

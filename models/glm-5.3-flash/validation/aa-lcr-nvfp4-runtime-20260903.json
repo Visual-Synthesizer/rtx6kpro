@@ -1,0 +1,151 @@
+{
+  "artifact_kind": "AA-LCR serving-runtime pool manifest",
+  "status": "qualified",
+  "checkpoint": {
+    "repository": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+    "revision": "378ca54585c46542bad1f3cb3ed0d73ae51cdb62",
+    "index_sha256": "0d1d9e6b226e76520e182de10d4e7194cc885c5cb1bf885bb90de1916ce312cb"
+  },
+  "container": {
+    "image": "voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340",
+    "image_id": "sha256:09cac4d0e2b1b4155ea27989c21c12aa5fa9f4d4d356ae5ca623f128a6836388",
+    "registry_digest": "voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340",
+    "source_lock_path": "/opt/glm53-flash/source.lock",
+    "source_lock_sha256": "9a6167d415d824e1707ba7df0dd5906e05c004f1ed2666f80f2f9e1ea9fde4be"
+  },
+  "source": {
+    "vllm_revision": "7015eb6949a93247df02fb6f9101d17c40bd83e8",
+    "vllm_tree": "456231387f6f5adc2d1a5241428f1226b29ea835",
+    "vllm_package_tree": "83e4480f930da37a26f893871a55bcbf54493b3b",
+    "b12x_revision": "1e59a1fd09f782d302b1068b15c8a0bd66103894",
+    "b12x_tree": "f322c804eec1c58a63bd4fe6e7901a95a678a575",
+    "b12x_package_tree": "aaa5f189acae0206d886553421f6e9044f4c458a"
+  },
+  "topology": {
+    "replicas": 2,
+    "tensor_parallel_size": 4,
+    "decode_context_parallel_size": 1,
+    "pipeline_parallel_size": 1
+  },
+  "serving": {
+    "served_model_name": "GLM-5.3-Flash-NVFP4-MTP3-AA-LCR",
+    "activation_dtype": "bfloat16",
+    "kv_cache_dtype": "fp8",
+    "attention_backend": "B12X",
+    "kda_prefill_backend": "flashkda",
+    "kda_decode_backend": "auto",
+    "moe_backend": "b12x",
+    "linear_backend": "b12x",
+    "weight_loader": "instanttensor",
+    "max_model_len": 1048576,
+    "max_num_batched_tokens": 4096,
+    "max_num_seqs": 24,
+    "prefill_schedule_interval": 8,
+    "kv_cache_memory_bytes": 32212254720,
+    "physical_kv_cache_tokens_per_replica": 4621648,
+    "prefix_caching": true,
+    "cache_mode": "vram",
+    "target_cache_page_tokens": 2048,
+    "recurrent_cache_page_tokens": 2048,
+    "speculative_decoding": {
+      "method": "mtp",
+      "num_speculative_tokens": 3,
+      "draft_sample_method": "probabilistic",
+      "rejection_sample_method": "standard",
+      "attention_backend": "B12X",
+      "moe_backend": "marlin"
+    },
+    "compilation_config": {
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "capture_sizes": [1, 2, 4, 8, 16, 32, 40, 48, 64, 96, 128, 192, 256]
+    }
+  },
+  "instances": [
+    {
+      "instance_index": 0,
+      "container_name": "glm53-aa-lcr-nvfp4-mtp3-gpu8-11",
+      "container_id": "af98e7f5a2f20080b548649fa09080677734f725a4f876a7fa9f2d95f45daf05",
+      "host_gpu_indices": [8, 9, 10, 11],
+      "host_gpu_uuids": [
+        "GPU-2a2cd7c3-b91f-092c-309d-cda7e408f659",
+        "GPU-8a5f7d96-6e51-82c0-3b02-bfea7f14d2d7",
+        "GPU-6171baff-cc22-608e-4029-507f67c392ff",
+        "GPU-e7376e80-d7a4-1d1f-6554-49876db72e37"
+      ],
+      "port": 5052,
+      "api_url": "http://127.0.0.1:5052/v1/chat/completions",
+      "jit_cache_volume": "glm53-aa-lcr-mtp3-cache-gpu8-11",
+      "docker_inspect_artifact": "runtime-artifacts/docker-inspect-gpu8-11.json",
+      "server_argv_artifact": "runtime-artifacts/server-argv-gpu8-11.txt"
+    },
+    {
+      "instance_index": 1,
+      "container_name": "glm53-aa-lcr-nvfp4-mtp3-gpu12-15",
+      "container_id": "1401191bbcd909d73a00fe78b4b90b8650e085b68a6e337e0a3986d68cc15c80",
+      "host_gpu_indices": [12, 13, 14, 15],
+      "host_gpu_uuids": [
+        "GPU-3304d777-8f0e-2767-419a-d72ffa553141",
+        "GPU-61b4b68d-9529-ef3e-184c-e19488aac9b7",
+        "GPU-a2f726b2-60db-8102-abef-abf76c457fe0",
+        "GPU-cd323562-fdc3-78c3-012e-86e281433050"
+      ],
+      "port": 5053,
+      "api_url": "http://127.0.0.1:5053/v1/chat/completions",
+      "jit_cache_volume": "glm53-aa-lcr-mtp3-cache-gpu12-15",
+      "docker_inspect_artifact": "runtime-artifacts/docker-inspect-gpu12-15.json",
+      "server_argv_artifact": "runtime-artifacts/server-argv-gpu12-15.txt"
+    }
+  ],
+  "server_arguments": [
+    "/opt/venv/bin/vllm",
+    "serve",
+    "/model/snapshots/378ca54585c46542bad1f3cb3ed0d73ae51cdb62",
+    "--served-model-name",
+    "GLM-5.3-Flash-NVFP4-MTP3-AA-LCR",
+    "--tensor-parallel-size",
+    "4",
+    "--decode-context-parallel-size",
+    "1",
+    "--max-num-seqs",
+    "24",
+    "--max-model-len",
+    "1048576",
+    "--max-num-batched-tokens",
+    "4096",
+    "--dtype",
+    "bfloat16",
+    "--kv-cache-dtype",
+    "fp8",
+    "--quantization",
+    "modelopt_mixed",
+    "--load-format",
+    "instanttensor",
+    "--attention-backend",
+    "B12X",
+    "--moe-backend",
+    "b12x",
+    "--linear-backend",
+    "b12x",
+    "--enable-prefix-caching",
+    "--speculative-config",
+    "{\"method\":\"mtp\",\"num_speculative_tokens\":3,\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"moe_backend\":\"marlin\",\"attention_backend\":\"B12X\"}",
+    "--kv-cache-memory-bytes",
+    "32212254720"
+  ],
+  "relevant_environment": {
+    "CACHE_MODE": "vram",
+    "KV_CACHE_QUANT": "fp8_ds_mla",
+    "SPECULATOR": "mtp",
+    "MTP_DEPTH": "3",
+    "GLM53_KDA_PREFILL_BACKEND": "flashkda",
+    "VLLM_ENABLE_PCIE_ALLREDUCE": "1",
+    "NCCL_MIN_NCHANNELS": "16",
+    "NCCL_MAX_NCHANNELS": "16",
+    "NCCL_BUFFSIZE": "2097152",
+    "NCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
+    "NCCL_GRAPH_FILE": "unset by launcher",
+    "OMP_NUM_THREADS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

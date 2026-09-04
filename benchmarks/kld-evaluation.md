@@ -1,11 +1,23 @@
-# KLD Evaluation for Quantized Models
+# Qwen3.5 SGLang KLD reproduction record
 
-> Current GLM-5.2/vLLM KLD runs are documented in
-> [GLM-5.2 KLD Evaluation](glm52-kld-evaluation.md). The rest of this page is
-> the older Qwen/SGLang workflow and should not be used for GLM-5.2 v14
-> reproduction.
+## Status
 
-Measure how much quality is lost in quantized models (NVFP4, AWQ, etc.) compared to a higher-precision reference (FP8) using KL divergence over full vocabulary logit distributions.
+| Use | Status | Limitation |
+|---|---|---|
+| Reproduce the recorded Qwen3.5/SGLang capture | implemented | The commands and observed values remain recorded below |
+| General KLD methodology | unsupported | Use the [vLLM full-vocabulary and route-control protocol](../kld/README.md) |
+| Fixed-route MoE codec ranking | unsupported | The recorded runs used natural routes and did not capture or replay exact expert IDs and route weights |
+| Exact AWQ-to-FP8 full-vocabulary comparison | unsupported | The operands have different native vocabulary sizes; the script conditions both distributions on their shared token-ID prefix |
+| Universal KLD quality thresholds | unsupported | KLD scales depend on the reference, model, corpus, tokenizer, runtime, and estimand |
+
+The GLM-5.2/vLLM measurements are documented in
+[GLM-5.2 KLD Evaluation](glm52-kld-evaluation.md). This page preserves the
+Qwen3.5/SGLang workflow and its exact observations; it is not the canonical
+method for another model or runtime.
+
+The workflow compares full-vocabulary logit distributions of quantized models
+against an FP8 reference. It measures distribution divergence on the declared
+inputs, not an amount of model quality lost.
 
 ## Table of Contents
 
@@ -21,7 +33,10 @@ Measure how much quality is lost in quantized models (NVFP4, AWQ, etc.) compared
 
 ## Overview
 
-Standard benchmarks (MMLU, HumanEval, etc.) are noisy and coarse. KL divergence measures the **exact difference in output probability distributions** between two models, giving a much more sensitive quality metric.
+Standard benchmarks such as MMLU and HumanEval are noisy and coarse. KL
+divergence is a more sensitive distribution-fidelity metric. Exact KLD requires
+aligned probability distributions over the same complete vocabulary; the AWQ
+row below does not satisfy that contract.
 
 **Reference model:** `Qwen/Qwen3.5-397B-A17B-FP8` (TP8, 8x RTX PRO 6000 Blackwell)
 **Test models:** See results below
@@ -44,7 +59,9 @@ lukealonso/Qwen3.5-397B-A17B-NVFP4        0.035637     0.006939   0.147900   0.5
 
 ### MoE Backend Comparison (lukealonso/NVFP4)
 
-Different MoE/FP4 backends produce equivalent KLD — the MoE kernel choice does not affect quality:
+The tested MoE/FP4 backends produced similar natural-route KLD in this recorded
+configuration. The result does not establish backend equivalence for another
+model, runtime, or route-controlled estimand:
 
 ```
 Model                                      Mean KLD   Median KLD    P95 KLD    P99 KLD    Max KLD
@@ -54,19 +71,33 @@ cutedsl + cudnn (moe cutedsl, fp4 cudnn)   0.036000     0.006900   0.148700   0.
 cutlass MoE                                0.036000     0.006900   0.148800   0.538100     4.4300
 ```
 
-### Ranking
+### Recorded natural-route values
 
-1. **QuantTrio/AWQ-INT4** — best quality. Mean KLD 0.024 (near-lossless).
-2. **nvidia/NVFP4** — 1.5x worse than AWQ, very close to lukealonso. Mean KLD 0.035.
-3. **lukealonso/NVFP4** — practically identical to nvidia. Mean KLD 0.036.
+| Candidate | Recorded mean KLD | Probability support |
+|---|---:|---|
+| QuantTrio/AWQ-INT4 | 0.024 | Conditional shared token-ID prefix |
+| nvidia/NVFP4 | 0.035 | Reference-aligned native vocabulary |
+| lukealonso/NVFP4 | 0.036 | Reference-aligned native vocabulary |
 
-> **Note (2026-03-29):** nvidia/NVFP4 KLD was previously reported as 0.109. nvidia fixed the checkpoint by keeping the shared expert layer in BF16 instead of quantizing it to NVFP4. Remeasured on the current stack (torch 2.12, CUDA 13.2, SGLang main), nvidia and lukealonso NVFP4 are now equivalent.
+The AWQ value is conditioned on a shared token-ID subset because its native
+vocabulary is larger than the reference vocabulary. It is therefore not
+directly comparable to the two exact-support NVFP4 values as a qualified
+full-vocabulary ranking. All rows use natural MoE routes and do not constitute
+a fixed-reference-route codec comparison.
 
-### Why AWQ beats NVFP4 in quality
+> **Measurement note (2026-03-29):** nvidia/NVFP4 KLD had been reported as
+> 0.109 before the checkpoint retained the shared expert layer in BF16. A
+> remeasurement using torch 2.12, CUDA 13.2, and an unpinned SGLang `main`
+> revision produced a value close to lukealonso/NVFP4. The missing SGLang
+> commit prevents an immutable runtime identity.
 
-- **INT4 (AWQ)** has 16 quantization levels with per-channel scaling and salient weight protection — smarter allocation of precision to important weights.
-- **FP4 (NVFP4, E2M1)** has only 8 unique values — less effective precision, but has dedicated Blackwell FP4 Tensor Core hardware for faster matmul.
-- NVFP4 trades quality for throughput; AWQ trades throughput for quality — **however, our throughput benchmarks show AWQ is also faster** (see below).
+### Limits of the AWQ interpretation
+
+The recorded AWQ value cannot establish that AWQ has better fidelity or explain
+the difference from NVFP4. Vocabulary conditioning, checkpoint construction,
+tensor-selection policy, scale granularity, kernels, and natural route changes
+were not isolated by this workflow. Those factors require matched-support and
+fixed-route ablations.
 
 ### Throughput Benchmark (MTP Speculative Decoding)
 
@@ -82,7 +113,11 @@ QuantTrio/Qwen3.5-397B-A17B-AWQ      152    665     976    1516    1662
 lukealonso/Qwen3.5-397B-A17B-NVFP4   132    581     852    1191    1202
 ```
 
-**AWQ wins on both quality AND throughput** at every concurrency level. 15% faster at C=1, growing to 38% at C=64 where AWQ still gains throughput (1662 tok/s) while NVFP4 plateaus (1191→1202). Prefill speed is identical (~16-17k tok/s at 16k context).
+AWQ produced higher decode throughput at every recorded concurrency: 15%
+higher at C=1 and 38% higher at C=64, where it reached 1,662 token/s while the
+NVFP4 run reached 1,202 token/s. The KLD data on this page do not support the
+corresponding quality claim. Recorded prefill throughput was approximately
+16–17k token/s at 16k context for both runs.
 
 For full decode + prefill tables across context lengths, reproduction details, and the benchmark script, see [inference-throughput/](inference-throughput/).
 
@@ -96,14 +131,12 @@ The env var alone does NOT enable MTP. Without the CLI flag, `speculative_algori
 
 VLM-format models (`Qwen3_5MoeForConditionalGeneration`) require `--mamba-scheduler-strategy extra_buffer` for MTP to work.
 
-### Interpretation scale
+### Interpretation boundary
 
-| Mean KLD | Quantization quality |
-|----------|---------------------|
-| < 0.01 | Near-lossless |
-| 0.01 - 0.05 | Good, minimal quality loss |
-| 0.05 - 0.1 | Noticeable quality loss |
-| > 0.1 | Significant quality loss |
+No universal mapping from mean KLD to labels such as "near-lossless" or
+"significant loss" is supported. Interpret these values only against runtime
+repeats, paired uncertainty, task evidence, and thresholds frozen for this
+exact model and corpus. See the [canonical protocol](../kld/README.md).
 
 ---
 
@@ -123,7 +156,7 @@ SGLang only exposes top-k logprobs via its API, not full vocabulary logits. KLD 
 ### Architecture
 
 ```
-Phase 1: FP8 Reference (TP8)          Phase 2: Test Model (TP4)
+FP8 reference capture (TP8)           Candidate capture (TP4)
 +-----------------------+               +-----------------------+
 | SGLang Server         |               | SGLang Server         |
 | + logit capture       |               | + logit capture       |
@@ -371,19 +404,17 @@ TEST_MODELS=(
 
 ### KLD scale
 
-| Mean KLD | Quantization quality |
-|----------|---------------------|
-| < 0.01 | Near-lossless |
-| 0.01 - 0.05 | Good, minimal quality loss |
-| 0.05 - 0.1 | Noticeable quality loss |
-| > 0.1 | Significant quality loss |
+The numeric scale is experiment-specific. Do not transfer thresholds from this
+Qwen3.5/FP8/WikiText-2 run to another model, corpus, tokenizer, runtime, or MoE
+route intervention.
 
 ### What the metrics mean
 
-- **Mean KLD** -- average divergence across all token positions. The primary quality metric.
+- **Mean KLD** -- average divergence across all token positions. The primary distribution-fidelity metric in this record.
 - **Median KLD** -- if much lower than mean, the distribution has a heavy right tail (a few positions are very wrong, most are fine).
 - **P95 / P99** -- tail behavior. High P95 means 5% of positions have substantially different predictions than the reference.
-- **Max KLD** -- worst single position. Values > 10 indicate completely broken predictions at some positions.
+- **Max KLD** -- largest observed single-position divergence; inspect the token
+  and context rather than applying a universal cutoff.
 
 ### KLD formula
 
@@ -395,9 +426,12 @@ KL(P_ref || Q_test) = sum_x  P_ref(x) * (log P_ref(x) - log Q_test(x))
 
 Where the sum is over all vocabulary tokens. This measures how many nats of information are lost when using the test model's distribution instead of the reference.
 
-### Determinism
+### Runtime variation
 
-KLD evaluation is fully deterministic -- running the same model twice on the same inputs produces bit-identical results. This makes it reliable for A/B comparisons.
+Bit-identical repeatability is not assumed. GPU kernels, reduction order, and
+MoE route boundaries can produce run-to-run variation. This reproduction
+record did not establish a repeated-process floor; a qualifying comparison must add
+sentinel repeats and paired confidence intervals.
 
 ---
 
@@ -411,8 +445,15 @@ Some checkpoints use VLM format (`Qwen3_5MoeForConditionalGeneration`) with `voc
 - Set `SGLANG_KLD_VOCAB_SIZE=248320` when running the server
 
 **Impact on KLD compute:**
-- The compute script automatically detects vocab size mismatch and truncates both distributions to the common 152,064 text tokens, then re-normalizes via `logsumexp`. This is mathematically equivalent to computing log-softmax over text tokens only.
-- Visual tokens (indices 152064-248319) are irrelevant for text-only benchmarks like WikiText.
+- The compute script truncates both operands to the shared 152,064 token-ID
+  prefix and renormalizes with `logsumexp`.
+- This computes KLD between distributions conditioned on the shared prefix. It
+  is not full-native-vocabulary KLD, and it is valid only if every shared token
+  ID has identical semantics.
+- Additional-token probability mass can affect normalization even on a
+  text-only input. It cannot be declared irrelevant without measurement.
+- The AWQ row must therefore remain a research-only conditional-support result
+  and must not be mixed into an exact full-vocabulary ranking.
 
 ### AWQ + FusedMoE modules_to_not_convert
 
@@ -426,7 +467,8 @@ On Blackwell GPUs (SM120), Qwen3.5-397B requires `--attention-backend triton` du
 
 Sehyo's checkpoint uses `compressed-tensors` quantization format. SGLang's `compressed-tensors` weight loader does not support `linear_attn` layers used by Qwen3.5-397B's mixed attention architecture (3 linear attention layers + 1 full attention, repeating). All `linear_attn` weights fail to load, leaving 45 out of 60 attention layers uninitialized, producing 100% NaN logits.
 
-**Workaround:** None on current SGLang. vLLM may have better `compressed-tensors` support for this architecture.
+**Workaround:** The recorded SGLang configuration has none. Validate a pinned
+vLLM `compressed-tensors` implementation separately for this architecture.
 
 ### TP padding in logits
 

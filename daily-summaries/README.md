@@ -10,6 +10,9 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-03](2026-09/2026-09-03.md) | GLM-5.3-Flash scheduler fix: logprobz's PR shipped decode-only steps to stop prefill from starving d |
+| [2026-09-02](2026-09/2026-09-02.md) | LMCache L2 cache corruption bug found & fixed — field reports across TP4/DCP4 exposed byte-level c |
+| [2026-09-01](2026-09/2026-09-01.md) | DeepSeek-V4-Flash-Vision-Exp released — same size as non-vision (+1GB), mixed early results: some  |
 | [2026-08-31](2026-08/2026-08-31.md) | - GLM-5.3-Flash "Jovian Judgement" r8 hits 350-430 tok/s decode, 12-15k tok/s prefill, 12M+ token KV |
 | [2026-08-30](2026-08/2026-08-30.md) | GLM-5.3 & GLM-5.3-Flash launched — community scrambled to quantize/serve within hours. David Young |
 | [2026-08-29](2026-08/2026-08-29.md) | GLM-5.3 and **GLM-5.3-Flash** dropped, triggering a same-day quant race (NVFP4, EXL3, DFlash2) acros |
@@ -194,6 +197,9 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-03](2026-09/2026-09-03.md) | GLM-5.3-Flash scheduler fix: logprobz's PR shipped decode-only steps to stop prefill from starving d |
+| [2026-09-02](2026-09/2026-09-02.md) | LMCache L2 cache corruption bug found & fixed — field reports across TP4/DCP4 exposed byte-level c |
+| [2026-09-01](2026-09/2026-09-01.md) | DeepSeek-V4-Flash-Vision-Exp released — same size as non-vision (+1GB), mixed early results: some  |
 | [2026-08-31](2026-08/2026-08-31.md) | - GLM-5.3-Flash "Jovian Judgement" r8 hits 350-430 tok/s decode, 12-15k tok/s prefill, 12M+ token KV |
 | [2026-08-30](2026-08/2026-08-30.md) | GLM-5.3 & GLM-5.3-Flash launched — community scrambled to quantize/serve within hours. David Young |
 | [2026-08-29](2026-08/2026-08-29.md) | GLM-5.3 and **GLM-5.3-Flash** dropped, triggering a same-day quant race (NVFP4, EXL3, DFlash2) acros |

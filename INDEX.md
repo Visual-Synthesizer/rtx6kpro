@@ -43,6 +43,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r4](models/ds4dspark-infernal-invocation-r4.md) - `models/ds4dspark-infernal-invocation-r4.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r7](models/ds4dspark-infernal-invocation-r7.md) - `models/ds4dspark-infernal-invocation-r7.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r9](models/ds4dspark-infernal-invocation-r9.md) - `models/ds4dspark-infernal-invocation-r9.md`
+- [DeepSeek-V4-Flash-0731 Jovian Judgement r1](models/ds4dspark-jovian-judgement-r1.md) - `models/ds4dspark-jovian-judgement-r1.md`
 - [DeepSeek-V4-Flash and DSpark v10](models/ds4dspark-v10.md) - `models/ds4dspark-v10.md`
 - [DeepSeek-V4-Flash-0731 DSpark on Gilded Gnosis r15](models/ds4dspark-v20-r15.md) - `models/ds4dspark-v20-r15.md`
 - [DeepSeek-V4-Flash-0731 DSpark: Gilded Gnosis r16](models/ds4dspark-v20-r16.md) - `models/ds4dspark-v20-r16.md`
@@ -160,10 +161,16 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.2 KLD Evaluation](benchmarks/glm52-kld-evaluation.md) - `benchmarks/glm52-kld-evaluation.md`
 - [Inference Throughput: Qwen3.5-397B-A17B Quantizations](benchmarks/inference-throughput/README.md) - `benchmarks/inference-throughput/README.md`
 - [vLLM vs SGLang Throughput: lukealonso/Qwen3.5-397B-A17B-NVFP4](benchmarks/inference-throughput/vllm-vs-sglang.md) - `benchmarks/inference-throughput/vllm-vs-sglang.md`
-- [KLD Evaluation for Quantized Models](benchmarks/kld-evaluation.md) - `benchmarks/kld-evaluation.md`
+- [Qwen3.5 SGLang KLD reproduction record](benchmarks/kld-evaluation.md) - `benchmarks/kld-evaluation.md`
 - [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) - `benchmarks/mtp-quality-evaluation.md`
 - [Qwen3.5-397B-A17B Quantization Comparison: AWQ vs NVFP4](benchmarks/nvfp4-quantization-comparison.md) - `benchmarks/nvfp4-quantization-comparison.md`
 - [Benchmark Results -- RTX 6000 Pro Blackwell](benchmarks/results.md) - `benchmarks/results.md`
+
+## Distribution Fidelity
+
+- [Measuring quantization distribution fidelity in vLLM](kld/README.md) - `kld/README.md`
+- [GLM-5.3-Flash BF16-to-NVFP4 distribution fidelity](kld/glm-5.3-flash-bf16-nvfp4.md) - `kld/glm-5.3-flash-bf16-nvfp4.md`
+- [GLM-5.3-Flash NVFP4 QAD step 1,750 distribution fidelity](kld/glm-5.3-flash-qad-step1750.md) - `kld/glm-5.3-flash-qad-step1750.md`
 
 ## Optimization Notes
 
@@ -406,8 +413,12 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-27](daily-summaries/2026-08/2026-08-28.md) - `daily-summaries/2026-08/2026-08-28.md`
 - [Daily Summary — 2026-08-28](daily-summaries/2026-08/2026-08-29.md) - `daily-summaries/2026-08/2026-08-29.md`
 - [Daily Summary — 2026-08-29](daily-summaries/2026-08/2026-08-30.md) - `daily-summaries/2026-08/2026-08-30.md`
+- [Daily Summary — 2026-08-30](daily-summaries/2026-08/2026-08-31.md) - `daily-summaries/2026-08/2026-08-31.md`
+- [Daily Summary — 2026-08-31](daily-summaries/2026-09/2026-09-01.md) - `daily-summaries/2026-09/2026-09-01.md`
+- [Daily Summary — 2026-09-01](daily-summaries/2026-09/2026-09-02.md) - `daily-summaries/2026-09/2026-09-02.md`
+- [Daily Summary — 2026-09-02](daily-summaries/2026-09/2026-09-03.md) - `daily-summaries/2026-09/2026-09-03.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
 
-- [KLD Evaluation Skill](scripts/kld-eval-skill.md) - `scripts/kld-eval-skill.md`
+- [Qwen3.5 SGLang KLD reproduction skill](scripts/kld-eval-skill.md) - `scripts/kld-eval-skill.md`

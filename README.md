@@ -15,7 +15,7 @@ If you just want to run a model, use these stable hub pages first:
 
 | Model family | Start here | Scope |
 |---|---|---|
-| GLM-5.3-Flash | [GLM-5.3-Flash](models/glm-5.3-flash.md) | Jovian Judgement Community source-locked NVIDIA 4-bit floating-point (NVFP4) target with no-spec, MTP:3, and Microscaling 8-bit floating-point (MXFP8) DFlash2 modes, qualified TP4/DCP1 performance, optional DCP4 full-CKV prefill, and Docker launch. |
+| GLM-5.3-Flash | [GLM-5.3-Flash](models/glm-5.3-flash.md) | Jovian Judgement Community source-locked NVIDIA 4-bit floating-point (NVFP4) target with no-spec, MTP:3, and Microscaling 8-bit floating-point (MXFP8) DFlash2 modes, qualified TP4/DCP1 performance, AA-LCR and KLD evaluation, optional DCP4 full-CKV prefill, and Docker launch. |
 | GLM-5.2 | [GLM-5.2 Runbook Hub](models/glm-5.2.md) | Fathomless vLLM, NVFP4, online FP8/MXFP8, B12X, DCP, MTP, KLD. |
 | DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Standard checkpoint, MTP, DSpark, B12X, Lucifer, CUTLASS. |
 | Kimi | [Kimi Runbook Hub](models/kimi.md) | Kimi-K2.7-Code, DFlash, parser/tool-call runtime. |
@@ -39,7 +39,7 @@ Need the complete map of every Markdown page?
 | Copy/paste production launch commands | Model hubs and current versioned model pages. |
 | Rebuild the Docker image | [Eldritch Docker](models/eldritch-enlightenment-docker.md), current model image sections, and build scripts in [scripts](scripts/). |
 | Compare backend speed | Model benchmark tables plus [Benchmark Results](benchmarks/results.md). |
-| Check quantization quality | [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), [KLD Evaluation](benchmarks/kld-evaluation.md), and model-specific KLD sections. |
+| Check quantization fidelity | [General KLD methodology](kld/README.md), [GLM-5.2 KLD](benchmarks/glm52-kld-evaluation.md), and model-specific KLD sections. |
 | Understand MTP, DSpark, or DFlash | [Speculative Decoding](optimization/speculative-decoding.md), DS4/Kimi/MiMo pages. |
 | Debug topology or PCIe behavior | [Topology](hardware/topology.md), [PCIe Bandwidth](hardware/pcie-bandwidth.md), [GPU Configurations](hardware/gpu-configs.md). |
 | Avoid known runtime footguns | [Common Issues](troubleshooting/common-issues.md), model caveats, and daily summaries. |
@@ -52,7 +52,7 @@ Need the complete map of every Markdown page?
 | GLM-5.3-Flash serving stack | [GLM-5.3-Flash](models/glm-5.3-flash.md) | Qualified Jovian Judgement Community TP4 image with DCP1 no-spec, MTP:3, and MXFP8 DFlash2 measurements plus DCP4 full-CKV prefill evidence. |
 | GLM-5.2 serving stack | [GLM-5.2 Infernal Invocation r18](models/glm5.2-infernal-invocation-r18.md) | Source-qualified CUDA 13.3 profiles with sparse-prefill row validation, projection-mixed EXL3 TP4, online MCG K6, and NVFP4 TP8. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
-| DS4 serving profile | [DS4 DSpark Infernal Invocation r18](models/ds4dspark-infernal-invocation-r18.md) | 0731 checkpoint, fixed K5, FULL graph dispatch, strict-tool concurrency, and native plus LMCache filesystem replay. |
+| DS4 serving profile | [DS4 DSpark Jovian Judgement r1](models/ds4dspark-jovian-judgement-r1.md) | Source-locked CUDA 13.3 profile with fixed K5, CUDA-graph dispatch, strict required tools, and opt-in LMCache replay. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
 | Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
 | MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | MiMo DFlash validation and fix notes. |
@@ -82,7 +82,7 @@ family unless you are reproducing a specific old result.
 | Consolidated throughput | [Benchmark Results](benchmarks/results.md) |
 | vLLM vs SGLang throughput | [Inference throughput](benchmarks/inference-throughput/README.md) |
 | GLM-5.2 KLD and quant quality | [GLM-5.2 KLD Evaluation](benchmarks/glm52-kld-evaluation.md) |
-| General KLD methodology | [KLD Evaluation](benchmarks/kld-evaluation.md) |
+| General KLD methodology | [Measuring quantization distribution fidelity in vLLM](kld/README.md) |
 | MTP quality checks | [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) |
 | NVFP4 quantization comparison | [NVFP4 Quantization Comparison](benchmarks/nvfp4-quantization-comparison.md) |
 
