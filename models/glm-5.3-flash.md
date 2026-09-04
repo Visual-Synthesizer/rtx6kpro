@@ -35,9 +35,9 @@ do not require checkpoint paths or source-code bind mounts.
 | Native DRAM offload | **qualified** and opt-in with `CACHE_MODE=native` |
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache` |
 | CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
-| Scheduler | 4,096 target tokens per step; concurrent-prefill interval 8 |
+| Scheduler | 4,096 target tokens per step; execution-time compute-share fairness assigns 40% of contended model execution to prefill; scheduling interval 1 |
 | Root filesystem | Two layers, within standard Docker overlay2 limits |
-| Qualification date | 2026-09-03 |
+| Qualification date | 2026-09-04 |
 
 The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md)
 and [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md)
@@ -55,12 +55,12 @@ dataset, prompt, sampling, runtime, equality checker, and receipt validation.
 ## Docker artifact
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260903-r20
-voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340
+voipmonitor/vllm:jovian-judgement-community-20260904-r21
+voipmonitor/vllm@sha256:f096012c508f9bc12e8c4e617b8ed19da3a2cecb525e9479904e848730f0c8ac
 ```
 
 The embedded source-lock SHA-256 is
-`9a6167d415d824e1707ba7df0dd5906e05c004f1ed2666f80f2f9e1ea9fde4be`.
+`e7adbbb9833b5cb1716bfc673a343b538b96672bad94d78753d1fd3c87940026`.
 The Docker digest fixes the runtime. Model repository names follow Hugging Face
 `main` unless an optional revision variable is supplied.
 
@@ -88,21 +88,20 @@ target, MTP, or DFlash2 hot paths.
 
 The measurements used four stock-clock RTX PRO 6000 Blackwell Workstation
 Edition GPUs with PCIe Gen5 x16 links, tensor parallelism of four, FP8 target
-KV cache, a 4,096-token scheduler budget, full and piecewise decode graphs,
-exactly 16 NCCL channels, and a 2 MiB NCCL buffer. Prefill values are medians of
-three cold 32K-token requests. C1 and C8 decode values are coordinate-wise
-medians of three 30-second context-zero samples. Each DCP4 C8 run was followed
-by a short C1 request to validate the transition from an eight-request CUDA
-graph to a one-request graph.
+KV cache, a 4,096-token scheduler budget, full and piecewise CUDA graphs,
+exactly 16 NCCL channels, a 2 MiB NCCL buffer, and the default 0.4 prefill
+compute-share target. Each decode cell is one 30-second context-zero sample on
+an idle warmed server. Each prefill value is the first measured cold 32K-token
+request after one warmup.
 
-| DCP | Serving mode | 32K prefill tok/s | C1 output tok/s | C1 steps/s | C1 accepted/step | C8 output tok/s | C8 steps/s | C8 accepted/step |
-|---:|---|---:|---:|---:|---:|---:|---:|---:|
-| 1 | No speculation | 14,908 | 169.76 | — | — | 735.86 | — | — |
-| 1 | MTP, depth 3 | 14,507 | 256.33 | 105.15 | 2.438 | 894.96 | 370.06 | 2.440 |
-| 1 | DFlash2, depth 7 | 14,691 | 214.27 | 89.46 | 2.436 | 689.35 | 291.12 | 2.370 |
-| 4 | No speculation | 13,019 | 151.46 | — | — | 666.02 | — | — |
-| 4 | MTP, depth 3 | 12,838 | 234.70 | 93.67 | 2.513 | 843.97 | 341.79 | 2.471 |
-| 4 | DFlash2, depth 7 | 13,028 | 207.92 | 81.12 | 2.563 | 645.85 | 263.11 | 2.456 |
+| DCP | Serving mode | KV capacity | 32K prefill tok/s | C1 output tok/s | C1 steps/s | C1 accepted/step | C8 output tok/s | C8 steps/s | C8 accepted/step |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | No speculation | 4,810,752 | 15,297 | 191.3 | — | — | 843.7 | — | — |
+| 1 | MTP, depth 3 | 3,840,000 | 14,893 | 288.1 | 112.9 | 2.55 | 980.7 | 402.0 | 2.44 |
+| 1 | DFlash2, depth 7 | 3,991,552 | 15,138 | 252.2 | 103.3 | 2.44 | 779.9 | 327.3 | 2.38 |
+| 4 | No speculation | 21,929,984 | 13,606 | 169.5 | — | — | 762.1 | — | — |
+| 4 | MTP, depth 3 | 17,858,560 | 13,135 | 269.4 | 105.9 | 2.54 | 932.0 | 379.0 | 2.46 |
+| 4 | DFlash2, depth 7 | 18,604,032 | 13,427 | 227.1 | 92.2 | 2.46 | 721.1 | 294.3 | 2.45 |
 
 Speculative output throughput varies with accepted length. Target steps per
 second isolates target-model execution speed.
@@ -112,40 +111,44 @@ second isolates target-model execution speed.
 With four decode-context ranks, every rank must select sparse-attention
 candidates from the complete target KV sequence rather than its rank-local
 quarter. The qualified implementation gathers the complete target KV view and
-keeps recurrent-state cache ownership independent. On DFlash2 depth 7, the
-implementation measured 12,999 prompt tok/s versus 9,858 prompt tok/s for
-rank-local selection, a 31.86% increase. The packaged configuration measured
-13,028 prompt tok/s in the three-run qualification above.
+keeps recurrent-state cache ownership independent. A feature-isolation test in
+the `20260903-r20` runtime measured 12,999 prompt tok/s with complete-KV
+selection versus 9,858 prompt tok/s with rank-local selection, a 31.86%
+increase. The `20260904-r21` runtime measured 13,427 prompt tok/s for its
+DFlash2 DCP4 qualification cell.
 
-### Comparison with the 2026-09-02 community artifact
+### Memory-weighted cache allocation
 
-The public `jovian-judgement-community-20260902-r17` artifact used the same
-stock GPU quartet and TP4/DCP1, but used 32 NCCL channels and 512-token split
-cache pages. The comparison therefore measures complete artifacts rather than
-one isolated source change.
+GLM-5.3 target attention and recurrent state have different bytes-per-request
+costs. The runtime partitions compatible layers by their actual cost instead
+of forcing equal layer counts into each shared pool. The deterministic search
+is capped at eight cache groups, preserving bounded scheduler and connector
+overhead.
 
-| Workload | 20260902-r17 | 20260903-r20 | Change |
-|---|---:|---:|---:|
-| No-spec 32K prefill | 14,663 tok/s | 14,908 tok/s | +1.67% |
-| MTP, depth 3, 32K prefill | 14,272 tok/s | 14,507 tok/s | +1.65% |
-| DFlash2, depth 7, 32K prefill | 14,323 tok/s | 14,691 tok/s | +2.57% |
-| No-spec C1 output | 163.43 tok/s | 169.76 tok/s | +3.87% |
-| No-spec C8 output | 734.96 tok/s | 735.86 tok/s | +0.12% |
-| MTP, depth 3, C1 target steps | 102.53 steps/s | 105.15 steps/s | +2.56% |
-| MTP, depth 3, C8 target steps | 374.58 steps/s | 370.06 steps/s | -1.21% |
-| DFlash2, depth 7, C1 target steps | 89.78 steps/s | 89.46 steps/s | -0.36% |
-| DFlash2, depth 7, C8 target steps | 294.22 steps/s | 291.12 steps/s | -1.05% |
+For TP4/DCP4 without speculation, the allocator increased usable KV capacity
+from 20,873,216 tokens in the `20260903-r20` artifact to 21,929,984 tokens:
+1,056,768 additional tokens, or 5.06%. The DCP1 DFlash2 A/B remained within run
+noise: 32K prefill changed from 15,151 to 15,138 tok/s, C1 verifier throughput
+from 101.6 to 103.3 steps/s, and C8 verifier throughput from 332.1 to 327.3
+steps/s.
 
-Speculative C8 output rates are 894.96 tok/s for MTP depth 3 and 689.35 tok/s
-for DFlash2 depth 7. They are respectively 5.41% and 10.83% below the earlier
-artifact because the measured accepted lengths fell from 2.538 to 2.440 and
-from 2.613 to 2.370. Target-step throughput, which isolates runtime execution
-from data-dependent proposal acceptance, changed by -1.21% and -1.05%.
+### Compute-share fairness
+
+The scheduler measures model-execution time separately for prefill and decode
+and targets 40% prefill share only while both classes are contending. A mixed
+C8 DFlash2 decode and cold 32K-prefill run assigned 42.97% of measured
+contended execution time to prefill. Forward passes are indivisible, so short
+runs oscillate around the configured target.
+
+Set `FAIRNESS_ENGINE=none` to disable fairness. Compute-share fairness requires
+`PREFILL_SCHEDULE_INTERVAL=1`; the launcher rejects incompatible values rather
+than silently changing scheduling behavior.
 
 ### Gated-delta-network prefill backend
 
-The B12X KDA comparison used the same source tree, hardware, clocks, scheduler,
-and three 32K-token samples per cell.
+The B12X KDA comparison used the `20260903-r20` source tree with matched
+hardware, clocks, scheduler, and three 32K-token samples per cell. The weighted
+cache allocator does not modify either KDA implementation.
 
 | Decode-context configuration | B12X KDA | FlashKDA | B12X change |
 |---|---:|---:|---:|
@@ -163,7 +166,7 @@ the qualified B12X, full-and-piecewise CUDA graph, FlashInfer sampler,
 `CUDAGRAPH_MODE` override is required.
 
 ```bash
-IMAGE=voipmonitor/vllm:jovian-judgement-community-20260903-r20
+IMAGE=voipmonitor/vllm:jovian-judgement-community-20260904-r21
 GPU_DEVICES=0,1,2,3
 PORT=8000
 docker pull "$IMAGE"
@@ -216,7 +219,9 @@ docker run -d \
   -e MAX_MODEL_LEN=1048576 \
   -e MAX_NUM_SEQS=32 \
   -e MAX_NUM_BATCHED_TOKENS=4096 \
-  -e PREFILL_SCHEDULE_INTERVAL=8 \
+  -e PREFILL_SCHEDULE_INTERVAL=1 \
+  -e FAIRNESS_ENGINE=compute_share \
+  -e PREFILL_COMPUTE_SHARE=0.4 \
   -e GPU_MEMORY_UTILIZATION=0.93 \
   "${MODE_ARGS[@]}" \
   "$IMAGE"
@@ -286,16 +291,17 @@ cache format, parallelism, DCP gathering policy, speculation mode, and object
 size, preventing incompatible cache objects from being reused.
 
 Qualification covered cold compute, vLLM automatic prefix reuse, LMCache DRAM
-restore, and filesystem restore after restarting both vLLM and the LMCache
-sidecar. DFlash2 restored 12,288 prompt tokens from filesystem storage after a
-full restart. External bytes were compared on every tensor-parallel rank across
-the target attention, recurrent-state, and DFlash sliding-attention groups.
+restore, and filesystem restore for FP8 and NVFP4. Both formats restored 12,288
+prompt tokens after restarting vLLM and the LMCache sidecar. FP8 DFlash2 also
+restored 12,288 tokens from DRAM and filesystem tiers without a service
+restart. External bytes were compared on every tensor-parallel rank across the
+target attention, recurrent-state, and DFlash sliding-attention groups.
 
 ## Source and review contract
 
 | Component | Qualified source |
 |---|---|
-| vLLM | commit `7015eb6949a93247df02fb6f9101d17c40bd83e8`; tree `456231387f6f5adc2d1a5241428f1226b29ea835`; package tree `83e4480f930da37a26f893871a55bcbf54493b3b` |
+| vLLM | branch `artifact/jovian-judgement-community-20260904-r21-source`; commit `f2d77086163e899f87f54a59af216d18ffa3a2b7`; tree `95bff0df5f40df443884c282de6fbda1b1fdb8d6`; package tree `4fbb1c257ac59e5e68450655ad4061d2c8a05e5c` |
 | B12X | commit `1e59a1fd09f782d302b1068b15c8a0bd66103894`; tree `f322c804eec1c58a63bd4fe6e7901a95a678a575`; package tree `aaa5f189acae0206d886553421f6e9044f4c458a` |
 | LMCache | commit `aefe3ab701ab7a835532e701be89f5055b13ec0f`; tree `683ab2c165a9aa0e2d1a1ab757af4a8b193688c5`; package tree `976a97f22c0497f34db089dc5f02a713dd0b5888` |
 
