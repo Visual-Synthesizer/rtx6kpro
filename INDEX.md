@@ -31,6 +31,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v4 Chthonic B12X](models/ds4-flash-v4.md) - `models/ds4-flash-v4.md`
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
+- [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r12](models/ds4dspark-infernal-invocation-r12.md) - `models/ds4dspark-infernal-invocation-r12.md`
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r14](models/ds4dspark-infernal-invocation-r14.md) - `models/ds4dspark-infernal-invocation-r14.md`
@@ -61,6 +62,9 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.1 MXFP4 Hybrid Native Checkpoint](models/glm-5.1-mxfp4.md) - `models/glm-5.1-mxfp4.md`
 - [GLM-5.1 Runbook Hub](models/glm-5.1.md) - `models/glm-5.1.md`
 - [GLM-5.2 Runbook Hub](models/glm-5.2.md) - `models/glm-5.2.md`
+- [GLM-5.3-Flash AA-LCR: BF16, published NVFP4, and QAD step 1,750](models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) - `models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md`
+- [GLM-5.3-Flash AA-LCR: published NVFP4 versus QAD step 1,750](models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md) - `models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md`
+- [GLM-5.3-Flash AA-LCR reproduction specification](models/glm-5.3-flash/aa-lcr-reproduction.md) - `models/glm-5.3-flash/aa-lcr-reproduction.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
