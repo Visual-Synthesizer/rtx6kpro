@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-05](2026-09/2026-09-05.md) | GPT-6 "Astra" launched in ChatGPT/Codex — community reports strong coding results (one-shot Tetris |
 | [2026-09-04](2026-09/2026-09-04.md) | - GLM-5.3-Flash R22 fixes a critical FlashKDA prefill kernel bug causing corrupted/runaway output un |
 | [2026-09-03](2026-09/2026-09-03.md) | GLM-5.3-Flash scheduler fix: logprobz's PR shipped decode-only steps to stop prefill from starving d |
 | [2026-09-02](2026-09/2026-09-02.md) | LMCache L2 cache corruption bug found & fixed — field reports across TP4/DCP4 exposed byte-level c |
@@ -198,6 +199,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-05](2026-09/2026-09-05.md) | GPT-6 "Astra" launched in ChatGPT/Codex — community reports strong coding results (one-shot Tetris |
 | [2026-09-04](2026-09/2026-09-04.md) | - GLM-5.3-Flash R22 fixes a critical FlashKDA prefill kernel bug causing corrupted/runaway output un |
 | [2026-09-03](2026-09/2026-09-03.md) | GLM-5.3-Flash scheduler fix: logprobz's PR shipped decode-only steps to stop prefill from starving d |
 | [2026-09-02](2026-09/2026-09-02.md) | LMCache L2 cache corruption bug found & fixed — field reports across TP4/DCP4 exposed byte-level c |
