@@ -180,6 +180,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Measuring quantization distribution fidelity in vLLM](kld/README.md) - `kld/README.md`
 - [GLM-5.3-Flash BF16-to-NVFP4 distribution fidelity](kld/glm-5.3-flash-bf16-nvfp4.md) - `kld/glm-5.3-flash-bf16-nvfp4.md`
 - [GLM-5.3-Flash NVFP4 QAD step 1,750 distribution fidelity](kld/glm-5.3-flash-qad-step1750.md) - `kld/glm-5.3-flash-qad-step1750.md`
+- [GLM-5.3-Flash NVFP4 QAD step 2,500 distribution fidelity](kld/glm-5.3-flash-qad-step2500.md) - `kld/glm-5.3-flash-qad-step2500.md`
 
 ## Optimization Notes
 

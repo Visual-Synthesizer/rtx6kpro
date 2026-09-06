@@ -25,7 +25,8 @@ do not require checkpoint paths or source-code bind mounts.
 | Two decode-context ranks | **implemented**; not independently performance-qualified for this artifact |
 | Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
-| QAD research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity, verifier-backed behavior, and AA-LCR are measured, but the checkpoint is not a qualified serving target |
+| QAD step-1,750 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity, verifier-backed behavior, and AA-LCR are measured, but the checkpoint is not a qualified serving target |
+| QAD step-2,500 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step2500`](../kld/glm-5.3-flash-qad-step2500.md); natural-route and exact-BF16-route distribution fidelity are measured, but behavioral capability, B12X execution, and serving are not qualified |
 | AA-LCR capability evaluation | **qualified** for the exact BF16, published-NVFP4, and QAD checkpoint-and-runtime configurations in the [three-configuration report](glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) |
 | Verifier-backed behavioral fidelity | **qualified execution; inconclusive one-point decision** for the topology-matched BF16, published-NVFP4, and QAD checkpoints in the [VBF report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
@@ -42,8 +43,9 @@ do not require checkpoint paths or source-code bind mounts.
 | FlashKDA numerical stability | **qualified** with the stable FP32 forward-substitution inverse |
 | Qualification date | 2026-09-05 |
 
-The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md)
-and [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md)
+The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md),
+[QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md), and
+[QAD step 2,500 progression comparison](../kld/glm-5.3-flash-qad-step2500.md)
 are research-only. They measure a reproducible FlashInfer CUTLASS path rather
 than the B12X serving path specified here.
 
