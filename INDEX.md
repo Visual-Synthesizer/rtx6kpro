@@ -70,6 +70,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.3-Flash AA-LCR: BF16, published NVFP4, and QAD step 1,750](models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) - `models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md`
 - [GLM-5.3-Flash AA-LCR: published NVFP4 versus QAD step 1,750](models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md) - `models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md`
 - [GLM-5.3-Flash AA-LCR reproduction specification](models/glm-5.3-flash/aa-lcr-reproduction.md) - `models/glm-5.3-flash/aa-lcr-reproduction.md`
+- [GLM-5.3-Flash QAD step 2,500 verifier-backed behavioral fidelity](models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash verifier-backed behavioral fidelity](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`

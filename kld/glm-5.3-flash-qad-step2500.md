@@ -30,6 +30,13 @@ the dialogue, instruction, and assistance stratum. The result supports QAD
 step 2,500 as the more faithful end-to-end checkpoint under its own routing,
 but not as the more faithful expert computation conditional on BF16 routes.
 
+The separate [verifier-backed behavioral-fidelity report](../models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md)
+compares published NVFP4, QAD step 1,750, and QAD step 2,500 on 224
+deterministic tasks under one matched TP4×2 serving profile. QAD step 2,500
+has the lowest behavioral point estimate, but both paired aggregate intervals
+are inconclusive. Improved distribution fidelity therefore does not establish
+a behavioral improvement on that task suite.
+
 ## Checkpoint identity and contents
 
 | Role | Artifact identity |

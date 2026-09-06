@@ -26,9 +26,9 @@ do not require checkpoint paths or source-code bind mounts.
 | Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
 | QAD step-1,750 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity, verifier-backed behavior, and AA-LCR are measured, but the checkpoint is not a qualified serving target |
-| QAD step-2,500 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step2500`](../kld/glm-5.3-flash-qad-step2500.md); natural-route and exact-BF16-route distribution fidelity are measured, but behavioral capability, B12X execution, and serving are not qualified |
+| QAD step-2,500 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step2500`](../kld/glm-5.3-flash-qad-step2500.md); distribution fidelity is measured, and the [matched TP4×2 VBF report](glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) records qualified executions with inconclusive behavioral comparisons; production serving remains unqualified |
 | AA-LCR capability evaluation | **qualified** for the exact BF16, published-NVFP4, and QAD checkpoint-and-runtime configurations in the [three-configuration report](glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) |
-| Verifier-backed behavioral fidelity | **qualified execution; inconclusive one-point decision** for the topology-matched BF16, published-NVFP4, and QAD checkpoints in the [VBF report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
+| Verifier-backed behavioral fidelity | **qualified executions; inconclusive one-point decisions** in the [TP8 BF16/published-NVFP4/QAD-step-1,750 report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md) and the [TP4×2 published-NVFP4/QAD-step-1,750/QAD-step-2,500 report](glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
@@ -63,6 +63,14 @@ judge. BF16 scores 93.11%, published NVFP4 scores 91.63%, and QAD step 1,750
 scores 92.35% on the primary fractional metric. All paired one-point decisions
 are inconclusive; the report separates qualified execution provenance from the
 statistical power required to claim behavioral equivalence or improvement.
+
+The [QAD step-2,500 VBF report](glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md)
+uses a matched two-replica TP4 profile for published NVFP4, QAD step 1,750, and
+QAD step 2,500. Their semantic scores are 92.31%, 91.87%, and 89.72%
+respectively. QAD step 2,500 has the lowest point estimate, but its paired
+intervals against both comparators are inconclusive. The controls were
+commissioned after the step-2,500 result was inspected, so behavioral claims
+remain research-only.
 
 ## Docker artifact
 

@@ -9,6 +9,11 @@ changes produce objectively better or worse answers?
 VBF is a project-specific benchmark with a published operation contract, not
 an established external leaderboard or a universal model-quality score.
 
+The [QAD step-2,500 companion report](qad-step2500-verifier-backed-behavioral-fidelity.md)
+applies the same 224-task suite to published NVFP4, QAD step 1,750, and QAD
+step 2,500 under a matched two-replica TP4 profile. The report keeps those
+executions separate from the TP8 results specified on this page.
+
 VBF gives each checkpoint the same deterministic tasks and scores every answer
 against programmatically computed ground truth. It does not ask another model
 to judge the answer, and it does not compare candidate prose with a BF16
