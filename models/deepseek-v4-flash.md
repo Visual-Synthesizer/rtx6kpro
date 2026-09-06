@@ -8,7 +8,7 @@ specifications.
 
 | Need | Page |
 |---|---|
-| Serve DeepSeek-V4-Flash-0731 fixed K5 with optional engine-driven LMCache | [DeepSeek-V4-Flash Jovian Judgement r6](ds4-jovian-judgement-r6.md) |
+| Serve DeepSeek-V4-Flash-0731 fixed K5 with optional engine-driven LMCache | [DeepSeek-V4-Flash Jovian Judgement r7](ds4-jovian-judgement-r7.md) |
 | Inspect the qualified DeepSeek-V4-Flash-Vision-Exp fixed-K3 runtime | [DeepSeek-V4-Flash Jovian Judgement r5](ds4-jovian-judgement-r5.md) |
 | Serve the qualified fixed-K5 source composition | [DeepSeek-V4-Flash-0731 Infernal Invocation r21](ds4dspark-infernal-invocation-r21.md) |
 | Test the target-only 2.11M-KV capacity profile | [DeepSeek-V4-Flash-0731 Infernal Invocation r19 preview](ds4dspark-infernal-invocation-r19.md) |
@@ -24,12 +24,12 @@ specifications.
 | Area | Specification |
 |---|---|
 | Vision checkpoint | `deepseek-ai/DeepSeek-V4-Flash-Vision-Exp`; target-only or fixed probabilistic K3 in Jovian Judgement r5 |
-| Qualified DSpark K5 image line | Jovian Judgement r6 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
+| Qualified DSpark K5 image line | Jovian Judgement r7 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | Target-only capacity study | Infernal Invocation r19 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | Standard-MTP checkpoint | `deepseek-ai/DeepSeek-V4-Flash` |
 | Archived DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-DSpark` |
-| General-purpose DSpark profile | fixed probabilistic K5, FastSafeTensors, B12X W4A8, FP8 compressed MLA KV |
+| General-purpose DSpark profile | fixed probabilistic K5, InstantTensor `BUFFERED`, B12X W4A8, FP8 compressed MLA KV |
 | KV offload | Native vLLM CPU/filesystem tiers or LMCache L1/filesystem L2; use one ownership model per server |
 | Backend family | B12X; archived pages also describe SparkInfer, Lucifer, and CUTLASS implementations |
 | Speculative decoding | Standard MTP and DSpark use different checkpoint, graph, and verifier contracts |
@@ -38,7 +38,7 @@ specifications.
 
 | Source line | Revision namespace | Serving specification |
 |---|---|---|
-| `dev/jovian-judgement` | Jovian Judgement `r*` | [DS4 text r6](ds4-jovian-judgement-r6.md), [text and Vision r5](ds4-jovian-judgement-r5.md) |
+| `dev/jovian-judgement` | Jovian Judgement `r*` | [DS4 text r7](ds4-jovian-judgement-r7.md), [text and Vision r5](ds4-jovian-judgement-r5.md) |
 | `dev/infernal-invocation` | Infernal Invocation `r*` | [r21 qualified source composition](ds4dspark-infernal-invocation-r21.md), [r19 capacity study](ds4dspark-infernal-invocation-r19.md) |
 | `dev/gilded-gnosis` | Gilded Gnosis `v20-r*` | [Gilded Gnosis r33](ds4dspark-v20-r33.md) |
 | Fathomless Firmament | `v9` and `v10` | [v10](ds4dspark-v10.md), [v9](ds4dspark-v9.md) |

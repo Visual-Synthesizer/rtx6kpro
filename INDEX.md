@@ -34,6 +34,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash Jovian Judgement r4](models/ds4-jovian-judgement-r4.md) - `models/ds4-jovian-judgement-r4.md`
 - [DeepSeek-V4-Flash Jovian Judgement r5](models/ds4-jovian-judgement-r5.md) - `models/ds4-jovian-judgement-r5.md`
 - [DeepSeek-V4-Flash Jovian Judgement r6](models/ds4-jovian-judgement-r6.md) - `models/ds4-jovian-judgement-r6.md`
+- [DeepSeek-V4-Flash Jovian Judgement r7](models/ds4-jovian-judgement-r7.md) - `models/ds4-jovian-judgement-r7.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r3](models/ds4-vision-jovian-judgement-r3.md) - `models/ds4-vision-jovian-judgement-r3.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
