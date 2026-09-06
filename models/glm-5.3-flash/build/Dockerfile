@@ -39,21 +39,21 @@ RUN /opt/venv/bin/python -m pip install --no-cache-dir \
 
 FROM ${BASE_IMAGE}
 
-ARG VLLM_SOURCE_REVISION=7f53b30481b4110f293521d09f7af18f9e8f9d9e
-ARG VLLM_SOURCE_TREE=c861b31da5cf527d96b5772a6709450b23c93a6f
-ARG VLLM_PACKAGE_TREE=3d98f6ebfaabf06309c9a5d3a7fbd469747aa5e1
-ARG B12X_SOURCE_REVISION=60dbc57098a3abff60cbf6048bcf8784c117feaf
-ARG B12X_SOURCE_TREE=c20b6aab67ed791cc226ee91de23f7c45509f436
-ARG B12X_PACKAGE_TREE=00248b09689830e55d8fbce8ee630600b63ef663
+ARG VLLM_SOURCE_REVISION=63a82f8d323e8538cbe6f88ae1812a1c01577a0f
+ARG VLLM_SOURCE_TREE=f54cd9ca2b9434727715197d32150b75e82a9ebf
+ARG VLLM_PACKAGE_TREE=a336313dfd12c6b692051d1d3291712dda0c2a3d
+ARG B12X_SOURCE_REVISION=e8ad299b174f16e2e8fb5879bea272f4efbb53f2
+ARG B12X_SOURCE_TREE=f3cd8a9eb00d3226a1acbbed1efedf10cc1c3e71
+ARG B12X_PACKAGE_TREE=95fdcb1cfea380480b8882fa44055cfef358ddbb
 ARG LMCACHE_SOURCE_REVISION=822330db1160d2847538d53f9e6f4eeee2404f4d
 ARG LMCACHE_SOURCE_TREE=008ac3e09ae5917aa0849147480d7bd5b9f8b37a
 ARG LMCACHE_PACKAGE_TREE=fe5442fbf258accaa7f26d2bbb00d8b7b5c349ca
 ARG LMCACHE_VERSION=0.5.5.dev0+glm53cache.engine.822330db
 ARG FLASHKDA_SOURCE_REVISION=3b225bf26bb8e218928a1fe14751cb48cf31d11b
 ARG FLASHKDA_EXTENSION_SHA256=16aece5ffb83c2dfb0355758bbbc9d6e0ea50a2cfc36ecee4936607d445aba0a
-ARG SOURCE_LOCK_SHA256=bced2847d40e650a145d7060d614bcf77de7df5d8a1d2db1a64c7bcaa338217a
+ARG SOURCE_LOCK_SHA256=e964f1c53c693eb83c3476c89a4a40e823f6d012f5ef9588ff5ae025ab18dd91
 ARG BASE_LAUNCHER_SHA256=e149d469b999181ca626c450c12f531721f21c0fb697690f80c7617f591ea7b4
-ARG RUNTIME_LAUNCHER_SHA256=e05822c9925c4e99c4e245526ec6430da30d9d43b3a723b67aaa222040e71d76
+ARG RUNTIME_LAUNCHER_SHA256=69b0bf28564d5f497d6da1d6eb34ba45eb505be788247e8acce793bd88497d69
 ARG LMCACHE_LAUNCHER_SHA256=c841af83547ecd6fd4bcf04cd8933b9f894eb5c9e27421130938b1168c0ac0c1
 ARG CACHE_COMPLETE_LMCACHE_LAUNCHER_SHA256=a618a5c6e60e0b2d145cbf6a269cddb7fb032abd45d5b6ddc8d769150da15d02
 ARG CACHE_MODE_LAUNCHER_SHA256=0c35ba35e24e5915b8da1ea2e1cae19e84ed1156057dd059800150d33f41ff18
@@ -72,7 +72,7 @@ RUN --mount=type=bind,from=flashkda-artifact,source=/,target=/flashkda-artifacts
     --mount=type=bind,source=serve-glm53-flash-lmcache-cache-complete.sh,target=/cache-complete-lmcache-launcher,ro \
     --mount=type=bind,source=serve-glm53-flash-cache-complete.sh,target=/cache-mode-launcher,ro \
     --mount=type=bind,source=glm53-r18-lmcache-runtime-requirements.txt,target=/lmcache-runtime-requirements,ro \
-    --mount=type=bind,source=glm53-jovian-judgement-community-20260905-r26.source.lock,target=/source-lock,ro \
+    --mount=type=bind,source=glm53-jovian-judgement-community-20260906-r27.source.lock,target=/source-lock,ro \
     test "$(sha256sum /source-lock | cut -d' ' -f1)" = "${SOURCE_LOCK_SHA256}" \
     && test "$(sha256sum /flashkda-artifacts/_flashkda_C.abi3.so | cut -d' ' -f1)" = \
       "${FLASHKDA_EXTENSION_SHA256}" \
@@ -92,6 +92,8 @@ RUN --mount=type=bind,from=flashkda-artifact,source=/,target=/flashkda-artifacts
       /vllm-source/vllm/models/glm5next/nvidia/mtp_draft_head.py \
     && grep -Fq 'expandable_segments' \
       /vllm-source/vllm/config/vllm.py \
+    && grep -Fq 'recurrent_instruction_boundary' \
+      /vllm-source/vllm/renderers/online_renderer.py \
     && grep -Fq 'B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE' \
       /b12x-source/b12x/moe/fused_moe/_impl.py \
     && grep -Fq 'B12X_PCIE_ONESHOT_PDL' \
@@ -191,23 +193,26 @@ RUN --mount=type=bind,from=flashkda-artifact,source=/,target=/flashkda-artifacts
       > /opt/lmcache/python-packages.txt
 
 ENV LMCACHE_EXPECTED_SOURCE_ROOT=/opt/venv/lib/python3.12/site-packages/lmcache \
-    LOCAL_INFERENCE_CACHE_FINGERPRINT=cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096 \
-    XDG_CACHE_HOME=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096 \
-    VLLM_CACHE_ROOT=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/vllm \
-    VLLM_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/vllm \
-    TRITON_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/triton \
-    TORCHINDUCTOR_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/torchinductor \
-    CUTE_DSL_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/cute-dsl \
-    B12X_CUTE_COMPILE_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/b12x/cute \
-    B12X_COMPILE_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/b12x/compile \
-    SPARKINFER_COMPILE_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/b12x/compile \
-    CUDA_CACHE_PATH=/cache/jit/cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096/cuda \
+    LOCAL_INFERENCE_CACHE_FINGERPRINT=cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096 \
+    XDG_CACHE_HOME=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096 \
+    VLLM_CACHE_ROOT=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/vllm \
+    VLLM_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/vllm \
+    TRITON_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/triton \
+    TORCHINDUCTOR_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/torchinductor \
+    CUTE_DSL_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/cute-dsl \
+    B12X_CUTE_COMPILE_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/b12x/cute \
+    B12X_COMPILE_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/b12x/compile \
+    SPARKINFER_COMPILE_CACHE_DIR=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/b12x/compile \
+    CUDA_CACHE_PATH=/cache/jit/cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096/cuda \
     VLLM_GLM53_L2_PREFETCH=1 \
     VLLM_GLM53_L2_PREFETCH_PERSIST_MB=0 \
     VLLM_GLM53_DFLASH_ATTN=1 \
     VLLM_CAUSAL_CONV1D_UPDATE_HOIST=1 \
     VLLM_GLM53_KDA_GATE_SIDE_STREAM=1 \
     VLLM_GLM53_MTP_DRAFT_HEAD=nvfp4 \
+    VLLM_MXFP8_LM_HEAD=0 \
+    VLLM_MTP_NVFP4_LM_HEAD=0 \
+    VLLM_LM_HEAD_A16=0 \
     VLLM_USE_FLASHINFER_SAMPLER=1 \
     VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE=768KB \
     VLLM_GLM53_ONLINE_DENSE_MXFP8=0 \
@@ -236,7 +241,7 @@ ENV LMCACHE_EXPECTED_SOURCE_ROOT=/opt/venv/lib/python3.12/site-packages/lmcache 
     GLM53_KDA_PREFILL_BACKEND=flashkda
 
 LABEL local-inference.status="${QUALIFICATION_STATUS}" \
-      local-inference.release.name="jovian-judgement-community-20260905-r26" \
+      local-inference.release.name="jovian-judgement-community-20260906-r27" \
       local-inference.release.overlay2-rootfs-layers="2" \
       local-inference.release.rootfs-format="flattened-runtime-plus-single-source-locked-package-layer" \
       local-inference.docker.commit="source-locked build; see org.opencontainers.image.source" \
@@ -244,42 +249,42 @@ LABEL local-inference.status="${QUALIFICATION_STATUS}" \
       local-inference.runtime.launcher.sha256="${CACHE_MODE_LAUNCHER_SHA256}" \
       local-inference.runtime.source-lock.path="/opt/glm53-flash/source.lock" \
       local-inference.runtime.source-lock.sha256="${SOURCE_LOCK_SHA256}" \
-      local-inference.runtime.cache-fingerprint="cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096" \
-      local-inference.cache.fingerprint="cu133-torch213-glm53-vllm3d98f6eb-fkda3b225bf-b12x00248b09-lmcachefe5442fb-p2048-bt4096" \
+      local-inference.runtime.cache-fingerprint="cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096" \
+      local-inference.cache.fingerprint="cu133-torch213-glm53-vllma336313d-fkda3b225bf-b12x95fdcb1c-lmcachefe5442fb-p2048-bt4096" \
       local-inference.cache.target-block-size="2048 for GPU-only serving; LMCache derives a DCP-aligned per-rank page" \
       local-inference.cache.recurrent-block-size="equal to the resolved target page" \
-      local-inference.vllm.base-revision="f564dffe9a6625ae3d87706530ce35974f1d2989" \
-      local-inference.vllm.branch="integration/glm53-r26-current-head-20260905" \
-      local-inference.vllm.foundation.commit="f564dffe9a6625ae3d87706530ce35974f1d2989" \
+      local-inference.vllm.base-revision="7d66922a7bf0c9c7efe9a35a87df128f6b24e762" \
+      local-inference.vllm.branch="integration/glm53-r27-release-20260906" \
+      local-inference.vllm.foundation.commit="7d66922a7bf0c9c7efe9a35a87df128f6b24e762" \
       local-inference.vllm.commit="${VLLM_SOURCE_REVISION}" \
       local-inference.vllm.source-revision="${VLLM_SOURCE_REVISION}" \
-      local-inference.vllm.upstream-base="f564dffe9a6625ae3d87706530ce35974f1d2989" \
-      local-inference.vllm.upstream-revision="f564dffe9a6625ae3d87706530ce35974f1d2989" \
+      local-inference.vllm.upstream-base="7d66922a7bf0c9c7efe9a35a87df128f6b24e762" \
+      local-inference.vllm.upstream-revision="7d66922a7bf0c9c7efe9a35a87df128f6b24e762" \
       local-inference.vllm.composition="dev/jovian-judgement plus source-locked GLM serving changes listed in /opt/glm53-flash/source.lock" \
-      local-inference.vllm.integration-prs="#619,#573,#571,#572,#642,#552,#558,#553" \
-      local-inference.vllm.integration.prs="#619,#573,#571,#572,#642,#552,#558,#553" \
+      local-inference.vllm.integration-prs="#619,#573,#571,#572,#665,#552,#558,#553,#561,#664,#599,#666,#653" \
+      local-inference.vllm.integration.prs="#619,#573,#571,#572,#665,#552,#558,#553,#561,#664,#599,#666,#653" \
       local-inference.vllm.integration.lock_sha256="${SOURCE_LOCK_SHA256}" \
       local-inference.vllm.integration.tree="${VLLM_SOURCE_TREE}" \
       local-inference.vllm.merge-heads="${VLLM_SOURCE_REVISION}" \
-      local-inference.vllm.patch_sha256="1959cd06ab6ccf9e21bc0219a9390d792fb3d3f5663ac73e7a68c0a7e1e0648d" \
+      local-inference.vllm.patch_sha256="8e99d9eb4507132bba7640f17cc2046971f4ea8343dbb1dfc316029f4ff66d27" \
       local-inference.vllm.tree="${VLLM_SOURCE_TREE}" \
       local-inference.vllm.package-tree="${VLLM_PACKAGE_TREE}" \
       local-inference.runtime.vllm.composition.commit="${VLLM_SOURCE_REVISION}" \
       local-inference.runtime.vllm.port.commit="${VLLM_SOURCE_REVISION}" \
-      local-inference.b12x.base-revision="613cfd9bbc542e2a7a9e5e216d1f62a8becda87f" \
-      local-inference.b12x.branch="integration/glm53-r26-current-head-20260905" \
-      local-inference.b12x.foundation.commit="613cfd9bbc542e2a7a9e5e216d1f62a8becda87f" \
+      local-inference.b12x.base-revision="a1bbd02781c7505754e7aa58a959c1a77891c690" \
+      local-inference.b12x.branch="integration/glm53-r27-release-20260906" \
+      local-inference.b12x.foundation.commit="a1bbd02781c7505754e7aa58a959c1a77891c690" \
       local-inference.b12x.commit="${B12X_SOURCE_REVISION}" \
       local-inference.b12x.source-revision="${B12X_SOURCE_REVISION}" \
-      local-inference.b12x.upstream-base="613cfd9bbc542e2a7a9e5e216d1f62a8becda87f" \
-      local-inference.b12x.upstream-revision="613cfd9bbc542e2a7a9e5e216d1f62a8becda87f" \
+      local-inference.b12x.upstream-base="a1bbd02781c7505754e7aa58a959c1a77891c690" \
+      local-inference.b12x.upstream-revision="a1bbd02781c7505754e7aa58a959c1a77891c690" \
       local-inference.b12x.composition="B12X master plus source-locked GLM serving changes listed in /opt/glm53-flash/source.lock" \
-      local-inference.b12x.integration-prs="#316,#267,#268,#269,#270,#272,#273,#278,#279,#280" \
-      local-inference.b12x.integration.prs="#316,#267,#268,#269,#270,#272,#273,#278,#279,#280" \
+      local-inference.b12x.integration-prs="#316,#267,#268,#269,#270,#272,#273,#278,#279,#280,#317" \
+      local-inference.b12x.integration.prs="#316,#267,#268,#269,#270,#272,#273,#278,#279,#280,#317" \
       local-inference.b12x.integration.lock_sha256="${SOURCE_LOCK_SHA256}" \
       local-inference.b12x.integration.tree="${B12X_SOURCE_TREE}" \
       local-inference.b12x.merge-heads="${B12X_SOURCE_REVISION}" \
-      local-inference.b12x.patch_sha256="a4a9a4cbf24eb2ef7bbf6315d359bcdbea08670587d6ab1843ffa96f68ac7118" \
+      local-inference.b12x.patch_sha256="f1c91506e328a7cb2df19d368499677bc52135b510df8ad1fd95bd29020aeb04" \
       local-inference.b12x.tree="${B12X_SOURCE_TREE}" \
       local-inference.b12x.package-tree="${B12X_PACKAGE_TREE}" \
       local-inference.lmcache.ref="integration/glm53-r26-current-head-20260905" \
@@ -316,6 +321,6 @@ LABEL local-inference.status="${QUALIFICATION_STATUS}" \
       org.opencontainers.image.description="GLM-5.3-Flash runtime with accelerated GPU-isolated engine-driven LMCache DRAM and filesystem tiers" \
       org.opencontainers.image.revision="${VLLM_SOURCE_REVISION}" \
       org.opencontainers.image.source="https://github.com/local-inference-lab/rtx6kpro/blob/master/models/glm-5.3-flash.md" \
-      org.opencontainers.image.version="20260905-r26"
+      org.opencontainers.image.version="20260906-r27"
 
 ENTRYPOINT ["/usr/local/bin/serve-glm53-flash.sh"]

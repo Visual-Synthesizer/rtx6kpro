@@ -43,8 +43,10 @@ has_cli_option() {
 runtime_args=()
 
 # Compute-share fairness charges measured model-execution time to prefill and
-# decode. CLI fairness options are one complete, authoritative override; when
-# either is present, the environment-owned pair is not appended.
+# decode. ``PREFILL_COMPUTE_SHARE`` is the vLLM scheduler interface. The
+# ``FAIRNESS_ENGINE`` environment variable remains a launcher compatibility
+# control for deployments created before the scheduler exposed compute share
+# directly.
 fairness_engine=${FAIRNESS_ENGINE:-none}
 prefill_compute_share=${PREFILL_COMPUTE_SHARE:-}
 case "${fairness_engine}" in
@@ -54,7 +56,9 @@ case "${fairness_engine}" in
       fail 'PREFILL_COMPUTE_SHARE is required for FAIRNESS_ENGINE=compute_share'
     require_open_unit_interval PREFILL_COMPUTE_SHARE "${prefill_compute_share}"
     ;;
-  micro_slicing) ;;
+  micro_slicing)
+    fail 'FAIRNESS_ENGINE=micro_slicing is unsupported by this vLLM scheduler; use compute_share or none'
+    ;;
   *)
     fail "FAIRNESS_ENGINE must be none, compute_share, or micro_slicing; got ${fairness_engine}"
     ;;
@@ -64,17 +68,10 @@ if [[ ${fairness_engine} != none && ${PREFILL_SCHEDULE_INTERVAL:-1} != 1 ]]; the
   fail 'PREFILL_SCHEDULE_INTERVAL must be 1 when FAIRNESS_ENGINE is enabled'
 fi
 
-if ! has_cli_option --fairness-engine "$@" &&
-  ! has_cli_option --prefill-compute-share "$@"; then
+if ! has_cli_option --prefill-compute-share "$@"; then
   case "${fairness_engine}" in
     compute_share)
-      runtime_args+=(
-        --fairness-engine compute_share
-        --prefill-compute-share "${prefill_compute_share}"
-      )
-      ;;
-    micro_slicing)
-      runtime_args+=(--fairness-engine micro_slicing)
+      runtime_args+=(--prefill-compute-share "${prefill_compute_share}")
       ;;
   esac
 fi
