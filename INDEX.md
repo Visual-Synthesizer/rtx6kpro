@@ -32,6 +32,8 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
 - [DeepSeek-V4-Flash Jovian Judgement r4](models/ds4-jovian-judgement-r4.md) - `models/ds4-jovian-judgement-r4.md`
+- [DeepSeek-V4-Flash Jovian Judgement r5](models/ds4-jovian-judgement-r5.md) - `models/ds4-jovian-judgement-r5.md`
+- [DeepSeek-V4-Flash Jovian Judgement r6](models/ds4-jovian-judgement-r6.md) - `models/ds4-jovian-judgement-r6.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r3](models/ds4-vision-jovian-judgement-r3.md) - `models/ds4-vision-jovian-judgement-r3.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
@@ -425,6 +427,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-09-01](daily-summaries/2026-09/2026-09-02.md) - `daily-summaries/2026-09/2026-09-02.md`
 - [Daily Summary — 2026-09-02](daily-summaries/2026-09/2026-09-03.md) - `daily-summaries/2026-09/2026-09-03.md`
 - [Daily Summary — 2026-09-03](daily-summaries/2026-09/2026-09-04.md) - `daily-summaries/2026-09/2026-09-04.md`
+- [Daily Summary — 2026-09-04](daily-summaries/2026-09/2026-09-05.md) - `daily-summaries/2026-09/2026-09-05.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
