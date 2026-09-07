@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-07](2026-09/2026-09-07.md) | - b12x loader prefill regression found & fixed: one-word patch (pinned_wc→managed) nearly doubles  |
 | [2026-09-06](2026-09/2026-09-06.md) | New b12x model loader (`--load-format b12x`) ships as a faster, zero-copy replacement for InstantTen |
 | [2026-09-05](2026-09/2026-09-05.md) | GPT-6 "Astra" launched in ChatGPT/Codex — community reports strong coding results (one-shot Tetris |
 | [2026-09-04](2026-09/2026-09-04.md) | - GLM-5.3-Flash R22 fixes a critical FlashKDA prefill kernel bug causing corrupted/runaway output un |
@@ -200,6 +201,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-07](2026-09/2026-09-07.md) | - b12x loader prefill regression found & fixed: one-word patch (pinned_wc→managed) nearly doubles  |
 | [2026-09-06](2026-09/2026-09-06.md) | New b12x model loader (`--load-format b12x`) ships as a faster, zero-copy replacement for InstantTen |
 | [2026-09-05](2026-09/2026-09-05.md) | GPT-6 "Astra" launched in ChatGPT/Codex — community reports strong coding results (one-shot Tetris |
 | [2026-09-04](2026-09/2026-09-04.md) | - GLM-5.3-Flash R22 fixes a critical FlashKDA prefill kernel bug causing corrupted/runaway output un |
