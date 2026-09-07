@@ -31,11 +31,13 @@ step 2,500 as the more faithful end-to-end checkpoint under its own routing,
 but not as the more faithful expert computation conditional on BF16 routes.
 
 The separate [verifier-backed behavioral-fidelity report](../models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md)
-compares published NVFP4, QAD step 1,750, and QAD step 2,500 on 224
-deterministic tasks under one matched TP4×2 serving profile. QAD step 2,500
-has the lowest behavioral point estimate, but both paired aggregate intervals
-are inconclusive. Improved distribution fidelity therefore does not establish
-a behavioral improvement on that task suite.
+compares published NVFP4 with QAD step 2,500 on 9,856 non-overlapping,
+deterministic task pairs. QAD increases the primary semantic point estimate by
+0.332 percentage points; the paired 95% interval is -0.317 to +0.982 points
+and lies inside the predeclared ±1-point practical-equivalence band. Exact-task
+discordance and exploratory family results are not uniformly favorable.
+Improved distribution fidelity therefore accompanies preserved aggregate VBF
+semantic score, not a demonstrated aggregate behavioral improvement.
 
 ## Checkpoint identity and contents
 
