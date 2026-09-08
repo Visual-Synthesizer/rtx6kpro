@@ -13,7 +13,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [INDEX](INDEX.md) - `INDEX.md`
+- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
@@ -31,6 +31,13 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash v4 Chthonic B12X](models/ds4-flash-v4.md) - `models/ds4-flash-v4.md`
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
+- [DeepSeek-V4-Flash Jovian Judgement r4](models/ds4-jovian-judgement-r4.md) - `models/ds4-jovian-judgement-r4.md`
+- [DeepSeek-V4-Flash Jovian Judgement r5](models/ds4-jovian-judgement-r5.md) - `models/ds4-jovian-judgement-r5.md`
+- [DeepSeek-V4-Flash Jovian Judgement r6](models/ds4-jovian-judgement-r6.md) - `models/ds4-jovian-judgement-r6.md`
+- [DeepSeek-V4-Flash Jovian Judgement r7](models/ds4-jovian-judgement-r7.md) - `models/ds4-jovian-judgement-r7.md`
+- [DeepSeek-V4-Flash Jovian Judgement r8](models/ds4-jovian-judgement-r8.md) - `models/ds4-jovian-judgement-r8.md`
+- [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
+- [DeepSeek-V4-Flash Vision Jovian Judgement r3](models/ds4-vision-jovian-judgement-r3.md) - `models/ds4-vision-jovian-judgement-r3.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r12](models/ds4dspark-infernal-invocation-r12.md) - `models/ds4dspark-infernal-invocation-r12.md`
 - [DeepSeek-V4-Flash-0731 on Infernal Invocation r14](models/ds4dspark-infernal-invocation-r14.md) - `models/ds4dspark-infernal-invocation-r14.md`
@@ -61,6 +68,11 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.1 MXFP4 Hybrid Native Checkpoint](models/glm-5.1-mxfp4.md) - `models/glm-5.1-mxfp4.md`
 - [GLM-5.1 Runbook Hub](models/glm-5.1.md) - `models/glm-5.1.md`
 - [GLM-5.2 Runbook Hub](models/glm-5.2.md) - `models/glm-5.2.md`
+- [GLM-5.3-Flash AA-LCR: BF16, published NVFP4, and QAD step 1,750](models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) - `models/glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md`
+- [GLM-5.3-Flash AA-LCR: published NVFP4 versus QAD step 1,750](models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md) - `models/glm-5.3-flash/aa-lcr-nvfp4-vs-qad-step1750.md`
+- [GLM-5.3-Flash AA-LCR reproduction specification](models/glm-5.3-flash/aa-lcr-reproduction.md) - `models/glm-5.3-flash/aa-lcr-reproduction.md`
+- [GLM-5.3-Flash QAD step 2,500 verifier-backed behavioral fidelity](models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md`
+- [GLM-5.3-Flash verifier-backed behavioral fidelity](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
@@ -171,6 +183,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Measuring quantization distribution fidelity in vLLM](kld/README.md) - `kld/README.md`
 - [GLM-5.3-Flash BF16-to-NVFP4 distribution fidelity](kld/glm-5.3-flash-bf16-nvfp4.md) - `kld/glm-5.3-flash-bf16-nvfp4.md`
 - [GLM-5.3-Flash NVFP4 QAD step 1,750 distribution fidelity](kld/glm-5.3-flash-qad-step1750.md) - `kld/glm-5.3-flash-qad-step1750.md`
+- [GLM-5.3-Flash NVFP4 QAD step 2,500 distribution fidelity](kld/glm-5.3-flash-qad-step2500.md) - `kld/glm-5.3-flash-qad-step2500.md`
 
 ## Optimization Notes
 
@@ -417,6 +430,9 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-08-31](daily-summaries/2026-09/2026-09-01.md) - `daily-summaries/2026-09/2026-09-01.md`
 - [Daily Summary — 2026-09-01](daily-summaries/2026-09/2026-09-02.md) - `daily-summaries/2026-09/2026-09-02.md`
 - [Daily Summary — 2026-09-02](daily-summaries/2026-09/2026-09-03.md) - `daily-summaries/2026-09/2026-09-03.md`
+- [Daily Summary — 2026-09-03](daily-summaries/2026-09/2026-09-04.md) - `daily-summaries/2026-09/2026-09-04.md`
+- [Daily Summary — 2026-09-04](daily-summaries/2026-09/2026-09-05.md) - `daily-summaries/2026-09/2026-09-05.md`
+- [Daily Summary — 2026-09-05](daily-summaries/2026-09/2026-09-06.md) - `daily-summaries/2026-09/2026-09-06.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

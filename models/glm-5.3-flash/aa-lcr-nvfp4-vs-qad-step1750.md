@@ -20,6 +20,11 @@ AA-LCR accuracy. The exact two-sided McNemar p-value is `0.7608`, and the
 question-cluster bootstrap interval includes both practically relevant
 directions.
 
+The companion
+[BF16, published NVFP4, and QAD report](aa-lcr-bf16-vs-nvfp4.md) adds the
+qualified TP8 BF16 result and its paired comparisons while preserving the
+two-configuration evidence reported here.
+
 ## Result
 
 | Checkpoint and serving configuration | Correct | AA-LCR pass@1 reproduction |

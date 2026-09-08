@@ -53,6 +53,7 @@ variables, file paths, JSON, or raw logs.
 | MXFP4 | Microscaling FP4 | FP4 format with microscaling. |
 | MXFP8 | Microscaling FP8 | FP8 format with microscaling. |
 | NVFP4 | NVIDIA FP4 | NVIDIA FP4 quantization format. |
+| QAD | Quantization-Aware Distillation | Distillation training performed with the target quantized representation in the loop. |
 | QAT | Quantization-Aware Training | Training/fine-tuning with quantization in the loop. |
 | W4A8 | 4-bit weights, 8-bit activations | Common MoE kernel mode. |
 | W4A16 | 4-bit weights, 16-bit activations | Common MoE kernel mode. |
@@ -95,3 +96,4 @@ variables, file paths, JSON, or raw logs.
 | CJK | Chinese/Japanese/Korean watchdog marker | Local historical shorthand in `/mnt/test.py`; often used as a corruption/repetition smoke signal. |
 | cc1 / cc64 | Concurrency 1 / concurrency 64 | Shorthand used in benchmark tables and discussion. |
 | ctx0 / 100k | Context length 0 / 100k tokens | Benchmark prompt-context shorthand. |
+| VBF | Verifier-Backed Behavioral Fidelity | Local Inference Lab benchmark that scores deterministic tasks against executable ground truth. |

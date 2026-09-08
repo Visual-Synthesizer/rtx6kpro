@@ -1,0 +1,217 @@
+{
+  "status": "qualified",
+  "contract": "Fixed-seed complete-output C1 rates with attributed fresh/repeated prompts",
+  "conditions": {
+    "base_url": "http://127.0.0.1:5051",
+    "model": "/model/snapshots/46aaae8a82032f77100f2f03e9cc11b391df3b4d",
+    "prompt": "Write an extremely detailed, comprehensive encyclopedia article about the complete history of mathematics from ancient Mesopotamia to 2025. Cover every civilization, every major mathematician, every theorem, proof, and breakthrough. Include detailed biographical information, historical context, and mathematical explanations. Do not summarize - provide maximum detail on every topic.",
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "max_tokens": 4096,
+    "reset_prefix_cache": false,
+    "idle_timeout": 60.0,
+    "request_timeout": 600.0,
+    "dtype": "torch.bfloat16",
+    "quantization": "modelopt_mixed",
+    "scheduler_budget": 4096,
+    "gpu_memory_utilization": 0.93
+  },
+  "inputs": {
+    "reference": {
+      "image": "sha256:aef5832d6661375dfc94607ae89db8c99af50c015010f61c12d06d958fbb53d1",
+      "report": "results/glm-mtp-math-checkpoint-sampling-20260908/reference/sampling.json",
+      "report_sha256": "7d8e83663aa785ae189b06cd9e012b8de7d8d72d19a02ad89f18e8ba04005b16",
+      "medians": {
+        "fresh": {
+          "output_tokens_per_second": 228.3515471411494,
+          "verifier_steps_per_second": 91.84208783315327,
+          "accepted_per_draft": 1.4926970254659473
+        },
+        "repeated": {
+          "output_tokens_per_second": 229.42986762759398,
+          "verifier_steps_per_second": 91.84219368127935,
+          "accepted_per_draft": 1.4983227056950252
+        }
+      }
+    },
+    "candidate": {
+      "image": "sha256:24b06eacca12e16cd94a9ed3b1987f5ef283b6358d5792664dcdd0ceaf7fdb17",
+      "report": "results/glm-mtp-math-checkpoint-sampling-20260908/candidate/sampling.json",
+      "report_sha256": "3dceecb5cac66e8c41aa40a5206488d2e7e7d3a16b333076dbd913f9f13fc3b1",
+      "medians": {
+        "fresh": {
+          "output_tokens_per_second": 232.9715286802653,
+          "verifier_steps_per_second": 92.38323063483928,
+          "accepted_per_draft": 1.5254454111733509
+        },
+        "repeated": {
+          "output_tokens_per_second": 231.6367610563488,
+          "verifier_steps_per_second": 92.34897808295362,
+          "accepted_per_draft": 1.5115016655833604
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "fresh_image": {
+      "metrics": {
+        "output_tokens_per_second": {
+          "reference_median": 228.3515471411494,
+          "candidate_median": 232.9715286802653,
+          "median_change_percent": 2.023188192484704,
+          "paired_geometric_change_percent": 1.4247641959182793,
+          "paired_bootstrap_95_percent_interval": [
+            -0.6219577203291223,
+            3.530949303462747
+          ]
+        },
+        "verifier_steps_per_second": {
+          "reference_median": 91.84208783315327,
+          "candidate_median": 92.38323063483928,
+          "median_change_percent": 0.5892100391588384,
+          "paired_geometric_change_percent": 0.45730533125278927,
+          "paired_bootstrap_95_percent_interval": [
+            0.2686267962937657,
+            0.6486196831140684
+          ]
+        },
+        "accepted_per_draft": {
+          "reference_median": 1.4926970254659473,
+          "candidate_median": 1.5254454111733509,
+          "median_change_percent": 2.1939070788448367,
+          "paired_geometric_change_percent": 1.6703687190954701,
+          "paired_bootstrap_95_percent_interval": [
+            -1.6653488918169213,
+            5.218842448911722
+          ]
+        }
+      },
+      "within_two_percent_rate_loss": true
+    },
+    "repeated_image": {
+      "metrics": {
+        "output_tokens_per_second": {
+          "reference_median": 229.42986762759398,
+          "candidate_median": 231.6367610563488,
+          "median_change_percent": 0.9619032829400354,
+          "paired_geometric_change_percent": 0.751112883189143,
+          "paired_bootstrap_95_percent_interval": [
+            -0.6097722233477085,
+            2.2129518432539994
+          ]
+        },
+        "verifier_steps_per_second": {
+          "reference_median": 91.84219368127935,
+          "candidate_median": 92.34897808295362,
+          "median_change_percent": 0.551799103833428,
+          "paired_geometric_change_percent": 0.4392905993516896,
+          "paired_bootstrap_95_percent_interval": [
+            0.235347511278484,
+            0.6406924077198344
+          ]
+        },
+        "accepted_per_draft": {
+          "reference_median": 1.4983227056950252,
+          "candidate_median": 1.5115016655833604,
+          "median_change_percent": 0.879580869878227,
+          "paired_geometric_change_percent": 0.5141388581685671,
+          "paired_bootstrap_95_percent_interval": [
+            -1.7395248518086535,
+            2.9220280248481676
+          ]
+        }
+      },
+      "within_two_percent_rate_loss": true
+    },
+    "candidate_checkpoint": {
+      "metrics": {
+        "output_tokens_per_second": {
+          "reference_median": 232.9715286802653,
+          "candidate_median": 231.6367610563488,
+          "median_change_percent": -0.5729316502654513,
+          "paired_geometric_change_percent": -0.13882358944757117,
+          "paired_bootstrap_95_percent_interval": [
+            -1.6180893878720288,
+            1.304406131408764
+          ]
+        },
+        "verifier_steps_per_second": {
+          "reference_median": 92.38323063483928,
+          "candidate_median": 92.34897808295362,
+          "median_change_percent": -0.03707659025374843,
+          "paired_geometric_change_percent": -0.036343272922563966,
+          "paired_bootstrap_95_percent_interval": [
+            -0.18300806352301685,
+            0.12680349071685426
+          ]
+        },
+        "accepted_per_draft": {
+          "reference_median": 1.5254454111733509,
+          "candidate_median": 1.5115016655833604,
+          "median_change_percent": -0.9140769959945727,
+          "paired_geometric_change_percent": -0.15615716615502778,
+          "paired_bootstrap_95_percent_interval": [
+            -2.6061114469573337,
+            2.258699198756373
+          ]
+        }
+      },
+      "within_two_percent_rate_loss": true
+    },
+    "reference_recompute": {
+      "metrics": {
+        "output_tokens_per_second": {
+          "reference_median": 228.3515471411494,
+          "candidate_median": 229.42986762759398,
+          "median_change_percent": 0.47221947910780493,
+          "paired_geometric_change_percent": 0.5288773485821574,
+          "paired_bootstrap_95_percent_interval": [
+            -1.0238088778421752,
+            2.235504635493542
+          ]
+        },
+        "verifier_steps_per_second": {
+          "reference_median": 91.84208783315327,
+          "candidate_median": 91.84219368127935,
+          "median_change_percent": 0.00011525013050572852,
+          "paired_geometric_change_percent": -0.018413850432163616,
+          "paired_bootstrap_95_percent_interval": [
+            -0.188968198679059,
+            0.14237946865717882
+          ]
+        },
+        "accepted_per_draft": {
+          "reference_median": 1.4926970254659473,
+          "candidate_median": 1.4983227056950252,
+          "median_change_percent": 0.3768802465002441,
+          "paired_geometric_change_percent": 0.9923621747615784,
+          "paired_bootstrap_95_percent_interval": [
+            -1.5530390758780195,
+            3.8634631745305423
+          ]
+        }
+      },
+      "within_two_percent_rate_loss": true
+    }
+  },
+  "rate_contract_passed": true,
+  "active_link_contract": {
+    "path": "results/glm-mtp-math-checkpoint-sampling-20260908/gpu-conditions.jsonl",
+    "samples": 2251,
+    "active_samples_per_gpu": {
+      "4": 1913,
+      "5": 1924,
+      "6": 1908,
+      "7": 1932
+    },
+    "degraded_active_samples": 0,
+    "first_degraded_sample": null,
+    "qualified": true
+  },
+  "stock_clock_samples": 2247,
+  "limitations": [
+    "Descriptive intervals do not prove statistical non-inferiority",
+    "No observation from the failed duration comparison is discarded",
+    "This probe does not establish target-distribution equivalence"
+  ]
+}

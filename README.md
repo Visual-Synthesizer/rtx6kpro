@@ -17,7 +17,7 @@ If you just want to run a model, use these stable hub pages first:
 |---|---|---|
 | GLM-5.3-Flash | [GLM-5.3-Flash](models/glm-5.3-flash.md) | Jovian Judgement Community source-locked NVIDIA 4-bit floating-point (NVFP4) target with no-spec, MTP:3, and Microscaling 8-bit floating-point (MXFP8) DFlash2 modes, qualified TP4/DCP1 performance, AA-LCR and KLD evaluation, optional DCP4 full-CKV prefill, and Docker launch. |
 | GLM-5.2 | [GLM-5.2 Runbook Hub](models/glm-5.2.md) | Fathomless vLLM, NVFP4, online FP8/MXFP8, B12X, DCP, MTP, KLD. |
-| DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Standard checkpoint, MTP, DSpark, B12X, Lucifer, CUTLASS. |
+| DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Text and Vision checkpoints, DSpark, B12X, LMCache, Lucifer, and CUTLASS. |
 | Kimi | [Kimi Runbook Hub](models/kimi.md) | Kimi-K2.7-Code, DFlash, parser/tool-call runtime. |
 | Xiaomi MiMo | [MiMo Runbook Hub](models/mimo.md) | MiMo V2.5 Pro FP4-DFlash. |
 | Qwen3.8-27B | [Qwen3.8-27B on RTX PRO 6000 Blackwell](models/qwen38-27b.md), [readable QSRT K5 training result](models/qwen38-qsrt-k5-training-result.md), [exact QSRT K5 specification](models/qwen38-qsrt-k5-r16.md) | TP1, TP2, and TP4 throughput evidence plus the QSRT K5 training interpretation, artifact, fidelity, runtime, and source contract. |
@@ -52,7 +52,7 @@ Need the complete map of every Markdown page?
 | GLM-5.3-Flash serving stack | [GLM-5.3-Flash](models/glm-5.3-flash.md) | Qualified Jovian Judgement Community TP4 image with DCP1 no-spec, MTP:3, and MXFP8 DFlash2 measurements plus DCP4 full-CKV prefill evidence. |
 | GLM-5.2 serving stack | [GLM-5.2 Infernal Invocation r18](models/glm5.2-infernal-invocation-r18.md) | Source-qualified CUDA 13.3 profiles with sparse-prefill row validation, projection-mixed EXL3 TP4, online MCG K6, and NVFP4 TP8. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
-| DS4 serving profile | [DS4 DSpark Jovian Judgement r1](models/ds4dspark-jovian-judgement-r1.md) | Source-locked CUDA 13.3 profile with fixed K5, CUDA-graph dispatch, strict required tools, and opt-in LMCache replay. |
+| DS4 text and Vision serving profiles | [DeepSeek-V4-Flash Jovian Judgement r9](models/ds4-jovian-judgement-r9.md) | Source-locked TP2 fixed-K5 text and fixed-K3 Vision serving with masked-KV and stream-lifetime corrections, measured GPU KV admission, and qualified text LMCache restoration. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
 | Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
 | MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | MiMo DFlash validation and fix notes. |
@@ -85,6 +85,8 @@ family unless you are reproducing a specific old result.
 | General KLD methodology | [Measuring quantization distribution fidelity in vLLM](kld/README.md) |
 | MTP quality checks | [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) |
 | NVFP4 quantization comparison | [NVFP4 Quantization Comparison](benchmarks/nvfp4-quantization-comparison.md) |
+| GLM-5.3-Flash behavioral fidelity | [Verifier-backed BF16, NVFP4, and QAD comparison](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
+| GLM-5.3-Flash QAD step-2,500 fidelity | [Aggregate equivalence and program-execution gain](models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) |
 
 KLD is a regression and quantization-sanity tool, not a complete quality metric.
 Use it together with long-context decode, coding probes, acceptance-rate checks,

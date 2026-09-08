@@ -1,0 +1,11 @@
+{
+  "status": "qualified",
+  "image": "sha256:24b06eacca12e16cd94a9ed3b1987f5ef283b6358d5792664dcdd0ceaf7fdb17",
+  "mode": "dflash2",
+  "dcp": 4,
+  "source_lock": "15a9a649559830822cb943ea0c3c6a644c8b69c9e54d7be3e265801851843932",
+  "contract": "Literal document and SYSTEM restores, C4 byte integrity, and three C8 cancellation/live-read eviction rounds",
+  "limitations": [
+    "No million-token timing, acceptance parity, or Qwen execution is qualified by this probe."
+  ]
+}

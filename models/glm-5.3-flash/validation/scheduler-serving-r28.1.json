@@ -1,0 +1,4714 @@
+{
+  "status": "measured; qualification interpretation is in the accompanying report",
+  "conditions": {
+    "gpu_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "gpu_model": "RTX PRO 6000 Blackwell Workstation Edition",
+    "target_kv": "fp8",
+    "tp": 4,
+    "scheduler_budget": 4096,
+    "omp_threads": 1,
+    "nccl_channels": 16,
+    "nccl_buffer_bytes": 2097152,
+    "cuda_graph_mode": "FULL_AND_PIECEWISE",
+    "benchmark_reasoning_effort": "max",
+    "benchmark_version": "0.4.29",
+    "benchmark_sha256": "a17ee69dd2ee5aa59d9c9a1b03e28cae6fe2837545ecc967256b2828215deab7"
+  },
+  "mtp3_dcp4_one_lane": {
+    "control_directory": "results/glm-scheduler-hardening-20260908/r28-mtp4-measurements",
+    "candidate_directory": "results/glm-scheduler-hardening-20260908/r281-release-mtp4-measurements",
+    "decode": [
+      {
+        "concurrency": 1,
+        "output_tok_per_s": {
+          "control": 244.32482521057105,
+          "candidate": 236.1729429423064,
+          "change_percent": -3.3364936458008088
+        },
+        "verifier_request_steps_per_s": {
+          "control": 97.28982532265915,
+          "candidate": 97.54172484720345,
+          "change_percent": 0.25891661713739467
+        },
+        "accepted_length": {
+          "control": 2.5118272197463147,
+          "candidate": 2.4217361585782635,
+          "change_percent": -3.5866742927146866
+        }
+      },
+      {
+        "concurrency": 4,
+        "output_tok_per_s": {
+          "control": 553.2439174055839,
+          "candidate": 566.7377764162538,
+          "change_percent": 2.4390433561292113
+        },
+        "verifier_request_steps_per_s": {
+          "control": 232.4957570976719,
+          "candidate": 230.54870076435571,
+          "change_percent": -0.8374588670442829
+        },
+        "accepted_length": {
+          "control": 2.3795871559633026,
+          "candidate": 2.458212839791787,
+          "change_percent": 3.3041733155873887
+        }
+      },
+      {
+        "concurrency": 8,
+        "output_tok_per_s": {
+          "control": 862.3720170815395,
+          "candidate": 872.4629119345182,
+          "change_percent": 1.1701324547993108
+        },
+        "verifier_request_steps_per_s": {
+          "control": 344.72201603259435,
+          "candidate": 343.9985195676712,
+          "change_percent": -0.2098782297834778
+        },
+        "accepted_length": {
+          "control": 2.5016447368421053,
+          "candidate": 2.5362403100775195,
+          "change_percent": 1.3829131181546161
+        }
+      },
+      {
+        "concurrency": 16,
+        "output_tok_per_s": {
+          "control": 1232.6983659990815,
+          "candidate": 1237.364539171107,
+          "change_percent": 0.3785332487435955
+        },
+        "verifier_request_steps_per_s": {
+          "control": 489.95707094751606,
+          "candidate": 491.5036888572277,
+          "change_percent": 0.3156639635224945
+        },
+        "accepted_length": {
+          "control": 2.5159313725490193,
+          "candidate": 2.5175081433224755,
+          "change_percent": 0.06267145402534258
+        }
+      },
+      {
+        "concurrency": 32,
+        "output_tok_per_s": {
+          "control": 1688.8485635220172,
+          "candidate": 1678.245987912485,
+          "change_percent": -0.627799072015145
+        },
+        "verifier_request_steps_per_s": {
+          "control": 654.6866412799473,
+          "candidate": 655.7718745998549,
+          "change_percent": 0.16576377941452947
+        },
+        "accepted_length": {
+          "control": 2.5796288743882547,
+          "candidate": 2.5591917752442996,
+          "change_percent": -0.7922495885692715
+        }
+      },
+      {
+        "concurrency": 64,
+        "output_tok_per_s": {
+          "control": 2254.6387046455216,
+          "candidate": 2259.338446547196,
+          "change_percent": 0.20844767243597406
+        },
+        "verifier_request_steps_per_s": {
+          "control": 864.8459477071008,
+          "candidate": 860.6240911733167,
+          "change_percent": -0.4881628392868209
+        },
+        "accepted_length": {
+          "control": 2.606983024691358,
+          "candidate": 2.625232630272953,
+          "change_percent": 0.700027787244828
+        }
+      }
+    ],
+    "c64_sixty_second_repeats": {
+      "raw_cells": [
+        [
+          {
+            "concurrency": 64,
+            "context_tokens": 0,
+            "aggregate_tps": 2153.6624813216476,
+            "server_steps_per_s": 842.6519869342875,
+            "server_spec_accept_length": 2.5558148734177215
+          },
+          {
+            "concurrency": 64,
+            "context_tokens": 0,
+            "aggregate_tps": 2159.4143928801045,
+            "server_steps_per_s": 844.6712220208653,
+            "server_spec_accept_length": 2.556514696586599
+          },
+          {
+            "concurrency": 64,
+            "context_tokens": 0,
+            "aggregate_tps": 2139.5410502788222,
+            "server_steps_per_s": 845.0136883008645,
+            "server_spec_accept_length": 2.5319602272727275
+          }
+        ],
+        [
+          {
+            "concurrency": 64,
+            "context_tokens": 0,
+            "aggregate_tps": 2155.5642523920487,
+            "server_steps_per_s": 844.6924590949172,
+            "server_spec_accept_length": 2.5518923830594185
+          },
+          {
+            "concurrency": 64,
+            "context_tokens": 0,
+            "aggregate_tps": 2178.8673503064197,
+            "server_steps_per_s": 846.5403723761476,
+            "server_spec_accept_length": 2.5738493064312737
+          },
+          {
+            "concurrency": 64,
+            "context_tokens": 0,
+            "aggregate_tps": 2149.976870147027,
+            "server_steps_per_s": 846.08712529525,
+            "server_spec_accept_length": 2.5410821248423705
+          }
+        ]
+      ],
+      "aggregate_tps": {
+        "control": 2153.6624813216476,
+        "candidate": 2155.5642523920487,
+        "change_percent": 0.08830404424531313
+      },
+      "server_steps_per_s": {
+        "control": 844.6712220208653,
+        "candidate": 846.08712529525,
+        "change_percent": 0.16762773934657638
+      },
+      "server_spec_accept_length": {
+        "control": 2.5558148734177215,
+        "candidate": 2.5518923830594185,
+        "change_percent": -0.153473179888719
+      }
+    },
+    "prefill_nominal_32k": {
+      "raw_cells": [
+        [
+          {
+            "ttft_seconds": 2.459,
+            "prefill_seconds": 2.459,
+            "tok_per_sec": 13140.0,
+            "client_ttft_seconds": 2.459,
+            "client_tok_per_sec": 13140.0,
+            "prompt_tokens": 32316,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0.0,
+              "prefill_seconds": 0.0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          },
+          {
+            "ttft_seconds": 2.459,
+            "prefill_seconds": 2.459,
+            "tok_per_sec": 13143.0,
+            "client_ttft_seconds": 2.459,
+            "client_tok_per_sec": 13143.0,
+            "prompt_tokens": 32315,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0.0,
+              "prefill_seconds": 0.0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        ],
+        [
+          {
+            "ttft_seconds": 2.461,
+            "prefill_seconds": 2.461,
+            "tok_per_sec": 13131.0,
+            "client_ttft_seconds": 2.461,
+            "client_tok_per_sec": 13131.0,
+            "prompt_tokens": 32315,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0.0,
+              "prefill_seconds": 0.0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          },
+          {
+            "ttft_seconds": 2.466,
+            "prefill_seconds": 2.466,
+            "tok_per_sec": 13103.0,
+            "client_ttft_seconds": 2.466,
+            "client_tok_per_sec": 13103.0,
+            "prompt_tokens": 32315,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0.0,
+              "prefill_seconds": 0.0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        ]
+      ],
+      "median_tok_per_s": {
+        "control": 13141.5,
+        "candidate": 13117.0,
+        "change_percent": -0.18643229463911615
+      }
+    },
+    "qualification_note": "Descriptive paired measurements; evaluate repeat ranges, cache gates, and boot-order controls separately."
+  },
+  "mtp3_dcp4_c1_sixty_second_repeats": {
+    "aggregate_tps": {
+      "control": {
+        "samples": [
+          229.75754735930835,
+          244.44669096192504,
+          231.64938254297996
+        ],
+        "n": 3,
+        "median": 231.64938254297996,
+        "min": 229.75754735930835,
+        "max": 244.44669096192504
+      },
+      "candidate": {
+        "samples": [
+          238.36557861501888,
+          233.94724721713442,
+          241.6905178470197
+        ],
+        "n": 3,
+        "median": 238.36557861501888,
+        "min": 233.94724721713442,
+        "max": 241.6905178470197
+      },
+      "median_change_percent": 2.8992937508878436
+    },
+    "server_steps_per_s": {
+      "control": {
+        "samples": [
+          97.80321276056739,
+          97.6619953866975,
+          97.94011885325588
+        ],
+        "n": 3,
+        "median": 97.80321276056739,
+        "min": 97.6619953866975,
+        "max": 97.94011885325588
+      },
+      "candidate": {
+        "samples": [
+          97.59955449374567,
+          97.55580207764945,
+          97.2429297323802
+        ],
+        "n": 3,
+        "median": 97.55580207764945,
+        "min": 97.2429297323802,
+        "max": 97.59955449374567
+      },
+      "median_change_percent": -0.25296784832992136
+    },
+    "server_spec_accept_length": {
+      "control": {
+        "samples": [
+          2.3494119652292484,
+          2.503243427791055,
+          2.3654468085106384
+        ],
+        "n": 3,
+        "median": 2.3654468085106384,
+        "min": 2.3494119652292484,
+        "max": 2.503243427791055
+      },
+      "candidate": {
+        "samples": [
+          2.4425277540563624,
+          2.3983253588516744,
+          2.4856848962797873
+        ],
+        "n": 3,
+        "median": 2.4425277540563624,
+        "min": 2.3983253588516744,
+        "max": 2.4856848962797873
+      },
+      "median_change_percent": 3.25862096194236
+    }
+  },
+  "mtp3_dcp4_reverse_control_c64": {
+    "aggregate_tps": [
+      2140.307833565552
+    ],
+    "server_steps_per_s": [
+      845.3692256628955
+    ],
+    "server_spec_accept_length": [
+      2.531802398989899
+    ]
+  },
+  "mtp3_dcp4_reverse_control_prefill": [
+    {
+      "32768": {
+        "ttft_seconds": 2.458,
+        "prefill_seconds": 2.458,
+        "tok_per_sec": 13148.0,
+        "client_ttft_seconds": 2.458,
+        "client_tok_per_sec": 13148.0,
+        "prompt_tokens": 32315,
+        "samples": 12,
+        "method": "client",
+        "server_validation": {
+          "method": "",
+          "tok_per_sec": 0.0,
+          "prefill_seconds": 0.0,
+          "prompt_tokens": 0,
+          "request_prompt_tokens": 0,
+          "cached_tokens": 0,
+          "token_source": "",
+          "samples": 0,
+          "invalid_reason": ""
+        },
+        "hardware_summary": {}
+      }
+    },
+    {
+      "32768": {
+        "ttft_seconds": 2.462,
+        "prefill_seconds": 2.462,
+        "tok_per_sec": 13123.0,
+        "client_ttft_seconds": 2.462,
+        "client_tok_per_sec": 13123.0,
+        "prompt_tokens": 32315,
+        "samples": 12,
+        "method": "client",
+        "server_validation": {
+          "method": "",
+          "tok_per_sec": 0.0,
+          "prefill_seconds": 0.0,
+          "prompt_tokens": 0,
+          "request_prompt_tokens": 0,
+          "cached_tokens": 0,
+          "token_source": "",
+          "samples": 0,
+          "invalid_reason": ""
+        },
+        "hardware_summary": {}
+      }
+    }
+  ],
+  "prefill_exact_204800": {
+    "control": {
+      "conditions": {
+        "prompt_tokens": 204800,
+        "max_tokens": 1,
+        "duration_seconds": 30.0,
+        "prompt_type": "deterministic cyclic token IDs with unique leading nonce"
+      },
+      "warmup": {
+        "nonce": 1788883736784918193,
+        "prompt_tokens": 204800,
+        "ttft_seconds": 16.02632237400394,
+        "tok_per_sec": 12778.976687265636,
+        "prompt_sources": {
+          "external_kv_transfer": 0,
+          "local_compute": 204800,
+          "local_cache_hit": 0
+        }
+      },
+      "samples": [
+        {
+          "nonce": 1788883752844447609,
+          "prompt_tokens": 204800,
+          "ttft_seconds": 16.047463323979173,
+          "tok_per_sec": 12762.141646024167,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_compute": 204800,
+            "local_cache_hit": 0
+          }
+        },
+        {
+          "nonce": 1788883768915309442,
+          "prompt_tokens": 204800,
+          "ttft_seconds": 16.017764743010048,
+          "tok_per_sec": 12785.803967396398,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_compute": 204800,
+            "local_cache_hit": 0
+          }
+        }
+      ],
+      "median_tok_per_sec": 12773.972806710282,
+      "status": "qualified"
+    },
+    "candidate": {
+      "conditions": {
+        "prompt_tokens": 204800,
+        "max_tokens": 1,
+        "duration_seconds": 30.0,
+        "prompt_type": "deterministic cyclic token IDs with unique leading nonce"
+      },
+      "warmup": {
+        "nonce": 1788881638498126898,
+        "prompt_tokens": 204800,
+        "ttft_seconds": 16.03488291997928,
+        "tok_per_sec": 12772.15437256617,
+        "prompt_sources": {
+          "external_kv_transfer": 0,
+          "local_compute": 204800,
+          "local_cache_hit": 0
+        }
+      },
+      "samples": [
+        {
+          "nonce": 1788881654558422371,
+          "prompt_tokens": 204800,
+          "ttft_seconds": 16.087657216994558,
+          "tok_per_sec": 12730.256322446685,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_compute": 204800,
+            "local_cache_hit": 0
+          }
+        },
+        {
+          "nonce": 1788881670661510865,
+          "prompt_tokens": 204800,
+          "ttft_seconds": 16.066606435982976,
+          "tok_per_sec": 12746.935752488922,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_compute": 204800,
+            "local_cache_hit": 0
+          }
+        }
+      ],
+      "median_tok_per_sec": 12738.596037467803,
+      "status": "qualified"
+    }
+  },
+  "mode_controls": {
+    "no-spec": {
+      "control_directory": "results/glm-scheduler-hardening-20260908/r281-interleaving-mode-controls/no-spec-r28/measurements",
+      "candidate_directory": "results/glm-scheduler-hardening-20260908/r281-interleaving-mode-controls/no-spec-scheduler/measurements",
+      "decode": [
+        {
+          "concurrency": 1,
+          "output_tok_per_s": {
+            "control": 158.59838072097415,
+            "candidate": 158.75395519143885,
+            "change_percent": 0.09809335363795135
+          },
+          "verifier_request_steps_per_s": {
+            "control": 0.0,
+            "candidate": 0.0,
+            "change_percent": null
+          },
+          "accepted_length": {
+            "control": 0.0,
+            "candidate": 0.0,
+            "change_percent": null
+          }
+        },
+        {
+          "concurrency": 8,
+          "output_tok_per_s": {
+            "control": 696.6265698797428,
+            "candidate": 700.3318465396255,
+            "change_percent": 0.5318885067106205
+          },
+          "verifier_request_steps_per_s": {
+            "control": 0.0,
+            "candidate": 0.0,
+            "change_percent": null
+          },
+          "accepted_length": {
+            "control": 0.0,
+            "candidate": 0.0,
+            "change_percent": null
+          }
+        }
+      ],
+      "prefill_nominal_32k": {
+        "raw_cells": [
+          [
+            {
+              "ttft_seconds": 2.198,
+              "prefill_seconds": 2.198,
+              "tok_per_sec": 14703.0,
+              "client_ttft_seconds": 2.198,
+              "client_tok_per_sec": 14703.0,
+              "prompt_tokens": 32315,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            },
+            {
+              "ttft_seconds": 2.198,
+              "prefill_seconds": 2.198,
+              "tok_per_sec": 14703.0,
+              "client_ttft_seconds": 2.198,
+              "client_tok_per_sec": 14703.0,
+              "prompt_tokens": 32315,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            }
+          ],
+          [
+            {
+              "ttft_seconds": 2.195,
+              "prefill_seconds": 2.195,
+              "tok_per_sec": 14719.0,
+              "client_ttft_seconds": 2.195,
+              "client_tok_per_sec": 14719.0,
+              "prompt_tokens": 32315,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            },
+            {
+              "ttft_seconds": 2.199,
+              "prefill_seconds": 2.199,
+              "tok_per_sec": 14698.0,
+              "client_ttft_seconds": 2.199,
+              "client_tok_per_sec": 14698.0,
+              "prompt_tokens": 32314,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            }
+          ]
+        ],
+        "median_tok_per_s": {
+          "control": 14703.0,
+          "candidate": 14708.5,
+          "change_percent": 0.03740733183703604
+        }
+      },
+      "qualification_note": "Descriptive paired measurements; evaluate repeat ranges, cache gates, and boot-order controls separately."
+    },
+    "dflash2": {
+      "control_directory": "results/glm-scheduler-hardening-20260908/r281-interleaving-mode-controls/dflash2-r28/measurements",
+      "candidate_directory": "results/glm-scheduler-hardening-20260908/r281-interleaving-mode-controls/dflash2-scheduler/measurements",
+      "decode": [
+        {
+          "concurrency": 1,
+          "output_tok_per_s": {
+            "control": 194.31320362325337,
+            "candidate": 203.17016709888435,
+            "change_percent": 4.558086280540885
+          },
+          "verifier_request_steps_per_s": {
+            "control": 91.02179922640386,
+            "candidate": 90.53489316498275,
+            "change_percent": -0.5349334616095658
+          },
+          "accepted_length": {
+            "control": 2.1347985347985348,
+            "candidate": 2.2441089837997055,
+            "change_percent": 5.1204105314549775
+          }
+        },
+        {
+          "concurrency": 8,
+          "output_tok_per_s": {
+            "control": 709.1014079087826,
+            "candidate": 692.1551596744334,
+            "change_percent": -2.3898201364915495
+          },
+          "verifier_request_steps_per_s": {
+            "control": 293.5547061954785,
+            "candidate": 290.6765257007388,
+            "change_percent": -0.9804579637102129
+          },
+          "accepted_length": {
+            "control": 2.415568181818182,
+            "candidate": 2.3811869844179654,
+            "change_percent": -1.4233171996137939
+          }
+        }
+      ],
+      "prefill_nominal_32k": {
+        "raw_cells": [
+          [
+            {
+              "ttft_seconds": 2.219,
+              "prefill_seconds": 2.219,
+              "tok_per_sec": 14561.0,
+              "client_ttft_seconds": 2.219,
+              "client_tok_per_sec": 14561.0,
+              "prompt_tokens": 32315,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            },
+            {
+              "ttft_seconds": 2.221,
+              "prefill_seconds": 2.221,
+              "tok_per_sec": 14552.0,
+              "client_ttft_seconds": 2.221,
+              "client_tok_per_sec": 14552.0,
+              "prompt_tokens": 32314,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            }
+          ],
+          [
+            {
+              "ttft_seconds": 2.22,
+              "prefill_seconds": 2.22,
+              "tok_per_sec": 14558.0,
+              "client_ttft_seconds": 2.22,
+              "client_tok_per_sec": 14558.0,
+              "prompt_tokens": 32315,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            },
+            {
+              "ttft_seconds": 2.219,
+              "prefill_seconds": 2.219,
+              "tok_per_sec": 14561.0,
+              "client_ttft_seconds": 2.219,
+              "client_tok_per_sec": 14561.0,
+              "prompt_tokens": 32316,
+              "samples": 12,
+              "method": "client",
+              "server_validation": {
+                "method": "",
+                "tok_per_sec": 0.0,
+                "prefill_seconds": 0.0,
+                "prompt_tokens": 0,
+                "request_prompt_tokens": 0,
+                "cached_tokens": 0,
+                "token_source": "",
+                "samples": 0,
+                "invalid_reason": ""
+              },
+              "hardware_summary": {}
+            }
+          ]
+        ],
+        "median_tok_per_s": {
+          "control": 14556.5,
+          "candidate": 14559.5,
+          "change_percent": 0.02060934977501372
+        }
+      },
+      "qualification_note": "Descriptive paired measurements; evaluate repeat ranges, cache gates, and boot-order controls separately."
+    }
+  },
+  "dflash_c8_extended_control": {
+    "status": "not run",
+    "reason": "Additional repetitions canceled at the user's request; preserve the short paired observation without claiming a persistent regression or equivalence."
+  },
+  "four_lane_c64": {
+    "aggregate_tps": {
+      "control": {
+        "samples": [
+          2155.5642523920487,
+          2178.8673503064197,
+          2149.976870147027
+        ],
+        "n": 3,
+        "median": 2155.5642523920487,
+        "min": 2149.976870147027,
+        "max": 2178.8673503064197
+      },
+      "candidate": {
+        "samples": [
+          2146.6628869558217,
+          2170.770653140552,
+          2165.0141949153694
+        ],
+        "n": 3,
+        "median": 2165.0141949153694,
+        "min": 2146.6628869558217,
+        "max": 2170.770653140552
+      },
+      "median_change_percent": 0.4383976266462142
+    },
+    "server_steps_per_s": {
+      "control": {
+        "samples": [
+          844.6924590949172,
+          846.5403723761476,
+          846.08712529525
+        ],
+        "n": 3,
+        "median": 846.08712529525,
+        "min": 844.6924590949172,
+        "max": 846.5403723761476
+      },
+      "candidate": {
+        "samples": [
+          847.0304869631327,
+          848.529257725128,
+          846.1001841939309
+        ],
+        "n": 3,
+        "median": 847.0304869631327,
+        "min": 846.1001841939309,
+        "max": 848.529257725128
+      },
+      "median_change_percent": 0.11149698886547821
+    },
+    "server_spec_accept_length": {
+      "control": {
+        "samples": [
+          2.5518923830594185,
+          2.5738493064312737,
+          2.5410821248423705
+        ],
+        "n": 3,
+        "median": 2.5518923830594185,
+        "min": 2.5410821248423705,
+        "max": 2.5738493064312737
+      },
+      "candidate": {
+        "samples": [
+          2.5343395780856426,
+          2.5582743710691824,
+          2.5588154161412358
+        ],
+        "n": 3,
+        "median": 2.5582743710691824,
+        "min": 2.5343395780856426,
+        "max": 2.5588154161412358
+      },
+      "median_change_percent": 0.25008844621075
+    }
+  },
+  "convoy": {
+    "4": {
+      "steady_decoders": 4,
+      "long_prefills": 8,
+      "long_prompt_tokens": 32768,
+      "late_short_prompt_tokens": 4096,
+      "late_delay_seconds": 0.5,
+      "one_lane_configuration": {
+        "prefill_compute_share": 0.4,
+        "prefill_compute_half_life": null,
+        "effective_prefill_compute_half_life_seconds": null,
+        "effective_prefill_compute_share": 0.4,
+        "decode_pressure": 1.0,
+        "prefill_pressure": 1.0,
+        "local_prefill_backlog_tokens": 0,
+        "max_parallel_prefills": 1,
+        "effective_max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto",
+        "effective_decode_refill_target": 1,
+        "runnable_decodes": 0
+      },
+      "four_lane_configuration": {
+        "prefill_compute_share": 0.4,
+        "prefill_compute_half_life": null,
+        "effective_prefill_compute_half_life_seconds": null,
+        "effective_prefill_compute_share": 0.4,
+        "decode_pressure": 1.0,
+        "prefill_pressure": 1.0,
+        "local_prefill_backlog_tokens": 0,
+        "max_parallel_prefills": "auto",
+        "effective_max_parallel_prefills": 4,
+        "prefill_policy": "decode-aware",
+        "decode_refill_target": "auto",
+        "effective_decode_refill_target": 4,
+        "runnable_decodes": 0
+      },
+      "metrics": {
+        "late_short_ttft_seconds": {
+          "control": {
+            "samples": [
+              46.85031726403395,
+              46.838975694961846,
+              46.90648956899531
+            ],
+            "n": 3,
+            "median": 46.85031726403395,
+            "min": 46.838975694961846,
+            "max": 46.90648956899531
+          },
+          "candidate": {
+            "samples": [
+              8.116217121016234,
+              9.046625296992715,
+              8.72619981697062
+            ],
+            "n": 3,
+            "median": 8.72619981697062,
+            "min": 8.116217121016234,
+            "max": 9.046625296992715
+          },
+          "median_change_percent": -81.37429941446833
+        },
+        "long_ttft_median_seconds": {
+          "control": {
+            "samples": [
+              26.0729349120229,
+              26.073787444503978,
+              26.088937990018167
+            ],
+            "n": 3,
+            "median": 26.073787444503978,
+            "min": 26.0729349120229,
+            "max": 26.088937990018167
+          },
+          "candidate": {
+            "samples": [
+              47.29776934350957,
+              47.91148859600071,
+              47.145923198986566
+            ],
+            "n": 3,
+            "median": 47.29776934350957,
+            "min": 47.145923198986566,
+            "max": 47.91148859600071
+          },
+          "median_change_percent": 81.39968903320694
+        },
+        "long_ttft_max_seconds": {
+          "control": {
+            "samples": [
+              46.61654185701627,
+              46.59588141698623,
+              46.65431793103926
+            ],
+            "n": 3,
+            "median": 46.61654185701627,
+            "min": 46.59588141698623,
+            "max": 46.65431793103926
+          },
+          "candidate": {
+            "samples": [
+              48.038181054987945,
+              49.37671615899308,
+              48.48751865501981
+            ],
+            "n": 3,
+            "median": 48.48751865501981,
+            "min": 48.038181054987945,
+            "max": 49.37671615899308
+          },
+          "median_change_percent": 4.013546958807579
+        },
+        "decode_gap_max_seconds": {
+          "control": {
+            "samples": [
+              0.3488105600117706,
+              0.34869106102269143,
+              0.3495983489556238
+            ],
+            "n": 3,
+            "median": 0.3488105600117706,
+            "min": 0.34869106102269143,
+            "max": 0.3495983489556238
+          },
+          "candidate": {
+            "samples": [
+              0.3780006490414962,
+              0.6947106209699996,
+              0.3749670200049877
+            ],
+            "n": 3,
+            "median": 0.3780006490414962,
+            "min": 0.3749670200049877,
+            "max": 0.6947106209699996
+          },
+          "median_change_percent": 8.368464827653344
+        },
+        "decode_gap_median_seconds": {
+          "control": {
+            "samples": [
+              0.014944791502784938,
+              0.014772851980524138,
+              0.01512980050756596
+            ],
+            "n": 3,
+            "median": 0.014944791502784938,
+            "min": 0.014772851980524138,
+            "max": 0.01512980050756596
+          },
+          "candidate": {
+            "samples": [
+              0.014631582977017388,
+              0.014589193015126511,
+              0.015563199995085597
+            ],
+            "n": 3,
+            "median": 0.014631582977017388,
+            "min": 0.014589193015126511,
+            "max": 0.015563199995085597
+          },
+          "median_change_percent": -2.095770460960822
+        }
+      }
+    },
+    "2": {
+      "steady_decoders": 2,
+      "long_prefills": 8,
+      "long_prompt_tokens": 32768,
+      "late_short_prompt_tokens": 4096,
+      "late_delay_seconds": 0.5,
+      "one_lane_configuration": {
+        "prefill_compute_share": 0.4,
+        "prefill_compute_half_life": null,
+        "effective_prefill_compute_half_life_seconds": null,
+        "effective_prefill_compute_share": 0.4,
+        "decode_pressure": 1.0,
+        "prefill_pressure": 1.0,
+        "local_prefill_backlog_tokens": 0,
+        "max_parallel_prefills": 1,
+        "effective_max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto",
+        "effective_decode_refill_target": 1,
+        "runnable_decodes": 0
+      },
+      "four_lane_configuration": {
+        "prefill_compute_share": 0.4,
+        "prefill_compute_half_life": null,
+        "effective_prefill_compute_half_life_seconds": null,
+        "effective_prefill_compute_share": 0.4,
+        "decode_pressure": 1.0,
+        "prefill_pressure": 1.0,
+        "local_prefill_backlog_tokens": 0,
+        "max_parallel_prefills": "auto",
+        "effective_max_parallel_prefills": 4,
+        "prefill_policy": "decode-aware",
+        "decode_refill_target": "auto",
+        "effective_decode_refill_target": 4,
+        "runnable_decodes": 0
+      },
+      "metrics": {
+        "late_short_ttft_seconds": {
+          "control": {
+            "samples": [
+              46.84410911501618,
+              46.89149687299505,
+              46.8320098510012
+            ],
+            "n": 3,
+            "median": 46.84410911501618,
+            "min": 46.8320098510012,
+            "max": 46.89149687299505
+          },
+          "candidate": {
+            "samples": [
+              2.815358075022232,
+              2.6474359610001557,
+              2.8220751840271987
+            ],
+            "n": 3,
+            "median": 2.815358075022232,
+            "min": 2.6474359610001557,
+            "max": 2.8220751840271987
+          },
+          "median_change_percent": -93.98994211180387
+        },
+        "long_ttft_median_seconds": {
+          "control": {
+            "samples": [
+              26.049604572501266,
+              26.131028924981365,
+              26.04671641148161
+            ],
+            "n": 3,
+            "median": 26.049604572501266,
+            "min": 26.04671641148161,
+            "max": 26.131028924981365
+          },
+          "candidate": {
+            "samples": [
+              43.33603264548583,
+              43.869384845515015,
+              43.282970997010125
+            ],
+            "n": 3,
+            "median": 43.33603264548583,
+            "min": 43.282970997010125,
+            "max": 43.869384845515015
+          },
+          "median_change_percent": 66.3596563428553
+        },
+        "long_ttft_max_seconds": {
+          "control": {
+            "samples": [
+              46.60355233901646,
+              46.65665058803279,
+              46.57733365899185
+            ],
+            "n": 3,
+            "median": 46.60355233901646,
+            "min": 46.57733365899185,
+            "max": 46.65665058803279
+          },
+          "candidate": {
+            "samples": [
+              47.89272325398633,
+              48.31092973501654,
+              47.81586792401504
+            ],
+            "n": 3,
+            "median": 47.89272325398633,
+            "min": 47.81586792401504,
+            "max": 48.31092973501654
+          },
+          "median_change_percent": 2.7662503184131326
+        },
+        "decode_gap_max_seconds": {
+          "control": {
+            "samples": [
+              0.3404604500392452,
+              0.33999754197429866,
+              0.3426324839820154
+            ],
+            "n": 3,
+            "median": 0.3404604500392452,
+            "min": 0.33999754197429866,
+            "max": 0.3426324839820154
+          },
+          "candidate": {
+            "samples": [
+              0.379445748985745,
+              0.3553537059924565,
+              0.37729026103625074
+            ],
+            "n": 3,
+            "median": 0.37729026103625074,
+            "min": 0.3553537059924565,
+            "max": 0.379445748985745
+          },
+          "median_change_percent": 10.817647392747132
+        },
+        "decode_gap_median_seconds": {
+          "control": {
+            "samples": [
+              0.011728662007953972,
+              0.011955411493545398,
+              0.011924060992896557
+            ],
+            "n": 3,
+            "median": 0.011924060992896557,
+            "min": 0.011728662007953972,
+            "max": 0.011955411493545398
+          },
+          "candidate": {
+            "samples": [
+              0.011984562472207472,
+              0.012022807524772361,
+              0.011995662993285805
+            ],
+            "n": 3,
+            "median": 0.011995662993285805,
+            "min": 0.011984562472207472,
+            "max": 0.012022807524772361
+          },
+          "median_change_percent": 0.6004833456647374
+        }
+      }
+    }
+  },
+  "checkpoint_regression": {
+    "million-cold-ram": {
+      "asynchronous_store": {
+        "cold_start_to_store_ready_seconds": 100.418,
+        "contract": "All checkpoint writes and configured storage-tier tasks drained; reported separately from API response time.",
+        "wait_after_response_seconds": 1.125
+      },
+      "checks": {
+        "cold_computed_complete_prompt": true,
+        "greedy_output_matches": true,
+        "restore_covers_exact_prompt": true,
+        "restore_does_not_recompute": true,
+        "restore_does_not_use_local_prefix_cache": true
+      },
+      "cold": {
+        "elapsed_seconds": 99.284,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 0,
+          "local_cache_hit": 0,
+          "local_compute": 1000000
+        },
+        "request_id": "cmpl-a71ebdbedb48cd00",
+        "text": " did"
+      },
+      "conditions": {
+        "cache_chunk_tokens": 4096,
+        "checkpoint_contract": "semantic",
+        "max_tokens": 1,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "nonce": 1788881689515717474,
+        "prompt_tokens": 1000000,
+        "stored_bytes": 13897433088,
+        "stored_bytes_measurement": "net L1 occupancy increase; excludes evicted payloads",
+        "temperature": 0
+      },
+      "restore": {
+        "effective_stored_gib_per_second": 15.13,
+        "elapsed_seconds": 0.855,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 1000000,
+          "local_cache_hit": 0,
+          "local_compute": 0
+        },
+        "request_id": "cmpl-896e523a666d240f",
+        "text": " did"
+      },
+      "status": "qualified"
+    },
+    "million-restart": {
+      "checks": {
+        "greedy_output_matches_reference": true,
+        "restore_covers_exact_prompt": true,
+        "restore_does_not_recompute": true,
+        "restore_does_not_use_local_prefix_cache": true
+      },
+      "conditions": {
+        "cache_chunk_tokens": 4096,
+        "checkpoint_contract": "semantic",
+        "external_cache": "filesystem_l2_after_process_restart",
+        "max_tokens": 1,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "nonce": 1788881689515717474,
+        "prompt_tokens": 1000000,
+        "reference_result": "results/glm-scheduler-hardening-20260908/r281-four-lane-checkpoints-mtp4/million-cold-ram.json",
+        "temperature": 0
+      },
+      "restore": {
+        "effective_stored_gib_per_second": 13.35,
+        "elapsed_seconds": 0.97,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 1000000,
+          "local_cache_hit": 0,
+          "local_compute": 0
+        },
+        "request_id": "cmpl-80ca5eac29290dd8",
+        "text": " did"
+      },
+      "status": "qualified"
+    },
+    "literal-answer-tiers": {
+      "checks": {
+        "all_answers_exact": true,
+        "apc_avoided_external_transfer": true,
+        "apc_used_local_prefix": true,
+        "cold_computed_full_prompt": true,
+        "external_tiers_restored_all_chunks": true,
+        "instruction_answers_exact": true,
+        "instruction_boundary_is_partial": true,
+        "instruction_changed_system_sources_exact": true,
+        "instruction_cold_sources_exact": true,
+        "instruction_local_sibling_sources_exact": true,
+        "instruction_ram_sibling_sources_exact": true,
+        "instruction_restart_sibling_sources_exact": true
+      },
+      "conditions": {
+        "answer_values_in_output_example": false,
+        "checkpoint_contract": "semantic",
+        "chunk_tokens": 4096,
+        "container": "glm53-r281-four-lane-checkpoints-mtp4",
+        "image_id": "sha256:259a592cc1b86312a9bb61bd95c1aad66577d468a5502b4191ec69e22313fede",
+        "max_tokens": 512,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "positions": [
+          1750,
+          2100,
+          2999,
+          3333
+        ],
+        "prompt_tokens": 54641,
+        "salt": "lmcache-literal-1788881790940658721",
+        "sentences": 5000
+      },
+      "expected": {
+        "1750": 5250,
+        "2100": 6300,
+        "2999": 9000,
+        "3333": 10000
+      },
+      "instruction_requests": {
+        "changed_system": {
+          "answer_correct": true,
+          "expected": "VALUE_CHANGED",
+          "id": "chatcmpl-89b899ba16ef746c",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "VALUE_CHANGED",
+            "function_call": null,
+            "reasoning": null,
+            "refusal": null,
+            "role": "assistant"
+          },
+          "position": 333,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_cache_hit": 0,
+            "local_compute": 11348
+          },
+          "usage": {
+            "completion_tokens": 4,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "prompt_tokens": 11348,
+            "prompt_tokens_details": null,
+            "total_tokens": 11352
+          }
+        },
+        "cold": {
+          "answer_correct": true,
+          "expected": "VALUE_2342",
+          "id": "chatcmpl-9bde46be75497dd7",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "VALUE_2342",
+            "function_call": null,
+            "reasoning": "Record 333: VALUE_2342",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "position": 333,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_cache_hit": 0,
+            "local_compute": 11351
+          },
+          "usage": {
+            "completion_tokens": 16,
+            "completion_tokens_details": {
+              "reasoning_tokens": 9
+            },
+            "prompt_tokens": 11351,
+            "prompt_tokens_details": null,
+            "total_tokens": 11367
+          }
+        },
+        "local_sibling": {
+          "answer_correct": true,
+          "expected": "VALUE_3511",
+          "id": "chatcmpl-a1862275185113bc",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "VALUE_3511",
+            "function_call": null,
+            "reasoning": null,
+            "refusal": null,
+            "role": "assistant"
+          },
+          "position": 500,
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_cache_hit": 11340,
+            "local_compute": 11
+          },
+          "usage": {
+            "completion_tokens": 7,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "prompt_tokens": 11351,
+            "prompt_tokens_details": null,
+            "total_tokens": 11358
+          }
+        },
+        "ram_sibling": {
+          "answer_correct": true,
+          "expected": "VALUE_4911",
+          "id": "chatcmpl-a6cd9f3f1cf16275",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "VALUE_4911",
+            "function_call": null,
+            "reasoning": null,
+            "refusal": null,
+            "role": "assistant"
+          },
+          "position": 700,
+          "prompt_sources": {
+            "external_kv_transfer": 11340,
+            "local_cache_hit": 0,
+            "local_compute": 11
+          },
+          "usage": {
+            "completion_tokens": 7,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "prompt_tokens": 11351,
+            "prompt_tokens_details": null,
+            "total_tokens": 11358
+          }
+        },
+        "restart_sibling": {
+          "answer_correct": true,
+          "expected": "VALUE_5611",
+          "id": "chatcmpl-97a5eb5f9a2bf766",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "VALUE_5611",
+            "function_call": null,
+            "reasoning": "Record 800: VALUE_5611",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "position": 800,
+          "prompt_sources": {
+            "external_kv_transfer": 11340,
+            "local_cache_hit": 0,
+            "local_compute": 11
+          },
+          "usage": {
+            "completion_tokens": 16,
+            "completion_tokens_details": {
+              "reasoning_tokens": 9
+            },
+            "prompt_tokens": 11351,
+            "prompt_tokens_details": null,
+            "total_tokens": 11367
+          }
+        }
+      },
+      "requests": {
+        "apc": {
+          "answer_correct": true,
+          "elapsed_seconds": 0.286,
+          "finish_reason": "stop",
+          "id": "chatcmpl-bdb15d7acf0b3e53",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "{\"1750\":5250,\"2100\":6300,\"2999\":9000,\"3333\":10000}",
+            "function_call": null,
+            "reasoning": "1750: 5250, 2100: 6300, 2999: 9000, 3333: 10000.",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "observed": {
+            "1750": 5250,
+            "2100": 6300,
+            "2999": 9000,
+            "3333": 10000
+          },
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_cache_hit": 54641,
+            "local_compute": 0
+          },
+          "usage": {
+            "completion_tokens": 64,
+            "completion_tokens_details": {
+              "reasoning_tokens": 34
+            },
+            "prompt_tokens": 54641,
+            "prompt_tokens_details": null,
+            "total_tokens": 54705
+          }
+        },
+        "cold": {
+          "answer_correct": true,
+          "elapsed_seconds": 5.203,
+          "finish_reason": "stop",
+          "id": "chatcmpl-abb44cfecedfe9f5",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "{\"1750\":5250,\"2100\":6300,\"2999\":9000,\"3333\":10000}",
+            "function_call": null,
+            "reasoning": "1750: 5250, 2100: 6300, 2999: 9000, 3333: 10000.",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "observed": {
+            "1750": 5250,
+            "2100": 6300,
+            "2999": 9000,
+            "3333": 10000
+          },
+          "prompt_sources": {
+            "external_kv_transfer": 0,
+            "local_cache_hit": 0,
+            "local_compute": 54641
+          },
+          "usage": {
+            "completion_tokens": 64,
+            "completion_tokens_details": {
+              "reasoning_tokens": 34
+            },
+            "prompt_tokens": 54641,
+            "prompt_tokens_details": null,
+            "total_tokens": 54705
+          }
+        },
+        "filesystem_l2": {
+          "answer_correct": true,
+          "elapsed_seconds": 0.287,
+          "finish_reason": "stop",
+          "id": "chatcmpl-9b3c48789af360e0",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "{\"1750\":5250,\"2100\":6300,\"2999\":9000,\"3333\":10000}",
+            "function_call": null,
+            "reasoning": "1750: 5250, 2100: 6300, 2999: 9000, 3333: 10000.",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "observed": {
+            "1750": 5250,
+            "2100": 6300,
+            "2999": 9000,
+            "3333": 10000
+          },
+          "prompt_sources": {
+            "external_kv_transfer": 54641,
+            "local_cache_hit": 0,
+            "local_compute": 0
+          },
+          "usage": {
+            "completion_tokens": 64,
+            "completion_tokens_details": {
+              "reasoning_tokens": 34
+            },
+            "prompt_tokens": 54641,
+            "prompt_tokens_details": null,
+            "total_tokens": 54705
+          }
+        },
+        "ram_l1": {
+          "answer_correct": true,
+          "elapsed_seconds": 0.281,
+          "finish_reason": "stop",
+          "id": "chatcmpl-b8e390fe982cea01",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "{\"1750\":5250,\"2100\":6300,\"2999\":9000,\"3333\":10000}",
+            "function_call": null,
+            "reasoning": "1750: 5250, 2100: 6300, 2999: 9000, 3333: 10000.",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "observed": {
+            "1750": 5250,
+            "2100": 6300,
+            "2999": 9000,
+            "3333": 10000
+          },
+          "prompt_sources": {
+            "external_kv_transfer": 54641,
+            "local_cache_hit": 0,
+            "local_compute": 0
+          },
+          "usage": {
+            "completion_tokens": 64,
+            "completion_tokens_details": {
+              "reasoning_tokens": 34
+            },
+            "prompt_tokens": 54641,
+            "prompt_tokens_details": null,
+            "total_tokens": 54705
+          }
+        },
+        "restart_l2": {
+          "answer_correct": true,
+          "elapsed_seconds": 0.333,
+          "finish_reason": "stop",
+          "id": "chatcmpl-a22d951dad6bcb98",
+          "message": {
+            "annotations": null,
+            "audio": null,
+            "content": "{\"1750\":5250,\"2100\":6300,\"2999\":9000,\"3333\":10000}",
+            "function_call": null,
+            "reasoning": "1750: 5250, 2100: 6300, 2999: 9000, 3333: 10000.",
+            "refusal": null,
+            "role": "assistant"
+          },
+          "observed": {
+            "1750": 5250,
+            "2100": 6300,
+            "2999": 9000,
+            "3333": 10000
+          },
+          "prompt_sources": {
+            "external_kv_transfer": 54641,
+            "local_cache_hit": 0,
+            "local_compute": 0
+          },
+          "usage": {
+            "completion_tokens": 64,
+            "completion_tokens_details": {
+              "reasoning_tokens": 34
+            },
+            "prompt_tokens": 54641,
+            "prompt_tokens_details": null,
+            "total_tokens": 54705
+          }
+        }
+      },
+      "status": "qualified"
+    },
+    "all-rank-byte-integrity": {
+      "status": "qualified",
+      "conditions": {
+        "checkpoint_contract": "semantic",
+        "concurrency": 4,
+        "instrumented": true,
+        "nonce": 1788882124284871564,
+        "prompt_tokens": 17011,
+        "world_size": 4
+      },
+      "byte_integrity": {
+        "generations": 4,
+        "ranks": 4,
+        "verified_bytes": 2647130112,
+        "verified_page_transfers": 384
+      }
+    },
+    "cancellation-eviction": {
+      "status": "qualified",
+      "conditions": {
+        "base_url": "http://127.0.0.1:5071",
+        "cache_url": "http://127.0.0.1:8105",
+        "model": "GLM-5.3-Flash-NVFP4",
+        "concurrency": 8,
+        "rounds": 3,
+        "prompt_tokens": 17011,
+        "output": "results/glm-scheduler-hardening-20260908/r281-four-lane-checkpoints-mtp4/cancellation-eviction.json",
+        "instrumented": true
+      },
+      "byte_integrity": {
+        "ranks": 4,
+        "generations": 24,
+        "verified_page_transfers": 2304,
+        "verified_bytes": 15882780672
+      }
+    }
+  },
+  "serving_contracts": {
+    "mtp3_dcp4_control": {
+      "scheduler_config": {
+        "max_num_seqs": 64,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 1024,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 4
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        14746058
+      ]
+    },
+    "mtp3_dcp4_candidate": {
+      "scheduler_config": {
+        "max_num_seqs": 64,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 1024,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 4
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        14746058
+      ]
+    },
+    "mtp3_dcp4_four_lanes": {
+      "scheduler_config": {
+        "max_num_seqs": 64,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": "auto",
+        "prefill_policy": "decode-aware",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 1024,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 4
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        14746058
+      ]
+    },
+    "no-spec_r28": {
+      "scheduler_config": {
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 2048,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 1
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        4686328
+      ]
+    },
+    "no-spec_scheduler": {
+      "scheduler_config": {
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 2048,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 1
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        4686328
+      ]
+    },
+    "dflash2_r28": {
+      "scheduler_config": {
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 2048,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 1
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        3691743
+      ]
+    },
+    "dflash2_scheduler": {
+      "scheduler_config": {
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 4096,
+        "prefill_compute_share": 0.4,
+        "max_parallel_prefills": 1,
+        "prefill_policy": "round-robin",
+        "decode_refill_target": "auto"
+      },
+      "cache_config": {
+        "cache_dtype": "fp8",
+        "block_size": 2048,
+        "gpu_memory_utilization": 0.93,
+        "mamba_cache_mode": "align"
+      },
+      "parallel_config": {
+        "tensor_parallel_size": 4,
+        "decode_context_parallel_size": 1
+      },
+      "compilation_config": {
+        "cudagraph_mode": [
+          2,
+          1
+        ],
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          40,
+          48,
+          64,
+          96,
+          128,
+          192,
+          256
+        ],
+        "max_cudagraph_capture_size": 256
+      },
+      "gpu_kv_pool_tokens": [
+        3676628
+      ]
+    }
+  },
+  "ram_restore_single_observation_same_quartet": {
+    "control": {
+      "asynchronous_store": {
+        "cold_start_to_store_ready_seconds": 99.446,
+        "contract": "All checkpoint writes and configured storage-tier tasks drained; reported separately from API response time.",
+        "wait_after_response_seconds": 1.293
+      },
+      "checks": {
+        "cold_computed_complete_prompt": true,
+        "greedy_output_matches": true,
+        "restore_covers_exact_prompt": true,
+        "restore_does_not_recompute": true,
+        "restore_does_not_use_local_prefix_cache": true
+      },
+      "cold": {
+        "elapsed_seconds": 98.132,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 0,
+          "local_cache_hit": 0,
+          "local_compute": 1000000
+        },
+        "request_id": "cmpl-9c205b188091f329",
+        "text": " did"
+      },
+      "conditions": {
+        "cache_chunk_tokens": 4096,
+        "checkpoint_contract": "semantic",
+        "max_tokens": 1,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "nonce": 202609081400,
+        "prompt_tokens": 1000000,
+        "stored_bytes": 1295990784,
+        "stored_bytes_measurement": "net L1 occupancy increase; excludes evicted payloads",
+        "temperature": 0
+      },
+      "restore": {
+        "effective_stored_gib_per_second": 1.664,
+        "elapsed_seconds": 0.725,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 1000000,
+          "local_cache_hit": 0,
+          "local_compute": 0
+        },
+        "request_id": "cmpl-b0091a90987d0fbf",
+        "text": " did"
+      },
+      "status": "qualified"
+    },
+    "candidate": {
+      "asynchronous_store": {
+        "cold_start_to_store_ready_seconds": 98.398,
+        "contract": "All checkpoint writes and configured storage-tier tasks drained; reported separately from API response time.",
+        "wait_after_response_seconds": 0.317
+      },
+      "checks": {
+        "cold_computed_complete_prompt": true,
+        "greedy_output_matches": true,
+        "restore_covers_exact_prompt": true,
+        "restore_does_not_recompute": true,
+        "restore_does_not_use_local_prefix_cache": true
+      },
+      "cold": {
+        "elapsed_seconds": 98.062,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 0,
+          "local_cache_hit": 0,
+          "local_compute": 1000000
+        },
+        "request_id": "cmpl-af4c6ead9188508c",
+        "text": " did"
+      },
+      "conditions": {
+        "cache_chunk_tokens": 4096,
+        "checkpoint_contract": "semantic",
+        "max_tokens": 1,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "nonce": 1788882184789441792,
+        "prompt_tokens": 1000000,
+        "stored_bytes": 2288664576,
+        "stored_bytes_measurement": "net L1 occupancy increase; excludes evicted payloads",
+        "temperature": 0
+      },
+      "restore": {
+        "effective_stored_gib_per_second": 2.622,
+        "elapsed_seconds": 0.813,
+        "output_token_ids": null,
+        "prompt_sources": {
+          "external_kv_transfer": 1000000,
+          "local_cache_hit": 0,
+          "local_compute": 0
+        },
+        "request_id": "cmpl-ba79c9d344200647",
+        "text": " did"
+      },
+      "status": "qualified"
+    },
+    "note": "One observation per image; not a steady-state RAM bandwidth comparison."
+  },
+  "aligned256_dflash2": {
+    "interior-prefix": {
+      "configuration": {
+        "base_url": "http://127.0.0.1:5061",
+        "model": "GLM-5.3-Flash-NVFP4",
+        "salt": "scheduler-aligned-1788886739621885275",
+        "output": "results/glm-scheduler-hardening-20260908/r281-interleaving-mode-controls/aligned256-dflash2/interior-prefix.json",
+        "require_fine_hit": true,
+        "literal": false,
+        "producer_tokens": 32768,
+        "shared_prefix_tokens": [
+          8960,
+          17152
+        ]
+      },
+      "cases": [
+        {
+          "name": "producer-8960",
+          "prompt_tokens": 32768,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 2.2304640500224195,
+          "response": {
+            "id": "cmpl-90155058f068cefa",
+            "object": "text_completion",
+            "created": 1788886739,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " dog.The quick brown fox jumps over the lazy dog.The quick brown fox",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 32768,
+              "total_tokens": 32784,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "sibling-8960",
+          "prompt_tokens": 9216,
+          "cache_hits": 8960.0,
+          "elapsed_seconds": 0.17589897202560678,
+          "response": {
+            "id": "cmpl-92cbffc1dbd8a7ce",
+            "object": "text_completion",
+            "created": 1788886741,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 9216,
+              "total_tokens": 9232,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "output_matches_cold": true,
+          "fine_hit": true
+        },
+        {
+          "name": "cold-control-8960",
+          "prompt_tokens": 9216,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 1.0731733200373128,
+          "response": {
+            "id": "cmpl-8268224e70d5a17a",
+            "object": "text_completion",
+            "created": 1788886742,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 9216,
+              "total_tokens": 9232,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "sibling-repeat-8960",
+          "prompt_tokens": 9216,
+          "cache_hits": 8960.0,
+          "elapsed_seconds": 0.07681072899140418,
+          "response": {
+            "id": "cmpl-a52e6c9a2622051d",
+            "object": "text_completion",
+            "created": 1788886743,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 9216,
+              "total_tokens": 9232,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "producer-17152",
+          "prompt_tokens": 32768,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 2.1610259740264155,
+          "response": {
+            "id": "cmpl-8fa303bf5a7b24a0",
+            "object": "text_completion",
+            "created": 1788886743,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " dog.The quick brown fox jumps over the lazy dog.The quick brown fox",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 32768,
+              "total_tokens": 32784,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "sibling-17152",
+          "prompt_tokens": 17408,
+          "cache_hits": 17152.0,
+          "elapsed_seconds": 0.1779817949864082,
+          "response": {
+            "id": "cmpl-84cdd9df65c2a499",
+            "object": "text_completion",
+            "created": 1788886745,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 17408,
+              "total_tokens": 17424,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "output_matches_cold": true,
+          "fine_hit": true
+        },
+        {
+          "name": "cold-control-17152",
+          "prompt_tokens": 17408,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 1.2738712989958003,
+          "response": {
+            "id": "cmpl-9fa635fd1f8d818c",
+            "object": "text_completion",
+            "created": 1788886745,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 17408,
+              "total_tokens": 17424,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "sibling-repeat-17152",
+          "prompt_tokens": 17408,
+          "cache_hits": 17152.0,
+          "elapsed_seconds": 0.0787902710144408,
+          "response": {
+            "id": "cmpl-838666b4e31bad56",
+            "object": "text_completion",
+            "created": 1788886746,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": " fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog",
+                "logprobs": null,
+                "finish_reason": "length",
+                "stop_reason": null,
+                "token_ids": [
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562,
+                  13,
+                  785,
+                  3974,
+                  13867,
+                  38627,
+                  34041,
+                  916,
+                  279,
+                  15666,
+                  5562
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 17408,
+              "total_tokens": 17424,
+              "completion_tokens": 16,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        }
+      ],
+      "fine_granularity_passed": true
+    },
+    "literal-prefix": {
+      "configuration": {
+        "base_url": "http://127.0.0.1:5061",
+        "model": "GLM-5.3-Flash-NVFP4",
+        "salt": "scheduler-aligned-1788886747018108494",
+        "output": "results/glm-scheduler-hardening-20260908/r281-interleaving-mode-controls/aligned256-dflash2/literal-prefix.json",
+        "require_fine_hit": true,
+        "literal": true,
+        "producer_tokens": 32768,
+        "shared_prefix_tokens": [
+          8960,
+          17152
+        ]
+      },
+      "cases": [
+        {
+          "name": "producer-8960",
+          "prompt_tokens": 37975,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 3.1148066289606504,
+          "response": {
+            "id": "cmpl-9c3d5ad8f5fc4019",
+            "object": "text_completion",
+            "created": 1788886747,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>```json\n{\n  \"25\": \"6ca0974b7059\",\n  \"100\": \"180b5c3f8d17\",\n  \"200\": \"44433ddb4d58\"\n}\n```",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  73022,
+                  2236,
+                  198,
+                  515,
+                  220,
+                  330,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  756,
+                  220,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  756,
+                  220,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  698,
+                  532,
+                  73022,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 37975,
+              "total_tokens": 38069,
+              "completion_tokens": 94,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "sibling-8960",
+          "prompt_tokens": 8997,
+          "cache_hits": 8960.0,
+          "elapsed_seconds": 0.35357699904125184,
+          "response": {
+            "id": "cmpl-b08405ce1bd1c6d5",
+            "object": "text_completion",
+            "created": 1788886750,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>```json\n{\n  \"25\": \"6ca0974b7059\",\n  \"100\": \"180b5c3f8d17\",\n  \"200\": \"44433ddb4d58\"\n}\n```",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  73022,
+                  2236,
+                  198,
+                  515,
+                  220,
+                  330,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  756,
+                  220,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  756,
+                  220,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  698,
+                  532,
+                  73022,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 8997,
+              "total_tokens": 9091,
+              "completion_tokens": 94,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "output_matches_cold": false,
+          "fine_hit": true,
+          "answer_correct": true
+        },
+        {
+          "name": "cold-control-8960",
+          "prompt_tokens": 8997,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 1.0008136149845086,
+          "response": {
+            "id": "cmpl-8f1383ad190f4702",
+            "object": "text_completion",
+            "created": 1788886750,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>{\"25\": \"6ca0974b7059\", \"100\": \"180b5c3f8d17\", \"200\": \"44433ddb4d58\"}",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  4913,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  497,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  497,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  9204,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 8997,
+              "total_tokens": 9082,
+              "completion_tokens": 85,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "answer_correct": true
+        },
+        {
+          "name": "sibling-repeat-8960",
+          "prompt_tokens": 8997,
+          "cache_hits": 8960.0,
+          "elapsed_seconds": 0.210740311013069,
+          "response": {
+            "id": "cmpl-bd879b5662fe5d70",
+            "object": "text_completion",
+            "created": 1788886751,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>{\"25\": \"6ca0974b7059\", \"100\": \"180b5c3f8d17\", \"200\": \"44433ddb4d58\"}",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  4913,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  497,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  497,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  9204,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 8997,
+              "total_tokens": 9082,
+              "completion_tokens": 85,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "answer_correct": true
+        },
+        {
+          "name": "producer-17152",
+          "prompt_tokens": 37975,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 2.927260131982621,
+          "response": {
+            "id": "cmpl-83f4ea988597e73b",
+            "object": "text_completion",
+            "created": 1788886751,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>{\"25\": \"6ca0974b7059\", \"100\": \"180b5c3f8d17\", \"200\": \"44433ddb4d58\"}",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  4913,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  497,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  497,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  9204,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 37975,
+              "total_tokens": 38060,
+              "completion_tokens": 85,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          }
+        },
+        {
+          "name": "sibling-17152",
+          "prompt_tokens": 17189,
+          "cache_hits": 17152.0,
+          "elapsed_seconds": 0.23756676900666207,
+          "response": {
+            "id": "cmpl-99a2c7c435b182cf",
+            "object": "text_completion",
+            "created": 1788886754,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059, Entry 100: 180b5c3f8d17, Entry 200: 44433ddb4d58.</think>{\"25\": \"6ca0974b7059\", \"100\": \"180b5c3f8d17\", \"200\": \"44433ddb4d58\"}",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  11,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  11,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  4913,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  497,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  497,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  9204,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 17189,
+              "total_tokens": 17274,
+              "completion_tokens": 85,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "output_matches_cold": false,
+          "fine_hit": true,
+          "answer_correct": true
+        },
+        {
+          "name": "cold-control-17152",
+          "prompt_tokens": 17189,
+          "cache_hits": 0.0,
+          "elapsed_seconds": 1.5137434910284355,
+          "response": {
+            "id": "cmpl-8f5a93e006e02d8d",
+            "object": "text_completion",
+            "created": 1788886755,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>{\"25\": \"6ca0974b7059\", \"100\": \"180b5c3f8d17\", \"200\": \"44433ddb4d58\"}",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  4913,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  497,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  497,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  9204,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 17189,
+              "total_tokens": 17274,
+              "completion_tokens": 85,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "answer_correct": true
+        },
+        {
+          "name": "sibling-repeat-17152",
+          "prompt_tokens": 17189,
+          "cache_hits": 17152.0,
+          "elapsed_seconds": 0.22360662202117965,
+          "response": {
+            "id": "cmpl-96fb95047c01fccd",
+            "object": "text_completion",
+            "created": 1788886756,
+            "model": "GLM-5.3-Flash-NVFP4",
+            "choices": [
+              {
+                "index": 0,
+                "text": "Entry 25: 6ca0974b7059. Entry 100: 180b5c3f8d17. Entry 200: 44433ddb4d58.</think>```json\n{\"25\": \"6ca0974b7059\", \"100\": \"180b5c3f8d17\", \"200\": \"44433ddb4d58\"}\n```",
+                "logprobs": null,
+                "finish_reason": "stop",
+                "stop_reason": 154827,
+                "token_ids": [
+                  5874,
+                  220,
+                  99446,
+                  25,
+                  220,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  13,
+                  15776,
+                  220,
+                  99457,
+                  25,
+                  220,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  13,
+                  15776,
+                  220,
+                  98867,
+                  25,
+                  220,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  13,
+                  154842,
+                  73022,
+                  2236,
+                  198,
+                  4913,
+                  99446,
+                  788,
+                  330,
+                  21,
+                  924,
+                  100614,
+                  22,
+                  19,
+                  65,
+                  22,
+                  100002,
+                  24,
+                  497,
+                  330,
+                  99457,
+                  788,
+                  330,
+                  105818,
+                  65,
+                  20,
+                  66,
+                  18,
+                  69,
+                  23,
+                  67,
+                  99419,
+                  497,
+                  330,
+                  98867,
+                  788,
+                  330,
+                  101723,
+                  19,
+                  100702,
+                  88981,
+                  19,
+                  67,
+                  101729,
+                  16690,
+                  73022,
+                  154827
+                ],
+                "prompt_logprobs": null,
+                "routed_experts": null
+              }
+            ],
+            "service_tier": null,
+            "system_fingerprint": "vllm-0.26.1rc0+glm53.r28.1.vllm9ff42d83-tp4-432e5709",
+            "usage": {
+              "prompt_tokens": 17189,
+              "total_tokens": 17278,
+              "completion_tokens": 89,
+              "prompt_tokens_details": null,
+              "completion_tokens_details": null
+            },
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "metrics": null
+          },
+          "answer_correct": true
+        }
+      ],
+      "expected": {
+        "25": "6ca0974b7059",
+        "100": "180b5c3f8d17",
+        "200": "44433ddb4d58"
+      },
+      "fine_granularity_passed": true,
+      "literal_answers_passed": true
+    },
+    "qualification_note": "GPU-local DFlash2/DCP1; actual internal-prefix hits and literal answers, not a full numerical parity or aligned-mode performance comparison."
+  },
+  "artifact_integrity": {
+    "images": {
+      "parent": {
+        "lock": {
+          "format": "local-inference-source-lock/v1",
+          "implementation.status": "implemented",
+          "qualification.contract": "See evidence for the resulting immutable image",
+          "release.name": "jovian-judgement-community-20260908-r28",
+          "release.version": "r28",
+          "runtime.base.image": "voipmonitor/vllm@sha256:93ac5228f1cbde2182ca294d8b479259144742af2756a49ff207dd245429bf43",
+          "runtime.cuda.version": "13.3",
+          "runtime.pytorch.version": "2.13.0",
+          "runtime.rootfs.layers": "2",
+          "runtime.cudagraph.mode": "FULL_AND_PIECEWISE",
+          "runtime.scheduler.max-num-batched-tokens": "4096",
+          "runtime.scheduler.prefill-compute-share": "0.4",
+          "runtime.nccl.channels": "16",
+          "runtime.nccl.buffer.bytes": "2097152",
+          "runtime.recurrent-checkpoint-policy": "auto",
+          "runtime.lmcache.transfer": "engine-driven asynchronous shared memory",
+          "runtime.lmcache.checkpoints": "atomic target and draft bundles for request_boundaries; independent chunks for explicit aligned",
+          "model.repository": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+          "draft.repository": "local-inference-lab/GLM-5.3-Flash-DFlash2",
+          "draft.quantization": "MXFP8",
+          "vllm.commit": "2531689fa50b956d3e1156e1ab80d119aaf34c1e",
+          "vllm.tree": "a8b355eb38a0b75b97eae06738b03c65b1e9fbb5",
+          "vllm.package.tree": "b58e8822b7f01df715fe72a94ed9ae4d2f447040",
+          "vllm.bundle.sha256": "76d4654ce69e6dedd2e0b4bd83155dd6306e19ef5254bb67d29a96acb67372c3",
+          "b12x.commit": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+          "b12x.tree": "c4bfeee9f3c9457400d191c870eb2e44fbcd5c2e",
+          "b12x.package.tree": "d76de6c4ceaa9c2feb49edaf8c2f77d5a29ab5cb",
+          "b12x.bundle.sha256": "a3ef23b6d179ec95b8a160cf509d4c75d6b90c58b5a604c47ce8b58ecf786e44",
+          "lmcache.commit": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+          "lmcache.tree": "247f81b6fd3b156c402a0dd31cd4a21ae8e21160",
+          "lmcache.package.tree": "85622f21a2a3ae115e7a4ca41801fe221001e87f",
+          "lmcache.bundle.sha256": "1ab4ac35c21e7fb623799acb49ce8fea25a39ea1b18751b5624c26b025f74e55",
+          "lmcache.version": "0.5.5.dev0+glm53checkpoints.617a1b47",
+          "flashkda.base.commit": "3b225bf26bb8e218928a1fe14751cb48cf31d11b",
+          "flashkda.patch.sha256": "a9537532cf231babc942fa592666893268ca0617b24daeb8e78d3249e8c1d58a",
+          "flashkda.extension.sha256": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+          "input.Dockerfile.glm53-cache-contracts.sha256": "0431cf8cf4f9979423e60cea8ce53a940347a7f3c2d70440d6c5bf123fc98f76",
+          "input.build_glm53_cache_contract_image.sh.sha256": "9ee13a42b0ad78b9f0c5e97dd0a376960ed4e80c484b708a9e54db5570da75ae",
+          "input.source_locked_image_labels.py.sha256": "b28378354056ab145edc8761dd232e3e2aab2bb691fdaa6b5175481d941e894a",
+          "input.install_source_bundle.sh.sha256": "d18c4b49acc40722b439a0838240c5a03c5df5b799027cd3c9c141fb78395613",
+          "input.install_glm53_source_locked.sh.sha256": "429cee897017343f129f65200aa829f1cf7cfd6c6f04897c724a467873849b1b",
+          "input.serve-glm53-flash-nvfp4-dflash2.sh.sha256": "e149d469b999181ca626c450c12f531721f21c0fb697690f80c7617f591ea7b4",
+          "input.serve-glm53-flash-nvfp4-dflash2-scheduler-qos.sh.sha256": "69b0bf28564d5f497d6da1d6eb34ba45eb505be788247e8acce793bd88497d69",
+          "input.serve-glm53-flash-lmcache.sh.sha256": "c841af83547ecd6fd4bcf04cd8933b9f894eb5c9e27421130938b1168c0ac0c1",
+          "input.serve-glm53-flash-lmcache-cache-complete.sh.sha256": "2e2e652c5f56ddfad6b123b24d938d6bcb62fcb2c1ea90a8b990ac3714b511f7",
+          "input.serve-glm53-flash-cache-complete.sh.sha256": "167da2e8e8ca79d8c50d93d279d2526b133737cfad8322ecca20c684137749f0",
+          "input.glm53_checkpoint_identity.py.sha256": "b5d259c38bf844d4da6a1a9d905a0e8983f586a8dc550b138d8cdf070c02f499",
+          "input.glm53-r18-lmcache-runtime-requirements.txt.sha256": "7ac402540e2ba3f02fc1a443934ef3ff6e2e10c8ff81ae989e3958cfff38adf7",
+          "build.uv.sha256": "9a4299a0c3bcc01012acbcdae7b5655e5087e0e5d87459306736a1420a902b81",
+          "runtime.cache.fingerprint": "cu133-torch213-glm53-vllmb58e8822-b12xd76de6c4-lmcache85622f21-flashkda3bb6ef2c"
+        },
+        "lock_sha256": "15a9a649559830822cb943ea0c3c6a644c8b69c9e54d7be3e265801851843932",
+        "vllm_version": "0.26.1rc0+glm53.flash.nvfp4.luke.clean.r1.vllme75bcfd.b12x58a046f",
+        "distribution_version": "0.26.1rc0+glm53.flash.nvfp4.luke.clean.r1.vllme75bcfd.b12x58a046f",
+        "sources": {
+          "vllm": {
+            "commit": "2531689fa50b956d3e1156e1ab80d119aaf34c1e",
+            "tree": "a8b355eb38a0b75b97eae06738b03c65b1e9fbb5",
+            "status": ""
+          },
+          "b12x": {
+            "commit": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+            "tree": "c4bfeee9f3c9457400d191c870eb2e44fbcd5c2e",
+            "status": ""
+          },
+          "lmcache": {
+            "commit": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+            "tree": "247f81b6fd3b156c402a0dd31cd4a21ae8e21160",
+            "status": ""
+          }
+        },
+        "native_sha256": {
+          "/opt/glm53-flash/vllm/vllm/_C_stable_libtorch.abi3.so": "183acc45f12f7c343bd1ee39c4e3a1fec029ed739119ab08661cae48a0d9ea74",
+          "/opt/glm53-flash/vllm/vllm/_flashkda_C.abi3.so": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+          "/opt/glm53-flash/vllm/vllm/_moe_C_stable_libtorch.abi3.so": "516f14d873a178d07ed4ee7ca36c51dd3fccf266e8e5ae9d585e51c04a65c313",
+          "/opt/glm53-flash/vllm/vllm/_qutlass_C.abi3.so": "5639ea4473e449d5730f21c0b41402dad49aaf67da290e0135d42bd25bf768b8",
+          "/opt/glm53-flash/vllm/vllm/_rust_tool_parser.abi3.so": "48a4c01764c83decd3d732af573d964e939d715a02ed92b3eebf04eaf8b59825",
+          "/opt/glm53-flash/vllm/vllm/cumem_allocator.abi3.so": "2343f5695e32a46d8564dd06330cb12630df47342b8d1a5a135f328bdd6981ce",
+          "/opt/glm53-flash/vllm/vllm/fs_io_C.abi3.so": "66d348e06a4480eca7d3894cfdefbb01a67e921e90ca101d14fc0434496cc4fb",
+          "/opt/glm53-flash/vllm/vllm/spinloop.abi3.so": "12401f8a902e6aebddd0e16ee44aaecd988a72334570ee95bc5c59067c67a41b",
+          "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa2_C.abi3.so": "37e3a34edb6dbd3d86a7952b3ec9975cb38e3a56a2381cdab9e302eaefe4ff81",
+          "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa3_C.abi3.so": "3afff6f3b03c23146d15312d94c291c16dce2c43206b483e96ff556fb22bb636",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/cuda_ops.cpython-312-x86_64-linux-gnu.so": "b72ce7043c31490ea3b3f29b954baaac6ea8aa2a571d4989ce581631f4db1b4a",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_fs.cpython-312-x86_64-linux-gnu.so": "6bd14f8438ca94d15acfca32146754a8b866bb86514dc473f11a6d7123fbf1ed",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_native.cpython-312-x86_64-linux-gnu.so": "9d710c8beb7cfd03a67ccccd177bd110e5cdc2404d6cc1589446ad3d38a562c8",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_redis.cpython-312-x86_64-linux-gnu.so": "65d7a5e51963443901de3798601962a237a33d5fe79eb5c3742c777671b3863f"
+        },
+        "id": "sha256:24b06eacca12e16cd94a9ed3b1987f5ef283b6358d5792664dcdd0ceaf7fdb17",
+        "layers": [
+          "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+          "sha256:400b08031a646562d84df920c85352585d369f17b720ea3b3098fc543922f0f8"
+        ],
+        "labels": {
+          "com.nvidia.build.id": "373437298",
+          "com.nvidia.build.ref": "f0144140a7c872635fafcadbd58fcbd63265d789",
+          "com.nvidia.cublas.version": "13.6.0.2",
+          "com.nvidia.cublasmp.version": "0.9.1.3056",
+          "com.nvidia.cuda.version": "13.3",
+          "com.nvidia.cudla.version": "13.3.29",
+          "com.nvidia.cudnn.version": "9.24.0.43",
+          "com.nvidia.cufft.version": "12.3.0.29",
+          "com.nvidia.curand.version": "10.4.3.29",
+          "com.nvidia.cusolver.version": "12.2.6.9",
+          "com.nvidia.cusolvermp.version": "0.8.0.3126",
+          "com.nvidia.cusparse.version": "12.8.2.51",
+          "com.nvidia.cusparselt.version": "0.9.1.1",
+          "com.nvidia.nccl.version": "2.30.7",
+          "com.nvidia.npp.version": "13.1.2.81",
+          "com.nvidia.nsightcompute.version": "2026.2.1.5",
+          "com.nvidia.nsightsystems.version": "2026.3.1.117",
+          "com.nvidia.nvjpeg.version": "13.2.1.68",
+          "com.nvidia.nvvm.version": "13.3.73",
+          "com.nvidia.pytorch.version": "2.13.0",
+          "com.nvidia.tensorrt.version": "11.1.0.106",
+          "com.nvidia.tensorrtoss.version": "",
+          "com.nvidia.volumes.needed": "nvidia_driver",
+          "local-inference.b12x.base-revision": "",
+          "local-inference.b12x.branch": "image-source",
+          "local-inference.b12x.commit": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+          "local-inference.b12x.composition": "",
+          "local-inference.b12x.foundation.commit": "",
+          "local-inference.b12x.integration-prs": "",
+          "local-inference.b12x.integration.lock_sha256": "",
+          "local-inference.b12x.integration.prs": "",
+          "local-inference.b12x.integration.tree": "",
+          "local-inference.b12x.merge-heads": "",
+          "local-inference.b12x.package-tree": "d76de6c4ceaa9c2feb49edaf8c2f77d5a29ab5cb",
+          "local-inference.b12x.patch_sha256": "",
+          "local-inference.b12x.repo": "https://github.com/local-inference-lab/b12x.git",
+          "local-inference.b12x.source-revision": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+          "local-inference.b12x.tree": "c4bfeee9f3c9457400d191c870eb2e44fbcd5c2e",
+          "local-inference.b12x.upstream-base": "",
+          "local-inference.b12x.upstream-revision": "",
+          "local-inference.backend.allreduce": "B12X PCIe with NCCL for larger transfers",
+          "local-inference.backend.attention.default": "",
+          "local-inference.backend.draft.attention": "",
+          "local-inference.backend.gdn.decode": "B12X",
+          "local-inference.backend.gdn.prefill": "FlashKDA with recurrent checkpoints",
+          "local-inference.backend.indexer.decode": "",
+          "local-inference.backend.indexer.prefill": "",
+          "local-inference.backend.kda.non-speculative-server": "",
+          "local-inference.backend.kda.speculative-server": "",
+          "local-inference.backend.linear.default": "",
+          "local-inference.backend.moe.default": "",
+          "local-inference.backend.target.attention": "",
+          "local-inference.backend.target.indexer": "",
+          "local-inference.backend.target.linear": "",
+          "local-inference.backend.target.moe": "",
+          "local-inference.cache.fingerprint": "",
+          "local-inference.cache.recurrent-block-size": "",
+          "local-inference.cache.target-block-size": "",
+          "local-inference.cuda.version": "13.3",
+          "local-inference.cutlass-dsl.version": "4.6.2",
+          "local-inference.deepgemm.commit": "a6b593d2826719dcf4892609af7b84ee23aaf32a",
+          "local-inference.deepgemm.repo": "https://github.com/deepseek-ai/DeepGEMM.git",
+          "local-inference.docker.commit": "",
+          "local-inference.draft.manifest.sha256": "",
+          "local-inference.draft.model": "local-inference-lab/GLM-5.3-Flash-DFlash2",
+          "local-inference.draft.quantization": "MXFP8",
+          "local-inference.draft.revision": "",
+          "local-inference.draft.source-revision": "",
+          "local-inference.draft.update-policy": "resolve requested Hugging Face revision at startup",
+          "local-inference.draft.weights.sha256": "",
+          "local-inference.exllamav3.commit": "704aefd743b390af4bd0fb429d1906f9b964c7d8",
+          "local-inference.exllamav3.repo": "https://github.com/brandonmmusic-max/exllamav3.git",
+          "local-inference.flash-attention.commit": "2b84100f50e1d2a8726a86c86d14c2f9c9e5a67c",
+          "local-inference.flash-attention.repo": "https://github.com/JaredforReal/flash-attention.git",
+          "local-inference.flashinfer.commit": "1ac6942776b383c6b03c7a5805a22e72a3e3349f",
+          "local-inference.flashinfer.repo": "https://github.com/voipmonitor/flashinfer.git",
+          "local-inference.flashinfer.version": "0.6.18+cu133",
+          "local-inference.flashinfer.wheel-image": "voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a3b55b973df48b08a6dfae4a2a1e64c975a990dda22f65e31acd5217b86bb",
+          "local-inference.flashinfer.wheel-image-id": "sha256:f7aec877834a2ea250fe5b9efe52d0e39caee8b74671bdf5d9387c620fa45575",
+          "local-inference.flashkda.base.commit": "3b225bf26bb8e218928a1fe14751cb48cf31d11b",
+          "local-inference.flashkda.extension.sha256": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+          "local-inference.flashkda.patch.sha256": "a9537532cf231babc942fa592666893268ca0617b24daeb8e78d3249e8c1d58a",
+          "local-inference.glm53.mtp-backends": "attention:B12X,moe:Marlin; private NVFP4 vocabulary head",
+          "local-inference.glm53.target-backends": "attention:B12X,moe:B12X,linear:B12X",
+          "local-inference.gpu.scope": "",
+          "local-inference.instanttensor.commit": "49b4010afc1cae0441e71fe0b0bffc24fa05e932",
+          "local-inference.instanttensor.libaio.commit": "1b18bfafc6a2f7b9fa2c6be77a95afed8b7be448",
+          "local-inference.instanttensor.libaio.repo": "https://github.com/sailfishos-mirror/libaio.git",
+          "local-inference.instanttensor.libaio.tree": "c9442e111b747e9329ea782c6edb9d13a827cc08",
+          "local-inference.instanttensor.repo": "https://github.com/voipmonitor/InstantTensor.git",
+          "local-inference.instanttensor.version": "0.1.9",
+          "local-inference.lmcache.branch": "image-source",
+          "local-inference.lmcache.commit": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+          "local-inference.lmcache.integration.lock_sha256": "",
+          "local-inference.lmcache.integration.prs": "",
+          "local-inference.lmcache.integration.tree": "",
+          "local-inference.lmcache.merge-heads": "",
+          "local-inference.lmcache.package-tree": "85622f21a2a3ae115e7a4ca41801fe221001e87f",
+          "local-inference.lmcache.patch_sha256": "",
+          "local-inference.lmcache.ref": "",
+          "local-inference.lmcache.repo": "https://github.com/local-inference-lab/LMCache.git",
+          "local-inference.lmcache.source-revision": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+          "local-inference.lmcache.tree": "247f81b6fd3b156c402a0dd31cd4a21ae8e21160",
+          "local-inference.lmcache.upstream-base": "",
+          "local-inference.lmcache.version": "0.5.5.dev0+glm53checkpoints.617a1b47",
+          "local-inference.model.repository": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+          "local-inference.model.revision": "",
+          "local-inference.model.update-policy": "resolve requested Hugging Face revision at startup",
+          "local-inference.nccl.commit": "fb6f40999a2a9e63104d4ae4a84118bce61528f8",
+          "local-inference.nccl.ref": "canonical/cu133-nccl2312-amd-turin",
+          "local-inference.nccl.repo": "https://github.com/local-inference-lab/nccl-canonical.git",
+          "local-inference.nccl.version": "2.31.2",
+          "local-inference.nccl4py.version": "0.3.1",
+          "local-inference.pytorch.commit": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+          "local-inference.pytorch.ref": "v2.13.0",
+          "local-inference.pytorch.repo": "https://github.com/pytorch/pytorch.git",
+          "local-inference.pytorch.version": "2.13.0",
+          "local-inference.qualification.hardware": "",
+          "local-inference.qualification.parallelism": "",
+          "local-inference.qualification.prefill": "",
+          "local-inference.release.name": "jovian-judgement-community-20260908-r28",
+          "local-inference.release.overlay2-rootfs-layers": "2",
+          "local-inference.release.rootfs-format": "flattened runtime plus source installation",
+          "local-inference.runtime.base-id": "",
+          "local-inference.runtime.base-image": "voipmonitor/vllm@sha256:93ac5228f1cbde2182ca294d8b479259144742af2756a49ff207dd245429bf43",
+          "local-inference.runtime.cache-fingerprint": "cu133-torch213-glm53-vllmb58e8822-b12xd76de6c4-lmcache85622f21-flashkda3bb6ef2c",
+          "local-inference.runtime.cudagraph-mode": "FULL_AND_PIECEWISE",
+          "local-inference.runtime.default.gpu-local.target-page-tokens": "2048",
+          "local-inference.runtime.default.recurrent-checkpoint-policy": "auto",
+          "local-inference.runtime.foundation.source-image": "",
+          "local-inference.runtime.foundation.source-image-id": "",
+          "local-inference.runtime.foundation.source-packages": "",
+          "local-inference.runtime.foundation.version": "",
+          "local-inference.runtime.host-kv-default": "",
+          "local-inference.runtime.launcher.sha256": "",
+          "local-inference.runtime.lmcache-transfer": "engine-driven asynchronous shared memory",
+          "local-inference.runtime.nvidia-pytorch-image": "",
+          "local-inference.runtime.source-lock.path": "/opt/glm53-flash/source.lock",
+          "local-inference.runtime.source-lock.sha256": "15a9a649559830822cb943ea0c3c6a644c8b69c9e54d7be3e265801851843932",
+          "local-inference.runtime.source-mode": "complete Git bundles",
+          "local-inference.runtime.source-overlay": "",
+          "local-inference.runtime.vllm.composition.commit": "",
+          "local-inference.runtime.vllm.port.commit": "",
+          "local-inference.rust.toolchain": "1.95",
+          "local-inference.scheduler.max-num-batched-tokens": "4096",
+          "local-inference.scheduler.prefill-compute-share": "0.4",
+          "local-inference.scheduler.prefill-schedule-interval": "1",
+          "local-inference.status": "implemented",
+          "local-inference.target.revision": "",
+          "local-inference.torch.version": "2.13.0",
+          "local-inference.torchvision.commit": "8fb87713a24951e639c494b0f2a8a81b5f8e33a6",
+          "local-inference.torchvision.ref": "v0.28.0",
+          "local-inference.torchvision.repo": "https://github.com/pytorch/vision.git",
+          "local-inference.torchvision.version": "0.28.0",
+          "local-inference.transformers.minimum-version": "5.5.1",
+          "local-inference.vllm.base-revision": "",
+          "local-inference.vllm.branch": "image-source",
+          "local-inference.vllm.commit": "2531689fa50b956d3e1156e1ab80d119aaf34c1e",
+          "local-inference.vllm.composition": "",
+          "local-inference.vllm.foundation.commit": "",
+          "local-inference.vllm.integration-prs": "",
+          "local-inference.vllm.integration.lock_sha256": "",
+          "local-inference.vllm.integration.prs": "",
+          "local-inference.vllm.integration.tree": "",
+          "local-inference.vllm.merge-heads": "",
+          "local-inference.vllm.package-tree": "b58e8822b7f01df715fe72a94ed9ae4d2f447040",
+          "local-inference.vllm.package-version": "",
+          "local-inference.vllm.patch_sha256": "",
+          "local-inference.vllm.repo": "https://github.com/local-inference-lab/vllm.git",
+          "local-inference.vllm.source-revision": "2531689fa50b956d3e1156e1ab80d119aaf34c1e",
+          "local-inference.vllm.tree": "a8b355eb38a0b75b97eae06738b03c65b1e9fbb5",
+          "local-inference.vllm.upstream-base": "",
+          "local-inference.vllm.upstream-revision": "",
+          "local-inference.xgrammar.commit": "2ea71da4ccb997a06928c9fb69b99f330da56697",
+          "local-inference.xgrammar.ref": "v0.2.5",
+          "local-inference.xgrammar.repo": "https://github.com/mlc-ai/xgrammar.git",
+          "local-inference.xgrammar.version": "0.2.5",
+          "org.opencontainers.image.description": "GLM-5.3-Flash with FP8 cache, MTP3 and MXFP8 DFlash2; complete Git sources",
+          "org.opencontainers.image.revision": "2531689fa50b956d3e1156e1ab80d119aaf34c1e",
+          "org.opencontainers.image.source": "https://github.com/local-inference-lab/blackwell-llm-docker",
+          "org.opencontainers.image.title": "Jovian Judgement community serving",
+          "org.opencontainers.image.version": "r28"
+        }
+      },
+      "candidate": {
+        "lock": {
+          "format": "local-inference-source-lock/v1",
+          "implementation.status": "implemented",
+          "qualification.contract": "See evidence for the resulting immutable image",
+          "release.name": "jovian-judgement-community-20260908-r28.1",
+          "release.version": "r28.1",
+          "runtime.base.image": "voipmonitor/vllm@sha256:93ac5228f1cbde2182ca294d8b479259144742af2756a49ff207dd245429bf43",
+          "runtime.cuda.version": "13.3",
+          "runtime.pytorch.version": "2.13.0",
+          "runtime.rootfs.layers": "3",
+          "runtime.cudagraph.mode": "FULL_AND_PIECEWISE",
+          "runtime.scheduler.max-num-batched-tokens": "4096",
+          "runtime.scheduler.prefill-compute-share": "0.4",
+          "runtime.nccl.channels": "16",
+          "runtime.nccl.buffer.bytes": "2097152",
+          "runtime.recurrent-checkpoint-policy": "auto",
+          "runtime.lmcache.transfer": "engine-driven asynchronous shared memory",
+          "runtime.lmcache.checkpoints": "atomic target and draft bundles for request_boundaries; independent chunks for explicit aligned",
+          "model.repository": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+          "draft.repository": "local-inference-lab/GLM-5.3-Flash-DFlash2",
+          "draft.quantization": "MXFP8",
+          "vllm.commit": "9ff42d83938e74018f9c255e8cfa7ca6df6921b0",
+          "vllm.tree": "f3651af6738fc4b425208a428c7bc4ff9f334f35",
+          "vllm.package.tree": "1a8fec2503bed7ece1275512572194f056d15d60",
+          "vllm.bundle.sha256": "6cd77da90553281de76618a522eb9e78e1ef48bea4855c4183fc2508b701cd0d",
+          "b12x.commit": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+          "b12x.tree": "c4bfeee9f3c9457400d191c870eb2e44fbcd5c2e",
+          "b12x.package.tree": "d76de6c4ceaa9c2feb49edaf8c2f77d5a29ab5cb",
+          "b12x.bundle.sha256": "a3ef23b6d179ec95b8a160cf509d4c75d6b90c58b5a604c47ce8b58ecf786e44",
+          "lmcache.commit": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+          "lmcache.tree": "247f81b6fd3b156c402a0dd31cd4a21ae8e21160",
+          "lmcache.package.tree": "85622f21a2a3ae115e7a4ca41801fe221001e87f",
+          "lmcache.bundle.sha256": "1ab4ac35c21e7fb623799acb49ce8fea25a39ea1b18751b5624c26b025f74e55",
+          "lmcache.version": "0.5.5.dev0+glm53checkpoints.617a1b47",
+          "flashkda.base.commit": "3b225bf26bb8e218928a1fe14751cb48cf31d11b",
+          "flashkda.patch.sha256": "a9537532cf231babc942fa592666893268ca0617b24daeb8e78d3249e8c1d58a",
+          "flashkda.extension.sha256": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+          "input.Dockerfile.glm53-cache-contracts.sha256": "0431cf8cf4f9979423e60cea8ce53a940347a7f3c2d70440d6c5bf123fc98f76",
+          "input.build_glm53_cache_contract_image.sh.sha256": "9ee13a42b0ad78b9f0c5e97dd0a376960ed4e80c484b708a9e54db5570da75ae",
+          "input.source_locked_image_labels.py.sha256": "b28378354056ab145edc8761dd232e3e2aab2bb691fdaa6b5175481d941e894a",
+          "input.install_source_bundle.sh.sha256": "d18c4b49acc40722b439a0838240c5a03c5df5b799027cd3c9c141fb78395613",
+          "input.install_glm53_source_locked.sh.sha256": "429cee897017343f129f65200aa829f1cf7cfd6c6f04897c724a467873849b1b",
+          "input.serve-glm53-flash-nvfp4-dflash2.sh.sha256": "3351bafcfbad2f367c5269fac0ae27e4e32cdffe0df805a7f30fbc0e9ee4419e",
+          "input.serve-glm53-flash-nvfp4-dflash2-scheduler-qos.sh.sha256": "a0c85248789942cf56315790fe389d220c4913e9a504573c8e946537de0d34d2",
+          "input.serve-glm53-flash-lmcache.sh.sha256": "c841af83547ecd6fd4bcf04cd8933b9f894eb5c9e27421130938b1168c0ac0c1",
+          "input.serve-glm53-flash-lmcache-cache-complete.sh.sha256": "2e2e652c5f56ddfad6b123b24d938d6bcb62fcb2c1ea90a8b990ac3714b511f7",
+          "input.serve-glm53-flash-cache-complete.sh.sha256": "10dedef2523817dca1133b059fb46ad39f40a1406552609ba482a985234d7c10",
+          "input.glm53_checkpoint_identity.py.sha256": "b5d259c38bf844d4da6a1a9d905a0e8983f586a8dc550b138d8cdf070c02f499",
+          "input.glm53-r18-lmcache-runtime-requirements.txt.sha256": "7ac402540e2ba3f02fc1a443934ef3ff6e2e10c8ff81ae989e3958cfff38adf7",
+          "build.uv.sha256": "9a4299a0c3bcc01012acbcdae7b5655e5087e0e5d87459306736a1420a902b81",
+          "runtime.cache.fingerprint": "cu133-torch213-glm53-vllm1a8fec25-b12xd76de6c4-lmcache85622f21-flashkda3bb6ef2c",
+          "runtime.parent.release-image": "voipmonitor/vllm@sha256:f5f121e37fd2afbb6f8f036e7eb627435cfb736de0a4420306dc2a25b6631669",
+          "runtime.parent.source-lock.sha256": "15a9a649559830822cb943ea0c3c6a644c8b69c9e54d7be3e265801851843932",
+          "runtime.default.reasoning-effort": "high",
+          "runtime.scheduler.max-parallel-prefills": "1",
+          "runtime.scheduler.auto-max-parallel-prefills": "4",
+          "vllm.parent.commit": "2531689fa50b956d3e1156e1ab80d119aaf34c1e",
+          "vllm.bundle.mode": "incremental over parent image; complete installed Git history",
+          "vllm.version": "0.26.1rc0+glm53.r28.1.vllm9ff42d83",
+          "input.Dockerfile.glm53-scheduler-overlay.sha256": "505f832c19f0109ae8151edbf6a2ee415ebf006633ede34ac0dc6c95329da3e7",
+          "input.build_glm53_scheduler_overlay.sh.sha256": "a9c99af45c06b782a1e00765c8348dc16adf4254da0905518bb3634f870ec171",
+          "input.prepare_glm53_scheduler_overlay.py.sha256": "e2891a16bf40f46db4cf6cd0178e0cd9b34b387f4cf1e313a6009a2273cae251",
+          "input.prepare_glm53_source_bundles.py.sha256": "c8e04c97e5460abceb6804566becf3c547ac9426599fb1a786dd097223d03cc3",
+          "input.install_glm53_scheduler_overlay.py.sha256": "9f90d4d28a9767b1a9ce2e0060a2705f0fc800c92423a6c44e6d736c08ba0252"
+        },
+        "lock_sha256": "4473b46dbf696a386da1fbd6f75e7ef9159c36d216d153c6beb5cfe68b7a7477",
+        "vllm_version": "0.26.1rc0+glm53.r28.1.vllm9ff42d83",
+        "distribution_version": "0.26.1rc0+glm53.r28.1.vllm9ff42d83",
+        "sources": {
+          "vllm": {
+            "commit": "9ff42d83938e74018f9c255e8cfa7ca6df6921b0",
+            "tree": "f3651af6738fc4b425208a428c7bc4ff9f334f35",
+            "status": ""
+          },
+          "b12x": {
+            "commit": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+            "tree": "c4bfeee9f3c9457400d191c870eb2e44fbcd5c2e",
+            "status": ""
+          },
+          "lmcache": {
+            "commit": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+            "tree": "247f81b6fd3b156c402a0dd31cd4a21ae8e21160",
+            "status": ""
+          }
+        },
+        "native_sha256": {
+          "/opt/glm53-flash/vllm/vllm/_C_stable_libtorch.abi3.so": "183acc45f12f7c343bd1ee39c4e3a1fec029ed739119ab08661cae48a0d9ea74",
+          "/opt/glm53-flash/vllm/vllm/_flashkda_C.abi3.so": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+          "/opt/glm53-flash/vllm/vllm/_moe_C_stable_libtorch.abi3.so": "516f14d873a178d07ed4ee7ca36c51dd3fccf266e8e5ae9d585e51c04a65c313",
+          "/opt/glm53-flash/vllm/vllm/_qutlass_C.abi3.so": "5639ea4473e449d5730f21c0b41402dad49aaf67da290e0135d42bd25bf768b8",
+          "/opt/glm53-flash/vllm/vllm/_rust_tool_parser.abi3.so": "48a4c01764c83decd3d732af573d964e939d715a02ed92b3eebf04eaf8b59825",
+          "/opt/glm53-flash/vllm/vllm/cumem_allocator.abi3.so": "2343f5695e32a46d8564dd06330cb12630df47342b8d1a5a135f328bdd6981ce",
+          "/opt/glm53-flash/vllm/vllm/fs_io_C.abi3.so": "66d348e06a4480eca7d3894cfdefbb01a67e921e90ca101d14fc0434496cc4fb",
+          "/opt/glm53-flash/vllm/vllm/spinloop.abi3.so": "12401f8a902e6aebddd0e16ee44aaecd988a72334570ee95bc5c59067c67a41b",
+          "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa2_C.abi3.so": "37e3a34edb6dbd3d86a7952b3ec9975cb38e3a56a2381cdab9e302eaefe4ff81",
+          "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa3_C.abi3.so": "3afff6f3b03c23146d15312d94c291c16dce2c43206b483e96ff556fb22bb636",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/cuda_ops.cpython-312-x86_64-linux-gnu.so": "b72ce7043c31490ea3b3f29b954baaac6ea8aa2a571d4989ce581631f4db1b4a",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_fs.cpython-312-x86_64-linux-gnu.so": "6bd14f8438ca94d15acfca32146754a8b866bb86514dc473f11a6d7123fbf1ed",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_native.cpython-312-x86_64-linux-gnu.so": "9d710c8beb7cfd03a67ccccd177bd110e5cdc2404d6cc1589446ad3d38a562c8",
+          "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_redis.cpython-312-x86_64-linux-gnu.so": "65d7a5e51963443901de3798601962a237a33d5fe79eb5c3742c777671b3863f"
+        },
+        "id": "sha256:259a592cc1b86312a9bb61bd95c1aad66577d468a5502b4191ec69e22313fede",
+        "layers": [
+          "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+          "sha256:400b08031a646562d84df920c85352585d369f17b720ea3b3098fc543922f0f8",
+          "sha256:2a2466158030da13e87da97083a4c417259b48efe245e93aa8e17552b80f6382"
+        ],
+        "labels": {
+          "com.nvidia.build.id": "373437298",
+          "com.nvidia.build.ref": "f0144140a7c872635fafcadbd58fcbd63265d789",
+          "com.nvidia.cublas.version": "13.6.0.2",
+          "com.nvidia.cublasmp.version": "0.9.1.3056",
+          "com.nvidia.cuda.version": "13.3",
+          "com.nvidia.cudla.version": "13.3.29",
+          "com.nvidia.cudnn.version": "9.24.0.43",
+          "com.nvidia.cufft.version": "12.3.0.29",
+          "com.nvidia.curand.version": "10.4.3.29",
+          "com.nvidia.cusolver.version": "12.2.6.9",
+          "com.nvidia.cusolvermp.version": "0.8.0.3126",
+          "com.nvidia.cusparse.version": "12.8.2.51",
+          "com.nvidia.cusparselt.version": "0.9.1.1",
+          "com.nvidia.nccl.version": "2.30.7",
+          "com.nvidia.npp.version": "13.1.2.81",
+          "com.nvidia.nsightcompute.version": "2026.2.1.5",
+          "com.nvidia.nsightsystems.version": "2026.3.1.117",
+          "com.nvidia.nvjpeg.version": "13.2.1.68",
+          "com.nvidia.nvvm.version": "13.3.73",
+          "com.nvidia.pytorch.version": "2.13.0",
+          "com.nvidia.tensorrt.version": "11.1.0.106",
+          "com.nvidia.tensorrtoss.version": "",
+          "com.nvidia.volumes.needed": "nvidia_driver",
+          "local-inference.b12x.base-revision": "",
+          "local-inference.b12x.branch": "image-source",
+          "local-inference.b12x.commit": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+          "local-inference.b12x.composition": "",
+          "local-inference.b12x.foundation.commit": "",
+          "local-inference.b12x.integration-prs": "",
+          "local-inference.b12x.integration.lock_sha256": "",
+          "local-inference.b12x.integration.prs": "",
+          "local-inference.b12x.integration.tree": "",
+          "local-inference.b12x.merge-heads": "",
+          "local-inference.b12x.package-tree": "d76de6c4ceaa9c2feb49edaf8c2f77d5a29ab5cb",
+          "local-inference.b12x.patch_sha256": "",
+          "local-inference.b12x.repo": "https://github.com/local-inference-lab/b12x.git",
+          "local-inference.b12x.source-revision": "3edbcbce70f491741b82f5eab9c1b30b39447228",
+          "local-inference.b12x.tree": "c4bfeee9f3c9457400d191c870eb2e44fbcd5c2e",
+          "local-inference.b12x.upstream-base": "",
+          "local-inference.b12x.upstream-revision": "",
+          "local-inference.backend.allreduce": "B12X PCIe with NCCL for larger transfers",
+          "local-inference.backend.attention.default": "",
+          "local-inference.backend.draft.attention": "",
+          "local-inference.backend.gdn.decode": "B12X",
+          "local-inference.backend.gdn.prefill": "FlashKDA with recurrent checkpoints",
+          "local-inference.backend.indexer.decode": "",
+          "local-inference.backend.indexer.prefill": "",
+          "local-inference.backend.kda.non-speculative-server": "",
+          "local-inference.backend.kda.speculative-server": "",
+          "local-inference.backend.linear.default": "",
+          "local-inference.backend.moe.default": "",
+          "local-inference.backend.target.attention": "",
+          "local-inference.backend.target.indexer": "",
+          "local-inference.backend.target.linear": "",
+          "local-inference.backend.target.moe": "",
+          "local-inference.cache.fingerprint": "",
+          "local-inference.cache.recurrent-block-size": "",
+          "local-inference.cache.target-block-size": "",
+          "local-inference.cuda.version": "13.3",
+          "local-inference.cutlass-dsl.version": "4.6.2",
+          "local-inference.deepgemm.commit": "a6b593d2826719dcf4892609af7b84ee23aaf32a",
+          "local-inference.deepgemm.repo": "https://github.com/deepseek-ai/DeepGEMM.git",
+          "local-inference.docker.commit": "",
+          "local-inference.draft.manifest.sha256": "",
+          "local-inference.draft.model": "local-inference-lab/GLM-5.3-Flash-DFlash2",
+          "local-inference.draft.quantization": "MXFP8",
+          "local-inference.draft.revision": "",
+          "local-inference.draft.source-revision": "",
+          "local-inference.draft.update-policy": "resolve requested Hugging Face revision at startup",
+          "local-inference.draft.weights.sha256": "",
+          "local-inference.exllamav3.commit": "704aefd743b390af4bd0fb429d1906f9b964c7d8",
+          "local-inference.exllamav3.repo": "https://github.com/brandonmmusic-max/exllamav3.git",
+          "local-inference.flash-attention.commit": "2b84100f50e1d2a8726a86c86d14c2f9c9e5a67c",
+          "local-inference.flash-attention.repo": "https://github.com/JaredforReal/flash-attention.git",
+          "local-inference.flashinfer.commit": "1ac6942776b383c6b03c7a5805a22e72a3e3349f",
+          "local-inference.flashinfer.repo": "https://github.com/voipmonitor/flashinfer.git",
+          "local-inference.flashinfer.version": "0.6.18+cu133",
+          "local-inference.flashinfer.wheel-image": "voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a3b55b973df48b08a6dfae4a2a1e64c975a990dda22f65e31acd5217b86bb",
+          "local-inference.flashinfer.wheel-image-id": "sha256:f7aec877834a2ea250fe5b9efe52d0e39caee8b74671bdf5d9387c620fa45575",
+          "local-inference.flashkda.base.commit": "3b225bf26bb8e218928a1fe14751cb48cf31d11b",
+          "local-inference.flashkda.extension.sha256": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+          "local-inference.flashkda.patch.sha256": "a9537532cf231babc942fa592666893268ca0617b24daeb8e78d3249e8c1d58a",
+          "local-inference.glm53.mtp-backends": "attention:B12X,moe:Marlin; private NVFP4 vocabulary head",
+          "local-inference.glm53.target-backends": "attention:B12X,moe:B12X,linear:B12X",
+          "local-inference.gpu.scope": "",
+          "local-inference.instanttensor.commit": "49b4010afc1cae0441e71fe0b0bffc24fa05e932",
+          "local-inference.instanttensor.libaio.commit": "1b18bfafc6a2f7b9fa2c6be77a95afed8b7be448",
+          "local-inference.instanttensor.libaio.repo": "https://github.com/sailfishos-mirror/libaio.git",
+          "local-inference.instanttensor.libaio.tree": "c9442e111b747e9329ea782c6edb9d13a827cc08",
+          "local-inference.instanttensor.repo": "https://github.com/voipmonitor/InstantTensor.git",
+          "local-inference.instanttensor.version": "0.1.9",
+          "local-inference.lmcache.branch": "image-source",
+          "local-inference.lmcache.commit": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+          "local-inference.lmcache.integration.lock_sha256": "",
+          "local-inference.lmcache.integration.prs": "",
+          "local-inference.lmcache.integration.tree": "",
+          "local-inference.lmcache.merge-heads": "",
+          "local-inference.lmcache.package-tree": "85622f21a2a3ae115e7a4ca41801fe221001e87f",
+          "local-inference.lmcache.patch_sha256": "",
+          "local-inference.lmcache.ref": "",
+          "local-inference.lmcache.repo": "https://github.com/local-inference-lab/LMCache.git",
+          "local-inference.lmcache.source-revision": "617a1b47a790de6b86eea92f59deb232a9eff87d",
+          "local-inference.lmcache.tree": "247f81b6fd3b156c402a0dd31cd4a21ae8e21160",
+          "local-inference.lmcache.upstream-base": "",
+          "local-inference.lmcache.version": "0.5.5.dev0+glm53checkpoints.617a1b47",
+          "local-inference.model.repository": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+          "local-inference.model.revision": "",
+          "local-inference.model.update-policy": "resolve requested Hugging Face revision at startup",
+          "local-inference.nccl.commit": "fb6f40999a2a9e63104d4ae4a84118bce61528f8",
+          "local-inference.nccl.ref": "canonical/cu133-nccl2312-amd-turin",
+          "local-inference.nccl.repo": "https://github.com/local-inference-lab/nccl-canonical.git",
+          "local-inference.nccl.version": "2.31.2",
+          "local-inference.nccl4py.version": "0.3.1",
+          "local-inference.pytorch.commit": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+          "local-inference.pytorch.ref": "v2.13.0",
+          "local-inference.pytorch.repo": "https://github.com/pytorch/pytorch.git",
+          "local-inference.pytorch.version": "2.13.0",
+          "local-inference.qualification.hardware": "",
+          "local-inference.qualification.parallelism": "",
+          "local-inference.qualification.prefill": "",
+          "local-inference.release.name": "jovian-judgement-community-20260908-r28.1",
+          "local-inference.release.overlay2-rootfs-layers": "3",
+          "local-inference.release.rootfs-format": "two-layer FP8 runtime plus Python scheduler and launcher overlay",
+          "local-inference.runtime.base-id": "",
+          "local-inference.runtime.base-image": "voipmonitor/vllm@sha256:93ac5228f1cbde2182ca294d8b479259144742af2756a49ff207dd245429bf43",
+          "local-inference.runtime.cache-fingerprint": "cu133-torch213-glm53-vllm1a8fec25-b12xd76de6c4-lmcache85622f21-flashkda3bb6ef2c",
+          "local-inference.runtime.cudagraph-mode": "FULL_AND_PIECEWISE",
+          "local-inference.runtime.default.gpu-local.target-page-tokens": "2048",
+          "local-inference.runtime.default.reasoning-effort": "high",
+          "local-inference.runtime.default.recurrent-checkpoint-policy": "auto",
+          "local-inference.runtime.foundation.source-image": "",
+          "local-inference.runtime.foundation.source-image-id": "",
+          "local-inference.runtime.foundation.source-packages": "",
+          "local-inference.runtime.foundation.version": "",
+          "local-inference.runtime.host-kv-default": "",
+          "local-inference.runtime.launcher.sha256": "",
+          "local-inference.runtime.lmcache-transfer": "engine-driven asynchronous shared memory",
+          "local-inference.runtime.nvidia-pytorch-image": "",
+          "local-inference.runtime.parent-image": "voipmonitor/vllm@sha256:f5f121e37fd2afbb6f8f036e7eb627435cfb736de0a4420306dc2a25b6631669",
+          "local-inference.runtime.source-lock.path": "/opt/glm53-flash/source.lock",
+          "local-inference.runtime.source-lock.sha256": "4473b46dbf696a386da1fbd6f75e7ef9159c36d216d153c6beb5cfe68b7a7477",
+          "local-inference.runtime.source-mode": "complete Git bundles",
+          "local-inference.runtime.source-overlay": "",
+          "local-inference.runtime.vllm.composition.commit": "",
+          "local-inference.runtime.vllm.port.commit": "",
+          "local-inference.rust.toolchain": "1.95",
+          "local-inference.scheduler.max-num-batched-tokens": "4096",
+          "local-inference.scheduler.max-parallel-prefills": "1",
+          "local-inference.scheduler.prefill-compute-share": "0.4",
+          "local-inference.scheduler.prefill-schedule-interval": "1",
+          "local-inference.status": "implemented",
+          "local-inference.target.revision": "",
+          "local-inference.torch.version": "2.13.0",
+          "local-inference.torchvision.commit": "8fb87713a24951e639c494b0f2a8a81b5f8e33a6",
+          "local-inference.torchvision.ref": "v0.28.0",
+          "local-inference.torchvision.repo": "https://github.com/pytorch/vision.git",
+          "local-inference.torchvision.version": "0.28.0",
+          "local-inference.transformers.minimum-version": "5.5.1",
+          "local-inference.vllm.base-revision": "",
+          "local-inference.vllm.branch": "image-source",
+          "local-inference.vllm.commit": "9ff42d83938e74018f9c255e8cfa7ca6df6921b0",
+          "local-inference.vllm.composition": "",
+          "local-inference.vllm.foundation.commit": "",
+          "local-inference.vllm.integration-prs": "",
+          "local-inference.vllm.integration.lock_sha256": "",
+          "local-inference.vllm.integration.prs": "",
+          "local-inference.vllm.integration.tree": "",
+          "local-inference.vllm.merge-heads": "",
+          "local-inference.vllm.package-tree": "1a8fec2503bed7ece1275512572194f056d15d60",
+          "local-inference.vllm.package-version": "",
+          "local-inference.vllm.patch_sha256": "",
+          "local-inference.vllm.repo": "https://github.com/local-inference-lab/vllm.git",
+          "local-inference.vllm.source-revision": "9ff42d83938e74018f9c255e8cfa7ca6df6921b0",
+          "local-inference.vllm.tree": "f3651af6738fc4b425208a428c7bc4ff9f334f35",
+          "local-inference.vllm.upstream-base": "",
+          "local-inference.vllm.upstream-revision": "",
+          "local-inference.vllm.version": "0.26.1rc0+glm53.r28.1.vllm9ff42d83",
+          "local-inference.xgrammar.commit": "2ea71da4ccb997a06928c9fb69b99f330da56697",
+          "local-inference.xgrammar.ref": "v0.2.5",
+          "local-inference.xgrammar.repo": "https://github.com/mlc-ai/xgrammar.git",
+          "local-inference.xgrammar.version": "0.2.5",
+          "org.opencontainers.image.description": "GLM-5.3-Flash with FP8 cache, MTP3 and MXFP8 DFlash2; complete Git sources",
+          "org.opencontainers.image.revision": "9ff42d83938e74018f9c255e8cfa7ca6df6921b0",
+          "org.opencontainers.image.source": "https://github.com/local-inference-lab/blackwell-llm-docker",
+          "org.opencontainers.image.title": "Jovian Judgement community serving",
+          "org.opencontainers.image.version": "r28.1"
+        }
+      }
+    },
+    "status": "qualified",
+    "scope": "Packaged source, launcher provenance and native artifact parity; not GPU performance"
+  },
+  "reasoning_default": {
+    "status": "qualified",
+    "checks": {
+      "default_equals_high": true,
+      "max_override_is_distinct": true,
+      "low_override_is_distinct": true
+    },
+    "rendered": {
+      "default": {
+        "count": 20,
+        "max_model_len": 1048576,
+        "tokens": [
+          154822,
+          154824,
+          154826,
+          25062,
+          287,
+          29905,
+          371,
+          25,
+          5124,
+          154827,
+          3838,
+          374,
+          220,
+          17,
+          488,
+          220,
+          17,
+          30,
+          154828,
+          154841
+        ],
+        "token_strs": null
+      },
+      "high": {
+        "count": 20,
+        "max_model_len": 1048576,
+        "tokens": [
+          154822,
+          154824,
+          154826,
+          25062,
+          287,
+          29905,
+          371,
+          25,
+          5124,
+          154827,
+          3838,
+          374,
+          220,
+          17,
+          488,
+          220,
+          17,
+          30,
+          154828,
+          154841
+        ],
+        "token_strs": null
+      },
+      "max": {
+        "count": 20,
+        "max_model_len": 1048576,
+        "tokens": [
+          154822,
+          154824,
+          154826,
+          25062,
+          287,
+          29905,
+          371,
+          25,
+          7487,
+          154827,
+          3838,
+          374,
+          220,
+          17,
+          488,
+          220,
+          17,
+          30,
+          154828,
+          154841
+        ],
+        "token_strs": null
+      },
+      "low": {
+        "count": 20,
+        "max_model_len": 1048576,
+        "tokens": [
+          154822,
+          154824,
+          154826,
+          25062,
+          287,
+          29905,
+          371,
+          25,
+          12035,
+          154827,
+          3838,
+          374,
+          220,
+          17,
+          488,
+          220,
+          17,
+          30,
+          154828,
+          154841
+        ],
+        "token_strs": null
+      }
+    }
+  },
+  "active_gpu_telemetry": [
+    {
+      "artifact": "gpu-telemetry-mode-controls.csv",
+      "active_utilization_threshold_percent": 50,
+      "active_links_all_gen5_x16": true,
+      "devices": {
+        "0": {
+          "temperature_c": {
+            "n": 1529,
+            "min": 39.0,
+            "median": 60.0,
+            "max": 68.0
+          },
+          "power_w": {
+            "n": 1529,
+            "min": 23.71,
+            "median": 369.72,
+            "max": 476.64
+          },
+          "graphics_mhz": {
+            "n": 1529,
+            "min": 180.0,
+            "median": 2775.0,
+            "max": 2827.0
+          },
+          "memory_mhz": {
+            "n": 1529,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        },
+        "1": {
+          "temperature_c": {
+            "n": 1566,
+            "min": 41.0,
+            "median": 64.0,
+            "max": 71.0
+          },
+          "power_w": {
+            "n": 1566,
+            "min": 77.54,
+            "median": 375.135,
+            "max": 481.96
+          },
+          "graphics_mhz": {
+            "n": 1566,
+            "min": 2610.0,
+            "median": 2820.0,
+            "max": 2865.0
+          },
+          "memory_mhz": {
+            "n": 1566,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        },
+        "2": {
+          "temperature_c": {
+            "n": 1550,
+            "min": 44.0,
+            "median": 65.0,
+            "max": 72.0
+          },
+          "power_w": {
+            "n": 1550,
+            "min": 102.8,
+            "median": 402.11,
+            "max": 501.58
+          },
+          "graphics_mhz": {
+            "n": 1550,
+            "min": 2610.0,
+            "median": 2812.0,
+            "max": 2865.0
+          },
+          "memory_mhz": {
+            "n": 1550,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        },
+        "3": {
+          "temperature_c": {
+            "n": 1565,
+            "min": 40.0,
+            "median": 62.0,
+            "max": 69.0
+          },
+          "power_w": {
+            "n": 1565,
+            "min": 86.24,
+            "median": 378.35,
+            "max": 480.08
+          },
+          "graphics_mhz": {
+            "n": 1565,
+            "min": 2610.0,
+            "median": 2812.0,
+            "max": 2865.0
+          },
+          "memory_mhz": {
+            "n": 1565,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        }
+      }
+    },
+    {
+      "artifact": "gpu-telemetry.csv",
+      "active_utilization_threshold_percent": 50,
+      "active_links_all_gen5_x16": true,
+      "devices": {
+        "0": {
+          "temperature_c": {
+            "n": 4189,
+            "min": 32.0,
+            "median": 61.0,
+            "max": 69.0
+          },
+          "power_w": {
+            "n": 4189,
+            "min": 20.29,
+            "median": 392.18,
+            "max": 454.39
+          },
+          "graphics_mhz": {
+            "n": 4189,
+            "min": 180.0,
+            "median": 2775.0,
+            "max": 2835.0
+          },
+          "memory_mhz": {
+            "n": 4189,
+            "min": 405.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        },
+        "1": {
+          "temperature_c": {
+            "n": 4191,
+            "min": 33.0,
+            "median": 64.0,
+            "max": 73.0
+          },
+          "power_w": {
+            "n": 4191,
+            "min": 24.65,
+            "median": 401.69,
+            "max": 459.37
+          },
+          "graphics_mhz": {
+            "n": 4191,
+            "min": 180.0,
+            "median": 2820.0,
+            "max": 2880.0
+          },
+          "memory_mhz": {
+            "n": 4191,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        },
+        "2": {
+          "temperature_c": {
+            "n": 4212,
+            "min": 37.0,
+            "median": 66.0,
+            "max": 74.0
+          },
+          "power_w": {
+            "n": 4212,
+            "min": 28.19,
+            "median": 428.485,
+            "max": 482.98
+          },
+          "graphics_mhz": {
+            "n": 4212,
+            "min": 180.0,
+            "median": 2805.0,
+            "max": 2872.0
+          },
+          "memory_mhz": {
+            "n": 4212,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        },
+        "3": {
+          "temperature_c": {
+            "n": 4179,
+            "min": 33.0,
+            "median": 63.0,
+            "max": 72.0
+          },
+          "power_w": {
+            "n": 4179,
+            "min": 50.65,
+            "median": 403.65,
+            "max": 461.4
+          },
+          "graphics_mhz": {
+            "n": 4179,
+            "min": 2610.0,
+            "median": 2812.0,
+            "max": 2872.0
+          },
+          "memory_mhz": {
+            "n": 4179,
+            "min": 13365.0,
+            "median": 13365.0,
+            "max": 13365.0
+          }
+        }
+      }
+    }
+  ],
+  "stock_offset_checks": [
+    {
+      "artifact": "candidate-boot-clocks.jsonl",
+      "samples": 2,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "control-boot-clocks.jsonl",
+      "samples": 2,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "four-lane-checkpoint-boot-clocks.jsonl",
+      "samples": 3,
+      "physical_gpus": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "four-lane-checkpoint-validation-clocks.jsonl",
+      "samples": 1563,
+      "physical_gpus": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "interleaving-modes-clocks.jsonl",
+      "samples": 4317,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "primary-followup-clocks.jsonl",
+      "samples": 1217,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r28-large-prefill-clocks.jsonl",
+      "samples": 54,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r28-million-prefix-clocks.jsonl",
+      "samples": 100,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r28-mtp4-contention-clocks.jsonl",
+      "samples": 230,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r28-mtp4-measurement-clocks.jsonl",
+      "samples": 940,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r281-mtp4-controlled-clocks.jsonl",
+      "samples": 831,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r281-mtp4-measurement-clocks.jsonl",
+      "samples": 605,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "r281-release-mtp4-clocks.jsonl",
+      "samples": 1101,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "release-candidate-boot-clocks.jsonl",
+      "samples": 2,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    },
+    {
+      "artifact": "reverse-control-clocks.jsonl",
+      "samples": 1742,
+      "physical_gpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_zero": true
+    }
+  ],
+  "excluded_clock_checks": [
+    {
+      "artifact": "dflash-c8-duration-clocks.jsonl",
+      "reason": "An unused repeat driver checked the separately overclocked GPUs4-7 and was rejected before starting any server or benchmark. All measured A/B arms use GPUs0-3."
+    }
+  ]
+}

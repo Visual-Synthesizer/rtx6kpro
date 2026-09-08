@@ -1,0 +1,218 @@
+{
+  "blocks": {
+    "A": {
+      "both_exact": 457,
+      "candidate_higher": 273,
+      "candidate_mean": 0.7419084821428571,
+      "candidate_only_exact": 241,
+      "delta": 0.07338169642857142,
+      "mcnemar_exact_p": 1.8095917068223476e-05,
+      "neither_exact": 171,
+      "paired_bootstrap_ci95": [
+        0.040318080357142856,
+        0.1064453125
+      ],
+      "reference_higher": 197,
+      "reference_mean": 0.6685267857142857,
+      "reference_only_exact": 155,
+      "tasks": 1024,
+      "ties": 554
+    },
+    "B": {
+      "both_exact": 430,
+      "candidate_higher": 293,
+      "candidate_mean": 0.7240513392857143,
+      "candidate_only_exact": 253,
+      "delta": 0.09402901785714286,
+      "mcnemar_exact_p": 1.767627900091522e-07,
+      "neither_exact": 193,
+      "paired_bootstrap_ci95": [
+        0.06012834821428571,
+        0.1279296875
+      ],
+      "reference_higher": 183,
+      "reference_mean": 0.6300223214285714,
+      "reference_only_exact": 148,
+      "tasks": 1024,
+      "ties": 548
+    }
+  },
+  "bootstrap": {
+    "engine": "numpy.random.Generator.PCG64",
+    "numpy_version": "1.26.4",
+    "samples": 100000,
+    "seed": 2026090702048,
+    "unit": "task"
+  },
+  "by_difficulty": {
+    "demanding": {
+      "both_exact": 271,
+      "candidate_higher": 203,
+      "candidate_mean": 0.7178414557623928,
+      "candidate_only_exact": 176,
+      "delta": 0.07216063585024053,
+      "mcnemar_exact_p": 0.00053292677103123,
+      "neither_exact": 120,
+      "paired_bootstrap_ci95": [
+        0.029282576866764276,
+        0.11482953357038277
+      ],
+      "reference_higher": 139,
+      "reference_mean": 0.6456808199121523,
+      "reference_only_exact": 116,
+      "tasks": 683,
+      "ties": 341
+    },
+    "standard": {
+      "both_exact": 469,
+      "candidate_higher": 110,
+      "candidate_mean": 0.8883078853796276,
+      "candidate_only_exact": 106,
+      "delta": 0.03241999581677473,
+      "mcnemar_exact_p": 0.10929564898388157,
+      "neither_exact": 25,
+      "paired_bootstrap_ci95": [
+        0.0006274837900020946,
+        0.06442166910688141
+      ],
+      "reference_higher": 90,
+      "reference_mean": 0.8558878895628529,
+      "reference_only_exact": 83,
+      "tasks": 683,
+      "ties": 483
+    },
+    "stress": {
+      "both_exact": 147,
+      "candidate_higher": 253,
+      "candidate_mean": 0.5925848345203184,
+      "candidate_only_exact": 212,
+      "delta": 0.1466275659824047,
+      "mcnemar_exact_p": 1.2199164518129667e-09,
+      "neither_exact": 219,
+      "paired_bootstrap_ci95": [
+        0.09928780896522833,
+        0.19375785504817764
+      ],
+      "reference_higher": 151,
+      "reference_mean": 0.44595726853791373,
+      "reference_only_exact": 104,
+      "tasks": 682,
+      "ties": 278
+    }
+  },
+  "claim": "QAD step 2,500 has a practically meaningful advantage over published NVFP4 on unseen numeric instances of the VBF deterministic integer-program template.",
+  "decision": "confirmed_practical_gain",
+  "limitations": [
+    "The tasks contain unseen numeric instances of one generated integer-program template.",
+    "The result does not measure code generation, repository work, or tool use.",
+    "Difficulty, field, and block rows are diagnostics rather than independent hypotheses."
+  ],
+  "per_field": {
+    "a": {
+      "candidate_correct": 1550,
+      "candidate_rate": 0.7568359375,
+      "delta": 0.08056640625,
+      "reference_correct": 1385,
+      "reference_rate": 0.67626953125
+    },
+    "b": {
+      "candidate_correct": 1546,
+      "candidate_rate": 0.7548828125,
+      "delta": 0.08056640625,
+      "reference_correct": 1381,
+      "reference_rate": 0.67431640625
+    },
+    "c": {
+      "candidate_correct": 1564,
+      "candidate_rate": 0.763671875,
+      "delta": 0.07861328125,
+      "reference_correct": 1403,
+      "reference_rate": 0.68505859375
+    },
+    "checksum": {
+      "candidate_correct": 1408,
+      "candidate_rate": 0.6875,
+      "delta": 0.09130859375,
+      "reference_correct": 1221,
+      "reference_rate": 0.59619140625
+    },
+    "d": {
+      "candidate_correct": 1568,
+      "candidate_rate": 0.765625,
+      "delta": 0.07861328125,
+      "reference_correct": 1407,
+      "reference_rate": 0.68701171875
+    },
+    "emitted": {
+      "candidate_correct": 1410,
+      "candidate_rate": 0.6884765625,
+      "delta": 0.0908203125,
+      "reference_correct": 1224,
+      "reference_rate": 0.59765625
+    },
+    "odd_position_sum": {
+      "candidate_correct": 1462,
+      "candidate_rate": 0.7138671875,
+      "delta": 0.08544921875,
+      "reference_correct": 1287,
+      "reference_rate": 0.62841796875
+    }
+  },
+  "practical_improvement_boundary": 0.01,
+  "primary": {
+    "both_exact": 887,
+    "candidate_higher": 566,
+    "candidate_mean": 0.7329799107142857,
+    "candidate_only_exact": 494,
+    "delta": 0.08370535714285714,
+    "mcnemar_exact_p": 1.3612485360086794e-11,
+    "neither_exact": 364,
+    "paired_bootstrap_ci95": [
+      0.05984933035714286,
+      0.107421875
+    ],
+    "reference_higher": 380,
+    "reference_mean": 0.6492745535714286,
+    "reference_only_exact": 303,
+    "tasks": 2048,
+    "ties": 1102
+  },
+  "provenance": {
+    "A": {
+      "candidate_receipts_sha256": "f4f926ff573898fea794478d3bd58a7b749e3d1ca3add65baad214e4bc4186e6",
+      "candidate_run_id": "2026-09-07-e4b99139e40076f7",
+      "reference_receipts_sha256": "829836b83f7931ce432617915c46ff0822b56f9c7730dd7b2bc4b3623345effa",
+      "reference_run_id": "2026-09-07-765ff81671b56e9d",
+      "runtime_comparison_contract_sha256": "c51e5870f67ab9f945155fe37dd9df7157c96cb4ccfa5c23599be8e334b1e378",
+      "suite_file_sha256": "a0191b4f1afd6bccaa53bb5043c200da75f7fc7d3d26b8b43f99709edb587333"
+    },
+    "B": {
+      "candidate_receipts_sha256": "54bd41a371bd5df184f414ff0e5efdb3b2e73785be53adfd905afd59f9bce365",
+      "candidate_run_id": "2026-09-07-74fedb2cc3db0318",
+      "reference_receipts_sha256": "c5086a25c6dd1eb739935534202ca39addacc5011594eee50c266565a762ccdd",
+      "reference_run_id": "2026-09-07-1fbb0ffd6e988552",
+      "runtime_comparison_contract_sha256": "3d8367a16eee3b9a0de51a2733d2ebed89a7c4b52b907ca643b0c150bc2bd18c",
+      "suite_file_sha256": "a14a0759ef3b8642a62c01058d1a17965f5d8539121ecca735a3c7902aa6220b"
+    }
+  },
+  "schema": "local-inference-lab.program-execution-confirmation/1",
+  "secondary": {
+    "candidate": {
+      "completion_tokens": 16010671,
+      "exact_rate": 0.67431640625,
+      "exact_tasks": 1381,
+      "length_limited": 36,
+      "protocol_valid": 2011,
+      "reasoning_tokens": 15861245
+    },
+    "reference": {
+      "completion_tokens": 16721662,
+      "exact_rate": 0.5810546875,
+      "exact_tasks": 1190,
+      "length_limited": 31,
+      "protocol_valid": 2011,
+      "reasoning_tokens": 16571956
+    }
+  },
+  "status": "qualified"
+}

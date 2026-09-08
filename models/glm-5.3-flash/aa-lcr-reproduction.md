@@ -7,13 +7,16 @@ GLM-5.3-Flash checkpoint-and-serving configurations on the Artificial Analysis
 Long Context Reasoning (AA-LCR) dataset.
 
 Status: **implemented**. The procedure produced qualified 300-attempt artifacts
-for the published NVFP4 checkpoint and QAD step 1,750. The frozen tools,
-configuration receipts, and aggregate validation receipts are stored beside
-this document. Full candidate answers and per-attempt judge receipts are
-retained by Local Inference Lab and are not distributed in the wiki.
+for the published NVFP4 checkpoint, QAD step 1,750, and the BF16 checkpoint.
+The frozen tools, configuration receipts, and aggregate validation receipts
+are stored beside this document. Full candidate answers and per-attempt judge
+receipts are retained by Local Inference Lab and are not distributed in the
+wiki.
 
-The corresponding result is
-[GLM-5.3-Flash AA-LCR: published NVFP4 versus QAD step 1,750](aa-lcr-nvfp4-vs-qad-step1750.md).
+The corresponding results are:
+
+- [BF16, published NVFP4, and QAD step 1,750](aa-lcr-bf16-vs-nvfp4.md); and
+- [published NVFP4 versus QAD step 1,750](aa-lcr-nvfp4-vs-qad-step1750.md).
 
 ## Immutable inputs
 
@@ -29,6 +32,8 @@ The corresponding result is
 | Published NVFP4 index SHA-256 | `0d1d9e6b226e76520e182de10d4e7194cc885c5cb1bf885bb90de1916ce312cb` |
 | QAD checkpoint | `GLM-5.3-Flash-NVFP4-QAD-step1750`, Quatrain step 1,750 |
 | QAD index SHA-256 | `b43d25a280d02bfd2a58c046386e24baad78fcce355ea2d48cc0c4c78671686b` |
+| BF16 checkpoint | `zai-org/GLM-5.3-Flash-BF16@61f77a1e1a67c410650ce5017411337da0dcd11a` |
+| BF16 index SHA-256 | `e6007bd58fb7e07f9fe69544257ee2713f252ef5855bbf685b48c991d524ef0f` |
 | Container digest | `voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340` |
 | Source-lock SHA-256 | `9a6167d415d824e1707ba7df0dd5906e05c004f1ed2666f80f2f9e1ea9fde4be` |
 
@@ -132,7 +137,7 @@ The expected SHA-256 is
 `6b5b4b3fff2b3cf0179591c3ee1721474dd588dea6504031caa22fb856509562`.
 The expected chat-token range is 76,820 to 114,611, with median 100,972.
 
-## Start one serving replica
+## Start one NVFP4 serving replica
 
 The following template starts one TP4/DCP1 replica. Replace angle-bracketed
 values with one checkpoint path, four GPU indices, a unique port, container
@@ -184,7 +189,9 @@ The immutable runtime receipts show every argument, backend, source revision,
 container identity, and GPU UUID:
 
 - [published NVFP4 runtime](validation/aa-lcr-nvfp4-runtime-20260903.json);
-- [QAD step 1,750 runtime](validation/aa-lcr-qad-step1750-runtime-20260903.json).
+- [QAD step 1,750 runtime](validation/aa-lcr-qad-step1750-runtime-20260903.json);
+  and
+- [BF16 runtime](validation/aa-lcr-bf16-runtime-20260903.json).
 
 Create a fresh `runtime-manifest.json` for a reproduction. Do not reuse a
 captured container ID. The manifest must record checkpoint and index hashes,
@@ -192,6 +199,93 @@ container image ID and registry digest, source revisions, GPU UUIDs, exact
 server argument vector, topology, activation and cache dtypes, selected
 backends, cache allocation, graph policy, prefix-cache state, and relevant
 non-secret environment variables.
+
+## Start the BF16 serving replica
+
+The BF16 checkpoint requires eight 96 GiB GPUs for the qualified runtime. The
+image's standard launcher selects the ModelOpt quantized path, so the BF16
+configuration invokes `/opt/venv/bin/vllm` directly. Mount the complete pinned
+snapshot at `/model`.
+
+~~~bash
+docker run -d \
+  --name glm53-aa-lcr-bf16-mtp3 \
+  --init \
+  --gpus '"device=0,1,2,3,4,5,6,7"' \
+  --network host \
+  --ipc host \
+  --shm-size 32g \
+  -v /srv/models/glm-5.3-flash-bf16-61f77a1:/model:ro \
+  -v glm53-aa-lcr-bf16-cache:/cache \
+  -e HF_HUB_OFFLINE=1 \
+  -e TRANSFORMERS_OFFLINE=1 \
+  -e OMP_NUM_THREADS=1 \
+  -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+  -e NCCL_SOCKET_IFNAME=lo \
+  -e GLOO_SOCKET_IFNAME=lo \
+  -e NCCL_MIN_NCHANNELS=16 \
+  -e NCCL_MAX_NCHANNELS=16 \
+  -e NCCL_BUFFSIZE=2097152 \
+  -e VLLM_ENABLE_PCIE_ALLREDUCE=1 \
+  -e VLLM_PCIE_ALLREDUCE_BACKEND=b12x \
+  -e VLLM_PCIE_DMA_MIN_BYTES=6MB \
+  -e VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE=2048 \
+  -e VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE=auto \
+  -e VLLM_GLM53_L2_PREFETCH=1 \
+  -e VLLM_GLM53_KDA_GATE_SIDE_STREAM=1 \
+  -e VLLM_USE_FLASHINFER_SAMPLER=1 \
+  -e 'CUDAGRAPH_CAPTURE_SIZES=1 2 4' \
+  --entrypoint /opt/venv/bin/vllm \
+  voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340 \
+  serve /model \
+  --served-model-name GLM-5.3-Flash-BF16-MTP3-AA-LCR \
+  --host 0.0.0.0 \
+  --port 5054 \
+  --tensor-parallel-size 8 \
+  --pipeline-parallel-size 1 \
+  --decode-context-parallel-size 1 \
+  --cp-kv-cache-interleave-size 4 \
+  --dcp-kv-cache-interleave-size 4 \
+  --max-num-seqs 4 \
+  --max-model-len 300000 \
+  --max-num-batched-tokens 2048 \
+  --prefill-schedule-interval 8 \
+  --max-cudagraph-capture-size 4 \
+  --kv-cache-memory 9663676416 \
+  --mamba-cache-mode align \
+  --enable-chunked-prefill \
+  --language-model-only \
+  --dtype bfloat16 \
+  --kv-cache-dtype fp8 \
+  --block-size 256 \
+  --load-format auto \
+  --attention-backend B12X \
+  --moe-backend auto \
+  --linear-backend auto \
+  --no-enable-flashinfer-autotune \
+  --enable-auto-tool-choice \
+  --tool-call-parser glm47 \
+  --reasoning-parser glm45 \
+  --additional-config \
+  '{"glm53_kda_decode_backend":"auto","kda_prefill_backend":"flashkda"}' \
+  --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE"}' \
+  --enable-prefix-caching \
+  --speculative-config \
+  '{"method":"mtp","num_speculative_tokens":3,"draft_sample_method":"probabilistic","rejection_sample_method":"standard","moe_backend":"auto","attention_backend":"B12X"}'
+~~~
+
+The qualified server reports 1,272,727 physical KV-cache tokens and 4.24-way
+capacity at the 300,000-token model limit. The resolved KV format is
+`fp8_ds_mla`, and the resolved routed-expert implementation is FlashInfer
+CUTLASS unquantized.
+
+A 4,096-token scheduler budget combined with 0.95 automatic GPU-memory
+allocation is **unsupported** for this workload. It passed a short smoke
+request but failed a 95,407-token preflight prompt during a temporary B12X
+multi-head-composition allocation. Use the explicit 9 GiB cache and 2,048-token
+scheduler budget above. The
+[failure receipt](validation/aa-lcr-bf16-bt4096-auto95-unsupported-20260903.json)
+records the rejected configuration.
 
 ## Generate published-NVFP4 answers
 
@@ -275,6 +369,48 @@ The qualified output identities are:
 - completeness receipt
   `a4227af03471f8b237edfa2dccb574d680259e654fb47fc1f300638e10823e81`.
 
+## Generate BF16 answers
+
+Use the single qualified TP8 endpoint. Four client workers submit four question
+groups; all repeats for one question remain serial in one worker.
+
+~~~bash
+python3 models/glm-5.3-flash/tools/run-aa-lcr.py generate \
+  --dataset-root /srv/aa-lcr-bdae010 \
+  --base-url http://127.0.0.1:5054/v1 \
+  --model GLM-5.3-Flash-BF16-MTP3-AA-LCR \
+  --output-dir /srv/glm53-aa-lcr/bf16 \
+  --runtime-manifest /srv/glm53-aa-lcr/bf16/runtime-manifest.json \
+  --repeats 3 \
+  --concurrency-per-endpoint 4 \
+  --repeat-scheduling question_serial \
+  --reasoning-effort max \
+  --temperature 1.0 \
+  --top-p 0.95 \
+  --max-tokens 163840 \
+  --timeout-seconds 7200
+~~~
+
+Seal the BF16 generation set with the shared token manifest:
+
+~~~bash
+python3 models/glm-5.3-flash/tools/run-aa-lcr.py verify-generations \
+  --dataset-root /srv/aa-lcr-bdae010 \
+  --generation-dir /srv/glm53-aa-lcr/bf16 \
+  --token-count-manifest /srv/aa-lcr-bdae010/glm-5.3-flash-token-counts.json \
+  --output /srv/glm53-aa-lcr/bf16/generation-completeness.json
+~~~
+
+The qualified BF16 output identities are:
+
+- generation manifest
+  `456822fe9b53e893ed789cdfe4f88597cb91938bdc6d29edf9216291b42288a7`;
+- completeness receipt
+  `de5357f136c0f888068806f08a99d85b57271e302f8cd32a59ea7ed1cb20b661`;
+  and
+- canonical generation receipt-set hash
+  `ccfdd6e920554ac662641de8af6c4a7b212b34a28563c567c91fd6f81b4a20d1`.
+
 ## Run the equality checker
 
 Artificial Analysis methodology version 4.1.1 names GPT-5.6 Luna at medium
@@ -308,6 +444,19 @@ python3 models/glm-5.3-flash/tools/judge-aa-lcr-codex.py \
   --timeout-seconds 600
 ~~~
 
+BF16:
+
+~~~bash
+python3 models/glm-5.3-flash/tools/judge-aa-lcr-codex.py \
+  --dataset-root /srv/aa-lcr-bdae010 \
+  --generation-dir /srv/glm53-aa-lcr/bf16 \
+  --output-dir /srv/glm53-aa-lcr/bf16/judges/gpt-5.6-luna-medium \
+  --model gpt-5.6-luna \
+  --reasoning-effort medium \
+  --concurrency 4 \
+  --timeout-seconds 600
+~~~
+
 A qualified judge directory contains exactly 300 JSON receipts, no error
 sidecars, a matching `judge-manifest.json`, and a
 `pass-at-1-summary.json` with status `qualified`.
@@ -316,9 +465,11 @@ The judge is an external dependency whose behavior can change behind a stable
 model name. A reproduction must record the model name, reasoning effort,
 provider, Codex CLI version, execution-isolation settings, and execution date.
 Matching the documented command does not imply bitwise reproduction of the
-2026-09-03 judge labels.
+retained judge labels.
 
-## Compute the paired comparison
+## Compute paired comparisons
+
+Published NVFP4 versus QAD step 1,750:
 
 ~~~bash
 python3 models/glm-5.3-flash/tools/compare-aa-lcr-scores.py \
@@ -329,6 +480,32 @@ python3 models/glm-5.3-flash/tools/compare-aa-lcr-scores.py \
   --bootstrap-replicates 200000 \
   --bootstrap-seed 20260903 \
   --output /srv/glm53-aa-lcr/nvfp4-vs-qad-step1750.json
+~~~
+
+Published NVFP4 versus BF16:
+
+~~~bash
+python3 models/glm-5.3-flash/tools/compare-aa-lcr-scores.py \
+  --reference-dir /srv/glm53-aa-lcr/nvfp4/judges/gpt-5.6-luna-medium \
+  --candidate-dir /srv/glm53-aa-lcr/bf16/judges/gpt-5.6-luna-medium \
+  --reference-label 'Published GLM-5.3-Flash NVFP4' \
+  --candidate-label 'GLM-5.3-Flash BF16' \
+  --bootstrap-replicates 200000 \
+  --bootstrap-seed 20260903 \
+  --output /srv/glm53-aa-lcr/nvfp4-vs-bf16.json
+~~~
+
+QAD step 1,750 versus BF16:
+
+~~~bash
+python3 models/glm-5.3-flash/tools/compare-aa-lcr-scores.py \
+  --reference-dir /srv/glm53-aa-lcr/qad-step1750/judges/gpt-5.6-luna-medium \
+  --candidate-dir /srv/glm53-aa-lcr/bf16/judges/gpt-5.6-luna-medium \
+  --reference-label 'Quatrain QAD step 1750' \
+  --candidate-label 'GLM-5.3-Flash BF16' \
+  --bootstrap-replicates 200000 \
+  --bootstrap-seed 20260903 \
+  --output /srv/glm53-aa-lcr/qad-step1750-vs-bf16.json
 ~~~
 
 The comparator requires both result sets to contain the same 300

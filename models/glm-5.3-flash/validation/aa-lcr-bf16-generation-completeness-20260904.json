@@ -1,0 +1,68 @@
+{
+  "artifact_kind": "AA-LCR generation completeness receipt",
+  "created_utc": "2026-09-04T00:21:47.566098Z",
+  "dataset": {
+    "prompt_manifest_sha256": "13f8fdc097679d5ead0c4bba6044b254a1fcd80f8e5afb9555c68bd3d0abd09d",
+    "questions": 100,
+    "repository": "ArtificialAnalysis/AA-LCR",
+    "revision": "bdae010bbce259820c0e34c1d7cce210d966fb75",
+    "token_count_manifest_sha256": "6b5b4b3fff2b3cf0179591c3ee1721474dd588dea6504031caa22fb856509562"
+  },
+  "generation": {
+    "configuration_sha256": "a986d29592e73f1a28467796bfd5b652ec684c34ff6bb2c7dfe551c3a9d3572a",
+    "failure_sidecars": 0,
+    "finish_reasons": {
+      "stop": 300
+    },
+    "generation_manifest_sha256": "456822fe9b53e893ed789cdfe4f88597cb91938bdc6d29edf9216291b42288a7",
+    "model": "GLM-5.3-Flash-BF16-MTP3-AA-LCR",
+    "per_repeat_receipts": {
+      "0": 100,
+      "1": 100,
+      "2": 100
+    },
+    "questions": 100,
+    "receipts": 300,
+    "repeats": 3,
+    "runtime_manifest_sha256": "fa457e262698fb12c0f9ac3680beced879f488ab9059b572dfbf1f5684589a57"
+  },
+  "qualification": {
+    "all_candidate_answer_hashes_match": true,
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_dataset_prompts_and_documents": true,
+    "all_receipts_match_generation_configuration": true,
+    "all_response_prompt_token_counts_match_pinned_tokenizer": true,
+    "all_responses_finished_with_stop": true
+  },
+  "receipt_manifest_sha256": "ccfdd6e920554ac662641de8af6c4a7b212b34a28563c567c91fd6f81b4a20d1",
+  "status": "qualified",
+  "usage": {
+    "completion_tokens": {
+      "maximum": 47741,
+      "mean": 4624.643333333333,
+      "median": 1813.5,
+      "minimum": 335,
+      "p95": 18133.5,
+      "p99": 32044.13,
+      "sum": 1387393
+    },
+    "prompt_tokens": {
+      "maximum": 114611,
+      "mean": 97318.11,
+      "median": 100972.0,
+      "minimum": 76820,
+      "p95": 113694.05,
+      "p99": 114607.04,
+      "sum": 29195433
+    },
+    "request_elapsed_seconds": {
+      "maximum": 285.6478056469932,
+      "mean": 77.49549971045228,
+      "median": 66.17767692502821,
+      "minimum": 2.533782943035476,
+      "p95": 184.022784,
+      "p99": 261.909896,
+      "sum": 23248.649913135683
+    }
+  }
+}

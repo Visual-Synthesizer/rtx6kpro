@@ -1,0 +1,194 @@
+{
+  "schema": "local-inference-lab.behavioral-fidelity-public-summary/1",
+  "status": "qualified",
+  "claim_scope": {
+    "external_validity": "research-only",
+    "primary_decision": "practically_equivalent",
+    "primary_metric": "equally task-weighted mean fraction of correct required fields",
+    "practical_margin": 0.01,
+    "task_pairs": 9856
+  },
+  "created_at": "2026-09-07T00:38:23.754759+00:00",
+  "checkpoints": {
+    "candidate": {
+      "checkpoint_manifest_sha256": "d783ff38cacd712bd29f7f7f31129b8633928c4bb782acf2e75b336cb90a743d",
+      "materialization_sha256": "962f7905587be9e4377b8bebbcd8e93b49c3c49f3bda6d818260da518dcd5e0a",
+      "model_index_sha256": "b43d25a280d02bfd2a58c046386e24baad78fcce355ea2d48cc0c4c78671686b",
+      "name": "GLM-5.3-Flash-NVFP4-QAD-step2500"
+    },
+    "reference": {
+      "model_index_sha256": "0d1d9e6b226e76520e182de10d4e7194cc885c5cb1bf885bb90de1916ce312cb",
+      "name": "local-inference-lab/GLM-5.3-Flash-NVFP4",
+      "revision": "378ca54585c46542bad1f3cb3ed0d73ae51cdb62"
+    }
+  },
+  "primary_comparison": {
+    "bootstrap_samples": 100000,
+    "bootstrap_seed": 11370430731486554476,
+    "candidate_mean": 0.9133254278273809,
+    "candidate_minus_reference": 0.0033202521065244283,
+    "decision": "practically_equivalent",
+    "paired_bootstrap_ci95": [
+      -0.0031725772251372133,
+      0.009815408096832479
+    ],
+    "reference_mean": 0.9100051757208565,
+    "task_weighting": "equal"
+  },
+  "secondary_diagnostics": {
+    "atomic_fields": {
+      "agreements": 86748,
+      "harmful_regressions": 5225,
+      "recoveries": 5167,
+      "task_clusters_with_value_disagreement": 2305,
+      "value_disagreements": 11977
+    },
+    "candidate": {
+      "exact_task_rate": 0.8449675324675324,
+      "exact_tasks": 8328,
+      "field_micro_accuracy": 0.9270846201358863,
+      "fields_correct": 90057,
+      "fields_total": 97140,
+      "length_limited": 404,
+      "protocol_valid": 9451,
+      "protocol_valid_rate": 0.9589082792207793
+    },
+    "exact_task_flips": {
+      "both_correct": 7435,
+      "candidate_only_correct": 893,
+      "mcnemar_exact_p": 0.0020667384878755492,
+      "neither_correct": 499,
+      "reference_only_correct": 1029
+    },
+    "reference": {
+      "exact_task_rate": 0.8587662337662337,
+      "exact_tasks": 8464,
+      "field_micro_accuracy": 0.9276816965204859,
+      "fields_correct": 90115,
+      "fields_total": 97140,
+      "length_limited": 335,
+      "protocol_valid": 9518,
+      "protocol_valid_rate": 0.9657061688311688
+    }
+  },
+  "components": [
+    {
+      "candidate_mean": 0.9143559669961735,
+      "candidate_receipts_sha256": "789835d32fea28ca19eab3b13010942fcc9b7418767b061b1e6aead979d459a6",
+      "candidate_run_id": "2026-09-06-b4453f873b8b8d4f",
+      "decision": "not_worse",
+      "description": "7,168-task component served by two matched TP4 replicas on RTX PRO 6000 Blackwell Workstation Edition GPUs",
+      "delta": 0.004763274938881803,
+      "id": "two-tp4-replicas-7168",
+      "paired_bootstrap_ci95": [
+        -0.002758209851323342,
+        0.012255194008755835
+      ],
+      "reference_mean": 0.9095926920572917,
+      "reference_receipts_sha256": "0bbeed63e3bdbfdc55bcf7f53f971ca1867fb6229d5f7d1930033d723f0ebbd4",
+      "reference_run_id": "2026-09-06-a41f6b0f0a06a94b",
+      "tasks": 7168
+    },
+    {
+      "candidate_mean": 0.9105773233772676,
+      "candidate_receipts_sha256": "a39bf47453c1ad23ff8eb80b0657b0c03359f7a3c865ec6296d6f153f72df440",
+      "candidate_run_id": "2026-09-06-01ff83c7e3f494bb",
+      "decision": "inconclusive",
+      "description": "2,688-task component served by one matched TP4 replica on RTX PRO 6000 Blackwell Max-Q Workstation Edition GPUs",
+      "delta": -0.0005278087797619047,
+      "id": "one-tp4-replica-2688",
+      "paired_bootstrap_ci95": [
+        -0.013288145173433954,
+        0.012182343152104591
+      ],
+      "reference_mean": 0.9111051321570295,
+      "reference_receipts_sha256": "617245343c32abb998ff9bf1327750b681659a4325bf3fd171b59949f18129d8",
+      "reference_run_id": "2026-09-06-3f2017143326cb7d",
+      "tasks": 2688
+    }
+  ],
+  "per_family": [
+    {
+      "candidate_mean": 0.9940949675324675,
+      "delta": -0.001542207792207792,
+      "family": "constraint_assignment",
+      "paired_bootstrap_ci95": [-0.00643262987012987, 0.0032467532467532465],
+      "reference_mean": 0.9956371753246753,
+      "tasks": 1408
+    },
+    {
+      "candidate_mean": 0.9599228896103896,
+      "delta": -0.0035511363636363635,
+      "family": "dependency_graph",
+      "paired_bootstrap_ci95": [-0.01653814935064935, 0.009334415584415584],
+      "reference_mean": 0.963474025974026,
+      "tasks": 1408
+    },
+    {
+      "candidate_mean": 0.9093572443181818,
+      "delta": -0.0400390625,
+      "family": "event_sourced_state",
+      "paired_bootstrap_ci95": [-0.05672940340909091, -0.0234375],
+      "reference_mean": 0.9493963068181818,
+      "tasks": 1408
+    },
+    {
+      "candidate_mean": 0.8893229166666666,
+      "delta": -0.032966382575757576,
+      "family": "evidence_chain_retrieval",
+      "paired_bootstrap_ci95": [-0.0537405303030303, -0.012488162878787875],
+      "reference_mean": 0.9222892992424242,
+      "tasks": 1408
+    },
+    {
+      "candidate_mean": 0.9980779474431818,
+      "delta": -0.00013316761363636395,
+      "family": "policy_application",
+      "paired_bootstrap_ci95": [-0.0019753196022727275, 0.0012384588068181815],
+      "reference_mean": 0.9982111150568181,
+      "tasks": 1408
+    },
+    {
+      "candidate_mean": 0.7451298701298701,
+      "delta": 0.09375,
+      "family": "program_execution",
+      "paired_bootstrap_ci95": [0.06544237012987014, 0.12205762987012987],
+      "reference_mean": 0.6513798701298701,
+      "tasks": 1408
+    },
+    {
+      "candidate_mean": 0.8973721590909091,
+      "delta": 0.007723721590909091,
+      "family": "record_reconciliation",
+      "paired_bootstrap_ci95": [-0.010387073863636364, 0.025834517045454544],
+      "reference_mean": 0.8896484375,
+      "tasks": 1408
+    }
+  ],
+  "provenance": {
+    "analysis_contract": {
+      "hardware_partitioning": "none",
+      "practical_margin": 0.01,
+      "task_weighting": "equal"
+    },
+    "comparison_artifacts": {
+      "one_tp4_replica_json_sha256": "4b288f7775feef8b1b60ff213c64710f7a54f10fd45cc5845a66179e8ec57ed3",
+      "pooled_json_sha256": "29dd86a73d4b0f1fb75b1e8598aeeb18b456940564e239bb346411040d916408",
+      "two_tp4_replicas_json_sha256": "b5e432117351791155799a7b5bd953a1e33b85516c7b90e79e9f7aae53f9ba82"
+    },
+    "evaluation_contract_sha256": {
+      "one_tp4_replica_2688": "fa63d21d6e0da8ba3f7a86049c2bb60ec6079bc86ad5382b32324228001fb0b9",
+      "pooled_9856": "447d37915147e85fbe528cef9735aa2b9739b100d3775dfc62d083890037bf98",
+      "two_tp4_replicas_7168": "e4fd526b019f33ae4f3605bce13f0954ff6fb62d9511748b8d7f91a37c68eb62"
+    },
+    "implementation": {
+      "git_commit": "db4e5d9f28ad66f769cef2ef2365e9d24dd7969b",
+      "repository": "local-inference-lab/llm-inference-bench"
+    },
+    "runtime_image": "voipmonitor/vllm@sha256:d6ccc79f65e3b83896e7307afafc89146b2d116ef2e7166295e15bd362a5d340",
+    "suite_sha256": {
+      "one_tp4_replica_2688": "970b9022a28346de8a6cdbdbba47299c559e4b3737df03474161ebc1b15b844f",
+      "two_tp4_replicas_7168": "38fc5741abb98cc188a5ecd80d2c7b0f328e9615725317b54d8b32c663fc0b42"
+    }
+  }
+}
