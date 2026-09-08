@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-08](2026-09/2026-09-08.md) | DeepSeek V4 Flash "Jovian Judgement r9" shipped on Docker Hub, fixing a NaN-leak bug in B12X attenti |
 | [2026-09-07](2026-09/2026-09-07.md) | - b12x loader prefill regression found & fixed: one-word patch (pinned_wc→managed) nearly doubles  |
 | [2026-09-06](2026-09/2026-09-06.md) | New b12x model loader (`--load-format b12x`) ships as a faster, zero-copy replacement for InstantTen |
 | [2026-09-05](2026-09/2026-09-05.md) | GPT-6 "Astra" launched in ChatGPT/Codex — community reports strong coding results (one-shot Tetris |
@@ -201,6 +202,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|------------|
+| [2026-09-08](2026-09/2026-09-08.md) | DeepSeek V4 Flash "Jovian Judgement r9" shipped on Docker Hub, fixing a NaN-leak bug in B12X attenti |
 | [2026-09-07](2026-09/2026-09-07.md) | - b12x loader prefill regression found & fixed: one-word patch (pinned_wc→managed) nearly doubles  |
 | [2026-09-06](2026-09/2026-09-06.md) | New b12x model loader (`--load-format b12x`) ships as a faster, zero-copy replacement for InstantTen |
 | [2026-09-05](2026-09/2026-09-05.md) | GPT-6 "Astra" launched in ChatGPT/Codex — community reports strong coding results (one-shot Tetris |
