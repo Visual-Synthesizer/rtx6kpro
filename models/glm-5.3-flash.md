@@ -32,16 +32,16 @@ do not require checkpoint paths or source-code bind mounts.
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
-| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R28 |
+| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R28.1 |
 | MTP proposal vocabulary head | NVFP4 draft-only copy by default; the target verifier vocabulary head remains BF16 |
 | GPU prefix cache | **qualified** request/SYSTEM boundaries in all six TP4 mode/DCP combinations; fine aligned retention is selectable |
-| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R28 |
+| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R28.1 |
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache`; asynchronous engine-driven pinned shared memory is the default transfer path |
 | CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
-| Scheduler | 4,096 target tokens per step; execution-time compute-share fairness assigns 40% of contended model execution to prefill; scheduling interval 1 |
-| Root filesystem | Two layers, within standard Docker overlay2 limits |
+| Scheduler | 4,096 target tokens per step; fixed prefill compute share 0.4; interval 1; one prefill lane by default, optional bounded interleaving |
+| Root filesystem | Three layers: the two-layer R28 base and one Python/launcher overlay |
 | FlashKDA numerical stability | **qualified** with the stable FP32 forward-substitution inverse |
-| Qwen serving integration | **implemented** in the source; no Qwen model execution or performance qualification for R28 |
+| Qwen serving integration | **implemented** in the source; no Qwen model execution or performance qualification for R28.1 |
 | Qualification date | 2026-09-08 |
 
 The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md),
@@ -77,44 +77,40 @@ score.
 ## Docker artifact
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260908-r28
-voipmonitor/vllm@sha256:f5f121e37fd2afbb6f8f036e7eb627435cfb736de0a4420306dc2a25b6631669
+voipmonitor/vllm:jovian-judgement-community-20260908-r28.1
+voipmonitor/vllm@sha256:52ef7badcc33918f276d778d29bd972a798297584ba776476c7c09b7bdb50e5f
 ```
 
-The image has two filesystem layers: an immutable CUDA 13.3, PyTorch 2.13,
-FlashInfer, NCCL and InstantTensor runtime, followed by the complete vLLM,
-B12X, FlashKDA and LMCache installation. It has no dependency on a preceding
-community image's writable filesystem. The embedded source lock identifies
-complete committed sources, native artifacts and launcher inputs.
+The image has three filesystem layers: the immutable two-layer R28 installation
+of CUDA 13.3, PyTorch 2.13, FlashInfer, NCCL, InstantTensor, vLLM, B12X,
+FlashKDA and LMCache, followed by one Python/launcher overlay. It is built
+directly from the published R28 digest, not from intermediate test images.
+The embedded source lock identifies complete committed sources, unchanged
+native artifacts and launcher inputs. The added layer is approximately
+111 MB uncompressed and remains within standard Docker overlay2 limits.
 
-The [embedded source lock](glm-5.3-flash/validation/fp8-serving-r28.source.lock)
-has SHA-256 `15a9a649559830822cb943ea0c3c6a644c8b69c9e54d7be3e265801851843932`.
+The [embedded source lock](glm-5.3-flash/validation/scheduler-serving-r28.1.source.lock)
+has SHA-256 `4473b46dbf696a386da1fbd6f75e7ef9159c36d216d153c6beb5cfe68b7a7477`.
 
-### Changes from R27
+### Changes from R28
 
-- Extends exact request and leading SYSTEM/developer checkpoint reuse to
-  DFlash2 and DCP4, alongside no-speculation and MTP3. Different user
-  continuations can reuse their shared instruction prefix in all six modes.
-- LMCache stores those semantic checkpoints as immutable, all-rank bundles.
-  Worker-owned asynchronous SHM copies support RAM and filesystem restore,
-  including restart of both services, without a sidecar CUDA context.
-- Cancellation and eviction cannot recycle checkpoint pages while copies are
-  using them. Full RAM pools reclaim eligible payloads; event setup and copy
-  submission failures release task ownership correctly.
-- Fine aligned retention can keep recurrent state every 256 tokens while
-  attention pages remain 2048 tokens. Packed prefill exports avoid a separate
-  target forward at every recurrent checkpoint, and speculative convolution
-  history remains consistent with the accepted prefix.
-- GLM DCP sparse-index compaction preserves selected-index order and initializes
-  counts and invalid tails without separate fill kernels.
-- Shared-expert output retains its allocation until consumer-stream reads finish.
-  Disjoint MLA projection batches avoid the documented SM120/121 cuBLAS
-  allocation-boundary fault while retaining CUDA graphs.
-- Truncated tool-call arguments remain parseable; malformed tool history does
-  not crash template rendering. Aborted external retrieves cannot complete
-  twice or free unrelated active requests.
-- Qwen source integration is included for independent testing. No Qwen model
-  execution or performance qualification is claimed for this release.
+- Removes model-future timing callbacks and avoids unnecessary decode-only
+  admission scans. Engine-owned timing preserves batch pairing and excludes
+  untimed predecessor queue residency.
+- Automatic prefill lanes resolve to at most four independently of cache
+  geometry. External restores retain their lane/credit ownership rules and
+  recurrent boundary-logits steps remain isolated.
+- All five scheduler environment controls are supported, including automatic
+  share and half-life. Explicit native CLI arguments take precedence.
+- Chat reasoning defaults to **high** instead of max, with per-request overrides.
+- B12X, FlashKDA, LMCache and all native libraries are unchanged. The R28
+  checkpoint, parser, CUDA safety and performance composition is retained.
+  The image adds one Python/launcher layer and consistent version metadata.
+
+The [R28 historical report](glm-5.3-flash/validation/fp8-serving-r28.md)
+preserves the R27-to-R28 changelog, six-mode performance matrix and cache tests.
+R28.1 has focused exact-image scheduler, serving and checkpoint qualification;
+it does not claim the complete R28 numerical study was rerun.
 
 ## Runtime backends
 
@@ -143,64 +139,57 @@ performance table below uses FlashKDA, not that alternative.
 ## Measured performance
 
 Stock RTX PRO 6000 Blackwell Workstation Edition GPUs, TP4, FP8 target KV,
-4096-token scheduler budget, OMP1, NCCL 16 channels/2 MiB buffers, and
-`FULL_AND_PIECEWISE` CUDA graphs. Each R27/R28 ratio uses the same physical
-quartet: GPUs 0–3 for no-speculation, 4–7 for MTP3, and 8–11 for DFlash2.
-Do not compare absolute rates between quartets as an isolated mode speedup.
-R27 was rerun for this comparison; its values are not copied from the R27
-publication measurements taken under a different test session.
+4096-token scheduler budget, OMP1, NCCL 16 channels/2 MiB buffers and
+`FULL_AND_PIECEWISE` graphs. Every R28/R28.1 A/B uses physical GPUs0–3.
+Decode requests explicitly select max reasoning on both images, so the
+launcher's high default is not counted as a scheduler speedup.
 
-The benchmark uses a fresh 32K context bucket for prefill and context-zero
-mathematics generation for C1/C8. Prefill is input tokens divided by API TTFT,
-including first-output work, not an isolated GPU prefill timer. C8 is aggregate
-throughput across eight concurrent requests. Three 30-second samples follow
-warmup; MTP3/DCP4 and DFlash2/DCP1 retain six samples across both boot orders.
+Prefill uses a cold nominal 32K bucket, approximately 32,315 actual prompt
+tokens. Rates divide input tokens by API TTFT, including first-output work.
+Two 30-second cells follow warmup. C8/C64 rates are aggregate request
+throughput, not per-client speed.
 
-| Mode | DCP | 32K prefill, R27 → R28 tok/s | C1 output, R27 → R28 tok/s | C8 total output, R27 → R28 tok/s |
-|---|---:|---:|---:|---:|
-| No-spec | 1 | 14,773 → 14,692 (−0.55%) | 158.80 → 158.86 (+0.04%) | 704.42 → 701.11 (−0.47%) |
-| MTP3 | 1 | 14,428 → 14,378 (−0.35%) | 249.73 → 247.55 (−0.87%) | 885.30 → 892.23 (+0.78%) |
-| DFlash2 K7 | 1 | 14,318 → 14,252 (−0.46%) | 208.97 → 206.90 (−0.99%) | 688.13 → 681.52 (−0.96%) |
-| No-spec | 4 | 13,180 → 13,531 (+2.66%) | 141.80 → 142.21 (+0.29%) | 647.73 → 639.71 (−1.24%) |
-| MTP3 | 4 | 12,890 → 13,195 (+2.37%) | 233.43 → 225.25 (−3.50%) | 819.19 → 829.69 (+1.28%) |
-| DFlash2 K7 | 4 | 12,814 → 13,102 (+2.25%) | 187.84 → 196.14 (+4.42%) | 627.93 → 629.43 (+0.24%) |
+| Mode | DCP / cache | 32K prefill, R28 → R28.1 tok/s | C1 output, R28 → R28.1 tok/s | C8 aggregate output, R28 → R28.1 tok/s |
+|---|---|---:|---:|---:|
+| No-spec | 1 / GPU-local | 14,703.0 → 14,708.5 (+0.04%) | 158.60 → 158.75 (+0.10%) | 696.63 → 700.33 (+0.53%) |
+| MTP3 | 4 / LMCache | 13,141.5 → 13,117.0 (−0.19%) | 231.65 → 238.37 (+2.90%) | 862.37 → 872.46 (+1.17%) |
+| DFlash2 K7 | 1 / GPU-local | 14,556.5 → 14,559.5 (+0.02%) | 194.31 → 203.17 (+4.56%) | 709.10 → 692.16 (−2.39%) |
 
-The MTP3/DCP4 short-duration C1 cell fails the 2% output-loss gate. A separate
-24-seed comparison on the exact packaged R28 image completes 4,096 output
-tokens per request, retaining all 96 fresh/repeated requests across both images:
+MTP3 uses 64 maximum sequences; GPU-local controls use 32. Each short decode
+cell is 30 seconds after warmup. MTP C1 instead reports three 60-second
+repeats per image, including reverse boot order. Its short C1 observation was
+244.32 → 236.17 tok/s (−3.34%); it is retained in the report. The longer
+output ranges overlap and do not establish a universal speedup.
 
-| MTP3/DCP4 request | C1 output, R27 → R28 tok/s | Verifier, R27 → R28 steps/s |
-|---|---:|---:|
-| Fresh prompt | 228.35 → 232.97 (+2.02%) | 91.84 → 92.38 (+0.59%) |
-| Repeated prompt | 229.43 → 231.64 (+0.96%) | 91.84 → 92.35 (+0.55%) |
-
-R27 recomputes all 78 repeated prompt tokens; R28 restores all 78 and computes
-zero. Within R28, repeated versus fresh output changes −0.57% and verifier
-rate −0.04%. All declared median-rate gates pass. The paired checkpoint output
-interval is −1.62% to +1.30%; this is descriptive, not a universal equivalence
-proof. The larger control does not reproduce a persistent checkpoint loss,
-but the failed short-duration result remains visible above.
-
-The [qualification report](glm-5.3-flash/validation/fp8-serving-r28.md) records
-artifact boundaries, complete-output summaries and numerical limitations.
-
-| Mode | DCP | C1 verifier, R27 → R28 steps/s | C8 aggregate verifier, R27 → R28 steps/s |
+| Mode | DCP | C1 verifier, R28 → R28.1 steps/s | C8 aggregate verifier, R28 → R28.1 steps/s |
 |---|---:|---:|---:|
-| MTP3 | 1 | 102.64 → 102.85 (+0.20%) | 365.80 → 365.93 (+0.04%) |
-| MTP3 | 4 | 91.71 → 92.20 (+0.53%) | 334.02 → 337.57 (+1.06%) |
-| DFlash2 K7 | 1 | 85.54 → 85.29 (−0.29%) | 285.26 → 283.23 (−0.71%) |
-| DFlash2 K7 | 4 | 77.99 → 78.16 (+0.22%) | 256.14 → 258.77 (+1.03%) |
+| MTP3 | 4 | 97.80 → 97.56 (−0.25%), longer repeats | 344.72 → 344.00 (−0.21%) |
+| DFlash2 K7 | 1 | 91.02 → 90.53 (−0.53%) | 293.55 → 290.68 (−0.98%) |
 
-Output also depends on proposal acceptance. C8 verifier rates sum request
-progress; they do not count physical batched CUDA graph launches. Sub-percent
-changes are observations, not individually demonstrated speedups.
+**DFlash C8 limitation:** output is lower in the short cell, with accepted length
+2.416 → 2.381. Extended repeats were not run; this observation is not
+described as proven noise, persistent regression or equivalence. This release
+does not claim every decode cell is faster or non-regressing.
 
-Separate DCP1 Sieve tests use temperature 1, top-p 0.95 and 4096 output tokens,
-with LMCache enabled. Median cold/RAM output is **312.01/310.34 tok/s for MTP3**
-and **386.14/381.20 tok/s for DFlash2**. They retain 24 and 48 distinct seeds
-respectively. These are different workloads from the mathematics table and
-are not an additional R27/R28 comparison. No +6000 VRAM result is inferred
-from these stock-clock measurements.
+MTP3/DCP4 C64, three 60-second cells per image, records
+**2,153.66 → 2,155.56 output tok/s (+0.09%)** and
+**844.67 → 846.09 verifier steps/s (+0.17%)**. Exact 204,800-token cold
+prefill records **12,773.97 → 12,738.60 tok/s (−0.28%)**.
+Sub-percent observations are not individually demonstrated speedups.
+
+Optional four-lane prefill interleaving was compared with one lane on the same
+R28.1 image. With four active decodes, eight cold32K prefills and a late4K
+request, median short-request TTFT changes **46.85 → 8.73 s**. Median long-request
+TTFT increases **approximately 26.1 → 47.3 s**. All requests finish; this is a
+latency trade-off, not a universal throughput gain. Pure C64 verifier rate
+changes +0.11%. One lane remains the default.
+
+The [R28.1 qualification report](glm-5.3-flash/validation/scheduler-serving-r28.1.md)
+contains raw-sample summaries, source identities, clock evidence, checkpoint
+checks and limitations. The [R28 historical report](glm-5.3-flash/validation/fp8-serving-r28.md)
+retains the six-mode/DCP matrix and stock DCP1 Sieve results: MTP3
+312.01/310.34 tok/s cold/RAM, DFlash2 386.14/381.20 tok/s. Those Sieve values
+were not rerun for R28.1 and are not +6000 VRAM measurements.
 
 ## Start the server
 
@@ -209,7 +198,7 @@ The defaults already select full-and-piecewise graphs, the B12X paths,
 FlashInfer sampling, NCCL 16 channels/2 MiB and OMP1.
 
 ```bash
-IMAGE=voipmonitor/vllm:jovian-judgement-community-20260908-r28
+IMAGE=voipmonitor/vllm:jovian-judgement-community-20260908-r28.1
 GPU_DEVICES=0,1,2,3
 PORT=8000
 docker pull "$IMAGE"
@@ -267,7 +256,42 @@ reuse; changing a model or source identity produces safe cache misses.
 
 `PREFILL_COMPUTE_SHARE=0.4` targets 40% of measured execution time for prefill
 only while prefill and decode contend. `PREFILL_SCHEDULE_INTERVAL=1` is required.
-Set `FAIRNESS_ENGINE=none` to disable this policy. MTP uses a private NVFP4
+Set `FAIRNESS_ENGINE=none` to disable this policy. Model execution is indivisible,
+so the realized share can oscillate over short windows. External-cache transfers
+do not consume local-prefill compute credit or a prefill lane while waiting.
+
+The scheduler launcher exposes these controls. Explicit native CLI arguments
+after the image name override corresponding environment values without duplicate
+flags.
+
+| Environment | Native CLI option | Values and default |
+|---|---|---|
+| `PREFILL_COMPUTE_SHARE` | `--prefill-compute-share` | Finite number strictly between 0 and 1, or `auto`; launcher default `0.4` |
+| `PREFILL_COMPUTE_HALF_LIFE` | `--prefill-compute-half-life` | `smooth`, `responsive`, or positive finite seconds; valid only with share `auto` |
+| `MAX_PARALLEL_PREFILLS` | `--max-parallel-prefills` | Positive integer or `auto`; default `1`; `auto` selects at most four lanes, capped by `MAX_NUM_SEQS` |
+| `PREFILL_POLICY` | `--prefill-policy` | `round-robin` (default) or `decode-aware` |
+| `DECODE_REFILL_TARGET` | `--decode-refill-target` | Positive integer or `auto` (default); automatic target equals the effective lane count |
+
+The lane count is independent of attention pages, recurrent checkpoints and
+LMCache object size. All lanes share the same global 4096-token scheduler budget;
+four lanes do not multiply that budget by four.
+
+For concurrent long prefills and latency-sensitive short requests, opt into:
+
+```bash
+# Add before "$IMAGE" in the common docker run command:
+-e MAX_PARALLEL_PREFILLS=auto \
+-e PREFILL_POLICY=decode-aware \
+-e DECODE_REFILL_TARGET=auto
+```
+
+Keep fixed share `0.4` initially. Interleaving can bring a short request to decode
+sooner by distributing service among long requests; it can increase their
+individual time to first token. One lane remains the image default. Automatic
+compute share is implemented for experiments, not selected as the production
+default. `FAIRNESS_ENGINE=micro_slicing` is rejected.
+
+MTP uses a private NVFP4
 proposal vocabulary head by default, costing 85.08 MiB per TP4 rank. The target
 vocabulary head remains BF16; `VLLM_GLM53_MTP_DRAFT_HEAD=bf16` selects the
 unquantized draft head for independent comparison.
@@ -278,6 +302,15 @@ per-rank pages from 4096-token storage objects and the DCP width. The public
 vLLM attention block argument remains 256. Weighted allocation groups layers
 by their actual cache cost, with a bounded number of groups, to reduce padding.
 Normal deployments do not need to override these layout settings.
+
+### Reasoning effort
+
+The GLM image launcher defaults chat reasoning to **high**, not max. An API
+request can override it with `"reasoning_effort":"max"` or
+`"reasoning_effort":"low"`. High still enables reasoning; it is not a
+no-thinking mode. To change the server default, pass
+`--default-chat-template-kwargs '{"reasoning_effort":"max"}'` after the image
+name. Running `vllm serve` directly bypasses the image launcher's default.
 
 ### Recurrent checkpoint policy
 
@@ -338,27 +371,28 @@ Set `LMCACHE_L2_ENABLED=0` for RAM-only operation. If multiple instances share
 the host network, give each distinct API and LMCache HTTP/MP/metrics ports.
 Do not share a writable cache directory across independent sidecars.
 
-All six FP8 mode/DCP combinations pass million-token cold/RAM/restart checks:
+The unchanged R28 checkpoint composition has
+[all-six FP8 mode/DCP million-token qualification](glm-5.3-flash/validation/fp8-serving-r28.md#checkpoint-storage).
+The exact R28.1 image separately passes MTP3/DCP4 with four prefill lanes:
 
-| Mode | DCP | 1M cold, seconds | RAM restore, seconds | Restore after service restart, seconds |
-|---|---:|---:|---:|---:|
-| No-spec | 1 | 93.899 | 0.918 | 1.768 |
-| No-spec | 4 | 93.905 | 0.694 | 1.147 |
-| MTP3 | 1 | 97.102 | 0.900 | 3.157 |
-| MTP3 | 4 | 97.739 | 0.739 | 0.977 |
-| DFlash2 | 1 | 95.957 | 0.996 | 1.618 |
-| DFlash2 | 4 | 96.374 | 0.722 | 0.987 |
+| Mode / DCP | 1M cold, seconds | RAM restore, seconds | Restore after both services restart, seconds |
+|---|---:|---:|---:|
+| MTP3 / 4, four lanes | 99.284 | 0.855 | 0.970 |
 
 Each restore attributes all one million prompt tokens to external storage and
 zero to local compute. Times include API/first-output work. The OS page cache
 was not flushed; restart results are not cold-device storage benchmarks.
-The exact packaged image also passes 54K lookup answers across all cache tiers,
+The image also passes 54K literal lookup answers across cache tiers,
 shared-SYSTEM reuse, C4 all-rank bytes and C8 cancellation/live-read eviction.
 These tests qualify storage correctness, not universal bitwise generation
 equivalence across different floating-point prefill partitions.
 
+A separate one-observation, same-quartet R28/R28.1 RAM comparison records
+0.725 → 0.813 seconds for 1M tokens. That 88 ms difference is retained in the
+report; it is insufficient to establish steady-state transfer-speed equivalence.
+
 Native DRAM offload remains implemented through `CACHE_MODE=native`; it is not
-independently requalified for R28. The qualified external path above is LMCache.
+independently requalified for R28.1. The qualified external path above is LMCache.
 Packed NVFP4 target KV and Qwen execution are outside this release's qualification.
 
 For independent native-offload testing, use `-e CACHE_MODE=native` and
@@ -373,7 +407,7 @@ tests. It lists the exact source revisions; no chain of preceding community
 images is needed. Runtime ABI dependencies are supplied by its pinned base.
 
 Complete Git mirrors preserve authorship and integration resolutions:
-[vLLM](https://github.com/voipmonitor/vllm/tree/integration/glm-fp8-checkpoint-serving-20260908),
+[vLLM](https://github.com/voipmonitor/vllm/tree/integration/glm-scheduler-hardening-20260908),
 [B12X](https://github.com/voipmonitor/b12x/tree/integration/glm-fp8-checkpoint-serving-20260908),
 [LMCache](https://github.com/local-inference-lab/LMCache/tree/integration/glm-fp8-checkpoint-serving-20260908).
 The [open merge checklist](https://github.com/local-inference-lab/vllm/issues/651)

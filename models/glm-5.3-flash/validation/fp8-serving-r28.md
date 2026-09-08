@@ -1,8 +1,8 @@
 # GLM FP8 serving and checkpoint qualification
 
 Status: **qualified for the contracts below**, measured on 2026-09-08.
-This report supports the [GLM deployment specification](../../glm-5.3-flash.md)
-and its R27-to-R28 performance table. It does not claim every workload is
+This historical report records the R28 artifact and its R27 comparison for the
+[GLM deployment specification](../../glm-5.3-flash.md). It does not claim every workload is
 faster, universal bitwise generation parity, Qwen qualification, or NVFP4
 target-KV qualification.
 
@@ -45,9 +45,29 @@ and full-and-piecewise CUDA graphs. A/B uses the same physical quartet for
 each mode. GPUs 0–3 serve no-spec, 4–7 MTP3 and 8–11 DFlash2. Absolute rates
 across quartets are not an isolated speculation-mode comparison.
 
-The deployment page retains all six 32K/C1/C8 rows. Each duration cell contains
-three warmed 30-second samples; MTP3/DCP4 and DFlash2/DCP1 retain six samples
-from both boot orders. The MTP3/DCP4 C1 output cell is **233.43 → 225.25 tok/s
+Each duration cell contains three warmed 30-second samples; MTP3/DCP4 and
+DFlash2/DCP1 retain six samples from both boot orders.
+
+| Mode | DCP | 32K prefill, R27 → R28 tok/s | C1 output, R27 → R28 tok/s | C8 total output, R27 → R28 tok/s |
+|---|---:|---:|---:|---:|
+| No-spec | 1 | 14,773 → 14,692 (−0.55%) | 158.80 → 158.86 (+0.04%) | 704.42 → 701.11 (−0.47%) |
+| MTP3 | 1 | 14,428 → 14,378 (−0.35%) | 249.73 → 247.55 (−0.87%) | 885.30 → 892.23 (+0.78%) |
+| DFlash2 K7 | 1 | 14,318 → 14,252 (−0.46%) | 208.97 → 206.90 (−0.99%) | 688.13 → 681.52 (−0.96%) |
+| No-spec | 4 | 13,180 → 13,531 (+2.66%) | 141.80 → 142.21 (+0.29%) | 647.73 → 639.71 (−1.24%) |
+| MTP3 | 4 | 12,890 → 13,195 (+2.37%) | 233.43 → 225.25 (−3.50%) | 819.19 → 829.69 (+1.28%) |
+| DFlash2 K7 | 4 | 12,814 → 13,102 (+2.25%) | 187.84 → 196.14 (+4.42%) | 627.93 → 629.43 (+0.24%) |
+
+| Mode | DCP | C1 verifier, R27 → R28 steps/s | C8 aggregate verifier, R27 → R28 steps/s |
+|---|---:|---:|---:|
+| MTP3 | 1 | 102.64 → 102.85 (+0.20%) | 365.80 → 365.93 (+0.04%) |
+| MTP3 | 4 | 91.71 → 92.20 (+0.53%) | 334.02 → 337.57 (+1.06%) |
+| DFlash2 K7 | 1 | 85.54 → 85.29 (−0.29%) | 285.26 → 283.23 (−0.71%) |
+| DFlash2 K7 | 4 | 77.99 → 78.16 (+0.22%) | 256.14 → 258.77 (+1.03%) |
+
+Prefill is input tokens divided by API TTFT, including first-output work.
+Speculative output also depends on proposal acceptance; aggregate verifier
+rates sum request progress rather than physical batched graph launches.
+The MTP3/DCP4 C1 output cell is **233.43 → 225.25 tok/s
 (−3.50%)**, outside the 2% median-loss gate, despite **91.71 → 92.20 steps/s
 (+0.53%)**. No observation from that cell is discarded.
 
@@ -78,6 +98,15 @@ external restore attributes 1,000,000 prompt tokens to storage and zero to
 compute. API restore times are 0.694–0.996 seconds from RAM and 0.977–3.157
 seconds after restarting both services. The OS filesystem cache was not
 flushed; these are not cold-device I/O measurements.
+
+| Mode | DCP | 1M cold, seconds | RAM restore, seconds | Restore after service restart, seconds |
+|---|---:|---:|---:|---:|
+| No-spec | 1 | 93.899 | 0.918 | 1.768 |
+| No-spec | 4 | 93.905 | 0.694 | 1.147 |
+| MTP3 | 1 | 97.102 | 0.900 | 3.157 |
+| MTP3 | 4 | 97.739 | 0.739 | 0.977 |
+| DFlash2 | 1 | 95.957 | 0.996 | 1.618 |
+| DFlash2 | 4 | 96.374 | 0.722 | 0.987 |
 
 The [exact-package storage result](packaged-checkpoints-r28.json) passes:
 
@@ -120,6 +149,32 @@ Fine-aligned MTP3/DCP4 compares 256-token versus 2048-token recurrent retention
 while keeping 2048-token attention pages: prefill −0.20%, C1 verifier +0.32%
 and C8 verifier +0.35%. That interval comparison predates the disjoint-MLA
 projection change and is not a fresh performance claim for every mode.
+
+## Historical release changes: R27 to R28
+
+- Extends exact request and leading SYSTEM/developer checkpoint reuse to
+  DFlash2 and DCP4, alongside no-speculation and MTP3. Different user
+  continuations can reuse their shared instruction prefix in all six modes.
+- LMCache stores those semantic checkpoints as immutable, all-rank bundles.
+  Worker-owned asynchronous SHM copies support RAM and filesystem restore,
+  including restart of both services, without a sidecar CUDA context.
+- Cancellation and eviction cannot recycle checkpoint pages while copies are
+  using them. Full RAM pools reclaim eligible payloads; event setup and copy
+  submission failures release task ownership correctly.
+- Fine aligned retention can keep recurrent state every 256 tokens while
+  attention pages remain 2048 tokens. Packed prefill exports avoid a separate
+  target forward at every recurrent checkpoint, and speculative convolution
+  history remains consistent with the accepted prefix.
+- GLM DCP sparse-index compaction preserves selected-index order and initializes
+  counts and invalid tails without separate fill kernels.
+- Shared-expert output retains its allocation until consumer-stream reads finish.
+  Disjoint MLA projection batches avoid the documented SM120/121 cuBLAS
+  allocation-boundary fault while retaining CUDA graphs.
+- Truncated tool-call arguments remain parseable; malformed tool history does
+  not crash template rendering. Aborted external retrieves cannot complete
+  twice or free unrelated active requests.
+- Qwen source integration is included for independent testing. No Qwen model
+  execution or performance qualification is claimed for this release.
 
 ## Review and reproduction
 
