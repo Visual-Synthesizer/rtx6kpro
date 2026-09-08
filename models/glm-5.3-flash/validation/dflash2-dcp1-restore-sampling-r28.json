@@ -1,0 +1,266 @@
+{
+  "status": "qualified",
+  "contract": "Exploratory 48-seed median output/verifier gate with all 144 observations retained",
+  "image": "sha256:d1be0f34bedfd920e1d27aaa16441fe74492898d3d86d7d70ff6514c3c41c2b9",
+  "physical_devices": [
+    "0",
+    "1",
+    "2",
+    "3"
+  ],
+  "conditions": {
+    "base_url": "http://127.0.0.1:5061",
+    "model": "GLM-5.3-Flash-NVFP4",
+    "prompt": "Write a Python script that implements the Sieve of Eratosthenes.",
+    "max_tokens": 4096,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "reset_prefix_cache": false,
+    "idle_timeout": 60.0,
+    "request_timeout": 600.0
+  },
+  "summary": {
+    "medians": {
+      "cold_a": {
+        "output_tokens_per_second": 386.13864456150014,
+        "verifier_steps_per_second": 85.85832801483994,
+        "accepted_per_draft": 3.5000869477009577
+      },
+      "cold_b": {
+        "output_tokens_per_second": 375.0412872432714,
+        "verifier_steps_per_second": 85.94040548930677,
+        "accepted_per_draft": 3.370335820895522
+      },
+      "ram": {
+        "output_tokens_per_second": 381.2037709262431,
+        "verifier_steps_per_second": 85.73392155231326,
+        "accepted_per_draft": 3.441478693056495
+      }
+    },
+    "contrasts_to_cold_a": {
+      "cold_b": {
+        "output_tokens_per_second": {
+          "median_ratio_change_percent": -2.873930769304611,
+          "paired_geometric_change_percent": -2.0377983218516693,
+          "paired_bootstrap_95_percent_interval": [
+            -6.922816015111588,
+            2.7368389192144416
+          ]
+        },
+        "verifier_steps_per_second": {
+          "median_ratio_change_percent": 0.09559640440779393,
+          "paired_geometric_change_percent": 0.004689300140629172,
+          "paired_bootstrap_95_percent_interval": [
+            -0.13581820490755225,
+            0.1435077582118421
+          ]
+        },
+        "accepted_per_draft": {
+          "median_ratio_change_percent": -3.707082959486563,
+          "paired_geometric_change_percent": -2.716808955850654,
+          "paired_bootstrap_95_percent_interval": [
+            -9.092050298492442,
+            3.5609186891640423
+          ]
+        }
+      },
+      "ram": {
+        "output_tokens_per_second": {
+          "median_ratio_change_percent": -1.2780056347017732,
+          "paired_geometric_change_percent": -0.25263930946946256,
+          "paired_bootstrap_95_percent_interval": [
+            -4.27642512465156,
+            3.927312642034663
+          ]
+        },
+        "verifier_steps_per_second": {
+          "median_ratio_change_percent": -0.14489737385192658,
+          "paired_geometric_change_percent": -0.19360490541914835,
+          "paired_bootstrap_95_percent_interval": [
+            -0.3425159494227019,
+            -0.04586188526765275
+          ]
+        },
+        "accepted_per_draft": {
+          "median_ratio_change_percent": -1.674479963503761,
+          "paired_geometric_change_percent": 0.02019920041557026,
+          "paired_bootstrap_95_percent_interval": [
+            -5.125501123110978,
+            5.4519850254749365
+          ]
+        }
+      }
+    },
+    "within_two_percent_output_and_step_loss": true,
+    "interpretation": "Confidence intervals describe sampling variation, not target-distribution equivalence."
+  },
+  "cohorts": [
+    {
+      "path": "results/glm-checkpoint-capacity-sampling-20260908/dflash2-gpu0-3/sampling.json",
+      "sha256": "60158c967a3c4f386378d8f0050e8b698b3263fb28ae3b59270dc1d107dcb97c",
+      "summary": {
+        "medians": {
+          "cold_a": {
+            "output_tokens_per_second": 388.83611864846233,
+            "verifier_steps_per_second": 85.84841946041797,
+            "accepted_per_draft": 3.5253094228665205
+          },
+          "cold_b": {
+            "output_tokens_per_second": 392.7638671105212,
+            "verifier_steps_per_second": 85.95956984673812,
+            "accepted_per_draft": 3.5719583266357393
+          },
+          "ram": {
+            "output_tokens_per_second": 377.6587710311937,
+            "verifier_steps_per_second": 85.6571142102103,
+            "accepted_per_draft": 3.410350767303476
+          }
+        },
+        "contrasts_to_cold_a": {
+          "cold_b": {
+            "output_tokens_per_second": {
+              "median_ratio_change_percent": 1.0101295311019776,
+              "paired_geometric_change_percent": -0.17319931974413907,
+              "paired_bootstrap_95_percent_interval": [
+                -6.250852788225542,
+                5.790079489574434
+              ]
+            },
+            "verifier_steps_per_second": {
+              "median_ratio_change_percent": 0.12947283947539745,
+              "paired_geometric_change_percent": 0.11618681676679624,
+              "paired_bootstrap_95_percent_interval": [
+                -0.03641261647517062,
+                0.2843743124468896
+              ]
+            },
+            "accepted_per_draft": {
+              "median_ratio_change_percent": 1.3232570016871614,
+              "paired_geometric_change_percent": -0.3395147575285562,
+              "paired_bootstrap_95_percent_interval": [
+                -8.171713165898325,
+                7.491741728933232
+              ]
+            }
+          },
+          "ram": {
+            "output_tokens_per_second": {
+              "median_ratio_change_percent": -2.8745651654274007,
+              "paired_geometric_change_percent": -4.187865367670906,
+              "paired_bootstrap_95_percent_interval": [
+                -9.14285504862406,
+                1.1003503435405566
+              ]
+            },
+            "verifier_steps_per_second": {
+              "median_ratio_change_percent": -0.22284073650986613,
+              "paired_geometric_change_percent": -0.2370583600906465,
+              "paired_bootstrap_95_percent_interval": [
+                -0.44583241052997763,
+                -0.03565616936035297
+              ]
+            },
+            "accepted_per_draft": {
+              "median_ratio_change_percent": -3.26095221081526,
+              "paired_geometric_change_percent": -5.007421635066265,
+              "paired_bootstrap_95_percent_interval": [
+                -11.288349417805918,
+                1.8420127671648023
+              ]
+            }
+          }
+        },
+        "within_two_percent_output_and_step_loss": false,
+        "interpretation": "Confidence intervals describe sampling variation, not target-distribution equivalence."
+      }
+    },
+    {
+      "path": "results/glm-dflash-restore-sampling-seed170025-170048-20260908/sampling.json",
+      "sha256": "287ddb1938a87d4945bd949b00ec31bfe6729b0192349bca85c2dbd48cc4bc99",
+      "summary": {
+        "medians": {
+          "cold_a": {
+            "output_tokens_per_second": 380.78629895349474,
+            "verifier_steps_per_second": 85.9023603251407,
+            "accepted_per_draft": 3.435810501720728
+          },
+          "cold_b": {
+            "output_tokens_per_second": 371.53442234904423,
+            "verifier_steps_per_second": 85.92275502227751,
+            "accepted_per_draft": 3.337928596677271
+          },
+          "ram": {
+            "output_tokens_per_second": 388.51790173392953,
+            "verifier_steps_per_second": 85.75941154718981,
+            "accepted_per_draft": 3.537408656065532
+          }
+        },
+        "contrasts_to_cold_a": {
+          "cold_b": {
+            "output_tokens_per_second": {
+              "median_ratio_change_percent": -2.4296768633423005,
+              "paired_geometric_change_percent": -3.867569708379328,
+              "paired_bootstrap_95_percent_interval": [
+                -11.697066898743532,
+                3.701175453368842
+              ]
+            },
+            "verifier_steps_per_second": {
+              "median_ratio_change_percent": 0.02374171915604517,
+              "paired_geometric_change_percent": -0.10668404379569549,
+              "paired_bootstrap_95_percent_interval": [
+                -0.3313356441029421,
+                0.10705207069246966
+              ]
+            },
+            "accepted_per_draft": {
+              "median_ratio_change_percent": -2.848873795409723,
+              "paired_geometric_change_percent": -5.037395345740696,
+              "paired_bootstrap_95_percent_interval": [
+                -15.232864867109509,
+                5.007422277710698
+              ]
+            }
+          },
+          "ram": {
+            "output_tokens_per_second": {
+              "median_ratio_change_percent": 2.0304309271849785,
+              "paired_geometric_change_percent": 3.844215588216393,
+              "paired_bootstrap_95_percent_interval": [
+                -2.0527420667082596,
+                10.51904284112323
+              ]
+            },
+            "verifier_steps_per_second": {
+              "median_ratio_change_percent": -0.16640844024521373,
+              "paired_geometric_change_percent": -0.15013252385263437,
+              "paired_bootstrap_95_percent_interval": [
+                -0.3578477687111455,
+                0.0534865532790393
+              ]
+            },
+            "accepted_per_draft": {
+              "median_ratio_change_percent": 2.9570360266935936,
+              "paired_geometric_change_percent": 5.3139142055731075,
+              "paired_bootstrap_95_percent_interval": [
+                -2.396466377184155,
+                14.225369714521003
+              ]
+            }
+          }
+        },
+        "within_two_percent_output_and_step_loss": true,
+        "interpretation": "Confidence intervals describe sampling variation, not target-distribution equivalence."
+      }
+    }
+  ],
+  "clock_guard_samples": {
+    "results/glm-checkpoint-capacity-sampling-20260908/dflash2-gpu0-3.stock-clocks.jsonl": 1186,
+    "results/glm-dflash-restore-sampling-seed170025-170048-20260908.stock-clocks.jsonl": 1075
+  },
+  "limitations": [
+    "The extension size was chosen after inspecting the first cohort",
+    "Bootstrap intervals are descriptive, not a preregistered non-inferiority proof",
+    "A passing rate gate does not establish target-distribution equivalence"
+  ]
+}
