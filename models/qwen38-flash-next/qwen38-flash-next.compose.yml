@@ -1,0 +1,133 @@
+name: qwen38-flash-next
+
+x-environment: &environment
+  MODEL: ${MODEL:-local-inference-lab/Qwen3.8-Flash-Next-NVFP4}
+  PORT: ${PORT:-8000}
+  HF_HOME: /root/.cache/huggingface
+  CUDA_DEVICE_ORDER: PCI_BUS_ID
+  OMP_NUM_THREADS: "2"
+  VLLM_WORKER_MULTIPROC_METHOD: spawn
+  VLLM_USE_V2_MODEL_RUNNER: "1"
+  VLLM_COMPUTE_NANS_IN_LOGITS: "0"
+  VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS: "0"
+  PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+  VLLM_SSM_CONV_STATE_LAYOUT: DS
+  VLLM_PLE_CPU_OFFLOAD: ${VLLM_PLE_CPU_OFFLOAD:-1}
+  VLLM_DISABLED_KERNELS: MarlinFP8ScaledMMLinearKernel
+  VLLM_CAUSAL_CONV1D_UPDATE_HOIST: "1"
+  VLLM_ENABLE_PCIE_ALLREDUCE: "1"
+  VLLM_PCIE_ALLREDUCE_BACKEND: b12x
+  # Keep the target vocabulary head BF16; quantize only the private MTP copy.
+  VLLM_MXFP8_LM_HEAD: "0"
+  VLLM_MTP_NVFP4_LM_HEAD: "1"
+  VLLM_LM_HEAD_A16: "1"
+  VLLM_QWEN3_8_FLASH_NEXT_MTP_COMPACT: "1"
+  VLLM_GDN_SPEC_DECODE_METADATA_FASTPATH: "1"
+  VLLM_QWEN3_8_FLASH_NEXT_OVERLAP: "1"
+  VLLM_B12X_DENSE_ACTIVATION_MODE: auto
+  B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE: "1"
+  B12X_DYNAMIC_DIRECT_EXPERT_SCALES: "1"
+  B12X_DYNAMIC_SPLIT_LOW_SMEM: "1"
+  B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET: "1"
+  B12X_DYNAMIC_SPLIT_FAST_PREPARE: "1"
+  B12X_DYNAMIC_WORK_SOURCE: persistent_grid
+  B12X_DYNAMIC_DETERMINISTIC_OUTPUT: "0"
+  B12X_DYNAMIC_SPLIT_COMPUTE_MAC: "224"
+  B12X_DENSE_SPLITK_TURBO: "1"
+  B12X_PCIE_ONESHOT_THREADS: "512"
+  B12X_PCIE_ONESHOT_BLOCK_LIMIT: "4"
+  B12X_PCIE_ONESHOT_PDL: "1"
+  B12X_MHC_PDL: "1"
+  NCCL_IB_DISABLE: "1"
+  NCCL_P2P_LEVEL: SYS
+  NCCL_CUMEM_ENABLE: "0"
+  NCCL_PROTO: LL,LL128,Simple
+  NCCL_MIN_NCHANNELS: "16"
+  NCCL_MAX_NCHANNELS: "16"
+  NCCL_BUFFSIZE: "2097152"
+  XDG_CACHE_HOME: /cache/jit/qwen38-r281
+  VLLM_CACHE_ROOT: /cache/jit/qwen38-r281/vllm
+  VLLM_CACHE_DIR: /cache/jit/qwen38-r281/vllm
+  TRITON_CACHE_DIR: /cache/jit/qwen38-r281/triton
+  CUTE_DSL_CACHE_DIR: /cache/jit/qwen38-r281/cute-dsl
+  B12X_CUTE_COMPILE_CACHE_DIR: /cache/jit/qwen38-r281/b12x/cute
+  B12X_COMPILE_CACHE_DIR: /cache/jit/qwen38-r281/b12x/compile
+  SPARKINFER_COMPILE_CACHE_DIR: /cache/jit/qwen38-r281/b12x/compile
+  TORCHINDUCTOR_CACHE_DIR: /cache/jit/qwen38-r281/torchinductor
+  CUDA_CACHE_PATH: /cache/jit/qwen38-r281/cuda
+
+x-runtime: &runtime
+  image: ${QWEN_IMAGE:-voipmonitor/vllm:jovian-judgement-community-20260908-r28.1}
+  init: true
+  network_mode: host
+  ipc: host
+  shm_size: 32g
+  restart: "no"
+  # The image's default entrypoint configures GLM, not Qwen.
+  entrypoint: ["/bin/bash", "-lc"]
+  command:
+    - >-
+      unset NCCL_GRAPH_FILE;
+      exec /opt/venv/bin/python -m vllm.entrypoints.cli.main serve "$${MODEL}"
+      --served-model-name Qwen3.8-Flash-Next
+      --host 0.0.0.0 --port "$${PORT}"
+      --tensor-parallel-size "$${TP}" --pipeline-parallel-size 1
+      --mamba-cache-mode align --enable-prefix-caching --enable-chunked-prefill
+      --mamba-ssm-cache-dtype auto --async-scheduling
+      --dtype bfloat16 --kv-cache-dtype fp8 --quantization modelopt_mixed
+      --block-size 64 --load-format instanttensor
+      --gpu-memory-utilization 0.96 --max-model-len 262144
+      --max-num-seqs 16 --max-num-batched-tokens 6019
+      --mm-encoder-tp-mode data --mm-processor-cache-gb 0 --language-model-only
+      --speculative-config '{"method":"mtp","num_speculative_tokens":3,"moe_backend":"b12x"}'
+      --gdn-decode-kernel b12x --linear-backend b12x --moe-backend b12x
+      --no-enable-flashinfer-autotune
+      --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE","custom_ops":["all"]}'
+      --max-cudagraph-capture-size 64
+      --reasoning-parser qwen3 --tool-call-parser qwen3_xml --enable-auto-tool-choice
+  volumes:
+    - qwen-model-cache:/root/.cache/huggingface
+    - qwen-runtime-cache:/cache
+  healthcheck:
+    test:
+      - CMD
+      - /opt/venv/bin/python
+      - -c
+      - "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:' + os.environ['PORT'] + '/health', timeout=4)"
+    interval: 30s
+    timeout: 5s
+    start_period: 10m
+    retries: 3
+
+services:
+  qwen-tp1:
+    <<: *runtime
+    profiles: [tp1]
+    environment:
+      <<: *environment
+      TP: "1"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${GPU:-0}"]
+              capabilities: [gpu]
+
+  qwen-tp2:
+    <<: *runtime
+    profiles: [tp2]
+    environment:
+      <<: *environment
+      TP: "2"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${GPU0:-0}", "${GPU1:-1}"]
+              capabilities: [gpu]
+
+volumes:
+  qwen-model-cache:
+  qwen-runtime-cache:

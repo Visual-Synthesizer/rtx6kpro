@@ -41,7 +41,7 @@ do not require checkpoint paths or source-code bind mounts.
 | Scheduler | 4,096 target tokens per step; fixed prefill compute share 0.4; interval 1; one prefill lane by default, optional bounded interleaving |
 | Root filesystem | Three layers: the two-layer R28 base and one Python/launcher overlay |
 | FlashKDA numerical stability | **qualified** with the stable FP32 forward-substitution inverse |
-| Qwen serving integration | **implemented** in the source; no Qwen model execution or performance qualification for R28.1 |
+| Qwen3.8-Flash-Next serving | **qualified** separately for TP1/MTP3 text, GPU prefix cache and stock-clock performance; see the [Qwen deployment page](qwen38-flash-next.md) for launch, PLE offload, TP2 limitations and results |
 | Qualification date | 2026-09-08 |
 
 The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md),
