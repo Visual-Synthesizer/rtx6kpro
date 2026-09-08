@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "status": "qualified for measured cells; reported turbo values are research-only",
+  "recorded_on": "2026-09-08",
+  "model": {
+    "name": "local-inference-lab/Qwen3.8-Flash-Next-NVFP4",
+    "revision": "b797d2e1160b9596b2570e56c1d3590faa09d4ed"
+  },
+  "conditions": {
+    "tensor_parallel_size": 1,
+    "hardware": "96 GB RTX PRO 6000 Blackwell Workstation",
+    "power_limit_w": 600,
+    "graphics_offset": 0,
+    "memory_offset": 0,
+    "temperature": 1,
+    "top_p": 0.95,
+    "top_k": 20,
+    "reasoning_effort": "xhigh",
+    "respect_eos": true,
+    "decode_context_bucket": 0,
+    "decode_prompt_token_count": 119,
+    "decode_warmup_seconds": 15,
+    "decode_measurement_seconds": 30,
+    "decode_cells_per_concurrency": 1,
+    "prefill_input_tokens": 32768,
+    "prefill_output_tokens": 1,
+    "prefill_warmup_requests": 2,
+    "prefill_measured_requests": 5,
+    "prefill_cache_hits": 0,
+    "prefill_metric": "input tokens divided by complete one-output-token HTTP wall time",
+    "sieve_warmup_requests": 1,
+    "sieve_measured_requests": 10,
+    "sieve_max_tokens": 2000,
+    "sieve_metric": "completion tokens, including reasoning, divided by streaming time after first text delta"
+  },
+  "devices": {
+    "vLLM": 0,
+    "SGLang": 1
+  },
+  "hardware_caveat": "Physical cards were not swapped. The measured deployments differ in recurrent precision, draft-head precision, token budget and cache settings.",
+  "measured": {
+    "decode": {
+      "vLLM": [
+        {
+          "concurrency": 1,
+          "output_tok_s": 172.8279598769442,
+          "steps_s": 84.64702741658203,
+          "effective_emitted_tokens_per_step": 2.0417487199684916,
+          "sampled_accept_length_gauge": 2.0417487199684916
+        },
+        {
+          "concurrency": 2,
+          "output_tok_s": 304.25166519282317,
+          "steps_s": 146.1421387318217,
+          "effective_emitted_tokens_per_step": 2.081888686131387,
+          "sampled_accept_length_gauge": 2.0818886861313866
+        },
+        {
+          "concurrency": 4,
+          "output_tok_s": 485.43735814041054,
+          "steps_s": 231.44650078967084,
+          "effective_emitted_tokens_per_step": 2.097406340057637,
+          "sampled_accept_length_gauge": 2.0974063400576366
+        },
+        {
+          "concurrency": 8,
+          "output_tok_s": 632.4193941010562,
+          "steps_s": 322.27910907997295,
+          "effective_emitted_tokens_per_step": 1.9623344370860927,
+          "sampled_accept_length_gauge": 1.9623344370860927
+        },
+        {
+          "concurrency": 16,
+          "output_tok_s": 944.4745030026945,
+          "steps_s": 471.03698737722635,
+          "effective_emitted_tokens_per_step": 2.0050962627406568,
+          "sampled_accept_length_gauge": 2.0050962627406568
+        }
+      ],
+      "SGLang": [
+        {
+          "concurrency": 1,
+          "output_tok_s": 152.50506480485424,
+          "steps_s": 72.84440399904717,
+          "effective_emitted_tokens_per_step": 2.0935728269099307,
+          "sampled_accept_length_gauge": 1.675
+        },
+        {
+          "concurrency": 2,
+          "output_tok_s": 267.5452947391593,
+          "steps_s": 128.56490472790045,
+          "effective_emitted_tokens_per_step": 2.0810134406850933,
+          "sampled_accept_length_gauge": 1.8375
+        },
+        {
+          "concurrency": 4,
+          "output_tok_s": 446.79264458245945,
+          "steps_s": 212.85775512506177,
+          "effective_emitted_tokens_per_step": 2.099019809355559,
+          "sampled_accept_length_gauge": 1.8625
+        }
+      ]
+    },
+    "prefill32k": {
+      "vLLM": {
+        "median_tok_s": 14813.421971263544,
+        "min_tok_s": 14800.447011146132,
+        "max_tok_s": 14854.723121921303,
+        "engine_prefill_tok_s": 14960.673036882123
+      },
+      "SGLang": {
+        "median_tok_s": 15582.699521922374,
+        "min_tok_s": 13999.773149077417,
+        "max_tok_s": 15595.769748789438,
+        "engine_prefill_tok_s": null
+      }
+    },
+    "sieve": {
+      "vLLM": {
+        "median_tok_s": 239.79606137404124,
+        "min_tok_s": 222.1243039796022,
+        "max_tok_s": 265.07789745180804,
+        "rates_tok_s": [
+          232.214175428823,
+          228.52850508446934,
+          234.65554716319656,
+          260.28619806107224,
+          222.1243039796022,
+          265.07789745180804,
+          238.49399670647395,
+          262.7099418812446,
+          241.09812604160854,
+          251.39613704701975
+        ],
+        "completion_tokens": [
+          969,
+          805,
+          712,
+          455,
+          945,
+          424,
+          349,
+          512,
+          1059,
+          402
+        ],
+        "finish_reasons": [
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop"
+        ]
+      },
+      "SGLang": {
+        "median_tok_s": 205.34864153016898,
+        "min_tok_s": 176.1667521049701,
+        "max_tok_s": 232.619462131509,
+        "rates_tok_s": [
+          208.50668752201582,
+          203.90869216432782,
+          206.87521287199687,
+          176.1667521049701,
+          197.70141670133336,
+          206.78859089601013,
+          195.38856998785533,
+          190.41681116896942,
+          227.19716288316388,
+          232.619462131509
+        ],
+        "completion_tokens": [
+          483,
+          982,
+          992,
+          1150,
+          943,
+          996,
+          1117,
+          1134,
+          622,
+          349
+        ],
+        "finish_reasons": [
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop"
+        ]
+      }
+    },
+    "stock_offset_telemetry_samples": 185
+  },
+  "operator_reported": {
+    "name": "SGLang mratsim turbo",
+    "reported_on": "2026-09-08",
+    "provenance": "Values supplied by the serving operator; not independently measured in this qualification.",
+    "c1_context_zero_output_tok_s": 154.4,
+    "uncached_32k_prefill_tok_s": 15281,
+    "hardware": null,
+    "graphics_offset": null,
+    "memory_offset": null,
+    "temperature": null,
+    "top_p": null,
+    "top_k": null,
+    "reasoning_effort": null,
+    "image_digest": null,
+    "replications": null,
+    "sieve": null
+  }
+}

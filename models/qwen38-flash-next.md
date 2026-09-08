@@ -147,49 +147,74 @@ this hybrid cache. Trust the engine's logical-capacity startup line. The
 requested block size is 64, but the measured effective hybrid pages are 3,008
 tokens; the recipe does not manually force a different geometry.
 
-## Measured llmbench performance
+## Measured llmbench and Sieve performance
 
-Status: **qualified** for the exact TP1/MTP3 text configuration above. One
-RTX PRO 6000 Blackwell Workstation GPU, 600 W limit, **stock clocks: memory
-offset 0, graphics offset 0**. These are not +6000 results.
+Status: **qualified for the measured vLLM and SGLang cells**, with deployment
+differences stated below. The mratsim turbo column is **research-only,
+operator-reported evidence**, not an independently qualified comparison.
 
-The [llm-inference-bench](https://github.com/local-inference-lab/llm-inference-bench)
-decode test uses ordinary reasoning, temperature 1, top-p 0.95, top-k 20 and
-respects end-of-sequence (EOS). Context `0` means a short chat prompt, rendered
-as 119 input tokens in this checkpoint, not literally zero input tokens.
-Each concurrency has three 30-second measurements after warmup.
+The measured vLLM and SGLang deployments each use **TP1: one 96 GB RTX PRO 6000
+Blackwell Workstation GPU**, a 600 W limit, **stock graphics and VRAM offsets
+of zero**, the same NVFP4 checkpoint, three speculative draft tokens, FP8
+attention KV and host PLE offload. These are **not +6000 results**.
 
-| Concurrent requests | Total output tok/s, median [range] | Request-level speculative steps/s | Effective accepted length |
-|---:|---:|---:|---:|
-| C1 | **171.79** [165.74–184.19] | 84.86 | 2.031 |
-| C8 | **622.04** [614.71–631.60] | 326.22 | 1.916 |
-| C16 | **933.81** [933.04–943.86] | 473.97 | 1.991 |
+**Decode and Sieve sampling: temperature 1, top-p 0.95, top-k 20,
+reasoning `xhigh`, EOS respected.** The
+[llm-inference-bench](https://github.com/local-inference-lab/llm-inference-bench)
+0.6.1 decode sweep uses context `0`: the same short chat prompt renders to
+119 input tokens on both servers. Each cell has 15 seconds of warmup followed
+by one 30-second measurement. C2 and above report **aggregate output across
+clients**, not speed per chat.
 
-**C8/C16 output is the sum across all clients, not speed per chat.** TP1 still
-means one GPU. Speculative steps at concurrency above one sum request-level
-verification rounds, not physical GPU batch forwards. Effective accepted
-length includes the verifier/bonus token.
+| Measurement, tok/s | vLLM R28.1 / MTP3 | SGLang FlashInfer / NEXTN3 | SGLang mratsim turbo, reported |
+|---|---:|---:|---:|
+| C1, context 0 | **172.8** | 152.5 | 154.4 |
+| C2, context 0 | **304.3** | 267.5 | Not measured |
+| C4, context 0 | **485.4** | 446.8 | Not measured |
+| C8, context 0 | **632.4** | Not measured | Not measured |
+| C16, context 0 | **944.5** | Not measured | Not measured |
+| Uncached 32K prefill, median input rate | 14,813 | **15,583** | 15,281 |
+| Sieve coding, median of 10 runs | **239.8** | 205.3 | Not measured |
+| Sieve coding, minimum | 222.1 | 176.2 | Not measured |
+| Sieve coding, maximum | 265.1 | 232.6 | Not measured |
 
-Cold prefill uses exactly 32,768 token IDs and one output token, two warmups
-and five measured requests, all with zero cached input tokens:
+The measured SGLang configuration is capped at four active requests; C8/C16
+were not measured or inferred from queued clients. vLLM runs on physical GPU0
+and SGLang on GPU1, without swapping cards. Their differing recurrent-state
+precision, draft-head precision, token budgets and cache settings are recorded
+in the [engine-comparison report](qwen38-flash-next/validation/tp1-engine-comparison.md).
+The table compares those deployments, not isolated engine implementations.
 
-| 32K prefill metric | Input tok/s, median [range] |
-|---|---:|
-| Engine request-prefill accounting | **14,839.30** [14,814.37–14,894.25] |
-| Complete one-output-token HTTP wall time | **14,690.93** [14,660.02–14,744.56] |
+Numerically, vLLM C1 is **13.3% higher** than measured SGLang FlashInfer and
+**11.9% higher** than the reported turbo result. SGLang FlashInfer prefill is
+**5.2% higher** than vLLM; the reported turbo prefill is **3.2% higher**.
+Turbo clocks, sampling, hardware, source identity and benchmark repetition
+count were not independently checked. Its two values were supplied by the
+serving operator on 2026-09-08; they are not a matched A/B or a significance claim.
 
-Neither metric is pure GPU kernel time. TP2, no-MTP, PLE-offload-disabled and
-+6000 throughput are **not measured for this image**. An overclocked instance
-passing a short response check is not a completed performance qualification.
+Cold prefill uses exactly 32,768 identical token IDs and one output token,
+two discarded warmups and five measurements, all with zero cache hits.
+The table uses the complete HTTP request time, including first-token work;
+it is **not pure GPU prefill time**. vLLM's separate engine-accounted median
+is 14,960.7 input tok/s and must not replace the comparable HTTP metric.
 
-The same-GPU reference/R28.1/reference comparison and individual samples are
-in the [TP1 qualification report](qwen38-flash-next/validation/r28.1-tp1.md).
-It also records the bounded cache/output checks and two generated-code test
-defects; serving qualification is not a general model-quality certificate.
+Sieve uses one discarded warmup and ten sequential C1 requests with a
+2,000-output-token cap. Its rate includes reasoning and answer tokens,
+excluding time to first text. All twenty measured requests finish by EOS.
+Generated Python was not executed: this is throughput evidence, not code-quality
+validation. The [measurement summary and Sieve samples](qwen38-flash-next/validation/tp1-engine-comparison.json)
+retain every measured decode cell and all ten Sieve rates per engine.
 
-### Run the decode benchmark
+TP2, no-MTP, PLE-offload-disabled and +6000 throughput remain **unqualified**
+for this image. The separate
+[TP1 qualification report](qwen38-flash-next/validation/r28.1-tp1.md) preserves
+the three-repeat same-GPU image comparison and bounded cache/output checks.
+Those samples are not pooled with the engine-comparison measurements above.
 
-On an otherwise idle server, with Python and `uv` installed:
+### Run the TP1 qualification benchmark
+
+The pinned command below reproduces the configuration of the separate
+TP1 qualification report. Use an otherwise idle server with Python and `uv`:
 
 ```bash
 curl -fL -o llm_decode_bench.py \
