@@ -32,17 +32,18 @@ do not require checkpoint paths or source-code bind mounts.
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
-| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R28.1 |
+| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R30 |
 | MTP proposal vocabulary head | NVFP4 draft-only copy by default; the target verifier vocabulary head remains BF16 |
 | GPU prefix cache | **qualified** request/SYSTEM boundaries in all six TP4 mode/DCP combinations; fine aligned retention is selectable |
-| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R28.1 |
+| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R30 |
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache`; asynchronous engine-driven pinned shared memory is the default transfer path |
 | CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
 | Scheduler | 4,096 target tokens per step; fixed prefill compute share 0.4; interval 1; one prefill lane by default, optional bounded interleaving |
-| Root filesystem | Three layers: the two-layer R28 base and one Python/launcher overlay |
+| Root filesystem | Two layers: flattened runtime foundation and committed source installation |
 | FlashKDA numerical stability | **qualified** with the stable FP32 forward-substitution inverse |
-| Qwen serving integration | **implemented** in the source; no Qwen model execution or performance qualification for R28.1 |
-| Qualification date | 2026-09-08 |
+| Qwen3.8-Flash-Next serving | **qualified** separately for TP1/MTP3 text, GPU prefix cache and stock-clock performance; see the [Qwen deployment page](qwen38-flash-next.md) for launch, PLE offload, TP2 limitations and results |
+| DeepSeek V4 serving | **qualified** for bounded TP2/DCP1 FP8 text and Vision checks; see the [DS4 runbook](ds4-jovian-community-r29.md) |
+| Qualification date | 2026-09-09 |
 
 The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md),
 [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md), and
@@ -77,40 +78,26 @@ score.
 ## Docker artifact
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260908-r28.1
-voipmonitor/vllm@sha256:52ef7badcc33918f276d778d29bd972a798297584ba776476c7c09b7bdb50e5f
+localinferencelab/vllm:jovian-judgement-community-20260909-r30
+localinferencelab/vllm@sha256:5f6fcbc681f20b7c052815ca17511d9fe789aea314a17723c202789dd7adc131
 ```
 
-The image has three filesystem layers: the immutable two-layer R28 installation
-of CUDA 13.3, PyTorch 2.13, FlashInfer, NCCL, InstantTensor, vLLM, B12X,
-FlashKDA and LMCache, followed by one Python/launcher overlay. It is built
-directly from the published R28 digest, not from intermediate test images.
-The embedded source lock identifies complete committed sources, unchanged
-native artifacts and launcher inputs. The added layer is approximately
-111 MB uncompressed and remains within standard Docker overlay2 limits.
+The image contains two filesystem layers: a flattened CUDA 13.3/PyTorch 2.13
+runtime foundation and one installation of complete committed vLLM, B12X and
+LMCache sources. FlashInfer, the DS4-compatible native vLLM operator and the
+authenticated FlashKDA extension are source-locked. It is not built by adding
+layers to a preceding community release.
 
-The [embedded source lock](glm-5.3-flash/validation/scheduler-serving-r28.1.source.lock)
-has SHA-256 `4473b46dbf696a386da1fbd6f75e7ef9159c36d216d153c6beb5cfe68b7a7477`.
+The [embedded source lock](glm-5.3-flash/validation/shared-serving-r30.source.lock)
+has SHA-256 `a293571bd5c0e5b18b04e6e42e5122b4783e64e61ad3f71031fead99fdab7d98`.
+The [R30 qualification and changelog](glm-5.3-flash/validation/shared-serving-r30.md)
+records the immutable image identity, differences from R29, measurements,
+cache migration requirements and known test limitations.
 
-### Changes from R28
-
-- Removes model-future timing callbacks and avoids unnecessary decode-only
-  admission scans. Engine-owned timing preserves batch pairing and excludes
-  untimed predecessor queue residency.
-- Automatic prefill lanes resolve to at most four independently of cache
-  geometry. External restores retain their lane/credit ownership rules and
-  recurrent boundary-logits steps remain isolated.
-- All five scheduler environment controls are supported, including automatic
-  share and half-life. Explicit native CLI arguments take precedence.
-- Chat reasoning defaults to **high** instead of max, with per-request overrides.
-- B12X, FlashKDA, LMCache and all native libraries are unchanged. The R28
-  checkpoint, parser, CUDA safety and performance composition is retained.
-  The image adds one Python/launcher layer and consistent version metadata.
-
-The [R28 historical report](glm-5.3-flash/validation/fp8-serving-r28.md)
-preserves the R27-to-R28 changelog, six-mode performance matrix and cache tests.
-R28.1 has focused exact-image scheduler, serving and checkpoint qualification;
-it does not claim the complete R28 numerical study was rerun.
+The same installed runtime supports
+[Qwen3.8-Flash-Next](qwen38-flash-next.md) and
+[DeepSeek V4 text/Vision](ds4-jovian-community-r29.md) through separate launch
+profiles. DS4 backend defaults do not replace the GLM settings below.
 
 ## Runtime backends
 
@@ -138,58 +125,58 @@ performance table below uses FlashKDA, not that alternative.
 
 ## Measured performance
 
-Stock RTX PRO 6000 Blackwell Workstation Edition GPUs, TP4, FP8 target KV,
+The [R30 source comparison](glm-5.3-flash/validation/shared-serving-r30.md#matched-performance)
+uses DFlash2 K7, TP4/DCP4 and engine-driven LMCache on the same stock quartet:
+
+| Measurement | R29 → R30 source composition | Change |
+|---|---:|---:|
+| Cold 32K prefill | 13,294 → 13,285 input tok/s | −0.07% |
+| C1 output, 30-second cell | 201.73 → 212.33 tok/s | +5.26% |
+| C1 verifier | 81.04 → 81.26 steps/s | +0.27% |
+| Sieve C1 output, five-run median | 256.40 → 336.69 tok/s | +31.31% observed, not an established speedup |
+| Sieve output min–max | 242.57–331.69 → 229.21–415.05 tok/s | Broad overlapping ranges |
+| Sieve verifier, median | 77.46 → 77.76 steps/s | +0.39% |
+
+Prefill and verifier execution are effectively unchanged. Speculative
+acceptance explains the variation in emitted tok/s; these samples do not
+establish a repeatable 31% gain. Sieve uses temperature 1/top-p 0.95 and
+4096 output tokens. The short duration cells retain top-p 1 to compare serving
+source; they do not measure the R30 default sampling change. All artifact and
+measurement boundaries are in the linked report. R30 does not repeat C8/C64
+throughput; historical results below remain labelled with their measured image.
+
+### Historical TP4/DCP1 comparison: R28.1 and R29
+
+Stock RTX PRO 6000 Blackwell Workstation GPUs, TP4/DCP1, FP8 target KV,
 4096-token scheduler budget, OMP1, NCCL 16 channels/2 MiB buffers and
-`FULL_AND_PIECEWISE` graphs. Every R28/R28.1 A/B uses physical GPUs0–3.
-Decode requests explicitly select max reasoning on both images, so the
-launcher's high default is not counted as a scheduler speedup.
+`FULL_AND_PIECEWISE` graphs. The R28.1 control and shared-runtime candidate
+were measured on the same physical GPUs3/12/13/14. C1 is context-zero decode,
+temperature 1, 15 seconds of warmup and 30 seconds measured.
 
-Prefill uses a cold nominal 32K bucket, approximately 32,315 actual prompt
-tokens. Rates divide input tokens by API TTFT, including first-output work.
-Two 30-second cells follow warmup. C8/C64 rates are aggregate request
-throughput, not per-client speed.
+Prefill is the client TTFT-derived input rate for a cold nominal 32K bucket
+(about 32,315 actual tokens), with 12 samples per image. It includes
+first-output work rather than timing only an attention kernel.
 
-| Mode | DCP / cache | 32K prefill, R28 → R28.1 tok/s | C1 output, R28 → R28.1 tok/s | C8 aggregate output, R28 → R28.1 tok/s |
-|---|---|---:|---:|---:|
-| No-spec | 1 / GPU-local | 14,703.0 → 14,708.5 (+0.04%) | 158.60 → 158.75 (+0.10%) | 696.63 → 700.33 (+0.53%) |
-| MTP3 | 4 / LMCache | 13,141.5 → 13,117.0 (−0.19%) | 231.65 → 238.37 (+2.90%) | 862.37 → 872.46 (+1.17%) |
-| DFlash2 K7 | 1 / GPU-local | 14,556.5 → 14,559.5 (+0.02%) | 194.31 → 203.17 (+4.56%) | 709.10 → 692.16 (−2.39%) |
-
-MTP3 uses 64 maximum sequences; GPU-local controls use 32. Each short decode
-cell is 30 seconds after warmup. MTP C1 instead reports three 60-second
-repeats per image, including reverse boot order. Its short C1 observation was
-244.32 → 236.17 tok/s (−3.34%); it is retained in the report. The longer
-output ranges overlap and do not establish a universal speedup.
-
-| Mode | DCP | C1 verifier, R28 → R28.1 steps/s | C8 aggregate verifier, R28 → R28.1 steps/s |
+| Mode | 32K prefill, R28.1 → shared tok/s | C1 output, R28.1 → shared tok/s | C1 verifier, R28.1 → shared steps/s |
 |---|---:|---:|---:|
-| MTP3 | 4 | 97.80 → 97.56 (−0.25%), longer repeats | 344.72 → 344.00 (−0.21%) |
-| DFlash2 K7 | 1 | 91.02 → 90.53 (−0.53%) | 293.55 → 290.68 (−0.98%) |
+| No-spec | 14,650 → 14,733 (+0.57%) | 169.38 → 169.35 (−0.02%) | Same as output rate |
+| MTP3 | 14,279 → 14,320 (+0.29%) | 258.02 → 265.19 (+2.78%) | 102.39 → 108.69 (+6.15%) |
+| DFlash2 K7 | 14,519 → 14,529 (+0.07%) | 226.01 → 230.98 (+2.20%) | 89.40 → 89.55 (+0.16%) |
 
-**DFlash C8 limitation:** output is lower in the short cell, with accepted length
-2.416 → 2.381. Extended repeats were not run; this observation is not
-described as proven noise, persistent regression or equivalence. This release
-does not claim every decode cell is faster or non-regressing.
+These are bounded observations, not proof of a universal speedup. MTP accepted
+length changes 2.520 → 2.440; DFlash changes 2.528 → 2.579. The MTP verifier
+difference was not isolated to a particular change, and host-side concurrent
+work differed between cells. Source/image boundaries are explicit in the
+[qualification report](glm-5.3-flash/validation/shared-serving-r29.md): these
+performance cells precede the LMCache metadata and DS4 BF16-router corrections;
+their GLM GPU-cache hot path is unchanged by those corrections.
 
-MTP3/DCP4 C64, three 60-second cells per image, records
-**2,153.66 → 2,155.56 output tok/s (+0.09%)** and
-**844.67 → 846.09 verifier steps/s (+0.17%)**. Exact 204,800-token cold
-prefill records **12,773.97 → 12,738.60 tok/s (−0.28%)**.
-Sub-percent observations are not individually demonstrated speedups.
-
-Optional four-lane prefill interleaving was compared with one lane on the same
-R28.1 image. With four active decodes, eight cold32K prefills and a late4K
-request, median short-request TTFT changes **46.85 → 8.73 s**. Median long-request
-TTFT increases **approximately 26.1 → 47.3 s**. All requests finish; this is a
-latency trade-off, not a universal throughput gain. Pure C64 verifier rate
-changes +0.11%. One lane remains the default.
-
-The [R28.1 qualification report](glm-5.3-flash/validation/scheduler-serving-r28.1.md)
-contains raw-sample summaries, source identities, clock evidence, checkpoint
-checks and limitations. The [R28 historical report](glm-5.3-flash/validation/fp8-serving-r28.md)
-retains the six-mode/DCP matrix and stock DCP1 Sieve results: MTP3
-312.01/310.34 tok/s cold/RAM, DFlash2 386.14/381.20 tok/s. Those Sieve values
-were not rerun for R28.1 and are not +6000 VRAM measurements.
+C8/C64 and Sieve were not rerun for R29. The
+[R28.1 report](glm-5.3-flash/validation/scheduler-serving-r28.1.md) retains its
+C8/C64 results and the short DFlash C8 decrease without relabelling them as R29.
+The [R28 report](glm-5.3-flash/validation/fp8-serving-r28.md) retains the
+six-mode/DCP matrix and Sieve results. None of the table above uses a +6000
+VRAM offset.
 
 ## Start the server
 
@@ -198,7 +185,7 @@ The defaults already select full-and-piecewise graphs, the B12X paths,
 FlashInfer sampling, NCCL 16 channels/2 MiB and OMP1.
 
 ```bash
-IMAGE=voipmonitor/vllm:jovian-judgement-community-20260908-r28.1
+IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r30
 GPU_DEVICES=0,1,2,3
 PORT=8000
 docker pull "$IMAGE"
@@ -231,7 +218,7 @@ Run the common command after assigning the chosen mode's variables:
 ```bash
 docker run -d --name "$NAME" --init \
   --gpus "\"device=${GPU_DEVICES}\"" --network host --ipc host \
-  -v jovian-judgement-runtime-cache:/cache \
+  -v jovian-judgement-r30-runtime-cache:/cache \
   -v jovian-judgement-huggingface-cache:/root/.cache/huggingface \
   -e MODEL=local-inference-lab/GLM-5.3-Flash-NVFP4 \
   -e CACHE_MODE=vram -e KV_CACHE_QUANT=fp8_ds_mla \
@@ -312,6 +299,32 @@ no-thinking mode. To change the server default, pass
 `--default-chat-template-kwargs '{"reasoning_effort":"max"}'` after the image
 name. Running `vllm serve` directly bypasses the image launcher's default.
 
+The agent profile sets **`clear_thinking=false`**: historical reasoning supplied
+by the client remains in the rendered conversation. Clients must return it in
+the corresponding assistant messages. Explicit request template options
+override the profile. Setting `clear_thinking=true` deliberately removes
+completed-turn reasoning and changes the token prefix; it is not a matched-input
+repair for generation problems. When replacing the complete server template
+JSON, include `"clear_thinking":false` to retain this agent behavior.
+
+### Sampling defaults
+
+The GLM launcher supplies **temperature 1 and top-p 0.95**, matching the
+[publisher generation configuration](https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/generation_config.json),
+even if the quantized checkpoint metadata omits them. Fixed top-k is disabled
+(vLLM effective `top_k=0`); GLM does not inherit Qwen's top-k 20.
+
+Per-request `temperature`, `top_p` and `top_k` override individual defaults.
+Explicit native `--generation-config`, `--override-generation-config` or
+`--config` arguments replace the launcher's sampling preset, allowing an
+operator-owned policy. Direct `vllm serve` invocation bypasses the launcher.
+The [Hugging Face metadata PR](https://huggingface.co/local-inference-lab/GLM-5.3-Flash-NVFP4/discussions/4)
+proposes the same defaults; Docker does not depend on its merge.
+
+Five no-spec and three DFlash2 full 839,815-token preserved-history requests
+showed no degeneration at top-p 0.95. That finite result supports the profile,
+not a universal numerical-repair claim. Top-p 1 remains available explicitly.
+
 ### Recurrent checkpoint policy
 
 The default `auto` policy selects request-boundary retention for the qualified
@@ -348,7 +361,7 @@ LMCache is opt-in. In the common command, replace `-e CACHE_MODE=vram` with:
 -e LMCACHE_TRANSFER_MODE=engine_driven \
 -e LMCACHE_L1_SIZE_GB=64 \
 -e LMCACHE_L2_ENABLED=1 \
--v jovian-judgement-lmcache-l2:/lmcache-l2
+-v jovian-judgement-r30-lmcache-l2:/lmcache-l2
 ```
 
 The host shared-memory filesystem must have at least 96 GiB available for the
@@ -371,7 +384,19 @@ Set `LMCACHE_L2_ENABLED=0` for RAM-only operation. If multiple instances share
 the host network, give each distinct API and LMCache HTTP/MP/metrics ports.
 Do not share a writable cache directory across independent sidecars.
 
-The unchanged R28 checkpoint composition has
+`LMCACHE_HTTP_HOST` defaults to `127.0.0.1`. Wildcard or IPv6 binds have matching
+readiness addresses. This interface exposes administrative operations; remote
+access requires a trusted network or authenticated proxy.
+
+Identical semantic checkpoints avoid duplicate payload publication. Growing
+histories share complete attention pages between immutable endpoints, while
+partial tails and recurrent/draft state remain endpoint-specific. A 32,768-token
+DFlash2/DCP4 cold store writes 80 objects; exact local/RAM/filesystem replays
+add none. Appending 256 tokens reuses the complete prefix and writes 40 objects.
+The [R30 report](glm-5.3-flash/validation/shared-serving-r30.md#cache-and-source-correctness)
+records three-mode all-rank byte comparisons and cancellation/eviction evidence.
+
+The retained recurrent-checkpoint architecture has
 [all-six FP8 mode/DCP million-token qualification](glm-5.3-flash/validation/fp8-serving-r28.md#checkpoint-storage).
 The exact R28.1 image separately passes MTP3/DCP4 with four prefill lanes:
 
@@ -382,7 +407,7 @@ The exact R28.1 image separately passes MTP3/DCP4 with four prefill lanes:
 Each restore attributes all one million prompt tokens to external storage and
 zero to local compute. Times include API/first-output work. The OS page cache
 was not flushed; restart results are not cold-device storage benchmarks.
-The image also passes 54K literal lookup answers across cache tiers,
+The R28.1 image also passes 54K literal lookup answers across cache tiers,
 shared-SYSTEM reuse, C4 all-rank bytes and C8 cancellation/live-read eviction.
 These tests qualify storage correctness, not universal bitwise generation
 equivalence across different floating-point prefill partitions.
@@ -392,8 +417,21 @@ A separate one-observation, same-quartet R28/R28.1 RAM comparison records
 report; it is insufficient to establish steady-state transfer-speed equivalence.
 
 Native DRAM offload remains implemented through `CACHE_MODE=native`; it is not
-independently requalified for R28.1. The qualified external path above is LMCache.
-Packed NVFP4 target KV and Qwen execution are outside this release's qualification.
+independently requalified for R30. The qualified external path above is LMCache.
+Packed NVFP4 target KV and Qwen LMCache are outside this release's qualification.
+
+R29 additionally qualifies DFlash2/DCP4 after the paged-gather metadata fix:
+54K cold/RAM/restart-filesystem answers, shared SYSTEM reuse, exact comparison
+of 3,639,803,904 transferred bytes across four ranks, and three C8 cancellation
+and live-read eviction rounds. This bounded check is not a repeat of the
+one-million-token timing matrix.
+
+Use an empty external-cache namespace for R30. Immutable pinned block-ID
+snapshots prevent asynchronous gathers from copying a later batch's pages.
+The correction cannot repair payloads written without that guarantee. Atomic
+GLM checkpoint identities reject incompatible sources; fresh named volumes
+also isolate ordinary external-cache objects. Preserve existing volumes until
+their owner chooses to remove them.
 
 For independent native-offload testing, use `-e CACHE_MODE=native` and
 `-e NATIVE_KV_OFFLOADING_SIZE_GB=64` in the common command. The launcher selects
@@ -407,9 +445,9 @@ tests. It lists the exact source revisions; no chain of preceding community
 images is needed. Runtime ABI dependencies are supplied by its pinned base.
 
 Complete Git mirrors preserve authorship and integration resolutions:
-[vLLM](https://github.com/voipmonitor/vllm/tree/integration/glm-scheduler-hardening-20260908),
-[B12X](https://github.com/voipmonitor/b12x/tree/integration/glm-fp8-checkpoint-serving-20260908),
-[LMCache](https://github.com/local-inference-lab/LMCache/tree/integration/glm-fp8-checkpoint-serving-20260908).
+[vLLM](https://github.com/voipmonitor/vllm/tree/integration/jovian-immutable-cache-serving-20260909),
+[B12X](https://github.com/voipmonitor/b12x/tree/release/jovian-judgement-20260909-r29),
+[LMCache](https://github.com/local-inference-lab/LMCache/tree/integration/jovian-checkpoint-dedup-20260909).
 The [open merge checklist](https://github.com/local-inference-lab/vllm/issues/651)
 describes each PR and integration caveat. Source locks, not tag-name inference,
 identify the measured packages. The timing matrix and exact packaged storage

@@ -1,0 +1,13 @@
+{
+  "status": "verified-registry-content",
+  "repository": "localinferencelab/vllm",
+  "tag": "jovian-judgement-community-20260909-r30",
+  "digest": "sha256:5f6fcbc681f20b7c052815ca17511d9fe789aea314a17723c202789dd7adc131",
+  "image_id": "sha256:1be0022694c3a2dcd9df9cacebf53e09b7a777815d7b5755ff7a54bd23b5249c",
+  "rootfs_layers": 2,
+  "source_lock_sha256": "a293571bd5c0e5b18b04e6e42e5122b4783e64e61ad3f71031fead99fdab7d98",
+  "pull_by_digest_verified": true,
+  "registry_config_matches_tested_image": true,
+  "qualification_report": "shared-serving-r30.md",
+  "measurements": "shared-serving-r30.measurements.json"
+}
