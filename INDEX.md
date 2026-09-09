@@ -37,6 +37,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [DeepSeek-V4-Flash Jovian Judgement r7](models/ds4-jovian-judgement-r7.md) - `models/ds4-jovian-judgement-r7.md`
 - [DeepSeek-V4-Flash Jovian Judgement r8](models/ds4-jovian-judgement-r8.md) - `models/ds4-jovian-judgement-r8.md`
 - [DeepSeek-V4-Flash Jovian Judgement r9](models/ds4-jovian-judgement-r9.md) - `models/ds4-jovian-judgement-r9.md`
+- [DeepSeek V4 on the shared Jovian Judgement image](models/ds4-jovian-community-r29.md) - `models/ds4-jovian-community-r29.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r3](models/ds4-vision-jovian-judgement-r3.md) - `models/ds4-vision-jovian-judgement-r3.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
@@ -78,6 +79,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM FP8 scheduler and launcher qualification](models/glm-5.3-flash/validation/scheduler-serving-r28.1.md) - `models/glm-5.3-flash/validation/scheduler-serving-r28.1.md`
 - [GLM-5.3-Flash verifier-backed behavioral fidelity](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
+- [Shared Jovian Judgement R29 qualification and changelog](models/glm-5.3-flash/validation/shared-serving-r29.md) - `models/glm-5.3-flash/validation/shared-serving-r29.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
 - [B12X W4A16 Regression Checkpoint - 2026-05-15](models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md) - `models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md`

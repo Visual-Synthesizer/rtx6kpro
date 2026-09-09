@@ -20,7 +20,7 @@ If you just want to run a model, use these stable hub pages first:
 | DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Text and Vision checkpoints, DSpark, B12X, LMCache, Lucifer, and CUTLASS. |
 | Kimi | [Kimi Runbook Hub](models/kimi.md) | Kimi-K2.7-Code, DFlash, parser/tool-call runtime. |
 | Xiaomi MiMo | [MiMo Runbook Hub](models/mimo.md) | MiMo V2.5 Pro FP4-DFlash. |
-| Qwen3.8-Flash-Next | [Qwen3.8-Flash-Next](models/qwen38-flash-next.md) | Community R28.1 Docker, qualified TP1/MTP3 text serving, TP2 recipe, n-gram/PLE offload, FP8 KV and measured C1/C8/C16 decode plus 32K prefill. |
+| Qwen3.8-Flash-Next | [Qwen3.8-Flash-Next](models/qwen38-flash-next.md) | Shared R29 Docker, qualified TP1/MTP3 text serving, TP2 recipe, n-gram/PLE offload and FP8 KV; measured release comparisons and separately attributed C1–C16/Sieve results. |
 | Qwen3.8-27B | [Qwen3.8-27B on RTX PRO 6000 Blackwell](models/qwen38-27b.md), [readable QSRT K5 training result](models/qwen38-qsrt-k5-training-result.md), [exact QSRT K5 specification](models/qwen38-qsrt-k5-r16.md) | TP1, TP2, and TP4 throughput evidence plus the QSRT K5 training interpretation, artifact, fidelity, runtime, and source contract. |
 | GLM-5.1 | [GLM-5.1 Runbook Hub](models/glm-5.1.md) | Historical GLM-5.1, KLD methodology, older B12X/SGLang work. |
 | Legacy / secondary models | [Legacy Model Runbooks](models/legacy.md) | DeepSeek-V4-Pro, GLM-4.7, Qwen, MiniMax, older Kimi pages. |
@@ -54,6 +54,7 @@ Need the complete map of every Markdown page?
 | GLM-5.2 serving stack | [GLM-5.2 Infernal Invocation r18](models/glm5.2-infernal-invocation-r18.md) | Source-qualified CUDA 13.3 profiles with sparse-prefill row validation, projection-mixed EXL3 TP4, online MCG K6, and NVFP4 TP8. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
 | DS4 text and Vision serving profiles | [DeepSeek-V4-Flash Jovian Judgement r9](models/ds4-jovian-judgement-r9.md) | Source-locked TP2 fixed-K5 text and fixed-K3 Vision serving with masked-KV and stream-lifetime corrections, measured GPU KV admission, and qualified text LMCache restoration. |
+| Shared GLM/Qwen/DS4 image | [DeepSeek V4 shared serving](models/ds4-jovian-community-r29.md) | Two-layer R29 image, separate text K5/Vision K3 profiles, immutable LMCache gather metadata and clustered BF16-router synchronization; bounded TP2/FP8 qualification. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
 | Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
 | MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | MiMo DFlash validation and fix notes. |

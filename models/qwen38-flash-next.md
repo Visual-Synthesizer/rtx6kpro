@@ -8,7 +8,7 @@ n-gram embedding (PLE) table to host RAM. It is a different model from
 [Qwen3.8-27B](qwen38-27b.md).
 
 ```text
-voipmonitor/vllm:jovian-judgement-community-20260908-r28.1
+localinferencelab/vllm:jovian-judgement-community-20260909-r29
 ```
 
 The image contains the same vLLM/B12X runtime as [GLM-5.3-Flash](glm-5.3-flash.md),
@@ -58,7 +58,7 @@ That is a different workload from the reasoning benchmark below.
 ## Start on two GPUs: TP2
 
 Status: **implemented**, with a statically checked recipe; TP2 serving and
-performance have **not been qualified on this R28.1 image**. Measurements from
+performance have **not been qualified on the shared R29 image**. Measurements from
 other Qwen-specific images are not substituted for that missing result.
 
 Select two distinct available GPUs. Stop the TP1 service before switching
@@ -102,7 +102,7 @@ VLLM_PLE_CPU_OFFLOAD=0 GPU0=0 GPU1=1 PORT=8000 \
   docker compose -f qwen38-flash-next.compose.yml --profile tp2 up -d
 ```
 
-Status of device-resident PLE on R28.1: **implemented, not qualified**. No
+Status of device-resident PLE: **implemented, not qualified**. No
 offload-on/off speed comparison is claimed here. Changing this environment
 setting recreates the serving container; use it only in a maintenance window.
 The native override `--additional-config '{"ple_table_memory":"mapped_host"}'`
@@ -133,11 +133,11 @@ switches below control the vocabulary projection, not the entire model.
 | LMCache RAM/disk restore | Installed in the image, but **not enabled or qualified for Qwen** |
 | Image/video inputs | Disabled by this text-only recipe; not qualified here |
 
-**Do not inherit `VLLM_LM_HEAD_A16=0` from the image.** That inherited setting
-produced near-zero MTP draft acceptance at C8/C16 in three repeated diagnostic
-sweeps. The explicit value of one restored normal acceptance without changing
-the target vocabulary head. The kernel-level cause of the W4A4 diagnostic is
-not established; the W4A16 configuration is the qualified choice.
+**Keep `VLLM_LM_HEAD_A16=1`.** Both the R29 image and the Compose recipe
+select it. The alternative value zero produced near-zero MTP draft acceptance
+at C8/C16 in three diagnostic sweeps; value one restored acceptance without
+changing the target vocabulary head. The W4A4 kernel-level cause is not
+established, so W4A16 remains the qualified configuration.
 
 The TP1 qualification reported **859,808 usable logical KV tokens**, with a
 small allocation variation between boots. This is a pool shared by requests,
@@ -148,6 +148,15 @@ requested block size is 64, but the measured effective hybrid pages are 3,008
 tokens; the recipe does not manually force a different geometry.
 
 ## Measured llmbench and Sieve performance
+
+The shared R29 composition passes a same-GPU TP1/MTP3 comparison against
+R28.1: three warmed C1 repeats have median output **173.66 → 177.27 tok/s
+(+2.08%)** and verifier rate **85.21 → 85.37 steps/s (+0.18%)**. C8 and
+32K prefill differ by less than 1%. These bounded measurements do not establish
+a general speedup; an initial lower C1 sample is retained in the
+[shared-image qualification report](glm-5.3-flash/validation/shared-serving-r29.md).
+The engine comparison and ten-run Sieve table below are explicitly R28.1
+measurements, not repeated or relabelled R29 results.
 
 Status: **qualified for the measured vLLM and SGLang cells**, with deployment
 differences stated below. The mratsim turbo column is **research-only,
