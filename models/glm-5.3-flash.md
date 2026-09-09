@@ -32,10 +32,10 @@ do not require checkpoint paths or source-code bind mounts.
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
 | Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
-| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R29 |
+| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R30 |
 | MTP proposal vocabulary head | NVFP4 draft-only copy by default; the target verifier vocabulary head remains BF16 |
 | GPU prefix cache | **qualified** request/SYSTEM boundaries in all six TP4 mode/DCP combinations; fine aligned retention is selectable |
-| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R29 |
+| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R30 |
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache`; asynchronous engine-driven pinned shared memory is the default transfer path |
 | CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
 | Scheduler | 4,096 target tokens per step; fixed prefill compute share 0.4; interval 1; one prefill lane by default, optional bounded interleaving |
@@ -78,8 +78,8 @@ score.
 ## Docker artifact
 
 ```text
-localinferencelab/vllm:jovian-judgement-community-20260909-r29
-localinferencelab/vllm@sha256:e44e07e615287605f87bd4db916d683e39066e72a1ba94cf4149089c1ec21b49
+localinferencelab/vllm:jovian-judgement-community-20260909-r30
+localinferencelab/vllm@sha256:5f6fcbc681f20b7c052815ca17511d9fe789aea314a17723c202789dd7adc131
 ```
 
 The image contains two filesystem layers: a flattened CUDA 13.3/PyTorch 2.13
@@ -88,10 +88,10 @@ LMCache sources. FlashInfer, the DS4-compatible native vLLM operator and the
 authenticated FlashKDA extension are source-locked. It is not built by adding
 layers to a preceding community release.
 
-The [embedded source lock](glm-5.3-flash/validation/shared-serving-r29.source.lock)
-has SHA-256 `3307f3372213496e5b7de4fc485ef5b8f7fc43ff99df896ac40fa68d4dd3f80c`.
-The [R29 qualification and changelog](glm-5.3-flash/validation/shared-serving-r29.md)
-records the immutable image identity, differences from R28.1, measurements,
+The [embedded source lock](glm-5.3-flash/validation/shared-serving-r30.source.lock)
+has SHA-256 `a293571bd5c0e5b18b04e6e42e5122b4783e64e61ad3f71031fead99fdab7d98`.
+The [R30 qualification and changelog](glm-5.3-flash/validation/shared-serving-r30.md)
+records the immutable image identity, differences from R29, measurements,
 cache migration requirements and known test limitations.
 
 The same installed runtime supports
@@ -124,6 +124,28 @@ qualified GLM target, MTP or DFlash2 hot paths. FlashKDA is the prefill default;
 performance table below uses FlashKDA, not that alternative.
 
 ## Measured performance
+
+The [R30 source comparison](glm-5.3-flash/validation/shared-serving-r30.md#matched-performance)
+uses DFlash2 K7, TP4/DCP4 and engine-driven LMCache on the same stock quartet:
+
+| Measurement | R29 → R30 source composition | Change |
+|---|---:|---:|
+| Cold 32K prefill | 13,294 → 13,285 input tok/s | −0.07% |
+| C1 output, 30-second cell | 201.73 → 212.33 tok/s | +5.26% |
+| C1 verifier | 81.04 → 81.26 steps/s | +0.27% |
+| Sieve C1 output, five-run median | 256.40 → 336.69 tok/s | +31.31% observed, not an established speedup |
+| Sieve output min–max | 242.57–331.69 → 229.21–415.05 tok/s | Broad overlapping ranges |
+| Sieve verifier, median | 77.46 → 77.76 steps/s | +0.39% |
+
+Prefill and verifier execution are effectively unchanged. Speculative
+acceptance explains the variation in emitted tok/s; these samples do not
+establish a repeatable 31% gain. Sieve uses temperature 1/top-p 0.95 and
+4096 output tokens. The short duration cells retain top-p 1 to compare serving
+source; they do not measure the R30 default sampling change. All artifact and
+measurement boundaries are in the linked report. R30 does not repeat C8/C64
+throughput; historical results below remain labelled with their measured image.
+
+### Historical TP4/DCP1 comparison: R28.1 and R29
 
 Stock RTX PRO 6000 Blackwell Workstation GPUs, TP4/DCP1, FP8 target KV,
 4096-token scheduler budget, OMP1, NCCL 16 channels/2 MiB buffers and
@@ -163,7 +185,7 @@ The defaults already select full-and-piecewise graphs, the B12X paths,
 FlashInfer sampling, NCCL 16 channels/2 MiB and OMP1.
 
 ```bash
-IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r29
+IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r30
 GPU_DEVICES=0,1,2,3
 PORT=8000
 docker pull "$IMAGE"
@@ -196,7 +218,7 @@ Run the common command after assigning the chosen mode's variables:
 ```bash
 docker run -d --name "$NAME" --init \
   --gpus "\"device=${GPU_DEVICES}\"" --network host --ipc host \
-  -v jovian-judgement-r29-runtime-cache:/cache \
+  -v jovian-judgement-r30-runtime-cache:/cache \
   -v jovian-judgement-huggingface-cache:/root/.cache/huggingface \
   -e MODEL=local-inference-lab/GLM-5.3-Flash-NVFP4 \
   -e CACHE_MODE=vram -e KV_CACHE_QUANT=fp8_ds_mla \
@@ -277,14 +299,31 @@ no-thinking mode. To change the server default, pass
 `--default-chat-template-kwargs '{"reasoning_effort":"max"}'` after the image
 name. Running `vllm serve` directly bypasses the image launcher's default.
 
-The GLM chat profile also sets `clear_thinking=true`: completed-turn reasoning
-is omitted when rendering later requests, while visible answers, tool exchanges
-and reasoning within the active tool cycle are retained. This follows the
-[checkpoint author's chat recommendation](https://huggingface.co/zai-org/GLM-5.3-Flash#note).
-It reduces repeated reasoning-history growth; it is not a change to target
-weights or proof that all long-context generation problems are fixed. Explicit
-request template options override the profile. When replacing the whole server
-JSON, include `"clear_thinking":true` if that behavior is desired.
+The agent profile sets **`clear_thinking=false`**: historical reasoning supplied
+by the client remains in the rendered conversation. Clients must return it in
+the corresponding assistant messages. Explicit request template options
+override the profile. Setting `clear_thinking=true` deliberately removes
+completed-turn reasoning and changes the token prefix; it is not a matched-input
+repair for generation problems. When replacing the complete server template
+JSON, include `"clear_thinking":false` to retain this agent behavior.
+
+### Sampling defaults
+
+The GLM launcher supplies **temperature 1 and top-p 0.95**, matching the
+[publisher generation configuration](https://huggingface.co/zai-org/GLM-5.3-Flash/blob/main/generation_config.json),
+even if the quantized checkpoint metadata omits them. Fixed top-k is disabled
+(vLLM effective `top_k=0`); GLM does not inherit Qwen's top-k 20.
+
+Per-request `temperature`, `top_p` and `top_k` override individual defaults.
+Explicit native `--generation-config`, `--override-generation-config` or
+`--config` arguments replace the launcher's sampling preset, allowing an
+operator-owned policy. Direct `vllm serve` invocation bypasses the launcher.
+The [Hugging Face metadata PR](https://huggingface.co/local-inference-lab/GLM-5.3-Flash-NVFP4/discussions/4)
+proposes the same defaults; Docker does not depend on its merge.
+
+Five no-spec and three DFlash2 full 839,815-token preserved-history requests
+showed no degeneration at top-p 0.95. That finite result supports the profile,
+not a universal numerical-repair claim. Top-p 1 remains available explicitly.
 
 ### Recurrent checkpoint policy
 
@@ -322,7 +361,7 @@ LMCache is opt-in. In the common command, replace `-e CACHE_MODE=vram` with:
 -e LMCACHE_TRANSFER_MODE=engine_driven \
 -e LMCACHE_L1_SIZE_GB=64 \
 -e LMCACHE_L2_ENABLED=1 \
--v jovian-judgement-r29-lmcache-l2:/lmcache-l2
+-v jovian-judgement-r30-lmcache-l2:/lmcache-l2
 ```
 
 The host shared-memory filesystem must have at least 96 GiB available for the
@@ -345,6 +384,18 @@ Set `LMCACHE_L2_ENABLED=0` for RAM-only operation. If multiple instances share
 the host network, give each distinct API and LMCache HTTP/MP/metrics ports.
 Do not share a writable cache directory across independent sidecars.
 
+`LMCACHE_HTTP_HOST` defaults to `127.0.0.1`. Wildcard or IPv6 binds have matching
+readiness addresses. This interface exposes administrative operations; remote
+access requires a trusted network or authenticated proxy.
+
+Identical semantic checkpoints avoid duplicate payload publication. Growing
+histories share complete attention pages between immutable endpoints, while
+partial tails and recurrent/draft state remain endpoint-specific. A 32,768-token
+DFlash2/DCP4 cold store writes 80 objects; exact local/RAM/filesystem replays
+add none. Appending 256 tokens reuses the complete prefix and writes 40 objects.
+The [R30 report](glm-5.3-flash/validation/shared-serving-r30.md#cache-and-source-correctness)
+records three-mode all-rank byte comparisons and cancellation/eviction evidence.
+
 The retained recurrent-checkpoint architecture has
 [all-six FP8 mode/DCP million-token qualification](glm-5.3-flash/validation/fp8-serving-r28.md#checkpoint-storage).
 The exact R28.1 image separately passes MTP3/DCP4 with four prefill lanes:
@@ -366,7 +417,7 @@ A separate one-observation, same-quartet R28/R28.1 RAM comparison records
 report; it is insufficient to establish steady-state transfer-speed equivalence.
 
 Native DRAM offload remains implemented through `CACHE_MODE=native`; it is not
-independently requalified for R29. The qualified external path above is LMCache.
+independently requalified for R30. The qualified external path above is LMCache.
 Packed NVFP4 target KV and Qwen LMCache are outside this release's qualification.
 
 R29 additionally qualifies DFlash2/DCP4 after the paged-gather metadata fix:
@@ -375,7 +426,7 @@ of 3,639,803,904 transferred bytes across four ranks, and three C8 cancellation
 and live-read eviction rounds. This bounded check is not a repeat of the
 one-million-token timing matrix.
 
-Use an empty external-cache namespace for R29. Its immutable pinned block-ID
+Use an empty external-cache namespace for R30. Immutable pinned block-ID
 snapshots prevent asynchronous gathers from copying a later batch's pages.
 The correction cannot repair payloads written without that guarantee. Atomic
 GLM checkpoint identities reject incompatible sources; fresh named volumes
@@ -394,9 +445,9 @@ tests. It lists the exact source revisions; no chain of preceding community
 images is needed. Runtime ABI dependencies are supplied by its pinned base.
 
 Complete Git mirrors preserve authorship and integration resolutions:
-[vLLM](https://github.com/voipmonitor/vllm/tree/integration/jovian-shared-serving-20260909-r29),
+[vLLM](https://github.com/voipmonitor/vllm/tree/integration/jovian-immutable-cache-serving-20260909),
 [B12X](https://github.com/voipmonitor/b12x/tree/release/jovian-judgement-20260909-r29),
-[LMCache](https://github.com/local-inference-lab/LMCache/tree/release/jovian-judgement-20260909-r29).
+[LMCache](https://github.com/local-inference-lab/LMCache/tree/integration/jovian-checkpoint-dedup-20260909).
 The [open merge checklist](https://github.com/local-inference-lab/vllm/issues/651)
 describes each PR and integration caveat. Source locks, not tag-name inference,
 identify the measured packages. The timing matrix and exact packaged storage

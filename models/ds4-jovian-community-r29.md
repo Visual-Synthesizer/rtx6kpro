@@ -6,7 +6,7 @@ its own launcher profile; GLM precision, scheduler and cache settings are not
 substituted for the DS4 profile.
 
 ```text
-localinferencelab/vllm:jovian-judgement-community-20260909-r29
+localinferencelab/vllm:jovian-judgement-community-20260909-r30
 ```
 
 Status: **qualified for the bounded TP2/DCP1 FP8 checks below**.
@@ -16,6 +16,11 @@ complete without the previously reproduced launch failure. This does not
 qualify long-duration filesystem-pressure behavior. Other TP/DCP topologies
 and NVFP4 target KV are not qualified by these checks.
 
+The bounded GPU evidence below is from R29. R30 retains those model/native
+components and adds launcher sampling defaults of temperature 1/top-p 0.95,
+with request and native-CLI overrides. DS4 inference is not rerun for R30.
+See the [R30 changelog](glm-5.3-flash/validation/shared-serving-r30.md).
+
 ## Start text or Vision
 
 Choose two available 96 GiB RTX PRO 6000 Blackwell GPUs. The example uses
@@ -24,7 +29,7 @@ are required. It downloads weights on first launch. Docker needs NVIDIA
 Container Toolkit and a CUDA 13.3-compatible driver.
 
 ```bash
-IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r29
+IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r30
 GPU_DEVICES=0,1
 PORT=8000
 VARIANT=text
@@ -34,7 +39,7 @@ docker run -d --name "$NAME" --init \
   --gpus "\"device=${GPU_DEVICES}\"" --network host --ipc host \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v ds4-model-cache:/root/.cache/huggingface \
-  -v ds4-r29-runtime-cache:/cache \
+  -v ds4-r30-runtime-cache:/cache \
   -e DS4_MODEL_VARIANT="$VARIANT" -e TP_SIZE=2 -e DCP_SIZE=1 \
   -e PORT="$PORT" -e MAX_MODEL_LEN=1048576 \
   -e MAX_NUM_BATCHED_TOKENS=4096 \
@@ -172,7 +177,9 @@ also retains the unresolved sanitizer diagnostic and its CUDA-only reproducer.
 
 The image has two filesystem layers, complete committed component histories,
 and an embedded `/opt/glm53-flash/source.lock`. The
-[shared-image report](glm-5.3-flash/validation/shared-serving-r29.md) records
+[R30 artifact report](glm-5.3-flash/validation/shared-serving-r30.md) records
+the deployed source identity. The historical
+[R29 qualification](glm-5.3-flash/validation/shared-serving-r29.md) records
 the GLM/Qwen/DS4 integration, immutable identities, test counts and limits.
 The [source-locked recipe](https://github.com/local-inference-lab/blackwell-llm-docker/tree/codex/glm53-source-locked-build/recipes/glm53)
 builds the same model profiles without chaining community images.

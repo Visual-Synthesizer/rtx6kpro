@@ -54,7 +54,7 @@ Need the complete map of every Markdown page?
 | GLM-5.2 serving stack | [GLM-5.2 Infernal Invocation r18](models/glm5.2-infernal-invocation-r18.md) | Source-qualified CUDA 13.3 profiles with sparse-prefill row validation, projection-mixed EXL3 TP4, online MCG K6, and NVFP4 TP8. |
 | GLM-5.2 MXFP4 | [GLM-5.2 FP8 + MXFP4 Experts](models/glm5.2_mxfp4.md) | Native MXFP4 expert checkpoint path and A8 serving notes. |
 | DS4 text and Vision serving profiles | [DeepSeek-V4-Flash Jovian Judgement r9](models/ds4-jovian-judgement-r9.md) | Source-locked TP2 fixed-K5 text and fixed-K3 Vision serving with masked-KV and stream-lifetime corrections, measured GPU KV admission, and qualified text LMCache restoration. |
-| Shared GLM/Qwen/DS4 image | [DeepSeek V4 shared serving](models/ds4-jovian-community-r29.md) | Two-layer R29 image, separate text K5/Vision K3 profiles, immutable LMCache gather metadata and clustered BF16-router synchronization; bounded TP2/FP8 qualification. |
+| Shared GLM/Qwen/DS4 image | [DeepSeek V4 shared serving](models/ds4-jovian-community-r29.md) | Two-layer R30 image, separate text K5/Vision K3 profiles, publisher sampling defaults and immutable LMCache transfers; DS4 TP2/FP8 qualification is retained from R29. |
 | DS4 full reference | [DS4 DSpark v9](models/ds4dspark-v9.md) | Full DSpark and standard MTP sweep reference. |
 | Kimi-K2.7-Code | [Kimi-K2.7-Code v3](models/kimi-k27-code_v3.md) | Fathomless Kimi DFlash validation. |
 | MiMo FP4-DFlash | [MiMo FP4-DFlash v3](models/xiaomi-mimo-v2.5-pro-fp4-dflash_v3.md) | MiMo DFlash validation and fix notes. |
