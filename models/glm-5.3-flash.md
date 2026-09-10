@@ -26,28 +26,36 @@ do not require checkpoint paths or source-code bind mounts.
 | Tensor parallelism of eight | **implemented**; not independently hardware-qualified for this artifact |
 | Target checkpoint | `local-inference-lab/GLM-5.3-Flash-NVFP4`; Hugging Face `main` unless `MODEL_REVISION` is set |
 | QAD step-1,750 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step1750`](../kld/glm-5.3-flash-qad-step1750.md); distribution fidelity, verifier-backed behavior, and AA-LCR are measured, but the checkpoint is not a qualified serving target |
-| QAD step-2,500 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step2500`](../kld/glm-5.3-flash-qad-step2500.md); distribution fidelity is measured, and the [9,856-task VBF report](glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) qualifies practical equivalence on its primary semantic score; production serving remains unqualified |
+| QAD step-2,500 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-step2500`](../kld/glm-5.3-flash-qad-step2500.md); distribution fidelity is measured, and the [R30 nucleus-sampling VBF report](glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) qualifies practical equivalence on its primary semantic score; production serving remains unqualified |
+| QAD TV-nucleus step-2,500 research checkpoint | [`GLM-5.3-Flash-NVFP4-QAD-TVN-step2500`](../kld/glm-5.3-flash-qad-tvn-step2500.md); distribution fidelity is measured, and the [R30 nucleus-sampling VBF report](glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md) qualifies practical equivalence to published NVFP4 and QAD step 2,500; production serving remains unqualified |
 | AA-LCR capability evaluation | **qualified** for the exact BF16, published-NVFP4, and QAD checkpoint-and-runtime configurations in the [three-configuration report](glm-5.3-flash/aa-lcr-bf16-vs-nvfp4.md) |
-| Verifier-backed behavioral fidelity | **qualified** practical equivalence for QAD step 2,500 versus published NVFP4 on the primary 9,856-task semantic score; **qualified execution with inconclusive one-point decisions** in the [TP8 BF16/published-NVFP4/QAD-step-1,750 report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
+| Verifier-backed behavioral fidelity | **qualified** practical equivalence among published NVFP4, QAD step 2,500, and QAD TV-nucleus step 2,500 under the [R30 temperature-1/top-p-0.95 three-checkpoint contract](glm-5.3-flash/verifier-backed-behavioral-fidelity.md) |
 | DFlash2 checkpoint | `local-inference-lab/GLM-5.3-Flash-DFlash2`; Hugging Face `main` unless `DFLASH_MODEL_REVISION` is set |
-| Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations |
+| Target routed experts | ModelOpt NVFP4 using B12X 4-bit weights and 4-bit activations; eligible prefills share input quantization and use separate expert projections |
 | DFlash2 weights | Offline-serialized ModelOpt MXFP8; no online weight quantization |
-| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R30 |
+| Target KV cache | **qualified** FP8; packed NVFP4 is implemented but not qualified for R34 |
 | MTP proposal vocabulary head | NVFP4 draft-only copy by default; the target verifier vocabulary head remains BF16 |
 | GPU prefix cache | **qualified** request/SYSTEM boundaries in all six TP4 mode/DCP combinations; fine aligned retention is selectable |
-| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R30 |
+| Native DRAM offload | **implemented** and opt-in with `CACHE_MODE=native`; not independently requalified for R34 |
 | LMCache DRAM and filesystem tiers | **qualified** and opt-in with `CACHE_MODE=lmcache`; asynchronous engine-driven pinned shared memory is the default transfer path |
 | CUDA graphs | **qualified** with launcher default `CUDAGRAPH_MODE=FULL_AND_PIECEWISE` for target and speculative decode |
 | Scheduler | 4,096 target tokens per step; fixed prefill compute share 0.4; interval 1; one prefill lane by default, optional bounded interleaving |
 | Root filesystem | Two layers: flattened runtime foundation and committed source installation |
 | FlashKDA numerical stability | **qualified** with the stable FP32 forward-substitution inverse |
-| Qwen3.8-Flash-Next serving | **qualified** separately for TP1/MTP3 text, GPU prefix cache and stock-clock performance; see the [Qwen deployment page](qwen38-flash-next.md) for launch, PLE offload, TP2 limitations and results |
+| Qwen3.8-Flash-Next serving | **qualified** separately for TP1/MTP3 text, GPU prefix cache and bounded performance; see the [Qwen deployment page](qwen38-flash-next.md) for launch, PLE offload, clock conditions, TP2 limitations and results |
 | DeepSeek V4 serving | **qualified** for bounded TP2/DCP1 FP8 text and Vision checks; see the [DS4 runbook](ds4-jovian-community-r29.md) |
-| Qualification date | 2026-09-09 |
+| Qualification date | 2026-09-10 |
+
+R34 qualifies the deployment-default change with GLM DFlash2 TP4/DCP1 serving,
+C1, cold 32K prefill and configuration-precedence tests. Its B12X and LMCache
+sources and all 14 audited native libraries match R33. The other modes retain
+their documented qualification lineage; their complete matrices were not
+repeated for this configuration-only update.
 
 The [BF16-to-NVFP4 distribution-fidelity report](../kld/glm-5.3-flash-bf16-nvfp4.md),
 [QAD step 1,750 comparison](../kld/glm-5.3-flash-qad-step1750.md), and
-[QAD step 2,500 progression comparison](../kld/glm-5.3-flash-qad-step2500.md)
+[QAD step 2,500 progression comparison](../kld/glm-5.3-flash-qad-step2500.md),
+and [QAD TV-nucleus step 2,500 comparison](../kld/glm-5.3-flash-qad-tvn-step2500.md)
 are research-only. They measure a reproducible FlashInfer CUTLASS path rather
 than the B12X serving path specified here.
 
@@ -60,26 +68,20 @@ the three complete configurations. The accompanying
 dataset, prompt, sampling, runtime, equality checker, and receipt validation.
 
 The [Verifier-Backed Behavioral Fidelity report](glm-5.3-flash/verifier-backed-behavioral-fidelity.md)
-uses 224 deterministic tasks with executable answer keys and no language-model
-judge. BF16 scores 93.11%, published NVFP4 scores 91.63%, and QAD step 1,750
-scores 92.35% on the primary fractional metric. All paired one-point decisions
-are inconclusive; the report separates qualified execution provenance from the
-statistical power required to claim behavioral equivalence or improvement.
-
-The [QAD step-2,500 VBF report](glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md)
-pools 9,856 non-overlapping task pairs from a two-replica TP4 component and an
-independent one-replica Max-Q TP4 component. Published NVFP4 scores 91.001%
-and QAD step 2,500 scores 91.333%; the +0.332-point difference has a paired
-95% interval from -0.317 to +0.982 points, entirely inside the predeclared
-±1-point equivalence band. Exact-task accuracy and exploratory family results
-remain mixed, so the qualified claim is limited to the primary VBF semantic
-score.
+compares published NVFP4, QAD step 2,500, and QAD TV-nucleus step 2,500 on
+7,168 deterministic tasks with executable answer keys and no language-model
+judge. Each checkpoint produces three fixed-seed responses per task under the
+R30 temperature-1/top-p-0.95 serving contract. Their primary semantic scores
+are 94.5386%, 94.5698%, and 94.5989%, respectively. Every paired 95% interval
+lies inside the predeclared ±1-point equivalence band and crosses zero. The
+result establishes practical equivalence on the primary endpoint, not a
+superior checkpoint. Exact-task and family diagnostics remain separate
+secondary outcomes.
 
 ## Docker artifact
 
 ```text
-localinferencelab/vllm:jovian-judgement-community-20260909-r30
-localinferencelab/vllm@sha256:5f6fcbc681f20b7c052815ca17511d9fe789aea314a17723c202789dd7adc131
+localinferencelab/vllm:jovian-judgement-community-20260910-r34
 ```
 
 The image contains two filesystem layers: a flattened CUDA 13.3/PyTorch 2.13
@@ -88,16 +90,33 @@ LMCache sources. FlashInfer, the DS4-compatible native vLLM operator and the
 authenticated FlashKDA extension are source-locked. It is not built by adding
 layers to a preceding community release.
 
-The [embedded source lock](glm-5.3-flash/validation/shared-serving-r30.source.lock)
-has SHA-256 `a293571bd5c0e5b18b04e6e42e5122b4783e64e61ad3f71031fead99fdab7d98`.
-The [R30 qualification and changelog](glm-5.3-flash/validation/shared-serving-r30.md)
-records the immutable image identity, differences from R29, measurements,
-cache migration requirements and known test limitations.
+The [embedded source lock](glm-5.3-flash/validation/moe-backend-default-r34.source.lock)
+has SHA-256 `e7b5712d12676c8daf0a000398cfa2d57eedb3e290cedf611fcee28fe2413dd0`.
+The [R34 qualification and changelog](glm-5.3-flash/validation/moe-backend-default-r34.md)
+records image identity, raw samples and qualification limits; the
+[registry receipt](glm-5.3-flash/validation/moe-backend-default-r34-registry.json)
+contains the immutable digest and verified pull result.
+Eligible GLM and Qwen prefills share quantized input across routed experts and
+use separate expert projections. LMCache filesystem eviction retires missing
+objects from byte accounting while protecting pending writes and preserving
+actual I/O errors. Checkpoint policies, concurrent publication, model precision,
+sampling/history defaults and all launchers are preserved. All audited native
+libraries are byte-identical to R33, including its corrected filesystem
+connector. The image sets `VLLM_DEFAULT_MOE_BACKEND=b12x`, so direct
+`vllm serve` also selects B12X when `--moe-backend` is omitted. An explicit
+backend, including `auto`, remains authoritative. The GLM wrapper additionally
+accepts `MOE_BACKEND`; its default is B12X. This changes MoE selection, not
+attention or sampler selection.
 
 The same installed runtime supports
 [Qwen3.8-Flash-Next](qwen38-flash-next.md) and
 [DeepSeek V4 text/Vision](ds4-jovian-community-r29.md) through separate launch
 profiles. DS4 backend defaults do not replace the GLM settings below.
+
+Known limitation: concurrent MTP3 requests with strict JSON-schema output and
+LMCache can fail grammar validation with HTTP 500. The failure is reproduced
+on both R31 and R32; [vLLM #726](https://github.com/local-inference-lab/vllm/issues/726)
+tracks it. R34 does not claim to fix that constrained-output defect.
 
 ## Runtime backends
 
@@ -106,7 +125,7 @@ profiles. DS4 backend defaults do not replace the GLM settings below.
 | Target sparse attention and C4 index selection | B12X |
 | Target recurrent prefill | FlashKDA with packed checkpoint exports |
 | Target recurrent decode | B12X when eligible, with the supported Triton path otherwise |
-| Target routed experts | B12X NVFP4 W4A4 |
+| Target routed experts | B12X NVFP4 W4A4; shared-input split projections for eligible prefills |
 | Target dense projections | B12X |
 | Tensor-parallel all-reduce | B12X PCIe one-shot/two-shot for supported sizes; PyNCCL for the remaining sizes |
 | MTP attention / experts | B12X / Marlin |
@@ -124,6 +143,71 @@ qualified GLM target, MTP or DFlash2 hot paths. FlashKDA is the prefill default;
 performance table below uses FlashKDA, not that alternative.
 
 ## Measured performance
+
+### R34 deployment-default qualification
+
+GLM DFlash2 K7, TP4/DCP1, FP8 KV, the same physical RTX PRO 6000 Workstation
+quartet with **VRAM +6000**, 4096-token budget and full-and-piecewise graphs:
+32K prefill **16,961 → 16,997 tok/s (+0.21%)**, R33 → R34. The R34 C1 cell gives
+**249.77 output tok/s and 97.40 verifier steps/s**. Both images use B12X;
+this is not a B12X-versus-FlashInfer comparison. The short C1 control has
+different speculative acceptance, so no general decode gain is claimed.
+[Conditions, control values and raw samples](glm-5.3-flash/validation/moe-backend-default-r34.md).
+
+### R33 shared-input NVFP4 prefill
+
+Same physical quartet of **RTX PRO 6000 Blackwell Workstation, 600 W,
+VRAM +6000**, used sequentially for R32 and R33. TP4/DCP1, FP8 target KV,
+GPU cache, 4096-token scheduler budget, OMP1, 16 NCCL channels/2 MiB buffers
+and full-and-piecewise graphs. These are **not stock-clock measurements**.
+
+Prefill sends exactly 32,768 input tokens and one output token, excludes one
+warmup and measures for at least 30 seconds. Server counters confirm zero
+prefix-cache reuse. The rate includes first-output work. No-spec uses
+temperature 0/top-p 1; MTP3 and DFlash2 use temperature 1/top-p 0.95.
+
+| Mode | 32K input tok/s, R32 → R33 | Change | R33 C1 output tok/s | R33 C8 aggregate output tok/s |
+|---|---:|---:|---:|---:|
+| No speculation | 15,737 → 17,128 | **+8.84%** | 177.05 | 771.50 |
+| MTP3 | 15,276 → 16,637 | **+8.91%** | 275.45 | 1002.93 |
+| DFlash2 K7 | 15,569 → 16,910 | **+8.61%** | 244.10–260.56 | 785.79–789.48 |
+
+C1 and C8 mean one and eight concurrent clients. Decode uses context 0,
+temperature 1/top-p 0.95, ten-second warmup and 30-second measured cells.
+MTP3 output changes −2.03%/−1.54% at C1/C8 while verifier rate changes
++0.99%/−0.32%; acceptance differs. DFlash2 repeats overlap the reference's
+observed verifier states. A general decode speedup or statistical equivalence
+is **not established**. The [complete comparison](glm-5.3-flash/validation/fp4-prefill-filesystem-r33.md#glm-performance)
+retains every reference and repeat, acceptance, numerical limits and exact
+answer checks. Sieve was not rerun for R33.
+
+LMCache passes exact 54,641-token GPU/RAM/filesystem/restart restores with zero
+recomputed prompt tokens. Filesystem restore takes 0.277 seconds and restore
+after worker/sidecar restart 0.414 seconds, including answer generation, with
+a warm OS page cache. These are bounded correctness measurements, not a
+storage-bandwidth or one-million-token qualification. See the
+[cache evidence](glm-5.3-flash/validation/fp4-prefill-filesystem-r33.md#lmcache-filesystem-qualification).
+
+### Historical R31 warmup and retained-RAM update
+
+Same physical quartet of **RTX PRO 6000 Max-Q Workstation, 300 W, VRAM +6000**;
+TP4/DCP1 MTP3, FP8 KV, 4096-token budget, full-and-piecewise graphs,
+temperature 1/top-p 0.95. LMCache is disabled for these performance cells.
+
+| Measurement | R30 | R31 source | R31 source repeat |
+|---|---:|---:|---:|
+| Cold 32K prefill | 11,151 tok/s | 11,068 tok/s (−0.74%) | Not repeated |
+| C1 output | 264.61 tok/s | 248.51 tok/s (−6.09%) | 259.26 tok/s (−2.02%) |
+| C1 verifier | 103.406 steps/s | 103.571 (+0.16%) | 103.389 (−0.02%) |
+| Mean emitted tokens per step | 2.5595 | 2.3999 | 2.5081 |
+
+Prefill and verifier execution are essentially unchanged. Output varies with
+acceptance; no throughput improvement is established. GPU KV capacity remains
+3,780,444 logical tokens. The [report](glm-5.3-flash/validation/warmup-retention-r31.md)
+preserves all cells, the source/final-image boundary and exact cache tests.
+Do not compare this Max-Q table directly to stock 600 W Workstation results.
+
+### Historical R29-to-R30 source comparison
 
 The [R30 source comparison](glm-5.3-flash/validation/shared-serving-r30.md#matched-performance)
 uses DFlash2 K7, TP4/DCP4 and engine-driven LMCache on the same stock quartet:
@@ -185,7 +269,7 @@ The defaults already select full-and-piecewise graphs, the B12X paths,
 FlashInfer sampling, NCCL 16 channels/2 MiB and OMP1.
 
 ```bash
-IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r30
+IMAGE=localinferencelab/vllm:jovian-judgement-community-20260910-r34
 GPU_DEVICES=0,1,2,3
 PORT=8000
 docker pull "$IMAGE"
@@ -218,7 +302,7 @@ Run the common command after assigning the chosen mode's variables:
 ```bash
 docker run -d --name "$NAME" --init \
   --gpus "\"device=${GPU_DEVICES}\"" --network host --ipc host \
-  -v jovian-judgement-r30-runtime-cache:/cache \
+  -v jovian-judgement-r33-runtime-cache:/cache \
   -v jovian-judgement-huggingface-cache:/root/.cache/huggingface \
   -e MODEL=local-inference-lab/GLM-5.3-Flash-NVFP4 \
   -e CACHE_MODE=vram -e KV_CACHE_QUANT=fp8_ds_mla \
@@ -361,7 +445,7 @@ LMCache is opt-in. In the common command, replace `-e CACHE_MODE=vram` with:
 -e LMCACHE_TRANSFER_MODE=engine_driven \
 -e LMCACHE_L1_SIZE_GB=64 \
 -e LMCACHE_L2_ENABLED=1 \
--v jovian-judgement-r30-lmcache-l2:/lmcache-l2
+-v jovian-judgement-r33-lmcache-l2:/lmcache-l2
 ```
 
 The host shared-memory filesystem must have at least 96 GiB available for the
@@ -383,6 +467,27 @@ match the version-2 storage keys used here.
 Set `LMCACHE_L2_ENABLED=0` for RAM-only operation. If multiple instances share
 the host network, give each distinct API and LMCache HTTP/MP/metrics ports.
 Do not share a writable cache directory across independent sidecars.
+
+`LMCACHE_L2_PREFETCH_POLICY=retain` is the default: disk-loaded objects remain
+reusable in the bounded host-RAM L1 after readers finish. They are not pinned
+forever; LRU can evict objects without active readers or writers. If a retained
+filesystem restore needs RAM, the launcher enables bounded emergency eviction
+without enabling writeback. Active owners can still force a safe cache miss.
+This is host-memory caching, not GPU hardware L2 prefetching.
+
+`LMCACHE_L2_PREFETCH_POLICY=default` selects temporary prefetched objects that
+are released when readers finish. `LMCACHE_SERVER_EXTRA_ARGS` accepts literal
+whitespace-separated server options, for example `--max-cpu-workers 4`.
+Shell expressions and embedded quoting are not evaluated; use dedicated
+variables for identity, geometry, transport and listener settings.
+
+R31's 4 GiB RAM-pressure test writes 6.62 GB of durable objects, then restores
+an evicted 32K prompt in 0.170 s with zero recompute. A 54,643-token literal
+lookup restores from RAM in 0.278 s, filesystem in 0.293 s and after both
+services restart in 0.410 s. All answers are exact. After filesystem load,
+128 objects / 1.76 GB remain reusable in RAM. These are bounded TP4/DCP1 MTP3
+checks with a warm OS page cache; see the
+[retention report](glm-5.3-flash/validation/warmup-retention-r31.md#ram-retention-and-restore-correctness).
 
 `LMCACHE_HTTP_HOST` defaults to `127.0.0.1`. Wildcard or IPv6 binds have matching
 readiness addresses. This interface exposes administrative operations; remote
@@ -417,7 +522,7 @@ A separate one-observation, same-quartet R28/R28.1 RAM comparison records
 report; it is insufficient to establish steady-state transfer-speed equivalence.
 
 Native DRAM offload remains implemented through `CACHE_MODE=native`; it is not
-independently requalified for R30. The qualified external path above is LMCache.
+independently requalified for R31. The qualified external path above is LMCache.
 Packed NVFP4 target KV and Qwen LMCache are outside this release's qualification.
 
 R29 additionally qualifies DFlash2/DCP4 after the paged-gather metadata fix:
@@ -426,7 +531,7 @@ of 3,639,803,904 transferred bytes across four ranks, and three C8 cancellation
 and live-read eviction rounds. This bounded check is not a repeat of the
 one-million-token timing matrix.
 
-Use an empty external-cache namespace for R30. Immutable pinned block-ID
+Use an empty external-cache namespace when adopting R32. Immutable pinned block-ID
 snapshots prevent asynchronous gathers from copying a later batch's pages.
 The correction cannot repair payloads written without that guarantee. Atomic
 GLM checkpoint identities reject incompatible sources; fresh named volumes
@@ -445,9 +550,9 @@ tests. It lists the exact source revisions; no chain of preceding community
 images is needed. Runtime ABI dependencies are supplied by its pinned base.
 
 Complete Git mirrors preserve authorship and integration resolutions:
-[vLLM](https://github.com/voipmonitor/vllm/tree/integration/jovian-immutable-cache-serving-20260909),
+[vLLM](https://github.com/voipmonitor/vllm/tree/integration/jovian-warmup-buffer-reuse-20260909),
 [B12X](https://github.com/voipmonitor/b12x/tree/release/jovian-judgement-20260909-r29),
-[LMCache](https://github.com/local-inference-lab/LMCache/tree/integration/jovian-checkpoint-dedup-20260909).
+[LMCache](https://github.com/local-inference-lab/LMCache/tree/integration/jovian-concurrent-checkpoint-publication-20260909).
 The [open merge checklist](https://github.com/local-inference-lab/vllm/issues/651)
 describes each PR and integration caveat. Source locks, not tag-name inference,
 identify the measured packages. The timing matrix and exact packaged storage

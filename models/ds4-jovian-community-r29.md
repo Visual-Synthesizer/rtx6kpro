@@ -6,20 +6,27 @@ its own launcher profile; GLM precision, scheduler and cache settings are not
 substituted for the DS4 profile.
 
 ```text
-localinferencelab/vllm:jovian-judgement-community-20260909-r30
+localinferencelab/vllm:jovian-judgement-community-20260910-r34
 ```
 
 Status: **qualified for the bounded TP2/DCP1 FP8 checks below**.
+
+R34 retains the DS4 launcher and compiled implementation. Its change makes
+native MoE selection default to B12X; the DS4 profile already explicitly
+selects B12X. The DS4 checks below retain their measured release identity and
+were not repeated for this configuration-only update.
 The source includes the clustered BF16-router barrier correction and immutable
 LMCache gather metadata. Two concurrent Vision/LMCache tests of 600 seconds
 complete without the previously reproduced launch failure. This does not
 qualify long-duration filesystem-pressure behavior. Other TP/DCP topologies
 and NVFP4 target KV are not qualified by these checks.
 
-The bounded GPU evidence below is from R29. R30 retains those model/native
-components and adds launcher sampling defaults of temperature 1/top-p 0.95,
-with request and native-CLI overrides. DS4 inference is not rerun for R30.
-See the [R30 changelog](glm-5.3-flash/validation/shared-serving-r30.md).
+The bounded GPU evidence below is from R29. R33 retains those model/native
+components and the launcher sampling defaults of temperature 1/top-p 0.95,
+with request and native-CLI overrides. Its NVFP4 split-prefill change is for GLM
+and eligible Qwen shapes; DS4 already has native shared-input MXFP4/MXFP8 split
+compute. No DS4 speedup or repeated text/Vision/LMCache matrix is attributed
+to this update. See the [R33 changelog and qualification scope](glm-5.3-flash/validation/fp4-prefill-filesystem-r33.md).
 
 ## Start text or Vision
 
@@ -29,7 +36,7 @@ are required. It downloads weights on first launch. Docker needs NVIDIA
 Container Toolkit and a CUDA 13.3-compatible driver.
 
 ```bash
-IMAGE=localinferencelab/vllm:jovian-judgement-community-20260909-r30
+IMAGE=localinferencelab/vllm:jovian-judgement-community-20260910-r34
 GPU_DEVICES=0,1
 PORT=8000
 VARIANT=text
@@ -177,7 +184,7 @@ also retains the unresolved sanitizer diagnostic and its CUDA-only reproducer.
 
 The image has two filesystem layers, complete committed component histories,
 and an embedded `/opt/glm53-flash/source.lock`. The
-[R30 artifact report](glm-5.3-flash/validation/shared-serving-r30.md) records
+[R33 artifact report](glm-5.3-flash/validation/fp4-prefill-filesystem-r33.md) records
 the deployed source identity. The historical
 [R29 qualification](glm-5.3-flash/validation/shared-serving-r29.md) records
 the GLM/Qwen/DS4 integration, immutable identities, test counts and limits.
