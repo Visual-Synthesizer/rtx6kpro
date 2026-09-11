@@ -49,3 +49,17 @@ on the vLLM recipe.
 
 Raw run directories (JSON + logs) available on request; harness:
 github.com/Visual-Synthesizer/rtx6kpro fork, `benchmarks/inference-throughput/`.
+
+## Companion result: Qwen3.8-27B quantization A/B (same host)
+
+`nvidia/Qwen3.8-27B-NVFP4` vs `huginnfork/Qwen3.8-27B-FP8`, identical serving
+(vLLM 0.28.1 nightly, TP2, MTP3, FP8 KV, FlashInfer attention, 262,144 max len):
+
+| | C1 ctx0 | C32 ctx0 (agg) | C2 @16k | Estonia | lavd |
+|---|---:|---:|---:|---:|---:|
+| nvidia NVFP4 | **135.1** | **2,405** | **286.4** | 100 % (30/30) | 100 % (10/10) |
+| huginnfork FP8 | 100.0 | 1,921 | 194.5 | 100 % (30/30) | 100 % (10/10) |
+
+NVFP4 is 22–47 % faster in every cell with identical MTP acceptance (0.40 vs 0.41)
+and full quality parity on both accuracy profiles — the Qwen3.6-era NVFP4 quality
+concerns do not reproduce on this Qwen3.8 checkpoint.
