@@ -61,5 +61,9 @@ github.com/Visual-Synthesizer/rtx6kpro fork, `benchmarks/inference-throughput/`.
 | huginnfork FP8 | 100.0 | 1,921 | 194.5 | 100 % (30/30) | 100 % (10/10) |
 
 NVFP4 is 22–47 % faster in every cell with identical MTP acceptance (0.40 vs 0.41)
-and full quality parity on both accuracy profiles — the Qwen3.6-era NVFP4 quality
-concerns do not reproduce on this Qwen3.8 checkpoint.
+and task parity on both accuracy profiles. Teacher-forced top-20 KLD vs the FP8
+reference (33k wikitext tokens, eager, no spec decode): median 0.0061, mean 0.124,
+P95 0.65 — i.e. **not lossless**: median-token agreement is backend-equivalence tier,
+but a real tail of divergence sits in low-confidence tokens where task benchmarks
+don't look. The Qwen3.6-era NVFP4 quality collapse does not reproduce; for
+maximum-fidelity use prefer FP8, for throughput NVFP4 is a sound trade.
