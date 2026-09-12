@@ -1,0 +1,42 @@
+{
+  "status": "qualified",
+  "checks": {
+    "two_layers": true,
+    "only_reviewed_runtime_delta": true,
+    "b12x_and_native_unchanged": true,
+    "source_lock_and_label_match": true,
+    "clean_sources_match_lock": true
+  },
+  "image": {
+    "id": "sha256:137a50e53b32bf8f76be3e1fce9bc40658a1df26bb0bde860fcb6e27b1e9369b",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:c067b07eaafe3edd45bbf9b748232a55d41ca136df476d912aa3465b67806d3a"
+    ],
+    "lock_sha256": "4b29f3011e8d144eba0136b8f7f4fba8d6dc26a533ac991b690f78bf45c74504"
+  },
+  "reference_image": "sha256:de98d38934c5bb34f2fe6f203f715f2271eaab507d340a982af8418b7eb930b4",
+  "changed_package_files": [
+    "vllm/_version.py",
+    "vllm/v1/worker/gpu/spec_decode/dspark/greedy.py",
+    "vllm/v1/worker/gpu/spec_decode/dspark/speculator.py"
+  ],
+  "sources": {
+    "vllm": {
+      "commit": "202a11a98eb360b73552586f2b5c5880cbd48c8c",
+      "tree": "e20d152fa6972a4a7e624e74d198403fccb7af73",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "323107ff948ca532f1f7c793b4b550c30ba5212b",
+      "tree": "18cb59ec640a5cb8d624bebfc81b919fee88340b",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "package_file_count": 3638
+}
