@@ -1,0 +1,617 @@
+{
+  "benchmark": "/root/vllm/worktrees/llmbench-loop-guard-20260906/llm_decode_bench.py",
+  "benchmark_sha256": "516dc590b80dda6d9880f9f5034026fdf1b2074e9747bf8a920758680f019817",
+  "base_url": "http://127.0.0.1:5056",
+  "model": "DeepSeek-V4.1-Flash",
+  "warmups": 1,
+  "measured_runs": 5,
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_p_omitted": false,
+  "max_tokens": 2000,
+  "reasoning_effort": "server default; not overridden",
+  "throughput_formula": "usage.completion_tokens / (stream_end - first_text_delta)",
+  "gpu_ids": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "expected_memory_offset": 6000,
+  "samples": [
+    {
+      "run": 0,
+      "ok": true,
+      "finish_reason": "stop",
+      "completion_tokens": 1204,
+      "ttft": 0.28007500898092985,
+      "gen_elapsed": 2.9188062850153074,
+      "total_elapsed": 3.198881293996237,
+      "generation_tok_s": 412.4973987417893,
+      "total_tok_s": 376.38158135461475,
+      "content_chars": 3896,
+      "reasoning_chars": 100,
+      "cjk_chars": 0,
+      "content_preview": "# Sieve of Eratosthenes in Python\n\nThe Sieve of Eratosthenes is an efficient algorithm for finding all prime numbers up to a given limit. It works by iteratively marking the multiples of each prime as composite.\n\n## Basic Implementation\n\n```python\ndef sieve_of_eratosthenes(limit):\n    \"\"\"Return a list of all prime numbers up to and including `limit`.\"\"\"\n    if limit < 2:\n        return []\n\n    # is_prime[i] will be True if i is prime, initially all True\n    is_prime = [True] * (limit + 1)\n    is",
+      "warmup": true,
+      "wall_seconds": 3.2085757080931216,
+      "gpu_before": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2610,
+          "temperature_c": 53
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2610,
+          "temperature_c": 52
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2610,
+          "temperature_c": 48
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2610,
+          "temperature_c": 50
+        }
+      ],
+      "gpu_after": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "spec_counter_deltas": {
+        "vllm:spec_decode_num_drafts_total": 265.0,
+        "vllm:spec_decode_num_draft_tokens_total": 1855.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 939.0
+      }
+    },
+    {
+      "run": 1,
+      "ok": true,
+      "finish_reason": "stop",
+      "completion_tokens": 758,
+      "ttft": 0.2659163729986176,
+      "gen_elapsed": 1.8891857439884916,
+      "total_elapsed": 2.155102116987109,
+      "generation_tok_s": 401.23106074244095,
+      "total_tok_s": 351.72347241703073,
+      "content_chars": 2342,
+      "reasoning_chars": 99,
+      "cjk_chars": 0,
+      "content_preview": "# Sieve of Eratosthenes in Python\n\nThe Sieve of Eratosthenes finds all prime numbers up to a given limit `n` by iteratively marking the multiples of each prime as composite.\n\n```python\ndef sieve_of_eratosthenes(n):\n    \"\"\"\n    Return a list of all prime numbers less than or equal to n.\n\n    Args:\n        n (int): The upper bound (inclusive) for finding primes.\n\n    Returns:\n        list[int]: A list of prime numbers <= n.\n    \"\"\"\n    if n < 2:\n        return []\n\n    # Initially assume every numb",
+      "warmup": false,
+      "wall_seconds": 2.164319312083535,
+      "gpu_before": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "gpu_after": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 54
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "spec_counter_deltas": {
+        "vllm:spec_decode_num_drafts_total": 172.0,
+        "vllm:spec_decode_num_draft_tokens_total": 1204.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 585.0
+      }
+    },
+    {
+      "run": 2,
+      "ok": true,
+      "finish_reason": "stop",
+      "completion_tokens": 948,
+      "ttft": 0.2689235619036481,
+      "gen_elapsed": 2.5378541060490534,
+      "total_elapsed": 2.8067776679527014,
+      "generation_tok_s": 373.5439313632777,
+      "total_tok_s": 337.75386302381514,
+      "content_chars": 3072,
+      "reasoning_chars": 109,
+      "cjk_chars": 0,
+      "content_preview": "# Sieve of Eratosthenes in Python\n\nThe **Sieve of Eratosthenes** is an efficient algorithm for finding all prime numbers up to a given limit `n`. It works by iteratively marking the multiples of each prime as composite.\n\n## Basic Implementation\n\n```python\ndef sieve_of_eratosthenes(n):\n    \"\"\"Return a list of all primes less than or equal to n.\"\"\"\n    if n < 2:\n        return []\n\n    # Assume every number is prime initially\n    is_prime = [True] * (n + 1)\n    is_prime[0] = is_prime[1] = False\n\n  ",
+      "warmup": false,
+      "wall_seconds": 2.815992722986266,
+      "gpu_before": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 54
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "gpu_after": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2812,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 54
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "spec_counter_deltas": {
+        "vllm:spec_decode_num_drafts_total": 232.0,
+        "vllm:spec_decode_num_draft_tokens_total": 1624.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 716.0
+      }
+    },
+    {
+      "run": 3,
+      "ok": true,
+      "finish_reason": "stop",
+      "completion_tokens": 594,
+      "ttft": 0.34477706404868513,
+      "gen_elapsed": 1.5418767390074208,
+      "total_elapsed": 1.886653803056106,
+      "generation_tok_s": 385.24480263084195,
+      "total_tok_s": 314.84313605273314,
+      "content_chars": 1895,
+      "reasoning_chars": 59,
+      "cjk_chars": 0,
+      "content_preview": "# Sieve of Eratosthenes\n\nThe Sieve of Eratosthenes finds all prime numbers up to a given limit `n` by iteratively marking the multiples of each prime as composite.\n\n```python\ndef sieve_of_eratosthenes(n: int) -> list[int]:\n    \"\"\"\n    Return a list of all prime numbers less than or equal to n.\n\n    Uses the Sieve of Eratosthenes algorithm:\n      1. Assume every number >= 2 is prime.\n      2. Starting from p = 2, mark all multiples of p as composite.\n      3. Move to the next unmarked number and ",
+      "warmup": false,
+      "wall_seconds": 1.895911118015647,
+      "gpu_before": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2812,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 54
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 57
+        }
+      ],
+      "gpu_after": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2812,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "spec_counter_deltas": {
+        "vllm:spec_decode_num_drafts_total": 141.0,
+        "vllm:spec_decode_num_draft_tokens_total": 987.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 453.0
+      }
+    },
+    {
+      "run": 4,
+      "ok": true,
+      "finish_reason": "stop",
+      "completion_tokens": 558,
+      "ttft": 0.27665442205034196,
+      "gen_elapsed": 1.4800847329897806,
+      "total_elapsed": 1.7567391550401226,
+      "generation_tok_s": 377.00544270383523,
+      "total_tok_s": 317.63395174467763,
+      "content_chars": 1819,
+      "reasoning_chars": 120,
+      "cjk_chars": 0,
+      "content_preview": "# Sieve of Eratosthenes in Python\n\nThe Sieve of Eratosthenes finds all prime numbers up to a given limit by iteratively marking multiples of each prime as composite.\n\n```python\ndef sieve_of_eratosthenes(limit):\n    \"\"\"Return a list of all primes up to and including `limit`.\"\"\"\n    if limit < 2:\n        return []\n\n    # Boolean array: is_prime[i] is True if i is a candidate prime\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False\n\n    # Only need to check up to sqrt(limit)\n",
+      "warmup": false,
+      "wall_seconds": 1.766007049009204,
+      "gpu_before": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2812,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 58
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "gpu_after": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 59
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "spec_counter_deltas": {
+        "vllm:spec_decode_num_drafts_total": 135.0,
+        "vllm:spec_decode_num_draft_tokens_total": 945.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 422.0
+      }
+    },
+    {
+      "run": 5,
+      "ok": true,
+      "finish_reason": "stop",
+      "completion_tokens": 711,
+      "ttft": 0.26584618305787444,
+      "gen_elapsed": 1.8445494410116225,
+      "total_elapsed": 2.110395624069497,
+      "generation_tok_s": 385.4599850736774,
+      "total_tok_s": 336.90365535774356,
+      "content_chars": 2299,
+      "reasoning_chars": 44,
+      "cjk_chars": 0,
+      "content_preview": "# Sieve of Eratosthenes\n\nThe Sieve of Eratosthenes finds all prime numbers up to a given limit `n` by iteratively marking the multiples of each prime as composite.\n\n```python\ndef sieve_of_eratosthenes(n: int) -> list[int]:\n    \"\"\"\n    Return a list of all prime numbers less than or equal to n.\n\n    Args:\n        n: The upper bound (inclusive). Must be a non-negative integer.\n\n    Returns:\n        A list of prime numbers <= n.\n    \"\"\"\n    if n < 2:\n        return []\n\n    # is_prime[i] will be Tru",
+      "warmup": false,
+      "wall_seconds": 2.119758678949438,
+      "gpu_before": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 60
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 59
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "gpu_after": [
+        {
+          "gpu": 4,
+          "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2805,
+          "temperature_c": 61
+        },
+        {
+          "gpu": 5,
+          "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2797,
+          "temperature_c": 59
+        },
+        {
+          "gpu": 6,
+          "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2812,
+          "temperature_c": 55
+        },
+        {
+          "gpu": 7,
+          "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+          "memory_offset": 6000,
+          "graphics_offset": 0,
+          "memory_mhz": 16365,
+          "graphics_mhz": 2790,
+          "temperature_c": 57
+        }
+      ],
+      "spec_counter_deltas": {
+        "vllm:spec_decode_num_drafts_total": 170.0,
+        "vllm:spec_decode_num_draft_tokens_total": 1190.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 541.0
+      }
+    }
+  ],
+  "summary": {
+    "median_tok_s": 385.24480263084195,
+    "min_tok_s": 373.5439313632777,
+    "max_tok_s": 401.23106074244095,
+    "successful_runs": 5
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "status": "qualified",
+  "checks": {
+    "two_layers": true,
+    "lock_and_label_match": true,
+    "committed_source_trees_match_lock": true,
+    "native_binaries_unchanged": true,
+    "python_dependency_outputs_match": true,
+    "prefill_graph_default_off": true,
+    "decode_graph_configuration_retained": true,
+    "serving_tested_image": true,
+    "no_source_mounts": true,
+    "text_vision_smoke": true,
+    "seeded_sampling": true,
+    "uncached_32k_prefill": true,
+    "c1_cells": true,
+    "sieve_both_five_run_series": true,
+    "gpu_quartet_and_offsets": true,
+    "target_and_draft_graphs": true,
+    "no_engine_failure": true,
+    "ram_engram": true,
+    "budget50_c1_cells": true
+  },
+  "image": {
+    "id": "sha256:e0a2d72272f7dc17583f5e9c8614a2610d6d3932414a8d32ca1cd57dafb8d803",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:be6002bd9f890c9af587a1ba7d0e387e14bbfdf8cb46220936e80b2bde43224d"
+    ],
+    "lock_sha256": "0729ad2c79d932aa8cd581a3b89f1f1b9cc9f0b9707547969ed989739323570b"
+  },
+  "sources": {
+    "vllm": {
+      "commit": "c687594b8a8082e18af9fe2f64eb5f9ee442e251",
+      "tree": "3fb88fdfd0b5acdd4460076c6443a4299e5edf7d",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "f1c4e9dd5b1d841c10cda70ee49c3190cf3db0be",
+      "tree": "480ea232d52fff4271b0412470d4ec340196735a",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "qualification_scope": "TP4/DCP1 DSpark K7, RAM Engram, text/Vision smoke and bounded prefill/C1/Sieve; not a model-quality or long-context churn claim",
+  "config": {
+    "batch_tokens": 4096,
+    "max_sequences": 4,
+    "max_context": 131072,
+    "temperature": 1,
+    "top_p": 0.95,
+    "memory_offset": 6000,
+    "omp_threads": 8,
+    "nccl_channels": 16,
+    "nccl_buffer_bytes": 2097152,
+    "adaptive_verification": true,
+    "prefill_breakable_graphs": false,
+    "reasoning_default": 75
+  },
+  "prefill": {
+    "before_decode": 21399.178600622858,
+    "after_decode": 21452.23573001124
+  },
+  "decode": {
+    "output_tokens_per_s": {
+      "median": 258.79015351208784,
+      "min": 256.8318860926742,
+      "max": 278.6472922805954
+    },
+    "verifier_steps_per_s": {
+      "median": 104.10944859181377,
+      "min": 103.13850009763874,
+      "max": 104.57965039884722
+    },
+    "draft_tokens_per_s": {
+      "median": 728.5327931598591,
+      "min": 721.969504005484,
+      "max": 732.1525846129861
+    },
+    "samples": [
+      {
+        "aggregate_tps": 278.6472922805954,
+        "server_steps_per_s": 103.13850009763874,
+        "server_spec_accept_length": 2.7016806722689077,
+        "server_spec_pos_accept": [
+          0.7301,
+          0.4751,
+          0.2789,
+          0.1422,
+          0.0533,
+          0.0155,
+          0.0065
+        ]
+      },
+      {
+        "aggregate_tps": 256.8318860926742,
+        "server_steps_per_s": 104.57965039884722,
+        "server_spec_accept_length": 2.4568058654765697,
+        "server_spec_pos_accept": [
+          0.6968,
+          0.4192,
+          0.2069,
+          0.0931,
+          0.0274,
+          0.0077,
+          0.0057
+        ]
+      },
+      {
+        "aggregate_tps": 258.79015351208784,
+        "server_steps_per_s": 104.10944859181377,
+        "server_spec_accept_length": 2.486226777706598,
+        "server_spec_pos_accept": [
+          0.6851,
+          0.4238,
+          0.2265,
+          0.106,
+          0.034,
+          0.007,
+          0.0038
+        ]
+      }
+    ]
+  },
+  "sieve": {
+    "50": {
+      "median_tok_s": 416.7218847517252,
+      "min_tok_s": 385.3995777607253,
+      "max_tok_s": 439.01324072561493,
+      "successful_runs": 5
+    },
+    "75": {
+      "median_tok_s": 393.58365330467956,
+      "min_tok_s": 371.93829241096364,
+      "max_tok_s": 442.9134995283374,
+      "successful_runs": 5
+    }
+  },
+  "decode_budget50": {
+    "reasoning_effort": 50,
+    "output_tokens_per_s": {
+      "median": 281.0776221247438,
+      "min": 268.0184437198308,
+      "max": 282.16285334846054
+    },
+    "verifier_steps_per_s": {
+      "median": 110.79850260251422,
+      "min": 110.18402812504783,
+      "max": 111.28816583366032
+    },
+    "draft_tokens_per_s": {
+      "median": 775.3561993579754,
+      "min": 771.288195976746,
+      "max": 779.0171727844486
+    },
+    "samples": [
+      {
+        "aggregate_tps": 282.16285334846054,
+        "server_steps_per_s": 110.79850260251422,
+        "server_spec_accept_length": 2.547095997592537,
+        "server_spec_pos_accept": [
+          0.6982,
+          0.4367,
+          0.2332,
+          0.1122,
+          0.0445,
+          0.0147,
+          0.0075
+        ]
+      },
+      {
+        "aggregate_tps": 281.0776221247438,
+        "server_steps_per_s": 110.18402812504783,
+        "server_spec_accept_length": 2.551285930408472,
+        "server_spec_pos_accept": [
+          0.6759,
+          0.4333,
+          0.2445,
+          0.1262,
+          0.0481,
+          0.0154,
+          0.0079
+        ]
+      },
+      {
+        "aggregate_tps": 268.0184437198308,
+        "server_steps_per_s": 111.28816583366032,
+        "server_spec_accept_length": 2.408328340323547,
+        "server_spec_pos_accept": [
+          0.6848,
+          0.4023,
+          0.1932,
+          0.0872,
+          0.0285,
+          0.0087,
+          0.0036
+        ]
+      }
+    ]
+  },
+  "kv_pool_tokens": 1741084,
+  "limitations": [
+    "Other model entrypoints retained but not rebenchmarked",
+    "SSD Engram retained; no R37 SSD throughput qualification",
+    "BF16 atomic MoE is not bitwise deterministic",
+    "Generated Sieve code was not executed",
+    "One CPU graph fixture fails identically on R36 when CUDA is hidden; 43 pass and 14 GPU cases skip in this CPU-only subset"
+  ],
+  "public_source_comparison": {
+    "control": "vLLM b40673cd / B12X 323107ff over R36 runtime; not a literal R36 image A/B",
+    "configuration": "Same quartet, respect-EOS protocol and numeric reasoning budget 50; sequential boots, stochastic sampling",
+    "measurements": {
+      "prefill_tok_s": {
+        "control": 14896.514201984526,
+        "r37": 21399.178600622858,
+        "change_percent": 43.652255222044104
+      },
+      "c1_output_tok_s_budget50": {
+        "control": 238.79881419686373,
+        "r37": 281.0776221247438,
+        "change_percent": 17.704781353321874
+      },
+      "c1_verifier_steps_s_budget50": {
+        "control": 98.99950839819728,
+        "r37": 110.79850260251422,
+        "change_percent": 11.918235146036139
+      },
+      "sieve_tok_s_budget50": {
+        "control": 385.24480263084195,
+        "r37": 416.7218847517252,
+        "change_percent": 8.1706701572418
+      }
+    }
+  }
+}

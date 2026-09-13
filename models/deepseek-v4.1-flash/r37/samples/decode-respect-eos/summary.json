@@ -1,0 +1,32 @@
+{
+  "samples": [
+    {
+      "repeat": 0,
+      "output_tok_per_sec": 278.6472922805954,
+      "verifier_steps_per_sec": 103.13850009763874,
+      "accepted_length": 2.7016806722689077,
+      "loop_diagnostics": [],
+      "respect_eos": true
+    },
+    {
+      "repeat": 1,
+      "output_tok_per_sec": 256.8318860926742,
+      "verifier_steps_per_sec": 104.57965039884722,
+      "accepted_length": 2.4568058654765697,
+      "loop_diagnostics": [],
+      "respect_eos": true
+    },
+    {
+      "repeat": 2,
+      "output_tok_per_sec": 258.79015351208784,
+      "verifier_steps_per_sec": 104.10944859181377,
+      "accepted_length": 2.486226777706598,
+      "loop_diagnostics": [],
+      "respect_eos": true
+    }
+  ],
+  "medians": {
+    "output_tok_per_sec": 258.79015351208784,
+    "verifier_steps_per_sec": 104.10944859181377
+  }
+}

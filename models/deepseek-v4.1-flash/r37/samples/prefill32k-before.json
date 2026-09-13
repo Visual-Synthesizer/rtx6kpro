@@ -1,0 +1,122 @@
+{
+  "status": "research-only",
+  "tokens": 32768,
+  "nonce": 1789274463939772909,
+  "samples": [
+    {
+      "repeat": -1,
+      "arm": "source",
+      "ttft_seconds": 1.532512751989998,
+      "tok_per_sec": 21381.877545521307,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5147501720348373
+      }
+    },
+    {
+      "repeat": 0,
+      "arm": "source",
+      "ttft_seconds": 1.545421110931784,
+      "tok_per_sec": 21203.28224340298,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5275745920371264
+      }
+    },
+    {
+      "repeat": 1,
+      "arm": "source",
+      "ttft_seconds": 1.5227594620082527,
+      "tok_per_sec": 21518.828690635586,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5041522160172462
+      }
+    },
+    {
+      "repeat": 2,
+      "arm": "source",
+      "ttft_seconds": 1.5280079309595749,
+      "tok_per_sec": 21444.9148699261,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.509661793941632
+      }
+    },
+    {
+      "repeat": 3,
+      "arm": "source",
+      "ttft_seconds": 1.5299649139633402,
+      "tok_per_sec": 21417.484610882497,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5129930920666084
+      }
+    },
+    {
+      "repeat": 4,
+      "arm": "source",
+      "ttft_seconds": 1.5325847839703783,
+      "tok_per_sec": 21380.872590363222,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5157781110610813
+      }
+    },
+    {
+      "repeat": 5,
+      "arm": "source",
+      "ttft_seconds": 1.5440482590347528,
+      "tok_per_sec": 21222.134611572703,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5270391469821334
+      }
+    }
+  ],
+  "implementation": "serving artifact recorded separately",
+  "runtime_switch": false,
+  "median_tok_per_sec": 21399.178600622858
+}
