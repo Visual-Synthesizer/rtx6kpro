@@ -36,6 +36,12 @@ across as many messages as required by Discord's 2,000-character message
 limit. No publication item is removed to satisfy that transport limit. Mention
 parsing is disabled for every Discord message.
 
+The GitHub filename and index entry use the UTC publication date. The report
+heading identifies the completed calendar day covered by the scheduled run.
+For example, the run published on `2026-09-13` stores
+`daily-summaries/2026-09/2026-09-13.md` with the heading
+`Daily Summary - 2026-09-12`.
+
 A full summary execution stores `records.json`, `coverage.json`,
 `model-output.json`, `summary.md`, and `status.json` under
 `/var/lib/discord-summary/runs/YYYY-MM-DD`. `coverage.json` records discovered

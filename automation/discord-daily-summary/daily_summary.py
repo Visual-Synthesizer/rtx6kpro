@@ -2014,7 +2014,7 @@ def recover_interrupted_publication(
 
 
 def update_summary_index(
-    index_path: Path, report_date: str, month: str, summary: str
+    index_path: Path, publication_date: str, month: str, summary: str
 ) -> None:
     if not index_path.exists():
         return
@@ -2030,9 +2030,13 @@ def update_summary_index(
     first_highlight = re.sub(
         r"(?:\s*\[\((?:jump|\d+)\)\]\([^)]*\))+$", "", first_highlight
     )
-    entry = f"| [{report_date}]({month}/{report_date}.md) | {first_highlight[:100]} |"
+    entry = (
+        f"| [{publication_date}]({month}/{publication_date}.md) | "
+        f"{first_highlight[:100]} |"
+    )
     existing_entry = re.compile(
-        rf"^\| \[{re.escape(report_date)}\]\([^\n]+\) \|.*\|$", re.MULTILINE
+        rf"^\| \[{re.escape(publication_date)}\]\([^\n]+\) \|.*\|$",
+        re.MULTILINE,
     )
     if existing_entry.search(content):
         index_path.write_text(
@@ -2049,6 +2053,7 @@ def update_summary_index(
 
 def publish_to_github(
     settings: Settings,
+    publication_date: str,
     report_date: str,
     summary: str,
     github_token_path: Path,
@@ -2081,8 +2086,8 @@ def publish_to_github(
             "GIT_COMMITTER_EMAIL": "bot@voipmonitor.org",
         }
     )
-    month = report_date[:7]
-    relative_summary = Path("daily-summaries") / month / f"{report_date}.md"
+    month = publication_date[:7]
+    relative_summary = Path("daily-summaries") / month / f"{publication_date}.md"
     relative_index = Path("daily-summaries") / "README.md"
     recover_interrupted_publication(
         repository,
@@ -2097,7 +2102,7 @@ def publish_to_github(
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(summary + "\n", encoding="utf-8")
     index_path = repository / relative_index
-    update_summary_index(index_path, report_date, month, summary)
+    update_summary_index(index_path, publication_date, month, summary)
     run_git(
         ["add", str(relative_summary), str(relative_index)], repository, environment
     )
@@ -2106,12 +2111,18 @@ def publish_to_github(
     ).returncode
     if changed != 0:
         run_git(
-            ["commit", "-m", f"Daily summary - {report_date}"],
+            [
+                "commit",
+                "-m",
+                f"Daily summary publication - {publication_date} (covers {report_date})",
+            ],
             repository,
             environment,
         )
     else:
-        LOG.info("GitHub summary already matches %s", report_date)
+        LOG.info(
+            "GitHub summary for publication date %s already matches", publication_date
+        )
     ahead = subprocess.run(
         ["git", "rev-list", "--count", "origin/master..HEAD"],
         cwd=repository,
@@ -2141,7 +2152,14 @@ def publish_summary(
     credential_directory = Path(os.environ["CREDENTIALS_DIRECTORY"])
     github_token_path = credential_directory / "github-token"
     askpass_path = Path("/opt/discord-summary/git-askpass.sh")
-    publish_to_github(settings, report_date, summary, github_token_path, askpass_path)
+    publish_to_github(
+        settings,
+        run_date,
+        report_date,
+        summary,
+        github_token_path,
+        askpass_path,
+    )
 
     publication_path = settings.state_directory / "published" / f"{run_date}.json"
     publication = (
