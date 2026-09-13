@@ -253,6 +253,15 @@ Dependency Python patches are hash-locked in the recipe, not hidden vLLM edits.
 Schema enumeration credits yingru's existing
 [PyTorch #195110](https://github.com/pytorch/pytorch/pull/195110); immutable
 mutation metadata and CuTe sentinel identity are separate patches.
+PyTorch main already avoids full default expansion during mutation tracking
+through Jason Ansel's [#186175](https://github.com/pytorch/pytorch/pull/186175),
+landed as [aea557660](https://github.com/pytorch/pytorch/commit/aea557660abe6db6a5fd249cc7353adaf36d57f4).
+Its registration method passes 16 CPU value/version-counter parity cases
+against R37; a complete PyTorch upgrade is not qualified by that check.
+The CuTe identity correction is submitted as
+[NVIDIA CUTLASS #3634](https://github.com/NVIDIA/cutlass/pull/3634), with seven
+host-only regression methods and explicit manual-review/AI attribution.
+These upstream references do not change R37's pinned dependency versions.
 Fourteen native binaries are unchanged from R36.
 
 **Public source parity:** JJ `9342b1ae809` and B12X master `fd3c638c` include
