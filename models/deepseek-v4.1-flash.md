@@ -253,5 +253,12 @@ Dependency Python patches are hash-locked in the recipe, not hidden vLLM edits.
 Schema enumeration credits yingru's existing
 [PyTorch #195110](https://github.com/pytorch/pytorch/pull/195110); immutable
 mutation metadata and CuTe sentinel identity are separate patches.
-Fourteen native binaries are unchanged from R36. Source inclusion in the image
-does not merge source PRs into JJ, B12X master or LMCache.
+Fourteen native binaries are unchanged from R36.
+
+**Public source parity:** JJ `9342b1ae809` and B12X master `fd3c638c` include
+all listed vLLM/B12X PRs. Their complete Git trees match the respective R37
+image source trees exactly. The #743 merge preserves its authored commit and
+both ownership/indexer and prefill-capture test groups; 15 focused checks pass.
+Building equivalent vLLM/B12X sources alone does not install the PyTorch/CuTe
+dependency patches. The source-locked Docker recipe is still required for
+runtime equivalence. LMCache remains unchanged.
