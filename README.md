@@ -14,6 +14,7 @@ If you just want to run a model, use these stable hub pages first:
 |---|---|---|
 | GLM-5.3-Flash | [GLM-5.3-Flash](models/glm-5.3-flash.md) | Jovian Judgement Community source-locked NVIDIA 4-bit floating-point (NVFP4) target with no-spec, MTP:3, and Microscaling 8-bit floating-point (MXFP8) DFlash2 modes, qualified TP4/DCP1 performance, AA-LCR and KLD evaluation, optional DCP4 full-CKV prefill, and Docker launch. |
 | GLM-5.2 | [GLM-5.2 Runbook Hub](models/glm-5.2.md) | Fathomless vLLM, NVFP4, online FP8/MXFP8, B12X, DCP, MTP, KLD. |
+| DeepSeek-V4.1-Flash | [DeepSeek-V4.1-Flash](models/deepseek-v4.1-flash.md) | Native text/Vision, B12X, DSpark K7, and RAM or SSD Engram tables in the shared R36 image; TP4 launch and measured throughput. |
 | DeepSeek-V4-Flash / DSpark | [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) | Text and Vision checkpoints, DSpark, B12X, LMCache, Lucifer, and CUTLASS. |
 | Kimi | [Kimi Runbook Hub](models/kimi.md) | Kimi-K2.7-Code, DFlash, parser/tool-call runtime. |
 | Xiaomi MiMo | [MiMo Runbook Hub](models/mimo.md) | MiMo V2.5 Pro FP4-DFlash. |

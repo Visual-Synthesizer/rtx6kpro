@@ -1,0 +1,330 @@
+{
+  "status": "qualified",
+  "scope": "Experimental GLM Spark TP2/DCP2 MTP3 FP8, native single-image capacity, GPU-local text cache and engine-driven RAM/filesystem text checkpoints",
+  "image": {
+    "id": "sha256:a96dcc30390a9f8750f1e2000f3a4d12d6fe7b268b10d1143bf37a7e3ec91c5b",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:4f07c224110bac23e92f4f7d4b06a135c4a9b78bed5a17831292fecfc07b6ef8"
+    ],
+    "lock_sha256": "87bd0bbb39e690285567c1ed55551e2dbf8dcd14980944a0e8981abf276c1cd2"
+  },
+  "checks": {
+    "prefill_conditions_match_reference": true,
+    "artifact_audit": true,
+    "both_profiles_used_audited_image": true,
+    "context_limit_is_1048576": true,
+    "both_profiles_admit_one_million": true,
+    "source_lock_is_audited": true,
+    "ram_full_prompt_restore": true,
+    "restart_filesystem_restore": true,
+    "literal_and_instruction_cache_tiers": true,
+    "sidecar_has_no_cuda_devices": true,
+    "million_token_visual_answer": true,
+    "post_image_mixed_progress": true,
+    "post_image_cache_and_continuation": true,
+    "cold_prefill_sources": true,
+    "three_decode_cells_without_errors": true,
+    "prefill_within_two_percent_reference": true,
+    "verifier_within_two_percent_reference": true,
+    "no_automatic_restarts": true
+  },
+  "sources": {
+    "vllm": {
+      "commit": "7f4aecc66e857d093e012a2c57d03711bd23be4a",
+      "tree": "638917d5473e73a7d56e8d033b41c0cd34b68181",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "73f66f028c1b59e92728e9fbbe4a472bb7796248",
+      "tree": "e16e8830853ee030a89efcc2554871a42616be19",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "recipe": {
+    "repository": "https://github.com/local-inference-lab/blackwell-llm-docker.git",
+    "commit": "b91127b1a54997d9a67a8aead8c1acf97b194f7b",
+    "tree": "57077f4327b9e8d86c0c5dd97272ddfd0c33a612"
+  },
+  "conditions": {
+    "model_repository": "local-inference-lab/GLM-5.3-Flash-NVFP4-Spark",
+    "model_revision": "ec0c3ce05787aa471121235af483b098f11d3570",
+    "physical_gpus": [
+      12,
+      13
+    ],
+    "memory_offset": 0,
+    "graphics_offset": 0,
+    "hardware": "2x NVIDIA RTX PRO 6000 Blackwell Workstation",
+    "tp": 2,
+    "dcp": 2,
+    "scheduler_tokens": 3072,
+    "max_num_seqs": 4,
+    "max_model_len": 1048576,
+    "kv_bytes_per_rank": 4294967296,
+    "target_kv": "FP8",
+    "l1_gib": 64,
+    "cublas_workspace": ":4096:1",
+    "decode_temperature": 1,
+    "decode_top_p": 0.95,
+    "decode_warmup_seconds": 15,
+    "decode_measured_seconds": 30,
+    "prefill": {
+      "prompt_tokens": 32768,
+      "max_tokens": 1,
+      "duration_seconds": 30.0,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "prompt_type": "deterministic cyclic token IDs with unique leading nonce"
+    }
+  },
+  "kv_pool_tokens": {
+    "lmcache": [
+      1051958
+    ],
+    "vram": [
+      1051958
+    ]
+  },
+  "decode_samples": {
+    "output_tok_s": [
+      167.29745778550273,
+      170.76695279276007,
+      172.8700778888513
+    ],
+    "verifier_steps_s": [
+      67.32580571435719,
+      67.54663146390705,
+      67.70133594143019
+    ],
+    "accept_length": [
+      2.4848935116394255,
+      2.5281342546890424,
+      2.5534219596258003
+    ],
+    "position_acceptance": [
+      [
+        0.7573,
+        0.4685,
+        0.259
+      ],
+      [
+        0.7754,
+        0.4852,
+        0.2675
+      ],
+      [
+        0.7755,
+        0.4968,
+        0.2811
+      ]
+    ]
+  },
+  "decode_medians": {
+    "output_tok_s": 170.76695279276007,
+    "verifier_steps_s": 67.54663146390705,
+    "accept_length": 2.5281342546890424
+  },
+  "prefill_median_tok_s": 10648.879140417841,
+  "prefill_samples": [
+    {
+      "nonce": 1789294915344505903,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.1339668500004336,
+      "tok_per_sec": 10455.758330690533,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294918486846060,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.0691723610507324,
+      "tok_per_sec": 10676.493902995355,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294921565211213,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.0611399519257247,
+      "tok_per_sec": 10704.508945886666,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294924634103994,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.094678448047489,
+      "tok_per_sec": 10588.499112298456,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294927736693100,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.0769744380377233,
+      "tok_per_sec": 10649.422235986176,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294930821810446,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.070367585052736,
+      "tok_per_sec": 10672.337787671499,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294933899947080,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.17280722304713,
+      "tok_per_sec": 10327.762670853343,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294937080624292,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.0772883070167154,
+      "tok_per_sec": 10648.336044849504,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294940165827828,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.197976463008672,
+      "tok_per_sec": 10246.47941566515,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    },
+    {
+      "nonce": 1789294943371679369,
+      "prompt_tokens": 32768,
+      "ttft_seconds": 3.0762043920112774,
+      "tok_per_sec": 10652.088035858924,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      }
+    }
+  ],
+  "same_gpu_reference": {
+    "image_id": "sha256:71a4f7aa6aba3e7050cd559787f2670ef713756c6df92f3704aba609ec786bb4",
+    "directory": "results/glm-spark-tp2-experimental-release-20260913-r2/r1-control",
+    "prefill_file": "results/glm-spark-tp2-experimental-release-20260913-r2/r1-control/prefill-32768.json",
+    "decode": {
+      "output_tok_s": [
+        163.37615088103485,
+        161.372170248516,
+        168.20343858812598
+      ],
+      "verifier_steps_s": [
+        67.17056601209656,
+        67.0689540466875,
+        67.53471394759082
+      ]
+    },
+    "prefill_tok_s": 10605.832832654116,
+    "changes_percent": {
+      "output_tok_s": 4.523794857369956,
+      "verifier_steps_s": 0.5598664327806313,
+      "prefill_tok_s": 0.4058739039445314
+    }
+  },
+  "lmcache": {
+    "cold_seconds": 139.687,
+    "ram": {
+      "effective_stored_gib_per_second": 8.393,
+      "elapsed_seconds": 0.808,
+      "output_token_ids": null,
+      "prompt_sources": {
+        "external_kv_transfer": 1048320,
+        "local_cache_hit": 0,
+        "local_compute": 0
+      },
+      "request_id": "cmpl-a334b630f25567b9",
+      "text": "Error"
+    },
+    "filesystem_after_restart": {
+      "effective_stored_gib_per_second": 5.3,
+      "elapsed_seconds": 1.279,
+      "output_token_ids": null,
+      "prompt_sources": {
+        "external_kv_transfer": 1048320,
+        "local_cache_hit": 0,
+        "local_compute": 0
+      },
+      "request_id": "cmpl-961ee6acf5652b1f",
+      "text": "Error"
+    },
+    "literal_tier_checks": {
+      "all_answers_exact": true,
+      "apc_avoided_external_transfer": true,
+      "apc_used_local_prefix": true,
+      "cold_computed_full_prompt": true,
+      "disk_restored_objects_remain_resident": true,
+      "external_tiers_restored_all_chunks": true,
+      "instruction_answers_exact": true,
+      "instruction_boundary_is_partial": true,
+      "instruction_changed_system_sources_exact": true,
+      "instruction_cold_sources_exact": true,
+      "instruction_local_sibling_sources_exact": true,
+      "instruction_ram_sibling_sources_exact": true,
+      "instruction_restart_sibling_sources_exact": true,
+      "retained_ram_is_bounded": true,
+      "retained_replay_preserves_ram_inventory": true,
+      "retained_replay_zero_recompute": true
+    }
+  },
+  "vision": {
+    "prompt_tokens": 1048320,
+    "elapsed_seconds": 142.99192007491365,
+    "minimum_free_bytes": {
+      "12": 243597312,
+      "13": 243597312
+    },
+    "capacity_qualified": true
+  },
+  "limitations": [
+    "Original Max-Q and dense-projection community crashes not reproduced; no universal crash-fix claim.",
+    "Exact multimodal semantic endpoint restore unsupported; aligned fallback may recompute a tail.",
+    "Filesystem restore includes OS page cache, not cold physical disk.",
+    "Long synthetic text checks transfer attribution and output equality, not language quality.",
+    "No DFlash, multiple maximum-resolution images, extended soak or other GPU-model qualification."
+  ]
+}

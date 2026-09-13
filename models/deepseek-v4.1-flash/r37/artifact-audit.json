@@ -1,0 +1,43 @@
+{
+  "status": "qualified",
+  "checks": {
+    "two_layers": true,
+    "lock_and_label_match": true,
+    "committed_source_trees_match_lock": true,
+    "native_binaries_unchanged": true,
+    "python_dependency_outputs_match": true,
+    "prefill_graph_default_off": true,
+    "decode_graph_configuration_retained": true
+  },
+  "image": {
+    "id": "sha256:e0a2d72272f7dc17583f5e9c8614a2610d6d3932414a8d32ca1cd57dafb8d803",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:be6002bd9f890c9af587a1ba7d0e387e14bbfdf8cb46220936e80b2bde43224d"
+    ],
+    "lock_sha256": "0729ad2c79d932aa8cd581a3b89f1f1b9cc9f0b9707547969ed989739323570b"
+  },
+  "sources": {
+    "vllm": {
+      "commit": "c687594b8a8082e18af9fe2f64eb5f9ee442e251",
+      "tree": "3fb88fdfd0b5acdd4460076c6443a4299e5edf7d",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "f1c4e9dd5b1d841c10cda70ee49c3190cf3db0be",
+      "tree": "480ea232d52fff4271b0412470d4ec340196735a",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "dependency_outputs": {
+    "usr/local/lib/python3.12/dist-packages/torch/_library/utils.py": "7e694fb5c280d4cb671415d6b14a6975f9ed42c8fb3c9907e93c1a3d57493e64",
+    "usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py": "aabff0867064a80dda974986ea3a31659105e3020248562f1de1cf89daf759cc",
+    "opt/venv/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/jit_executor.py": "a36eea9adcb75546aa5a373809581772234d13392df74a9f4854291e0e9e4221"
+  },
+  "unchanged_native_binary_count": 14
+}

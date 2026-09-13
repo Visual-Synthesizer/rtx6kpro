@@ -1,0 +1,12 @@
+{
+  "status": "verified-registry-content",
+  "repository": "localinferencelab/vllm",
+  "tag": "jovian-judgement-community-tp2-experimental-20260913-r2",
+  "digest": "sha256:c549afc8dc065fa63246618761ec2563af78ff70dae6409ed5c72acdc850f795",
+  "image_id": "sha256:a96dcc30390a9f8750f1e2000f3a4d12d6fe7b268b10d1143bf37a7e3ec91c5b",
+  "rootfs_layers": 2,
+  "source_lock_sha256": "87bd0bbb39e690285567c1ed55551e2dbf8dcd14980944a0e8981abf276c1cd2",
+  "pull_by_digest_verified": true,
+  "registry_config_matches_tested_image": true,
+  "qualification": "results/glm-spark-tp2-experimental-release-20260913-r2/qualification.json"
+}

@@ -4,6 +4,10 @@ Use this page as the stable entry point for DeepSeek-V4-Flash and DSpark on RTX
 PRO 6000 Blackwell. Release pages are immutable measurement and deployment
 specifications.
 
+For the distinct DeepSeek-V4.1 model and its native DSpark/Engram layout, use
+[DeepSeek-V4.1-Flash](deepseek-v4.1-flash.md). Its RAM/SSD table controls do not
+configure KV offload for DeepSeek-V4-Flash.
+
 ## Recommended Deployment
 
 | Need | Page |

@@ -25,19 +25,20 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 
 - [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) - `models/deepseek-v4-flash.md`
 - [DeepSeek-V4-Pro TP16 Lucifer on 16x RTX PRO 6000 Blackwell](models/deepseek-v4-pro-tp16-lucifer.md) - `models/deepseek-v4-pro-tp16-lucifer.md`
+- [DeepSeek-V4.1-Flash — Jovian Judgement](models/deepseek-v4.1-flash.md) - `models/deepseek-v4.1-flash.md`
 - [DeepSeek-V4-Flash v1 on 8x RTX PRO 6000 Blackwell](models/ds4-flash-v1.md) - `models/ds4-flash-v1.md`
 - [DeepSeek-V4-Flash v2 B12X PR11 vs Lucifer Cutlass](models/ds4-flash-v2.md) - `models/ds4-flash-v2.md`
 - [DeepSeek-V4-Flash v3 B12X vs Standard Lucifer Cutlass](models/ds4-flash-v3.md) - `models/ds4-flash-v3.md`
 - [DeepSeek-V4-Flash v4 Chthonic B12X](models/ds4-flash-v4.md) - `models/ds4-flash-v4.md`
 - [DeepSeek-V4-Flash v5 Eldritch DS4Fix](models/ds4-flash-v5.md) - `models/ds4-flash-v5.md`
 - [DeepSeek-V4-Flash v6 Eldritch Enlightenment](models/ds4-flash-v6.md) - `models/ds4-flash-v6.md`
+- [DeepSeek V4 on the shared Jovian Judgement image](models/ds4-jovian-community-r29.md) - `models/ds4-jovian-community-r29.md`
 - [DeepSeek-V4-Flash Jovian Judgement r4](models/ds4-jovian-judgement-r4.md) - `models/ds4-jovian-judgement-r4.md`
 - [DeepSeek-V4-Flash Jovian Judgement r5](models/ds4-jovian-judgement-r5.md) - `models/ds4-jovian-judgement-r5.md`
 - [DeepSeek-V4-Flash Jovian Judgement r6](models/ds4-jovian-judgement-r6.md) - `models/ds4-jovian-judgement-r6.md`
 - [DeepSeek-V4-Flash Jovian Judgement r7](models/ds4-jovian-judgement-r7.md) - `models/ds4-jovian-judgement-r7.md`
 - [DeepSeek-V4-Flash Jovian Judgement r8](models/ds4-jovian-judgement-r8.md) - `models/ds4-jovian-judgement-r8.md`
 - [DeepSeek-V4-Flash Jovian Judgement r9](models/ds4-jovian-judgement-r9.md) - `models/ds4-jovian-judgement-r9.md`
-- [DeepSeek V4 on the shared Jovian Judgement image](models/ds4-jovian-community-r29.md) - `models/ds4-jovian-community-r29.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r2](models/ds4-vision-jovian-judgement-r2.md) - `models/ds4-vision-jovian-judgement-r2.md`
 - [DeepSeek-V4-Flash Vision Jovian Judgement r3](models/ds4-vision-jovian-judgement-r3.md) - `models/ds4-vision-jovian-judgement-r3.md`
 - [DeepSeek-V4-Flash-0731 Infernal Invocation r10](models/ds4dspark-infernal-invocation-r10.md) - `models/ds4dspark-infernal-invocation-r10.md`
@@ -76,11 +77,18 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM community R27 build inputs](models/glm-5.3-flash/build/README.md) - `models/glm-5.3-flash/build/README.md`
 - [GLM-5.3-Flash QAD step 2,500 verifier-backed behavioral fidelity](models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash QAD TV-nucleus step 2,500 verifier-backed behavioral fidelity](models/glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md`
+- [Concurrent immutable checkpoint publication: R32 qualification](models/glm-5.3-flash/validation/concurrent-checkpoints-r32.md) - `models/glm-5.3-flash/validation/concurrent-checkpoints-r32.md`
+- [NVFP4 shared-input prefill and filesystem eviction: R33 qualification](models/glm-5.3-flash/validation/fp4-prefill-filesystem-r33.md) - `models/glm-5.3-flash/validation/fp4-prefill-filesystem-r33.md`
 - [GLM FP8 serving and checkpoint qualification](models/glm-5.3-flash/validation/fp8-serving-r28.md) - `models/glm-5.3-flash/validation/fp8-serving-r28.md`
+- [B12X MoE deployment default: R34 qualification](models/glm-5.3-flash/validation/moe-backend-default-r34.md) - `models/glm-5.3-flash/validation/moe-backend-default-r34.md`
 - [GLM FP8 scheduler and launcher qualification](models/glm-5.3-flash/validation/scheduler-serving-r28.1.md) - `models/glm-5.3-flash/validation/scheduler-serving-r28.1.md`
+- [Shared Jovian Judgement serving qualification: R29](models/glm-5.3-flash/validation/shared-serving-r29.md) - `models/glm-5.3-flash/validation/shared-serving-r29.md`
+- [Shared Jovian Judgement serving qualification: R30](models/glm-5.3-flash/validation/shared-serving-r30.md) - `models/glm-5.3-flash/validation/shared-serving-r30.md`
+- [SwiGLU-correct public source composition: R35 release](models/glm-5.3-flash/validation/swiglu-reviewed-composition-r35.md) - `models/glm-5.3-flash/validation/swiglu-reviewed-composition-r35.md`
+- [Warmup buffer reuse and host-RAM retention: R31 qualification](models/glm-5.3-flash/validation/warmup-retention-r31.md) - `models/glm-5.3-flash/validation/warmup-retention-r31.md`
 - [GLM-5.3-Flash verifier-backed behavioral fidelity](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md`
+- [GLM-5.3-Flash Spark on two GPUs](models/glm-5.3-flash-spark-tp2.md) - `models/glm-5.3-flash-spark-tp2.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
-- [Shared Jovian Judgement R29 qualification and changelog](models/glm-5.3-flash/validation/shared-serving-r29.md) - `models/glm-5.3-flash/validation/shared-serving-r29.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
 - [GLM-5.1 on RTX PRO 6000 Blackwell](models/glm5.1/README.md) - `models/glm5.1/README.md`
 - [B12X W4A16 Regression Checkpoint - 2026-05-15](models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md) - `models/glm5.1/b12x-w4a16-regression-checkpoint-2026-05-15.md`
@@ -170,6 +178,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Qwen3.5-397B-A17B on RTX PRO 6000 Blackwell](models/qwen35-397b.md) - `models/qwen35-397b.md`
 - [Qwen3.8-27B on RTX PRO 6000 Blackwell](models/qwen38-27b.md) - `models/qwen38-27b.md`
 - [Qwen TP1/MTP3 qualification for the Jovian Judgement R28.1 image](models/qwen38-flash-next/validation/r28.1-tp1.md) - `models/qwen38-flash-next/validation/r28.1-tp1.md`
+- [Qwen TP1 engine throughput comparison](models/qwen38-flash-next/validation/tp1-engine-comparison.md) - `models/qwen38-flash-next/validation/tp1-engine-comparison.md`
 - [Qwen3.8-Flash-Next](models/qwen38-flash-next.md) - `models/qwen38-flash-next.md`
 - [Qwen3.8-27B QSRT K5 dense-MLP recovery](models/qwen38-qsrt-k5-r16.md) - `models/qwen38-qsrt-k5-r16.md`
 - [Qwen3.8-27B QSRT K5 recovery: what the training result means](models/qwen38-qsrt-k5-training-result.md) - `models/qwen38-qsrt-k5-training-result.md`
@@ -446,8 +455,13 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-09-05](daily-summaries/2026-09/2026-09-06.md) - `daily-summaries/2026-09/2026-09-06.md`
 - [Daily Summary — 2026-09-06](daily-summaries/2026-09/2026-09-07.md) - `daily-summaries/2026-09/2026-09-07.md`
 - [Daily Summary — 2026-09-07](daily-summaries/2026-09/2026-09-08.md) - `daily-summaries/2026-09/2026-09-08.md`
+- [Daily Summary — 2026-09-08](daily-summaries/2026-09/2026-09-09.md) - `daily-summaries/2026-09/2026-09-09.md`
+- [Daily Summary — 2026-09-09](daily-summaries/2026-09/2026-09-10.md) - `daily-summaries/2026-09/2026-09-10.md`
+- [Daily Summary — 2026-09-10](daily-summaries/2026-09/2026-09-11.md) - `daily-summaries/2026-09/2026-09-11.md`
+- [Daily Summary - 2026-09-11](daily-summaries/2026-09/2026-09-12.md) - `daily-summaries/2026-09/2026-09-12.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
 
+- [Discord Daily Summary Service](automation/discord-daily-summary/README.md) - `automation/discord-daily-summary/README.md`
 - [Qwen3.5 SGLang KLD reproduction skill](scripts/kld-eval-skill.md) - `scripts/kld-eval-skill.md`
