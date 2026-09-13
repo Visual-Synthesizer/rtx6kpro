@@ -3,7 +3,7 @@
 Automated daily summaries of the [RTX6kPRO Discord](https://discord.gg/X54jjmcxWJ) community activity.
 Each highlight links directly to the relevant Discord message.
 
-*Auto-generated daily at 08:07 UTC. Source: Discord bot → Claude → Discord + wiki.*
+*Auto-generated daily at 08:07 UTC. Source: Discord bot → local DeepSeek-V4-Flash → Discord + wiki.*
 
 
 ## March 2026
