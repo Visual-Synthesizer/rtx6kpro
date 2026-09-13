@@ -2,19 +2,39 @@
 
 Status: **implemented**. The service reads public community messages from the
 preceding 24 hours, including active and recently archived public threads. It
-extracts technical events from bounded conversation chunks, selects a daily
-digest from the complete event set, validates every cited Discord URL against
-the original message, renders deterministic Markdown, and publishes the same
-document to Discord and the `rtx6kpro` repository.
+extracts technical events from bounded conversation chunks, audits every
+extracted event, validates every publication item against its cited original
+messages, renders deterministic Markdown, and publishes the same document to
+Discord and the `rtx6kpro` repository.
 
 The model receives no tools. Discord messages are serialized as untrusted JSON
 records, and every model stage returns constrained JSON rather than Markdown.
 Each eligible record is primary evidence in exactly one extraction chunk;
 adjacent chunks may repeat records as explicitly marked conversation context.
-No record is discarded to fit a single model prompt. A citation-verification
-call rewrites or rejects every selected candidate using only its cited original
-records. The Python renderer accepts only source URLs present in the fetched
-records. Discord publication disables mention parsing.
+The extractor records an explicit disposition and reason for every primary
+record and fails when any record is omitted. Input chunking bounds individual
+model requests without dropping records. The editorial audit marks
+each extracted event as `publish`, `duplicate`, `low_signal`, or `unsupported`
+and records a reason. Ranking determines section placement rather than imposing
+an item-count limit. A citation-verification call accepts or rejects each
+publication item without rewriting it. Rejected items enter a separate repair
+pass with the verifier's reason and original evidence, and repaired text must
+pass the citation verifier again. The Python renderer accepts only source URLs
+present in the fetched records.
+
+Every model call uses the checkpoint's supported sampling contract
+(`temperature=1`, `top_p=1`, deterministic `seed=0`) with thinking enabled and
+`reasoning_effort=high`. Requests omit `max_tokens`; the model's context window
+is the only generation ceiling. Independent extraction chunks run concurrently
+according to `model_concurrency`, while the editorial and citation-verification
+passes each receive the complete extracted event set.
+
+The report separates key highlights, releases and fixes, regressions and user
+reports, benchmarks and implementation findings, and active work. GitHub stores
+the complete report. Discord receives the same report split at line boundaries
+across as many messages as required by Discord's 2,000-character message
+limit. No publication item is removed to satisfy that transport limit. Mention
+parsing is disabled for every Discord message.
 
 A full summary execution stores `records.json`, `coverage.json`,
 `model-output.json`, `summary.md`, and `status.json` under
@@ -80,7 +100,12 @@ sudo systemd-run --wait --pipe --collect \
 Pass `--records-file /var/lib/discord-summary/runs/YYYY-MM-DD/records.json` to
 repeat model and renderer qualification without reading Discord again.
 Use `--fetch-only` to verify Discord source discovery and write the coverage
-artifacts without invoking the model or either publisher.
+artifacts without invoking the model or either publisher. Pass
+`--replace-discord-messages` only when replacing a published report: the bot
+posts all replacement parts successfully before deleting the prior message
+set. `--publish-existing-run /var/lib/discord-summary/runs/YYYY-MM-DD` publishes
+an already qualified `summary.md` without repeating collection or model calls;
+the run's `status.json` must have status `ready` or `published`.
 
 The production schedule is 08:07 UTC with a maximum randomized delay of one
 minute. `systemctl start discord-daily-summary.service` is a publishing run;

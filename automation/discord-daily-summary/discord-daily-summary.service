@@ -33,7 +33,7 @@ RestrictNamespaces=yes
 RestrictSUIDSGID=yes
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
-TimeoutStartSec=30min
+TimeoutStartSec=60min
 
 [Install]
 WantedBy=multi-user.target

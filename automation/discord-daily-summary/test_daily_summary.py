@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import Mock, patch
 
 
 MODULE_PATH = Path(__file__).with_name("daily_summary.py")
@@ -39,64 +40,71 @@ def record(
 
 
 class RenderSummaryTest(unittest.TestCase):
+    @staticmethod
+    def item(source, text: str = "Measured 123 tok/s.", event_id: str = "e0001"):
+        return {
+            "section": "benchmarks_and_implementation_findings",
+            "text": text,
+            "event_ids": [event_id],
+            "source_urls": [source.url],
+        }
+
     def test_renders_only_validated_fields(self) -> None:
         source = record()
-        raw = {
-            "highlights": [
-                {"text": "Measured 123 tok/s.", "source_urls": [source.url]}
-            ],
-            "channels": [
-                {"description": "Performance results", "source_urls": [source.url]}
-            ],
-        }
-        rendered = daily_summary.render_summary(raw, [source], "2026-09-10", 1900)
+        raw = {"items": [self.item(source)]}
+        rendered = daily_summary.render_summary(raw, [source], "2026-09-10")
         self.assertTrue(rendered.startswith("# Daily Summary - 2026-09-10"))
         self.assertIn("Measured 123 tok/s.", rendered)
+        self.assertIn("## Benchmarks and implementation findings", rendered)
         self.assertNotIn("One thing before", rendered)
 
     def test_rejects_hallucinated_source_urls(self) -> None:
         source = record()
         raw = {
-            "highlights": [
+            "items": [
                 {
-                    "text": "Unsupported claim",
+                    **self.item(source, "Unsupported claim"),
                     "source_urls": ["https://discord.com/channels/1/2/999"],
                 }
-            ],
-            "channels": [],
+            ]
         }
-        self.assertIsNone(
-            daily_summary.render_summary(raw, [source], "2026-09-10", 1900)
-        )
+        with self.assertRaisesRegex(ValueError, "outside the daily record set"):
+            daily_summary.render_summary(raw, [source], "2026-09-10")
 
     def test_accepts_no_signal_result(self) -> None:
-        self.assertIsNone(
-            daily_summary.render_summary(
-                {"highlights": [], "channels": []}, [], "2026-09-10", 1900
-            )
-        )
+        self.assertIsNone(daily_summary.render_summary({"items": []}, [], "2026-09-10"))
 
     def test_disables_mass_mentions(self) -> None:
         source = record()
-        raw = {
-            "highlights": [{"text": "@everyone test", "source_urls": [source.url]}],
-            "channels": [],
-        }
-        rendered = daily_summary.render_summary(raw, [source], "2026-09-10", 1900)
+        raw = {"items": [self.item(source, "@everyone test")]}
+        rendered = daily_summary.render_summary(raw, [source], "2026-09-10")
         self.assertNotIn("@everyone", rendered)
 
-    def test_drops_duplicate_source(self) -> None:
+    def test_rejects_duplicate_event(self) -> None:
         source = record()
         raw = {
-            "highlights": [
-                {"text": "First", "source_urls": [source.url]},
-                {"text": "Duplicate", "source_urls": [source.url]},
+            "items": [
+                self.item(source, "First"),
+                self.item(source, "Duplicate"),
             ],
-            "channels": [],
         }
-        rendered = daily_summary.render_summary(raw, [source], "2026-09-10", 1900)
-        self.assertIn("First", rendered)
-        self.assertNotIn("Duplicate", rendered)
+        with self.assertRaisesRegex(ValueError, "repeated event identifiers"):
+            daily_summary.render_summary(raw, [source], "2026-09-10")
+
+    def test_splits_without_dropping_bullets(self) -> None:
+        source = record()
+        raw = {
+            "items": [
+                self.item(source, f"Finding {index} " + "x" * 50, f"e{index:04d}")
+                for index in range(1, 8)
+            ]
+        }
+        rendered = daily_summary.render_summary(raw, [source], "2026-09-10")
+        parts = daily_summary.split_discord_messages(rendered, 180)
+        self.assertGreater(len(parts), 1)
+        self.assertTrue(all(len(part) <= 180 for part in parts))
+        for index in range(1, 8):
+            self.assertEqual(sum(f"Finding {index} " in part for part in parts), 1)
 
     def test_truncates_at_a_word_boundary(self) -> None:
         text = daily_summary.clean_summary_text("alpha beta gamma", 12)
@@ -141,37 +149,6 @@ class ExtractionChunkTest(unittest.TestCase):
         source = record(content="x" * 2_000)
         with self.assertRaisesRegex(ValueError, "exceeds the extraction chunk limit"):
             daily_summary.build_extraction_chunks([source], 1_000, 0)
-
-
-class SelectionBatchTest(unittest.TestCase):
-    def test_every_event_is_present_in_exactly_one_batch(self) -> None:
-        events = [
-            {
-                "text": f"event-{index}-" + "x" * 300,
-                "source_urls": [record(message_id=str(index)).url],
-            }
-            for index in range(12)
-        ]
-        batches = daily_summary.build_selection_batches(events, 1_500)
-        flattened = [event for batch in batches for event in batch]
-        self.assertEqual(flattened, events)
-        self.assertGreater(len(batches), 1)
-        self.assertTrue(
-            all(
-                daily_summary.selection_payload_size(batch) <= 1_500
-                for batch in batches
-            )
-        )
-
-    def test_deduplicates_shortlists_by_source_set(self) -> None:
-        source = record()
-        events = [
-            {"text": "first", "source_urls": [source.url]},
-            {"text": "FIRST", "source_urls": [source.url]},
-        ]
-        self.assertEqual(
-            daily_summary.deduplicate_selection_events(events), [events[0]]
-        )
 
 
 class SummaryPolicyTest(unittest.TestCase):
@@ -230,6 +207,103 @@ class PerformanceClaimTest(unittest.TestCase):
             )
         )
 
+
+class EditorialValidationTest(unittest.TestCase):
+    def test_requires_an_audit_decision_for_every_event(self) -> None:
+        source = record()
+        events = [
+            {
+                "id": "e0001",
+                "text": "Measured 123 tok/s.",
+                "source_urls": [source.url],
+            },
+            {
+                "id": "e0002",
+                "text": "A second finding.",
+                "source_urls": [source.url],
+            },
+        ]
+        raw = {
+            "audit": [
+                {"event_id": "e0001", "disposition": "publish", "reason": "Useful"}
+            ],
+            "items": [
+                {
+                    "section": "key_highlights",
+                    "text": "Measured 123 tok/s.",
+                    "event_ids": ["e0001"],
+                    "source_urls": [source.url],
+                }
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "omitted extracted events"):
+            daily_summary.validate_editorial_output(raw, events, {source.url: source})
+
+    def test_preserves_secondary_technical_events(self) -> None:
+        source = record()
+        events = [
+            {
+                "id": "e0001",
+                "text": "A release was published.",
+                "source_urls": [source.url],
+            },
+            {
+                "id": "e0002",
+                "text": "A benchmark was measured.",
+                "source_urls": [source.url],
+            },
+        ]
+        raw = {
+            "audit": [
+                {"event_id": "e0001", "disposition": "publish", "reason": "Release"},
+                {"event_id": "e0002", "disposition": "publish", "reason": "Benchmark"},
+            ],
+            "items": [
+                {
+                    "section": "releases_and_fixes",
+                    "text": "A release was published.",
+                    "event_ids": ["e0001"],
+                    "source_urls": [source.url],
+                },
+                {
+                    "section": "benchmarks_and_implementation_findings",
+                    "text": "A benchmark was measured.",
+                    "event_ids": ["e0002"],
+                    "source_urls": [source.url],
+                },
+            ],
+        }
+        validated = daily_summary.validate_editorial_output(
+            raw, events, {source.url: source}
+        )
+        self.assertEqual(len(validated["items"]), 2)
+
+
+class ModelRequestTest(unittest.TestCase):
+    @patch.object(daily_summary.requests, "post")
+    def test_uses_reasoning_without_an_output_token_cap(self, post: Mock) -> None:
+        response = Mock()
+        response.json.return_value = {
+            "choices": [
+                {"finish_reason": "stop", "message": {"content": '{"value":1}'}}
+            ],
+            "usage": {},
+        }
+        response.raise_for_status.return_value = None
+        post.return_value = response
+        client = daily_summary.LocalModelClient("http://model", "model")
+
+        client.complete_json("system", "user", {"type": "json_object"}, timeout=10)
+
+        payload = post.call_args.kwargs["json"]
+        self.assertNotIn("max_tokens", payload)
+        self.assertEqual(payload["temperature"], 1.0)
+        self.assertEqual(payload["top_p"], 1.0)
+        self.assertEqual(
+            payload["chat_template_kwargs"],
+            {"thinking": True, "reasoning_effort": "high"},
+        )
+
     def test_keeps_single_author_comparison(self) -> None:
         first = record(message_id="10")
         second = record(message_id="11")
@@ -239,6 +313,45 @@ class PerformanceClaimTest(unittest.TestCase):
                 "Measured 100 tok/s and 50 tok/s", list(records), records
             )
         )
+
+
+class DiscordPublicationTest(unittest.TestCase):
+    def test_replace_posts_every_part_before_deleting_prior_messages(self) -> None:
+        client = daily_summary.DiscordClient("token", "guild")
+        client.publish = Mock(side_effect=["new-1", "new-2"])
+        client.delete_message = Mock()
+
+        result = client.publish_many(
+            "summary-channel",
+            ["first part", "second part"],
+            ["prior-1", "prior-2"],
+            replace=True,
+        )
+
+        self.assertEqual(result, ["new-1", "new-2"])
+        self.assertEqual(client.publish.call_count, 2)
+        self.assertEqual(
+            client.delete_message.call_args_list,
+            [
+                unittest.mock.call("summary-channel", "prior-1"),
+                unittest.mock.call("summary-channel", "prior-2"),
+            ],
+        )
+
+    def test_replace_removes_partial_posts_and_preserves_prior_messages(self) -> None:
+        client = daily_summary.DiscordClient("token", "guild")
+        client.publish = Mock(side_effect=["new-1", RuntimeError("post failed")])
+        client.delete_message = Mock()
+
+        with self.assertRaisesRegex(RuntimeError, "post failed"):
+            client.publish_many(
+                "summary-channel",
+                ["first part", "second part"],
+                ["prior-1"],
+                replace=True,
+            )
+
+        client.delete_message.assert_called_once_with("summary-channel", "new-1")
 
 
 class PublicationRecoveryTest(unittest.TestCase):

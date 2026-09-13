@@ -8,9 +8,9 @@
   "policy_path": "/etc/discord-summary/policy.json",
   "window_hours": 24,
   "maximum_message_characters": 0,
-  "maximum_chunk_characters": 60000,
+  "maximum_chunk_characters": 30000,
   "chunk_overlap_records": 3,
-  "maximum_summary_characters": 1900,
+  "model_concurrency": 4,
   "excluded_channel_ids": [
     "1488533923687432352",
     "1543442118972932167",
