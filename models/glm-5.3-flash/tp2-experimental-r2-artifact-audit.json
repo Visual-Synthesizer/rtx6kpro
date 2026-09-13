@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "checks": {
+    "two_rootfs_layers": true,
+    "component_implementations_unchanged": true,
+    "source_commits_trees_match_control": true,
+    "clean_sources_match_manifest": true,
+    "launcher_hashes_match_manifest": true,
+    "installed_lock_and_label_match": true,
+    "recipe_identity_matches_manifest": true,
+    "entrypoint_is_tp2": true
+  },
+  "changed_package_files": [
+    "vllm/_version.py"
+  ],
+  "launcher_checks": {
+    "/usr/local/bin/serve-glm-spark-tp2.sh": true,
+    "/usr/local/bin/serve-glm53-flash.sh": true,
+    "/usr/local/libexec/serve-glm53-flash-lmcache-cache-complete.sh": true,
+    "/usr/local/bin/serve-glm53-flash-nvfp4-dflash2.sh": true,
+    "/usr/local/libexec/serve-glm53-flash-nvfp4-dflash2.sh": true
+  },
+  "sources": {
+    "vllm": {
+      "commit": "7f4aecc66e857d093e012a2c57d03711bd23be4a",
+      "tree": "638917d5473e73a7d56e8d033b41c0cd34b68181",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "73f66f028c1b59e92728e9fbbe4a472bb7796248",
+      "tree": "e16e8830853ee030a89efcc2554871a42616be19",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "reference_image": "sha256:71a4f7aa6aba3e7050cd559787f2670ef713756c6df92f3704aba609ec786bb4",
+  "image": {
+    "id": "sha256:a96dcc30390a9f8750f1e2000f3a4d12d6fe7b268b10d1143bf37a7e3ec91c5b",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:4f07c224110bac23e92f4f7d4b06a135c4a9b78bed5a17831292fecfc07b6ef8"
+    ],
+    "lock_sha256": "87bd0bbb39e690285567c1ed55551e2dbf8dcd14980944a0e8981abf276c1cd2"
+  }
+}
