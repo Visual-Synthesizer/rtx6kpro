@@ -10,7 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
-| [2026-09-13](2026-09/2026-09-13.md) | KV cache 2,997,801 tokens; max concurrency 2.86x at 1M context; PCIe4, power-limited 220W. [(1)](htt |
+| [2026-09-13](2026-09/2026-09-13.md) | SGLang guide ormandj/sglang-glm53-flash-sm120 v0.4.3 and live verification report max_total_tokens=5 |
 | [2026-09-12](2026-09/2026-09-12.md) | Qwen3.8 Flash Next TP2 decode collapses above 16 concurrent requests (1340 tps at C16, 120 tps at C3 |------------|
 | [2026-09-11](2026-09/2026-09-11.md) | DeepSeek-V4.1-Flash launches: 552B MoE + 196B "Engram" params, native FP4 experts, 1M ctx, tunable r |
 | [2026-09-10](2026-09/2026-09-10.md) | DeepSeek-V4.1-Flash released: new "Engram" architecture, 552B backbone + 196B Engram params, KV cach |
