@@ -1,0 +1,90 @@
+{
+  "image_id": "sha256:5ae584725299f10d00f37f40f859e22a709577a6a55315e636ae9598ad02a155",
+  "container": "ds41-r38-ram-gpu4-7",
+  "image_reference": "localinferencelab/vllm:jovian-judgement-community-20260914-r38",
+  "command": [
+    "--prefill-compute-share",
+    "0.4",
+    "--prefill-schedule-interval",
+    "1",
+    "--max-parallel-prefills",
+    "1",
+    "--limit-mm-per-prompt",
+    "{\"image\":2}"
+  ],
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/root/vllm/sglang/models",
+      "Destination": "/model",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/root/vllm/cache/ds41-r36",
+      "Destination": "/cache",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "devices": [
+    {
+      "Driver": "",
+      "Count": 0,
+      "DeviceIDs": [
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "Capabilities": [
+        [
+          "gpu"
+        ]
+      ],
+      "Options": {}
+    }
+  ],
+  "driver": "615.71.09",
+  "gpus": [
+    {
+      "gpu": 4,
+      "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2827,
+      "temperature_c": 63
+    },
+    {
+      "gpu": 5,
+      "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2827,
+      "temperature_c": 61
+    },
+    {
+      "gpu": 6,
+      "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2850,
+      "temperature_c": 59
+    },
+    {
+      "gpu": 7,
+      "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2835,
+      "temperature_c": 61
+    }
+  ]
+}

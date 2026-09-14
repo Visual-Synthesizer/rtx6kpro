@@ -1,0 +1,222 @@
+{
+  "status": "qualified",
+  "samples": [
+    {
+      "case": "cold",
+      "passed": true,
+      "expected": "9664",
+      "content": "9664",
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 14873,
+        "local_cache_hit": 0
+      },
+      "elapsed_seconds": 0.7700855979928747,
+      "response": {
+        "id": "chatcmpl-bd4ee826ec91aa9c",
+        "object": "chat.completion",
+        "created": 1789348575,
+        "model": "DeepSeek-V4.1-Flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "9664",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.26.1rc0+glm53.r37.vllmc687594b-tp4-c329f89b",
+        "usage": {
+          "prompt_tokens": 14873,
+          "total_tokens": 14876,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    },
+    {
+      "case": "repeat",
+      "passed": true,
+      "expected": "9664",
+      "content": "9664",
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 281,
+        "local_cache_hit": 14592
+      },
+      "elapsed_seconds": 0.2148220050148666,
+      "response": {
+        "id": "chatcmpl-872b5f5a6dbdcc01",
+        "object": "chat.completion",
+        "created": 1789348576,
+        "model": "DeepSeek-V4.1-Flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "9664",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.26.1rc0+glm53.r37.vllmc687594b-tp4-c329f89b",
+        "usage": {
+          "prompt_tokens": 14873,
+          "total_tokens": 14876,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    },
+    {
+      "case": "extended",
+      "passed": true,
+      "expected": "24681357",
+      "content": "24681357",
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 303,
+        "local_cache_hit": 14592
+      },
+      "elapsed_seconds": 0.21003920293878764,
+      "response": {
+        "id": "chatcmpl-b80f74e7f6d660e6",
+        "object": "chat.completion",
+        "created": 1789348576,
+        "model": "DeepSeek-V4.1-Flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "24681357",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.26.1rc0+glm53.r37.vllmc687594b-tp4-c329f89b",
+        "usage": {
+          "prompt_tokens": 14895,
+          "total_tokens": 14899,
+          "completion_tokens": 4,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    },
+    {
+      "case": "extended_repeat",
+      "passed": true,
+      "expected": "24681357",
+      "content": "24681357",
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 303,
+        "local_cache_hit": 14592
+      },
+      "elapsed_seconds": 0.20836162008345127,
+      "response": {
+        "id": "chatcmpl-8a405dc93107ccd5",
+        "object": "chat.completion",
+        "created": 1789348576,
+        "model": "DeepSeek-V4.1-Flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "24681357",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.26.1rc0+glm53.r37.vllmc687594b-tp4-c329f89b",
+        "usage": {
+          "prompt_tokens": 14895,
+          "total_tokens": 14899,
+          "completion_tokens": 4,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    }
+  ],
+  "scope": "Four deterministic lookup requests with cold/repeat/answer-changing prefix extension"
+}

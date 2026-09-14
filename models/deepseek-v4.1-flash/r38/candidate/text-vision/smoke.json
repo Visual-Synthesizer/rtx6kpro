@@ -1,0 +1,134 @@
+{
+  "status": "qualified",
+  "checks": [
+    {
+      "case": "arithmetic",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-858690e4e9aa70ce",
+        "object": "chat.completion",
+        "created": 1789349202,
+        "model": "DeepSeek-V4.1-Flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "4",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.26.1rc0+glm53.r38.vllm66c29357-tp4-b56e22e3",
+        "usage": {
+          "prompt_tokens": 18,
+          "total_tokens": 20,
+          "completion_tokens": 2,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "created_cache_tokens": 0,
+            "multimodal_tokens": null
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    },
+    {
+      "case": "vision",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-a1c5f99a64b7ddac",
+        "object": "chat.completion",
+        "created": 1789349202,
+        "model": "DeepSeek-V4.1-Flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "A pigeon is in the foreground.",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": null,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.26.1rc0+glm53.r38.vllm66c29357-tp4-b56e22e3",
+        "usage": {
+          "prompt_tokens": 996,
+          "total_tokens": 1004,
+          "completion_tokens": 8,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "created_cache_tokens": 0,
+            "multimodal_tokens": {
+              "image": 977
+            }
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      }
+    }
+  ],
+  "gpu_conditions": [
+    {
+      "gpu": 4,
+      "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+      "memory_offset": 0,
+      "graphics_offset": 0
+    },
+    {
+      "gpu": 5,
+      "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+      "memory_offset": 0,
+      "graphics_offset": 0
+    },
+    {
+      "gpu": 6,
+      "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+      "memory_offset": 0,
+      "graphics_offset": 0
+    },
+    {
+      "gpu": 7,
+      "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+      "memory_offset": 0,
+      "graphics_offset": 0
+    }
+  ],
+  "qualification_scope": "Two requests: deterministic arithmetic and pigeon-image recognition"
+}

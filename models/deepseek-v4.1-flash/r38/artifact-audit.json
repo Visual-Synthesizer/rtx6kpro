@@ -1,0 +1,60 @@
+{
+  "status": "qualified",
+  "checks": {
+    "two_layers": true,
+    "lock_and_label_match": true,
+    "committed_source_trees_match_lock": true,
+    "retained_native_binaries": true,
+    "stable_native_matches_build": true,
+    "python_dependency_outputs_match": true,
+    "prefill_graph_default_off": true,
+    "decode_graph_configuration_retained": true
+  },
+  "image": {
+    "id": "sha256:5ae584725299f10d00f37f40f859e22a709577a6a55315e636ae9598ad02a155",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:cd59f85dfcf800d9d59b4694f4e16b305b8de6b8ecb3f856426b56caca87d6b4"
+    ],
+    "lock_sha256": "1ea3a44b9f01aa010f76d2ae920337da7988ac6070108741b6b3efb687f520b1"
+  },
+  "sources": {
+    "vllm": {
+      "commit": "66c293578412417476f842c1da5805d3a3d959a8",
+      "tree": "301dddf6d8fd2393aeac4d68e3a954d19911507f",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "ce419b52681b7922bb0972d4b58b590a3fd005b2",
+      "tree": "6abad73444018f7ce1f0bdc3f0992649a4c21722",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "dependency_outputs": {
+    "usr/local/lib/python3.12/dist-packages/torch/_library/utils.py": "7e694fb5c280d4cb671415d6b14a6975f9ed42c8fb3c9907e93c1a3d57493e64",
+    "usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py": "aabff0867064a80dda974986ea3a31659105e3020248562f1de1cf89daf759cc",
+    "opt/venv/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/jit_executor.py": "a36eea9adcb75546aa5a373809581772234d13392df74a9f4854291e0e9e4221"
+  },
+  "unchanged_native_binary_count": 13,
+  "native_hashes": {
+    "/opt/glm53-flash/vllm/vllm/_C_stable_libtorch.abi3.so": "e4fcbe4676b9d426f94ef1d51b8a2d851ac8acbad3ddc4094bfd139bb9466d2d",
+    "/opt/glm53-flash/vllm/vllm/_flashkda_C.abi3.so": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+    "/opt/glm53-flash/vllm/vllm/_moe_C_stable_libtorch.abi3.so": "516f14d873a178d07ed4ee7ca36c51dd3fccf266e8e5ae9d585e51c04a65c313",
+    "/opt/glm53-flash/vllm/vllm/_qutlass_C.abi3.so": "5639ea4473e449d5730f21c0b41402dad49aaf67da290e0135d42bd25bf768b8",
+    "/opt/glm53-flash/vllm/vllm/_rust_tool_parser.abi3.so": "48a4c01764c83decd3d732af573d964e939d715a02ed92b3eebf04eaf8b59825",
+    "/opt/glm53-flash/vllm/vllm/cumem_allocator.abi3.so": "2343f5695e32a46d8564dd06330cb12630df47342b8d1a5a135f328bdd6981ce",
+    "/opt/glm53-flash/vllm/vllm/fs_io_C.abi3.so": "66d348e06a4480eca7d3894cfdefbb01a67e921e90ca101d14fc0434496cc4fb",
+    "/opt/glm53-flash/vllm/vllm/spinloop.abi3.so": "12401f8a902e6aebddd0e16ee44aaecd988a72334570ee95bc5c59067c67a41b",
+    "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa2_C.abi3.so": "37e3a34edb6dbd3d86a7952b3ec9975cb38e3a56a2381cdab9e302eaefe4ff81",
+    "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa3_C.abi3.so": "3afff6f3b03c23146d15312d94c291c16dce2c43206b483e96ff556fb22bb636",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/cuda_ops.cpython-312-x86_64-linux-gnu.so": "b72ce7043c31490ea3b3f29b954baaac6ea8aa2a571d4989ce581631f4db1b4a",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_fs.cpython-312-x86_64-linux-gnu.so": "4728916542e31ca65e48844a1396af3f8d5cf1c9bf998dd7e405e34b09e3cb1a",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_native.cpython-312-x86_64-linux-gnu.so": "9d710c8beb7cfd03a67ccccd177bd110e5cdc2404d6cc1589446ad3d38a562c8",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_redis.cpython-312-x86_64-linux-gnu.so": "65d7a5e51963443901de3798601962a237a33d5fe79eb5c3742c777671b3863f"
+  }
+}

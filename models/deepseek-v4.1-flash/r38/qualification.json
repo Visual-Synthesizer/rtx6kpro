@@ -1,0 +1,339 @@
+{
+  "status": "qualified",
+  "checks": {
+    "two_layers": true,
+    "lock_and_label_match": true,
+    "committed_source_trees_match_lock": true,
+    "retained_native_binaries": true,
+    "stable_native_matches_build": true,
+    "python_dependency_outputs_match": true,
+    "prefill_graph_default_off": true,
+    "decode_graph_configuration_retained": true,
+    "control_prefill_all_uncached": true,
+    "control_decode_cells_complete": true,
+    "control_decode_no_errors_or_loops": true,
+    "control_sieve_five_normal_stops": true,
+    "control_prefix_exact_answers_and_hits": true,
+    "control_text_vision": true,
+    "control_stock_clocks": true,
+    "control_kv_capacity_recorded": true,
+    "control_no_engine_traceback": true,
+    "candidate_prefill_all_uncached": true,
+    "candidate_decode_cells_complete": true,
+    "candidate_decode_no_errors_or_loops": true,
+    "candidate_sieve_five_normal_stops": true,
+    "candidate_prefix_exact_answers_and_hits": true,
+    "candidate_text_vision": true,
+    "candidate_stock_clocks": true,
+    "candidate_kv_capacity_recorded": true,
+    "candidate_no_engine_traceback": true,
+    "same_physical_quartet_and_driver": true,
+    "served_image_matches_artifact": true,
+    "test_adaptive": true,
+    "test_config": true,
+    "test_allocator": true,
+    "test_engram-vllm": true,
+    "test_native": true,
+    "test_engram-b12x": true
+  },
+  "image": {
+    "id": "sha256:5ae584725299f10d00f37f40f859e22a709577a6a55315e636ae9598ad02a155",
+    "layers": [
+      "sha256:cb220f94ebc323749ae8e960eecd0076d01b4a23ee7d2dabdb463b44fdc37d68",
+      "sha256:cd59f85dfcf800d9d59b4694f4e16b305b8de6b8ecb3f856426b56caca87d6b4"
+    ],
+    "lock_sha256": "1ea3a44b9f01aa010f76d2ae920337da7988ac6070108741b6b3efb687f520b1"
+  },
+  "sources": {
+    "vllm": {
+      "commit": "66c293578412417476f842c1da5805d3a3d959a8",
+      "tree": "301dddf6d8fd2393aeac4d68e3a954d19911507f",
+      "status": ""
+    },
+    "b12x": {
+      "commit": "ce419b52681b7922bb0972d4b58b590a3fd005b2",
+      "tree": "6abad73444018f7ce1f0bdc3f0992649a4c21722",
+      "status": ""
+    },
+    "lmcache": {
+      "commit": "29bc5a2efde737c436b04499eb62cd1776cebeec",
+      "tree": "5a88a1ea9d2627c76288d056e7193f7454669b64",
+      "status": ""
+    }
+  },
+  "dependency_outputs": {
+    "usr/local/lib/python3.12/dist-packages/torch/_library/utils.py": "7e694fb5c280d4cb671415d6b14a6975f9ed42c8fb3c9907e93c1a3d57493e64",
+    "usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py": "aabff0867064a80dda974986ea3a31659105e3020248562f1de1cf89daf759cc",
+    "opt/venv/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/jit_executor.py": "a36eea9adcb75546aa5a373809581772234d13392df74a9f4854291e0e9e4221"
+  },
+  "unchanged_native_binary_count": 13,
+  "native_hashes": {
+    "/opt/glm53-flash/vllm/vllm/_C_stable_libtorch.abi3.so": "e4fcbe4676b9d426f94ef1d51b8a2d851ac8acbad3ddc4094bfd139bb9466d2d",
+    "/opt/glm53-flash/vllm/vllm/_flashkda_C.abi3.so": "3bb6ef2c9f0be24b2c6ae8a48eb20b53f28e632ed9cb45a32c7c0133f8cfde91",
+    "/opt/glm53-flash/vllm/vllm/_moe_C_stable_libtorch.abi3.so": "516f14d873a178d07ed4ee7ca36c51dd3fccf266e8e5ae9d585e51c04a65c313",
+    "/opt/glm53-flash/vllm/vllm/_qutlass_C.abi3.so": "5639ea4473e449d5730f21c0b41402dad49aaf67da290e0135d42bd25bf768b8",
+    "/opt/glm53-flash/vllm/vllm/_rust_tool_parser.abi3.so": "48a4c01764c83decd3d732af573d964e939d715a02ed92b3eebf04eaf8b59825",
+    "/opt/glm53-flash/vllm/vllm/cumem_allocator.abi3.so": "2343f5695e32a46d8564dd06330cb12630df47342b8d1a5a135f328bdd6981ce",
+    "/opt/glm53-flash/vllm/vllm/fs_io_C.abi3.so": "66d348e06a4480eca7d3894cfdefbb01a67e921e90ca101d14fc0434496cc4fb",
+    "/opt/glm53-flash/vllm/vllm/spinloop.abi3.so": "12401f8a902e6aebddd0e16ee44aaecd988a72334570ee95bc5c59067c67a41b",
+    "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa2_C.abi3.so": "37e3a34edb6dbd3d86a7952b3ec9975cb38e3a56a2381cdab9e302eaefe4ff81",
+    "/opt/glm53-flash/vllm/vllm/vllm_flash_attn/_vllm_fa3_C.abi3.so": "3afff6f3b03c23146d15312d94c291c16dce2c43206b483e96ff556fb22bb636",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/cuda_ops.cpython-312-x86_64-linux-gnu.so": "b72ce7043c31490ea3b3f29b954baaac6ea8aa2a571d4989ce581631f4db1b4a",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_fs.cpython-312-x86_64-linux-gnu.so": "4728916542e31ca65e48844a1396af3f8d5cf1c9bf998dd7e405e34b09e3cb1a",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_native.cpython-312-x86_64-linux-gnu.so": "9d710c8beb7cfd03a67ccccd177bd110e5cdc2404d6cc1589446ad3d38a562c8",
+    "/opt/venv/lib/python3.12/site-packages/lmcache/lmcache_redis.cpython-312-x86_64-linux-gnu.so": "65d7a5e51963443901de3798601962a237a33d5fe79eb5c3742c777671b3863f"
+  },
+  "scope": "TP4/DCP1 DSpark K7 RAM Engram, stock GPU4-7; bounded serving, not model-quality or SSD throughput qualification",
+  "control": {
+    "checks": {
+      "prefill_all_uncached": true,
+      "decode_cells_complete": true,
+      "decode_no_errors_or_loops": true,
+      "sieve_five_normal_stops": true,
+      "prefix_exact_answers_and_hits": true,
+      "text_vision": true,
+      "stock_clocks": true,
+      "kv_capacity_recorded": true,
+      "no_engine_traceback": true
+    },
+    "metrics": {
+      "prefill32k": {
+        "median": 20950.2853986942,
+        "min": 20820.2701385117,
+        "max": 21055.4099129715,
+        "samples": [
+          21051.77390300157,
+          21055.4099129715,
+          21044.371033488835,
+          20856.19976389956,
+          20820.740316644984,
+          20820.2701385117
+        ]
+      },
+      "kv_tokens": 1546785,
+      "sieve": {
+        "median_tok_s": 356.6705277940328,
+        "min_tok_s": 321.32671888345976,
+        "max_tok_s": 367.515627285592,
+        "successful_runs": 5
+      },
+      "c1": {
+        "output_tok_s": {
+          "median": 226.37127492140968,
+          "min": 213.56910075235658,
+          "max": 239.17344909046275,
+          "samples": [
+            213.56910075235658,
+            239.17344909046275
+          ]
+        },
+        "request_verifier_steps_s": {
+          "median": 86.87141100774078,
+          "min": 85.94774905982896,
+          "max": 87.79507295565259,
+          "samples": [
+            87.79507295565259,
+            85.94774905982896
+          ]
+        },
+        "output_per_request_step": [
+          2.4325864033421953,
+          2.78277734678045
+        ],
+        "warmup_seconds": [
+          5.535,
+          5.529
+        ]
+      },
+      "c8": {
+        "output_tok_s": {
+          "median": 592.6333661235464,
+          "min": 585.6193683315411,
+          "max": 599.6473639155516,
+          "samples": [
+            599.6473639155516,
+            585.6193683315411
+          ]
+        },
+        "request_verifier_steps_s": {
+          "median": 249.93147363032756,
+          "min": 249.04922598294243,
+          "max": 250.81372127771266,
+          "samples": [
+            250.81372127771266,
+            249.04922598294243
+          ]
+        },
+        "output_per_request_step": [
+          2.390807651434644,
+          2.3514201500535905
+        ],
+        "warmup_seconds": [
+          5.533,
+          5.534
+        ]
+      }
+    },
+    "image_id": "sha256:e0a2d72272f7dc17583f5e9c8614a2610d6d3932414a8d32ca1cd57dafb8d803",
+    "gpu_uuids": [
+      "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+      "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+      "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+      "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e"
+    ],
+    "driver": "615.71.09"
+  },
+  "candidate": {
+    "checks": {
+      "prefill_all_uncached": true,
+      "decode_cells_complete": true,
+      "decode_no_errors_or_loops": true,
+      "sieve_five_normal_stops": true,
+      "prefix_exact_answers_and_hits": true,
+      "text_vision": true,
+      "stock_clocks": true,
+      "kv_capacity_recorded": true,
+      "no_engine_traceback": true
+    },
+    "metrics": {
+      "prefill32k": {
+        "median": 21035.18107381826,
+        "min": 20915.806128085344,
+        "max": 21156.22358017475,
+        "samples": [
+          21155.379199612573,
+          21156.22358017475,
+          21137.850996320718,
+          20932.511151315808,
+          20915.806128085344,
+          20918.67376639406
+        ]
+      },
+      "kv_tokens": 4569816,
+      "sieve": {
+        "median_tok_s": 375.57647501969643,
+        "min_tok_s": 357.326791669001,
+        "max_tok_s": 412.95095956358745,
+        "successful_runs": 5
+      },
+      "c1": {
+        "output_tok_s": {
+          "median": 259.2666061708917,
+          "min": 256.9796707976159,
+          "max": 261.5535415441675,
+          "samples": [
+            256.9796707976159,
+            261.5535415441675
+          ]
+        },
+        "request_verifier_steps_s": {
+          "median": 101.1962045945638,
+          "min": 100.58725746829234,
+          "max": 101.80515172083524,
+          "samples": [
+            101.80515172083524,
+            100.58725746829234
+          ]
+        },
+        "output_per_request_step": [
+          2.5242305173542894,
+          2.6002651640702683
+        ],
+        "warmup_seconds": [
+          5.531,
+          5.53
+        ]
+      },
+      "c8": {
+        "output_tok_s": {
+          "median": 810.6056777613553,
+          "min": 801.3100128003797,
+          "max": 819.901342722331,
+          "samples": [
+            819.901342722331,
+            801.3100128003797
+          ]
+        },
+        "request_verifier_steps_s": {
+          "median": 363.41804993846426,
+          "min": 362.34655983667,
+          "max": 364.4895400402585,
+          "samples": [
+            364.4895400402585,
+            362.34655983667
+          ]
+        },
+        "output_per_request_step": [
+          2.249450951683748,
+          2.2114464482885534
+        ],
+        "warmup_seconds": [
+          5.531,
+          5.533
+        ]
+      }
+    },
+    "image_id": "sha256:5ae584725299f10d00f37f40f859e22a709577a6a55315e636ae9598ad02a155",
+    "gpu_uuids": [
+      "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+      "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+      "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+      "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e"
+    ],
+    "driver": "615.71.09"
+  },
+  "changes": {
+    "prefill32k_pct": 0.40522443254809026,
+    "sieve_pct": 5.300675484065032,
+    "kv_tokens_pct": 195.43963770013283,
+    "c1_output_tok_s_pct": 14.531583683001493,
+    "c1_request_verifier_steps_s_pct": 16.48965225803296,
+    "c8_output_tok_s_pct": 36.780296908285834,
+    "c8_request_verifier_steps_s_pct": 45.40707685179104
+  },
+  "tests": {
+    "adaptive": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "config": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "allocator": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "engram-vllm": {
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "native": {
+      "tests": 56,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "engram-b12x": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "limitations": [
+    "Sequential boots and two short decode sweeps do not isolate component causality or stochastic acceptance.",
+    "C8 verifier rate is summed per-request verification work, not physical engine iterations.",
+    "R38 draft-token counters count verified positions; R37 counts proposed positions. Their acceptance-rate denominators differ.",
+    "Three known bounded CED oracle cases and distributed adaptive TP publication are outside this test selection.",
+    "SSD component tests do not establish whole-model SSD throughput. GLM, Qwen, DS4 and LMCache are retained, not serving-requalified."
+  ]
+}
