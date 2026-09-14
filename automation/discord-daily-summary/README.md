@@ -20,7 +20,9 @@ an item-count limit. A citation-verification call accepts or rejects each
 publication item without rewriting it. Rejected items enter a separate repair
 pass with the verifier's reason and original evidence, and repaired text must
 pass the citation verifier again. The Python renderer accepts only source URLs
-present in the fetched records.
+present in the fetched records. Before verification, editorial citations are
+constrained to the recorded sources of the extracted events assigned to each
+item; unsupported model-selected URLs cannot enter the report.
 
 Every model call uses the checkpoint's supported sampling contract
 (`temperature=1`, `top_p=1`, deterministic `seed=0`) with thinking enabled and

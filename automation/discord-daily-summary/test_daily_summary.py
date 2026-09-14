@@ -249,6 +249,38 @@ class PerformanceClaimTest(unittest.TestCase):
 
 
 class EditorialValidationTest(unittest.TestCase):
+    def test_constrains_editorial_citations_to_the_items_events(self) -> None:
+        source = record(message_id="10")
+        unrelated = record(message_id="11")
+        events = [
+            {
+                "id": "e0001",
+                "text": "Measured 123 tok/s.",
+                "source_urls": [source.url],
+            }
+        ]
+        raw = {
+            "audit": [
+                {"event_id": "e0001", "disposition": "publish", "reason": "Useful"}
+            ],
+            "items": [
+                {
+                    "section": "benchmarks_and_implementation_findings",
+                    "text": "Measured 123 tok/s.",
+                    "event_ids": ["e0001"],
+                    "source_urls": [unrelated.url],
+                }
+            ],
+        }
+
+        validated = daily_summary.validate_editorial_output(
+            raw,
+            events,
+            {source.url: source, unrelated.url: unrelated},
+        )
+
+        self.assertEqual(validated["items"][0]["source_urls"], [source.url])
+
     def test_requires_an_audit_decision_for_every_event(self) -> None:
         source = record()
         events = [

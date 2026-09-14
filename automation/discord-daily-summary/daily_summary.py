@@ -1942,20 +1942,29 @@ def validate_editorial_output(
                 + ", ".join(sorted(overlap))
             )
 
-        allowed_urls = {
-            str(url)
-            for event_id in event_ids
-            for url in events_by_id[event_id]["source_urls"]
-        }
-        source_urls = list(
+        allowed_urls = list(
+            dict.fromkeys(
+                str(url)
+                for event_id in event_ids
+                for url in events_by_id[event_id]["source_urls"]
+                if str(url) in records_by_url
+            )
+        )
+        requested_urls = list(
             dict.fromkeys(str(value) for value in item.get("source_urls", []))
         )
-        if (
-            not source_urls
-            or any(url not in allowed_urls for url in source_urls)
-            or any(url not in records_by_url for url in source_urls)
-        ):
-            raise ValueError("Editorial item contains an unsupported source URL")
+        source_urls = [url for url in requested_urls if url in allowed_urls][:3]
+        if requested_urls != source_urls:
+            LOG.warning(
+                "Canonicalized editorial citations for extracted events: %s",
+                ", ".join(event_ids),
+            )
+        if not source_urls:
+            source_urls = allowed_urls[:3]
+        if not source_urls:
+            raise ValueError(
+                "Editorial item has no recorded source URL for its extracted events"
+            )
         text = clean_summary_text(item.get("text", ""), 600)
         normalized = text.casefold()
         if normalized in normalized_texts:
