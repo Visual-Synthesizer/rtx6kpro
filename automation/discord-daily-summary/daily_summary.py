@@ -1084,46 +1084,103 @@ class LocalModelClient:
                 for source_number, url in enumerate(candidate["source_urls"])
             ]
 
+        def complete_candidate_audit(
+            payload_by_id: dict[str, dict[str, Any]],
+            *,
+            system_prompt: str,
+            response_format: dict[str, Any],
+            start_marker: str,
+            end_marker: str,
+            pass_name: str,
+        ) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
+            decisions: dict[str, dict[str, Any]] = {}
+            artifacts: list[dict[str, Any]] = []
+
+            def request(identifiers: list[str], request_name: str) -> None:
+                expected = set(identifiers)
+                model_input = [payload_by_id[identifier] for identifier in identifiers]
+                output, usage = self.complete_json(
+                    system_prompt,
+                    start_marker
+                    + "\n"
+                    + json.dumps(
+                        model_input,
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    )
+                    + "\n"
+                    + end_marker,
+                    response_format,
+                    timeout=1_200,
+                )
+                artifacts.append({"pass": request_name, "usage": usage, "raw": output})
+                for item in output.get("candidates", []):
+                    identifier = str(item.get("id", ""))
+                    if identifier not in expected or identifier in decisions:
+                        LOG.warning(
+                            "Ignoring invalid candidate id %r in %s",
+                            identifier,
+                            request_name,
+                        )
+                        continue
+                    decisions[identifier] = item
+
+            identifiers = list(payload_by_id)
+            request(identifiers, pass_name)
+            missing = [
+                identifier for identifier in identifiers if identifier not in decisions
+            ]
+            if missing:
+                LOG.warning(
+                    "%s omitted %d candidates; retrying in batches of four",
+                    pass_name,
+                    len(missing),
+                )
+                for offset in range(0, len(missing), 4):
+                    batch = missing[offset : offset + 4]
+                    request(batch, f"{pass_name}-recovery-batch-{offset // 4 + 1}")
+            missing = [
+                identifier for identifier in identifiers if identifier not in decisions
+            ]
+            if missing:
+                LOG.warning(
+                    "%s still omitted %d candidates; retrying individually",
+                    pass_name,
+                    len(missing),
+                )
+                for identifier in missing:
+                    request([identifier], f"{pass_name}-recovery-{identifier}")
+            missing = [
+                identifier for identifier in identifiers if identifier not in decisions
+            ]
+            if missing:
+                raise ValueError(
+                    f"{pass_name} omitted candidates after recovery: "
+                    + ", ".join(missing)
+                )
+            return decisions, artifacts
+
         def verify_pass(
             pass_items: dict[str, dict[str, Any]], pass_name: str
         ) -> dict[str, dict[str, Any]]:
-            verification_input = [
-                {
+            verification_input = {
+                identifier: {
                     "id": identifier,
                     "section": candidate["section"],
                     "proposed_text": candidate["text"],
                     "source_records": source_records(candidate),
                 }
                 for identifier, candidate in pass_items.items()
-            ]
-            verified, usage = self.complete_json(
-                verification_system_prompt(),
-                "CANDIDATES_WITH_SOURCES\n"
-                + json.dumps(
-                    verification_input,
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                )
-                + "\nEND_CANDIDATES_WITH_SOURCES",
-                verification_response_format(),
-                timeout=1_200,
+            }
+            decisions, artifacts = complete_candidate_audit(
+                verification_input,
+                system_prompt=verification_system_prompt(),
+                response_format=verification_response_format(),
+                start_marker="CANDIDATES_WITH_SOURCES",
+                end_marker="END_CANDIDATES_WITH_SOURCES",
+                pass_name=pass_name,
             )
-            verification_passes.append(
-                {"pass": pass_name, "usage": usage, "raw": verified}
-            )
-            decisions: dict[str, dict[str, Any]] = {}
-            for item in verified.get("candidates", []):
-                identifier = str(item.get("id", ""))
-                if identifier in decisions or identifier not in pass_items:
-                    raise ValueError(
-                        f"Citation verifier returned invalid item id {identifier!r}"
-                    )
-                decisions[identifier] = item
-            missing = sorted(set(pass_items) - set(decisions))
-            if missing:
-                raise ValueError(
-                    "Citation verifier omitted candidates: " + ", ".join(missing)
-                )
+            verification_passes.extend(artifacts)
             return decisions
 
         def retained_candidate(
@@ -1166,8 +1223,8 @@ class LocalModelClient:
         repair_artifact: dict[str, Any] | None = None
         final_reasons = dict(initial_reasons)
         if rejected_ids:
-            repair_input = [
-                {
+            repair_input = {
+                identifier: {
                     "id": identifier,
                     "section": items_by_id[identifier]["section"],
                     "proposed_text": items_by_id[identifier]["text"],
@@ -1175,33 +1232,16 @@ class LocalModelClient:
                     "source_records": source_records(items_by_id[identifier]),
                 }
                 for identifier in rejected_ids
-            ]
-            repaired, repair_usage = self.complete_json(
-                repair_system_prompt(),
-                "REJECTED_CANDIDATES_WITH_SOURCES\n"
-                + json.dumps(
-                    repair_input,
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                )
-                + "\nEND_REJECTED_CANDIDATES_WITH_SOURCES",
-                repair_response_format(),
-                timeout=1_200,
+            }
+            repair_decisions, repair_passes = complete_candidate_audit(
+                repair_input,
+                system_prompt=repair_system_prompt(),
+                response_format=repair_response_format(),
+                start_marker="REJECTED_CANDIDATES_WITH_SOURCES",
+                end_marker="END_REJECTED_CANDIDATES_WITH_SOURCES",
+                pass_name="citation-repair",
             )
-            repair_artifact = {"usage": repair_usage, "raw": repaired}
-            repair_decisions: dict[str, dict[str, Any]] = {}
-            for item in repaired.get("candidates", []):
-                identifier = str(item.get("id", ""))
-                if identifier in repair_decisions or identifier not in rejected_ids:
-                    raise ValueError(
-                        f"Citation repair returned invalid item id {identifier!r}"
-                    )
-                repair_decisions[identifier] = item
-            missing_repairs = sorted(set(rejected_ids) - set(repair_decisions))
-            if missing_repairs:
-                raise ValueError(
-                    "Citation repair omitted candidates: " + ", ".join(missing_repairs)
-                )
+            repair_artifact = {"passes": repair_passes}
 
             repaired_items: dict[str, dict[str, Any]] = {}
             for identifier in rejected_ids:
@@ -1279,7 +1319,11 @@ class LocalModelClient:
         result: dict[str, Any] = {"audit": audit, "items": kept_items}
         result["_verification_usage"] = {
             "verification_passes": [item["usage"] for item in verification_passes],
-            "repair": repair_artifact["usage"] if repair_artifact else None,
+            "repair": (
+                [item["usage"] for item in repair_artifact["passes"]]
+                if repair_artifact
+                else None
+            ),
         }
         result["_verification_raw"] = {
             "verification_passes": verification_passes,
