@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import fcntl
+import hashlib
 import json
 import logging
 import os
@@ -622,19 +623,53 @@ class LocalModelClient:
             },
             "response_format": response_format,
         }
-        response = requests.post(
-            f"{self.base_url}/v1/chat/completions", json=payload, timeout=timeout
-        )
-        response.raise_for_status()
-        body = response.json()
-        message = body["choices"][0]["message"]
-        if message.get("tool_calls") or message.get("function_call"):
-            raise RuntimeError("Local model returned an unexpected tool call")
-        if body["choices"][0].get("finish_reason") != "stop":
-            raise RuntimeError(
-                f"Local model did not complete cleanly: {body['choices'][0].get('finish_reason')}"
-            )
-        return json.loads(message["content"]), body.get("usage", {})
+        attempts = 3
+        for attempt in range(1, attempts + 1):
+            try:
+                response = requests.post(
+                    f"{self.base_url}/v1/chat/completions",
+                    json=payload,
+                    timeout=timeout,
+                )
+                response.raise_for_status()
+                body = response.json()
+                choice = body["choices"][0]
+                message = choice["message"]
+                if message.get("tool_calls") or message.get("function_call"):
+                    raise ValueError("local model returned an unexpected tool call")
+                finish_reason = choice.get("finish_reason")
+                if finish_reason != "stop":
+                    raise ValueError(
+                        f"local model finish_reason is {finish_reason!r}, not 'stop'"
+                    )
+                content = message.get("content")
+                if not isinstance(content, str) or not content.strip():
+                    raise ValueError("local model message.content is empty or null")
+                parsed = json.loads(content)
+                if not isinstance(parsed, dict):
+                    raise ValueError("local model content is not a JSON object")
+                return parsed, body.get("usage", {})
+            except (
+                KeyError,
+                IndexError,
+                TypeError,
+                ValueError,
+                requests.RequestException,
+            ) as error:
+                if attempt == attempts:
+                    raise RuntimeError(
+                        f"Local model failed to return valid structured output after {attempts} attempts"
+                    ) from error
+                delay = 2 ** (attempt - 1)
+                LOG.warning(
+                    "Local model structured-output attempt %d/%d failed: %s; retrying in %ds",
+                    attempt,
+                    attempts,
+                    error,
+                    delay,
+                )
+                time.sleep(delay)
+        raise AssertionError("unreachable local-model retry state")
 
     def extract_events(
         self,
@@ -642,8 +677,38 @@ class LocalModelClient:
         policy_actions: dict[str, tuple[str, ...]],
         report_date: str,
         model_concurrency: int,
+        checkpoint_directory: Path | None,
     ) -> dict[str, Any]:
         def extract_chunk(chunk: ExtractionChunk) -> dict[str, Any]:
+            model_data = chunk.as_model_data(policy_actions)
+            input_sha256 = hashlib.sha256(
+                json.dumps(
+                    model_data,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
+            checkpoint_path = (
+                checkpoint_directory / f"{chunk.identifier}.json"
+                if checkpoint_directory is not None
+                else None
+            )
+            if checkpoint_path is not None and checkpoint_path.exists():
+                checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+                if (
+                    checkpoint.get("schema_version") == 1
+                    and checkpoint.get("chunk_id") == chunk.identifier
+                    and checkpoint.get("input_sha256") == input_sha256
+                ):
+                    result = checkpoint.get("result")
+                    if isinstance(result, dict):
+                        validate_extraction_chunk_result(chunk, result)
+                        LOG.info(
+                            "Reusing qualified extraction checkpoint %s",
+                            chunk.identifier,
+                        )
+                        return result
             LOG.info(
                 "Extracting technical events from %s",
                 chunk.identifier,
@@ -718,7 +783,7 @@ class LocalModelClient:
                         }
                     )
 
-            run_pass(chunk.as_model_data(policy_actions), valid_urls)
+            run_pass(model_data, valid_urls)
             for url in event_source_urls:
                 if (
                     url in record_audit
@@ -829,7 +894,7 @@ class LocalModelClient:
                 raise ValueError(
                     f"Extraction event coverage mismatch for {chunk.identifier}"
                 )
-            return {
+            result = {
                 "events": accepted_events,
                 "chunk": {
                     "id": chunk.identifier,
@@ -845,6 +910,23 @@ class LocalModelClient:
                     "raw": raw_passes,
                 },
             }
+            validate_extraction_chunk_result(chunk, result)
+            if checkpoint_path is not None:
+                atomic_write(
+                    checkpoint_path,
+                    json.dumps(
+                        {
+                            "schema_version": 1,
+                            "chunk_id": chunk.identifier,
+                            "input_sha256": input_sha256,
+                            "result": result,
+                        },
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                    + "\n",
+                )
+            return result
 
         with ThreadPoolExecutor(
             max_workers=min(model_concurrency, len(chunks) or 1)
@@ -946,6 +1028,7 @@ class LocalModelClient:
         maximum_chunk_characters: int,
         chunk_overlap_records: int,
         model_concurrency: int,
+        checkpoint_directory: Path | None = None,
     ) -> dict[str, Any]:
         included_records = [
             record
@@ -956,7 +1039,11 @@ class LocalModelClient:
             included_records, maximum_chunk_characters, chunk_overlap_records
         )
         extraction = self.extract_events(
-            chunks, policy_actions, report_date, model_concurrency
+            chunks,
+            policy_actions,
+            report_date,
+            model_concurrency,
+            checkpoint_directory,
         )
         editorial, editorial_usage = self.edit_events(
             extraction["events"],
@@ -1229,6 +1316,56 @@ def extraction_payload_size(records: list[tuple[MessageRecord, bool]]) -> int:
             separators=(",", ":"),
         )
     )
+
+
+def validate_extraction_chunk_result(
+    chunk: ExtractionChunk, result: dict[str, Any]
+) -> None:
+    expected_urls = {record.url for record, primary in chunk.records if primary}
+    metadata = result.get("chunk")
+    if not isinstance(metadata, dict) or metadata.get("id") != chunk.identifier:
+        raise ValueError(
+            f"Extraction checkpoint metadata does not identify {chunk.identifier}"
+        )
+    if metadata.get("primary_records") != len(expected_urls):
+        raise ValueError(
+            f"Extraction checkpoint record count does not match {chunk.identifier}"
+        )
+    audit = metadata.get("record_audit")
+    if not isinstance(audit, list):
+        raise ValueError(f"Extraction checkpoint for {chunk.identifier} has no audit")
+    audit_urls = [str(entry.get("url", "")) for entry in audit]
+    if len(audit_urls) != len(set(audit_urls)) or set(audit_urls) != expected_urls:
+        raise ValueError(
+            f"Extraction checkpoint audit does not cover {chunk.identifier} exactly once"
+        )
+    events = result.get("events")
+    if not isinstance(events, list):
+        raise ValueError(f"Extraction checkpoint for {chunk.identifier} has no events")
+    event_urls: set[str] = set()
+    for event in events:
+        source_urls = event.get("source_urls")
+        if not isinstance(source_urls, list) or not source_urls:
+            raise ValueError(
+                f"Extraction checkpoint for {chunk.identifier} contains an uncited event"
+            )
+        urls = {str(url) for url in source_urls}
+        if not urls.issubset(expected_urls):
+            raise ValueError(
+                f"Extraction checkpoint for {chunk.identifier} cites another chunk"
+            )
+        event_urls.update(urls)
+    audited_event_urls = {
+        str(entry["url"]) for entry in audit if entry.get("disposition") == "event"
+    }
+    if event_urls != audited_event_urls:
+        raise ValueError(
+            f"Extraction checkpoint event coverage does not match {chunk.identifier}"
+        )
+    if metadata.get("accepted_events") != len(events):
+        raise ValueError(
+            f"Extraction checkpoint event count does not match {chunk.identifier}"
+        )
 
 
 def build_extraction_chunks(
@@ -2405,6 +2542,7 @@ def main() -> int:
             settings.maximum_chunk_characters,
             settings.chunk_overlap_records,
             settings.model_concurrency,
+            run_directory / "extraction-chunks",
         )
         primary_records = sum(
             int(chunk["primary_records"]) for chunk in raw["_extraction"]["chunks"]

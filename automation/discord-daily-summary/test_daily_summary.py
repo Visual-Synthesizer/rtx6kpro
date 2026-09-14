@@ -150,6 +150,46 @@ class ExtractionChunkTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exceeds the extraction chunk limit"):
             daily_summary.build_extraction_chunks([source], 1_000, 0)
 
+    def test_reuses_a_qualified_checkpoint_for_identical_input(self) -> None:
+        source = record(content="B12X measured 123 tok/s on RTX hardware.")
+        chunk = daily_summary.ExtractionChunk("chunk-001", ((source, True),))
+        response = {
+            "record_audit": [
+                {
+                    "url": source.url,
+                    "disposition": "event",
+                    "reason": "Measured inference performance.",
+                }
+            ],
+            "events": [
+                {
+                    "text": "B12X measured 123 tok/s on RTX hardware.",
+                    "status": "measured",
+                    "kind": "performance",
+                    "importance": 3,
+                    "source_urls": [source.url],
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint_directory = Path(directory)
+            first = daily_summary.LocalModelClient("http://model", "model")
+            first.complete_json = Mock(return_value=(response, {"total_tokens": 20}))
+            extracted = first.extract_events(
+                [chunk], {}, "2026-09-13", 1, checkpoint_directory
+            )
+            self.assertEqual(len(extracted["events"]), 1)
+            self.assertTrue((checkpoint_directory / "chunk-001.json").exists())
+
+            second = daily_summary.LocalModelClient("http://model", "model")
+            second.complete_json = Mock(side_effect=AssertionError("model was called"))
+            reused = second.extract_events(
+                [chunk], {}, "2026-09-13", 1, checkpoint_directory
+            )
+
+        self.assertEqual(reused, extracted)
+        second.complete_json.assert_not_called()
+
 
 class SummaryPolicyTest(unittest.TestCase):
     def test_scoped_rule_and_expiry(self) -> None:
@@ -303,6 +343,34 @@ class ModelRequestTest(unittest.TestCase):
             payload["chat_template_kwargs"],
             {"thinking": True, "reasoning_effort": "high"},
         )
+
+    @patch.object(daily_summary.time, "sleep")
+    @patch.object(daily_summary.requests, "post")
+    def test_retries_a_null_structured_response(self, post: Mock, sleep: Mock) -> None:
+        empty_response = Mock()
+        empty_response.raise_for_status.return_value = None
+        empty_response.json.return_value = {
+            "choices": [{"finish_reason": "stop", "message": {"content": None}}]
+        }
+        valid_response = Mock()
+        valid_response.raise_for_status.return_value = None
+        valid_response.json.return_value = {
+            "choices": [
+                {"finish_reason": "stop", "message": {"content": '{"value":1}'}}
+            ],
+            "usage": {"prompt_tokens": 10},
+        }
+        post.side_effect = [empty_response, valid_response]
+        client = daily_summary.LocalModelClient("http://model", "model")
+
+        result, usage = client.complete_json(
+            "system", "user", {"type": "json_object"}, timeout=10
+        )
+
+        self.assertEqual(result, {"value": 1})
+        self.assertEqual(usage, {"prompt_tokens": 10})
+        self.assertEqual(post.call_count, 2)
+        sleep.assert_called_once_with(1)
 
     def test_keeps_single_author_comparison(self) -> None:
         first = record(message_id="10")

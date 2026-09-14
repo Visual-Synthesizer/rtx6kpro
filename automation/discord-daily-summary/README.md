@@ -43,11 +43,16 @@ For example, the run published on `2026-09-13` stores
 `Daily Summary - 2026-09-12`.
 
 A full summary execution stores `records.json`, `coverage.json`,
-`model-output.json`, `summary.md`, and `status.json` under
+`model-output.json`, `summary.md`, `status.json`, and qualified per-chunk
+extraction checkpoints under
 `/var/lib/discord-summary/runs/YYYY-MM-DD`. `coverage.json` records discovered
 sources, archived-thread discovery, fetch failures, message counts, truncation,
 policy application, extraction chunk count, and exact primary-record coverage.
 A production run fails before publication when source coverage is incomplete.
+A retry with identical records and policy reuses a chunk checkpoint only when
+its SHA-256 input identity and exact primary-record/event audit validate.
+A malformed, empty, or transiently failed structured model response is retried
+twice before the run fails; retries do not add an output-token ceiling.
 A complete run with no independently meaningful event stores
 `status=no_signal` and does not publish filler to Discord or GitHub.
 
