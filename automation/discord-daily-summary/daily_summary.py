@@ -1123,6 +1123,24 @@ class LocalModelClient:
                             request_name,
                         )
                         continue
+                    if item.get("keep"):
+                        source_count = len(
+                            payload_by_id[identifier].get("source_records", [])
+                        )
+                        used_sources = item.get("used_source_numbers", [])
+                        if not any(
+                            isinstance(number, int)
+                            and not isinstance(number, bool)
+                            and 0 <= number < source_count
+                            for number in used_sources
+                        ):
+                            LOG.warning(
+                                "Ignoring retained candidate %s without valid evidence "
+                                "in %s",
+                                identifier,
+                                request_name,
+                            )
+                            continue
                     decisions[identifier] = item
 
             identifiers = list(payload_by_id)

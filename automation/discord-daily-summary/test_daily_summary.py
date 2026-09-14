@@ -416,6 +416,57 @@ class ModelRequestTest(unittest.TestCase):
 
 
 class CitationVerificationTest(unittest.TestCase):
+    def test_recovers_a_retained_candidate_without_valid_evidence(self) -> None:
+        source = record(message_id="10", content="B12X added a planner.")
+        candidates = {
+            "audit": [{"event_id": "e0001", "disposition": "publish", "reason": "Fix"}],
+            "items": [
+                {
+                    "section": "releases_and_fixes",
+                    "text": "B12X added a planner.",
+                    "event_ids": ["e0001"],
+                    "source_urls": [source.url],
+                }
+            ],
+        }
+        client = daily_summary.LocalModelClient("http://model", "model")
+        client.complete_json = Mock(
+            side_effect=[
+                (
+                    {
+                        "candidates": [
+                            {
+                                "id": "i0001",
+                                "keep": True,
+                                "reason": "Supported.",
+                                "used_source_numbers": [],
+                            }
+                        ]
+                    },
+                    {},
+                ),
+                (
+                    {
+                        "candidates": [
+                            {
+                                "id": "i0001",
+                                "keep": True,
+                                "reason": "Supported.",
+                                "used_source_numbers": [0],
+                            }
+                        ]
+                    },
+                    {},
+                ),
+            ]
+        )
+
+        result = client.verify_candidates(candidates, [source])
+
+        self.assertEqual(len(result["items"]), 1)
+        self.assertEqual(result["items"][0]["source_urls"], [source.url])
+        self.assertEqual(client.complete_json.call_count, 2)
+
     def test_recovers_candidate_ids_omitted_by_a_verifier_pass(self) -> None:
         first = record(message_id="10", content="B12X added a planner.")
         second = record(message_id="11", content="vLLM fixed a loader.")
