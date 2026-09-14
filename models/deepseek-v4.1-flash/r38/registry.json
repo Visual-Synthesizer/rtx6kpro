@@ -1,0 +1,12 @@
+{
+  "status": "verified-registry-content",
+  "repository": "localinferencelab/vllm",
+  "tag": "jovian-judgement-community-20260914-r38",
+  "digest": "sha256:f41ca8bb10bb3a125a50340d70d39ad4b7f5605f3fcb661bc992ed0bc4701a00",
+  "image_id": "sha256:5ae584725299f10d00f37f40f859e22a709577a6a55315e636ae9598ad02a155",
+  "rootfs_layers": 2,
+  "source_lock_sha256": "1ea3a44b9f01aa010f76d2ae920337da7988ac6070108741b6b3efb687f520b1",
+  "pull_by_digest_verified": true,
+  "registry_config_matches_tested_image": true,
+  "qualification": "/root/vllm/docker/results/ds41-community-r38-20260914/qualification.json"
+}

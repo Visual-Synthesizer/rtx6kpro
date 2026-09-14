@@ -20,7 +20,9 @@ an item-count limit. A citation-verification call accepts or rejects each
 publication item without rewriting it. Rejected items enter a separate repair
 pass with the verifier's reason and original evidence, and repaired text must
 pass the citation verifier again. The Python renderer accepts only source URLs
-present in the fetched records.
+present in the fetched records. Before verification, editorial citations are
+constrained to the recorded sources of the extracted events assigned to each
+item; unsupported model-selected URLs cannot enter the report.
 
 Every model call uses the checkpoint's supported sampling contract
 (`temperature=1`, `top_p=1`, deterministic `seed=0`) with thinking enabled and
@@ -43,11 +45,18 @@ For example, the run published on `2026-09-13` stores
 `Daily Summary - 2026-09-12`.
 
 A full summary execution stores `records.json`, `coverage.json`,
-`model-output.json`, `summary.md`, and `status.json` under
+`model-output.json`, `summary.md`, `status.json`, and qualified per-chunk
+extraction checkpoints under
 `/var/lib/discord-summary/runs/YYYY-MM-DD`. `coverage.json` records discovered
 sources, archived-thread discovery, fetch failures, message counts, truncation,
 policy application, extraction chunk count, and exact primary-record coverage.
 A production run fails before publication when source coverage is incomplete.
+A retry with identical records and policy reuses a chunk checkpoint only when
+its SHA-256 input identity and exact primary-record/event audit validate.
+A malformed, empty, or transiently failed structured model response is retried
+twice before the run fails; retries do not add an output-token ceiling. A
+citation decision that retains an item without identifying valid source
+evidence is incomplete and enters the bounded candidate-audit recovery path.
 A complete run with no independently meaningful event stores
 `status=no_signal` and does not publish filler to Discord or GitHub.
 

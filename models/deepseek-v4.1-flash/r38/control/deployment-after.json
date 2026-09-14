@@ -1,0 +1,88 @@
+{
+  "image_id": "sha256:e0a2d72272f7dc17583f5e9c8614a2610d6d3932414a8d32ca1cd57dafb8d803",
+  "container": "ds41-r38-control-r37-gpu4-7",
+  "image_reference": "localinferencelab/vllm:jovian-judgement-community-20260913-r37",
+  "command": [
+    "--prefill-compute-share",
+    "0.4",
+    "--prefill-schedule-interval",
+    "1",
+    "--max-parallel-prefills",
+    "1"
+  ],
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/root/vllm/sglang/models",
+      "Destination": "/model",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/root/vllm/cache/ds41-r36",
+      "Destination": "/cache",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "devices": [
+    {
+      "Driver": "",
+      "Count": 0,
+      "DeviceIDs": [
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "Capabilities": [
+        [
+          "gpu"
+        ]
+      ],
+      "Options": {}
+    }
+  ],
+  "driver": "615.71.09",
+  "gpus": [
+    {
+      "gpu": 4,
+      "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2827,
+      "temperature_c": 64
+    },
+    {
+      "gpu": 5,
+      "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2835,
+      "temperature_c": 61
+    },
+    {
+      "gpu": 6,
+      "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2835,
+      "temperature_c": 58
+    },
+    {
+      "gpu": 7,
+      "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+      "memory_offset": 0,
+      "graphics_offset": 0,
+      "memory_mhz": 13365,
+      "graphics_mhz": 2835,
+      "temperature_c": 59
+    }
+  ]
+}

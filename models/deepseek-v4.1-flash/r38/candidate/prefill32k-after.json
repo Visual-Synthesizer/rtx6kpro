@@ -1,0 +1,74 @@
+{
+  "status": "research-only",
+  "tokens": 32768,
+  "nonce": 1789274463939772909,
+  "samples": [
+    {
+      "repeat": -1,
+      "arm": "source",
+      "ttft_seconds": 1.5662165560061112,
+      "tok_per_sec": 20921.755599084692,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5484923749463633
+      }
+    },
+    {
+      "repeat": 0,
+      "arm": "source",
+      "ttft_seconds": 1.5654118019156158,
+      "tok_per_sec": 20932.511151315808,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5484036490088329
+      }
+    },
+    {
+      "repeat": 1,
+      "arm": "source",
+      "ttft_seconds": 1.5666620640549809,
+      "tok_per_sec": 20915.806128085344,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.5497265910962597
+      }
+    },
+    {
+      "repeat": 2,
+      "arm": "source",
+      "ttft_seconds": 1.5664472980424762,
+      "tok_per_sec": 20918.67376639406,
+      "prompt_sources": {
+        "external_kv_transfer": 0,
+        "local_compute": 32768,
+        "local_cache_hit": 0
+      },
+      "engine_work": {
+        "vllm:iteration_tokens_total_count": 1.0,
+        "vllm:iteration_tokens_total_sum": 32769.0,
+        "vllm:request_prefill_time_seconds_sum": 1.549738434026949
+      }
+    }
+  ],
+  "implementation": "serving artifact recorded separately",
+  "runtime_switch": false,
+  "median_tok_per_sec": 20918.67376639406
+}
