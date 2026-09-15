@@ -1,0 +1,73 @@
+{
+  "artifact_kind": "AA-LCR generation completeness receipt",
+  "created_utc": "2026-09-15T11:48:39.491068Z",
+  "dataset": {
+    "prompt_manifest_sha256": "13f8fdc097679d5ead0c4bba6044b254a1fcd80f8e5afb9555c68bd3d0abd09d",
+    "questions": 100,
+    "repository": "ArtificialAnalysis/AA-LCR",
+    "revision": "9a77ef56b717057ade24ceab4d273712a0b4f19e",
+    "token_count_manifest_sha256": "4f6b687c6aefd48af3763fead7df57819fa2588ced4a201b117db559bab9af33"
+  },
+  "generation": {
+    "configuration_sha256": "945c9662dfd999f8f007b2c660360f8ad5774e16989841f506dccee01f1635e9",
+    "empty_candidate_answers": 0,
+    "failure_sidecars": 0,
+    "finish_reasons": {
+      "stop": 700
+    },
+    "generation_manifest_sha256": "83e95da236a5a8b2a949010c310b13ebe6a77abf9966d08a951198cd6f22bb96",
+    "model": "Qwen3.8-Flash-Next",
+    "per_repeat_receipts": {
+      "0": 100,
+      "1": 100,
+      "2": 100,
+      "3": 100,
+      "4": 100,
+      "5": 100,
+      "6": 100
+    },
+    "questions": 100,
+    "receipts": 700,
+    "repeats": 7,
+    "runtime_manifest_sha256": "85cb9d4d3ed68995bb3f6c3e43bf92e6ae961635ade5f7bc3cbfbba9511eecda"
+  },
+  "qualification": {
+    "all_candidate_answer_hashes_match": true,
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_dataset_prompts_and_documents": true,
+    "all_receipts_match_generation_configuration": true,
+    "all_response_prompt_token_counts_match_pinned_tokenizer": true,
+    "all_responses_finished_with_stop": true
+  },
+  "receipt_manifest_sha256": "196773b6fd32959b376ce53748f4a8d9b4093871a253dd1e7c7636e61cf932d4",
+  "status": "qualified",
+  "usage": {
+    "completion_tokens": {
+      "maximum": 21787,
+      "mean": 2192.0071428571428,
+      "median": 1196.5,
+      "minimum": 169,
+      "p95": 7527.55,
+      "p99": 15644.2,
+      "sum": 1534405
+    },
+    "prompt_tokens": {
+      "maximum": 122152,
+      "mean": 106617.56,
+      "median": 107175.5,
+      "minimum": 87887,
+      "p95": 120396.1,
+      "p99": 122152.0,
+      "sum": 74632292
+    },
+    "request_elapsed_seconds": {
+      "maximum": 1618.246559842024,
+      "mean": 362.9939508985904,
+      "median": 219.9451020678971,
+      "minimum": 27.484634656924754,
+      "p95": 1217.083699,
+      "p99": 1465.596345,
+      "sum": 254095.7656290133
+    }
+  }
+}

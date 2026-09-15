@@ -1,0 +1,54 @@
+{
+  "schema": "local-inference-lab.direct-arithmetic-stability-run.v1",
+  "semantic_role": "Direct-answer arithmetic comparison across complete checkpoint and serving configurations",
+  "status": "qualified configuration",
+  "created_at": "2026-09-15T12:48:20.237236+00:00",
+  "script": "/data/evals/run-direct-arithmetic-stability.py",
+  "script_sha256": "cfc5843aded9e2461b5a775fd6a1f3bf05eb0edbf08a69909c791bbdbf600351",
+  "suite_sha256": "052618c42375ba8c2f73fe86ac280fc9256ea5921e69ca8609206230ba23ae80",
+  "model": "Qwen3.8-Flash-Next",
+  "endpoint_sets": {
+    "NVFP4": [
+      "http://127.0.0.1:30001/v1",
+      "http://127.0.0.1:30002/v1",
+      "http://127.0.0.1:30003/v1",
+      "http://127.0.0.1:30004/v1",
+      "http://127.0.0.1:30005/v1",
+      "http://127.0.0.1:30006/v1",
+      "http://127.0.0.1:30007/v1",
+      "http://127.0.0.1:30008/v1"
+    ],
+    "QAD": [
+      "http://127.0.0.1:30009/v1",
+      "http://127.0.0.1:30010/v1",
+      "http://127.0.0.1:30011/v1",
+      "http://127.0.0.1:30012/v1",
+      "http://127.0.0.1:30013/v1",
+      "http://127.0.0.1:30014/v1",
+      "http://127.0.0.1:30015/v1",
+      "http://127.0.0.1:30016/v1"
+    ]
+  },
+  "protocol": "OpenAI Chat Completions, non-streaming",
+  "sampling": {
+    "temperatures": [
+      0.0,
+      1.0
+    ],
+    "reasoning_repeats": {
+      "none": 3,
+      "low": 1
+    },
+    "request_seed": null,
+    "max_tokens": 2048
+  },
+  "execution": {
+    "per_endpoint_concurrency": 4,
+    "maximum_global_concurrency": 64,
+    "timeout_seconds": 120.0,
+    "automatic_retries": 0,
+    "expected_attempts": 9600
+  },
+  "scoring": "Stripped response text must equal the algorithmically computed base-10 integer",
+  "contract_sha256": "7bd2b533b9c8d51ff6aae4c8b27ab14347c56dc7e9bdec677c8d3d8c77f5c862"
+}

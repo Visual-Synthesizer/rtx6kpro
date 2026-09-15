@@ -1,0 +1,76 @@
+{
+  "artifact_kind": "AA-LCR Codex equality-checker summary",
+  "attempts": 700,
+  "comparison_scope": "Artificial Analysis AA-LCR v1.1 equality-checker reproduction",
+  "correct": 544,
+  "created_utc": "2026-09-15T12:02:49.811499Z",
+  "elapsed_seconds": {
+    "maximum": 42.42057214898523,
+    "median": 9.83718586654868,
+    "minimum": 2.5074965490493923,
+    "sum": 5836.510172514711
+  },
+  "judge": {
+    "codex_cli_version": "codex-cli 0.154.0",
+    "dataset_revision": "9a77ef56b717057ade24ceab4d273712a0b4f19e",
+    "execution_isolation": {
+      "ephemeral_session": true,
+      "sandbox": "read-only",
+      "user_config_loaded": false,
+      "workspace": "empty"
+    },
+    "generation_manifest_sha256": "d7c39582bbd5163ae84d57a981f94d24df1bdc7aaab59e2723255782f0635a6b",
+    "generation_repeats": 7,
+    "model": "gpt-5.6-luna",
+    "prompt_contract": "AA-LCR v1.1 system and user prompts; emit a JSON verdict of CORRECT or INCORRECT",
+    "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+    "reasoning_effort": "medium",
+    "system_prompt_sha256": "e5ed5b4646e01151f43e9ea97ba8490208151d4317c594963719f37dcecf40ca"
+  },
+  "judge_config_sha256": "299efea5580c909cb1bd09597db0ae66e1bb069ad1b29d80c504385f8f589c68",
+  "pass_at_1": 0.7771428571428571,
+  "per_repeat": {
+    "0": {
+      "attempts": 100,
+      "correct": 75,
+      "pass_at_1": 0.75
+    },
+    "1": {
+      "attempts": 100,
+      "correct": 80,
+      "pass_at_1": 0.8
+    },
+    "2": {
+      "attempts": 100,
+      "correct": 79,
+      "pass_at_1": 0.79
+    },
+    "3": {
+      "attempts": 100,
+      "correct": 80,
+      "pass_at_1": 0.8
+    },
+    "4": {
+      "attempts": 100,
+      "correct": 76,
+      "pass_at_1": 0.76
+    },
+    "5": {
+      "attempts": 100,
+      "correct": 79,
+      "pass_at_1": 0.79
+    },
+    "6": {
+      "attempts": 100,
+      "correct": 75,
+      "pass_at_1": 0.75
+    }
+  },
+  "qualification": {
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_judge_configuration": true,
+    "failure_sidecars": 0
+  },
+  "receipt_manifest_sha256": "820bd176e35fd18426dd76cefc04bc9c234fdfaeb0fe548ff190b78667622543",
+  "status": "qualified"
+}

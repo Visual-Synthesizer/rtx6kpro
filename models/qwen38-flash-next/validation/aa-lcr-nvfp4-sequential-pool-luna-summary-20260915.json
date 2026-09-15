@@ -1,0 +1,55 @@
+{
+  "artifact_kind": "AA-LCR Codex equality-checker summary",
+  "attempts": 300,
+  "comparison_scope": "Artificial Analysis AA-LCR v1.1 equality-checker reproduction",
+  "correct": 231,
+  "created_utc": "2026-09-15T02:10:50.215098Z",
+  "elapsed_seconds": {
+    "maximum": 16.75712162302807,
+    "median": 3.4619468639721163,
+    "minimum": 2.201267099007964,
+    "sum": 1594.3159370939247
+  },
+  "judge": {
+    "codex_cli_version": "codex-cli 0.154.0",
+    "dataset_revision": "9a77ef56b717057ade24ceab4d273712a0b4f19e",
+    "execution_isolation": {
+      "ephemeral_session": true,
+      "sandbox": "read-only",
+      "user_config_loaded": false,
+      "workspace": "empty"
+    },
+    "generation_manifest_sha256": "931781e7eb2c224cd6c438f7f6c188bd25e8f2a3c3cf20e701f3af10b543efef",
+    "model": "gpt-5.6-luna",
+    "prompt_contract": "AA-LCR v1.1 system and user prompts; emit a JSON verdict of CORRECT or INCORRECT",
+    "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+    "reasoning_effort": "medium",
+    "system_prompt_sha256": "e5ed5b4646e01151f43e9ea97ba8490208151d4317c594963719f37dcecf40ca"
+  },
+  "judge_config_sha256": "87ffc3640c22a379814f92b38e4fe11fded2b45c42c7365af2e12b751700b2ea",
+  "pass_at_1": 0.77,
+  "per_repeat": {
+    "0": {
+      "attempts": 100,
+      "correct": 77,
+      "pass_at_1": 0.77
+    },
+    "1": {
+      "attempts": 100,
+      "correct": 75,
+      "pass_at_1": 0.75
+    },
+    "2": {
+      "attempts": 100,
+      "correct": 79,
+      "pass_at_1": 0.79
+    }
+  },
+  "qualification": {
+    "all_expected_question_repeat_pairs_present": true,
+    "all_receipts_match_judge_configuration": true,
+    "failure_sidecars": 0
+  },
+  "receipt_manifest_sha256": "a1ef3818d9cd8f073c6cdde7497f8408ee5cfe6ca6cc5d4db73b59cbe102cc8a",
+  "status": "qualified"
+}
