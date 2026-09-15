@@ -122,10 +122,65 @@ particular, ten responses to one survey question remain one question cluster.
 | Streaming | disabled |
 | Completion status | all 2,000 responses ended with `stop` |
 
-Published NVFP4 generated 2,039,403 completion tokens across its ten
-generations; QAD generated 2,164,009. Both checkpoints processed 106,617,560
-prompt tokens. The 139,000-token value is a ceiling rather than a requested
-response length.
+### Candidate token usage
+
+Both checkpoints processed 106,617,560 prompt tokens. The API reported
+reasoning tokens inside the completion-token count, so the following identity
+holds for every request:
+
+```text
+completion tokens = reasoning tokens + non-reasoning completion tokens
+```
+
+Every one of the 1,000 retained generation receipts per checkpoint contains
+`completion_tokens` and `completion_tokens_details.reasoning_tokens`. The
+per-request percentiles use the nearest-rank definition; the median is the
+conventional middle-pair mean for the even sample size.
+
+| Reasoning tokens per request | Total | Mean | Median | P90 | P99 |
+|---|---:|---:|---:|---:|---:|
+| Published NVFP4 | 1,793,512 | 1,793.5 | 924.0 | 4,229 | 12,291 |
+| QAD | 1,934,207 | 1,934.2 | 954.5 | 4,534 | 14,757 |
+
+| Total completion tokens per request | Total | Mean | Median | P90 | P99 |
+|---|---:|---:|---:|---:|---:|
+| Published NVFP4 | 2,039,403 | 2,039.4 | 1,201.5 | 4,540 | 12,584 |
+| QAD | 2,164,009 | 2,164.0 | 1,199.5 | 4,829 | 14,959 |
+
+| Non-reasoning completion tokens per request | Total | Mean | Median | P90 | P99 |
+|---|---:|---:|---:|---:|---:|
+| Published NVFP4 | 245,891 | 245.9 | 233.5 | 409 | 582 |
+| QAD | 229,802 | 229.8 | 216.0 | 381 | 577 |
+
+QAD used 140,695 more reasoning tokens (+7.84%), 16,089 fewer non-reasoning
+completion tokens (-6.54%), and 124,606 more completion tokens overall
+(+6.11%). Median total completion length was effectively unchanged; QAD's
+additional usage appears in the upper tail of the reasoning distribution.
+These descriptive token counts do not establish that longer reasoning caused
+the measured accuracy difference.
+
+The 139,000-token maximum output is a ceiling rather than a requested response
+length.
+
+### Reasoning-effort parity
+
+All four candidate-generation manifests—published NVFP4 and QAD in both the
+three-repeat and seven-repeat segments—declare `reasoning_effort: xhigh`. The
+generation runner inserts that value directly into every Chat Completions
+request. All 2,000 retained response receipts match their segment's hashed
+generation configuration, and all expose a populated reasoning-token count.
+
+Within each corresponding three-repeat or seven-repeat segment, after
+excluding endpoint URLs and runtime-manifest identities, the generation
+contracts for published NVFP4 and QAD have identical sampling fields. Both use
+temperature 1.0, top-p 0.95, top-k 20, min-p 0, presence penalty 0, repetition
+penalty 1, no request seed, no system message, and non-streaming generation.
+The token-usage difference therefore is not explained by a configured
+reasoning-effort difference.
+
+The response API does not echo the requested reasoning effort, so the retained
+receipts prove request-contract parity rather than the engine's internal
+interpretation of `xhigh`.
 
 Published NVFP4 returned an empty final-answer field twice: question 55 in
 global repeat 0 and question 54 in global repeat 8. Both requests ended with
