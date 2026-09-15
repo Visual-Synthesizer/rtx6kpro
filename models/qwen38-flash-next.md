@@ -26,7 +26,7 @@ declare a finite activation limit. See the [R35 scope and changelog](glm-5.3-fla
 ## Quality evaluation
 
 The qualified
-[AA-LCR v1.1 comparison of published NVFP4 and QAD step 1,500](qwen38-flash-next/aa-lcr-nvfp4-vs-qad-step1500.md)
+[AA-LCR v1.1 comparison of published NVFP4 and QAD](qwen38-flash-next/aa-lcr-nvfp4-vs-qad.md)
 uses ten independent generations per question with GPT-5.6 Luna at medium
 reasoning as the equality checker. Published NVFP4 scored 77.5% and the
 quantization-aware-distillation (QAD) checkpoint scored 79.4%. The +1.9-point

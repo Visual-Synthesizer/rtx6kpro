@@ -177,7 +177,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Qwen3.5 Smaller Variants (27B, 35B, 122B) on RTX PRO 6000 Blackwell](models/qwen35-27b.md) - `models/qwen35-27b.md`
 - [Qwen3.5-397B-A17B on RTX PRO 6000 Blackwell](models/qwen35-397b.md) - `models/qwen35-397b.md`
 - [Qwen3.8-27B on RTX PRO 6000 Blackwell](models/qwen38-27b.md) - `models/qwen38-27b.md`
-- [Qwen3.8-Flash-Next AA-LCR: published NVFP4 versus QAD step 1,500](models/qwen38-flash-next/aa-lcr-nvfp4-vs-qad-step1500.md) - `models/qwen38-flash-next/aa-lcr-nvfp4-vs-qad-step1500.md`
+- [Qwen3.8-Flash-Next AA-LCR: published NVFP4 versus QAD](models/qwen38-flash-next/aa-lcr-nvfp4-vs-qad.md) - `models/qwen38-flash-next/aa-lcr-nvfp4-vs-qad.md`
 - [Qwen TP1/MTP3 qualification for the Jovian Judgement R28.1 image](models/qwen38-flash-next/validation/r28.1-tp1.md) - `models/qwen38-flash-next/validation/r28.1-tp1.md`
 - [Qwen TP1 engine throughput comparison](models/qwen38-flash-next/validation/tp1-engine-comparison.md) - `models/qwen38-flash-next/validation/tp1-engine-comparison.md`
 - [Qwen3.8-Flash-Next](models/qwen38-flash-next.md) - `models/qwen38-flash-next.md`

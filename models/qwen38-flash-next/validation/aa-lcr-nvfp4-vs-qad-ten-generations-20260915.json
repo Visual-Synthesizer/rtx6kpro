@@ -133,7 +133,7 @@
     "candidate": {
       "attempts": 1000,
       "correct": 794,
-      "name": "Qwen3.8-Flash-Next NVFP4 QAD step1500 v1",
+      "name": "Qwen3.8-Flash-Next QAD",
       "score": 0.794,
       "segments": [
         {

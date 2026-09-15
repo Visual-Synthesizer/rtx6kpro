@@ -1,12 +1,11 @@
-# Qwen3.8-Flash-Next AA-LCR: published NVFP4 versus QAD step 1,500
+# Qwen3.8-Flash-Next AA-LCR: published NVFP4 versus QAD
 
 Status: **qualified local reproduction**.
 
 This report compares the published NVIDIA 4-bit floating-point (NVFP4)
 `local-inference-lab/Qwen3.8-Flash-Next-NVFP4` checkpoint at revision
 `ada4da32a583a78aa47299f45a70603c950490b8` with the Local Inference Lab
-quantization-aware-distillation checkpoint
-`Qwen3.8-Flash-Next-NVFP4-QAD-step1500-v1`. Each checkpoint produced ten
+quantization-aware-distillation (QAD) checkpoint. Each checkpoint produced ten
 independent answers for every one of the 100 Artificial Analysis Long Context
 Reasoning (AA-LCR) v1.1 questions. GPT-5.6 Luna at medium reasoning classified
 all 2,000 answers with the AA-LCR v1.1 equality-checker contract.
@@ -29,10 +28,10 @@ prediction with three speculative tokens is abbreviated MTP3.
 | Checkpoint and serving configuration | Correct | AA-LCR pass@1 reproduction |
 |---|---:|---:|
 | Published NVFP4, TP1, MTP3 | 775/1,000 | **77.5%** |
-| QAD step 1,500 v1, TP1, MTP3 | 794/1,000 | **79.4%** |
+| QAD, TP1, MTP3 | 794/1,000 | **79.4%** |
 | QAD minus published NVFP4 | +19/1,000 | **+1.9 percentage points** |
 
-| Global repeat | Published NVFP4 | QAD step 1,500 | Difference |
+| Global repeat | Published NVFP4 | QAD | Difference |
 |---:|---:|---:|---:|
 | 0 | 77/100 | 79/100 | +2 points |
 | 1 | 75/100 | 80/100 | +5 points |
@@ -65,7 +64,7 @@ inside every selected cluster. The resulting intervals are:
 | Quantity | 95% percentile interval |
 |---|---:|
 | Published NVFP4 score | 70.8% to 83.7% |
-| QAD step 1,500 score | 72.7% to 85.6% |
+| QAD score | 72.7% to 85.6% |
 | QAD minus published NVFP4 | **0.0 to +3.8 points** |
 
 The bootstrap distribution assigns 2.697% probability to a resampled
@@ -81,9 +80,9 @@ questions would address task-sampling uncertainty more directly than further
 repeats of the same 100 questions; repeated equality-checker labels would
 quantify judge variation.
 
-The [machine-readable comparison](validation/aa-lcr-nvfp4-vs-qad-step1500-ten-generations-20260915.json)
+The [machine-readable comparison](validation/aa-lcr-nvfp4-vs-qad-ten-generations-20260915.json)
 has SHA-256
-`915c4d8a4ff3bb08488f9a6d357d345eaa06850e8f4d9b09fa8fbf11a8bc57bf`.
+`baa2875901f6fb8627a18f78d2960ca28ace3915b8b00117b0c6322306e6203c`.
 
 ## Category observations
 
@@ -91,7 +90,7 @@ Category differences are descriptive. Several categories contain very few
 question clusters, so their repeated answers are not independent substitutes
 for additional questions.
 
-| Document category | Questions | Published NVFP4 | QAD step 1,500 | Difference |
+| Document category | Questions | Published NVFP4 | QAD | Difference |
 |---|---:|---:|---:|---:|
 | Academia | 5 | 44/50 (88.0%) | 47/50 (94.0%) | +6.0 points |
 | Company documents | 63 | 500/630 (79.37%) | 523/630 (83.02%) | +3.65 points |
@@ -141,9 +140,7 @@ The published checkpoint identity is
 Its weight-index SHA-256 is
 `435eef76fc10fc6e932a208a1f85a86bc9c7ffc389b27b34ba83bb6a5d0371e9`.
 
-The QAD checkpoint is the local artifact
-`/data/models/Qwen3.8-Flash-Next-NVFP4-QAD-step1500-v1`, identified by
-weight-index SHA-256
+The QAD checkpoint is identified by weight-index SHA-256
 `c528e5628a0f448edc52023933c207a8dbded850afdd960d893c9171a7665dde`
 and export-manifest SHA-256
 `8a0b93599e3edb4ab25357e8af16cf1ac2c6a61354fcec9d6aa50ee9fbf94397`.
@@ -177,13 +174,13 @@ The public runtime receipts are:
 - [published NVFP4 sequential-pool runtime](validation/aa-lcr-nvfp4-sequential-pool-runtime-manifest-20260915.json),
   SHA-256
   `2516cf648003a6e2dddb6afa4b7872b362810eddb53b95edde21ff9349fb5635`;
-- [QAD sequential-pool runtime](validation/aa-lcr-qad-step1500-sequential-pool-runtime-manifest-20260915.json),
+- [QAD sequential-pool runtime](validation/aa-lcr-qad-sequential-pool-runtime-manifest-20260915.json),
   SHA-256
   `ef73fff3e634b1b65b96d438c22e20e22814c0cd44c0ef4a8a0f584e619a8439`;
 - [published NVFP4 split-pool runtime](validation/aa-lcr-nvfp4-split-pool-runtime-manifest-20260915.json),
   SHA-256
   `7db42f744820c663194d2d3ac39e6ced688daadce692066cc71f0017ee629fe8`;
-- [QAD split-pool runtime](validation/aa-lcr-qad-step1500-split-pool-runtime-manifest-20260915.json),
+- [QAD split-pool runtime](validation/aa-lcr-qad-split-pool-runtime-manifest-20260915.json),
   SHA-256
   `85cb9d4d3ed68995bb3f6c3e43bf92e6ae961635ade5f7bc3cbfbba9511eecda`.
 
@@ -214,8 +211,8 @@ summary verifies all expected verdicts and identifies its retained receipt set.
 |---|---|---|---|
 | Published NVFP4, repeats 0–2 | [manifest](validation/aa-lcr-nvfp4-sequential-pool-generation-manifest-20260915.json) | [receipt](validation/aa-lcr-nvfp4-sequential-pool-generation-completeness-20260915.json) | [summary](validation/aa-lcr-nvfp4-sequential-pool-luna-summary-20260915.json) |
 | Published NVFP4, repeats 3–9 | [manifest](validation/aa-lcr-nvfp4-split-pool-generation-manifest-20260915.json) | [receipt](validation/aa-lcr-nvfp4-split-pool-generation-completeness-20260915.json) | [summary](validation/aa-lcr-nvfp4-split-pool-luna-summary-20260915.json) |
-| QAD step 1,500, repeats 0–2 | [manifest](validation/aa-lcr-qad-step1500-sequential-pool-generation-manifest-20260915.json) | [receipt](validation/aa-lcr-qad-step1500-sequential-pool-generation-completeness-20260915.json) | [summary](validation/aa-lcr-qad-step1500-sequential-pool-luna-summary-20260915.json) |
-| QAD step 1,500, repeats 3–9 | [manifest](validation/aa-lcr-qad-step1500-split-pool-generation-manifest-20260915.json) | [receipt](validation/aa-lcr-qad-step1500-split-pool-generation-completeness-20260915.json) | [summary](validation/aa-lcr-qad-step1500-split-pool-luna-summary-20260915.json) |
+| QAD, repeats 0–2 | [manifest](validation/aa-lcr-qad-sequential-pool-generation-manifest-20260915.json) | [receipt](validation/aa-lcr-qad-sequential-pool-generation-completeness-20260915.json) | [summary](validation/aa-lcr-qad-sequential-pool-luna-summary-20260915.json) |
+| QAD, repeats 3–9 | [manifest](validation/aa-lcr-qad-split-pool-generation-manifest-20260915.json) | [receipt](validation/aa-lcr-qad-split-pool-generation-completeness-20260915.json) | [summary](validation/aa-lcr-qad-split-pool-luna-summary-20260915.json) |
 
 The aggregate comparison records all segment hashes and candidate and judge
 receipt-set identities. Candidate responses, complete API response objects,
@@ -244,3 +241,8 @@ The segmented comparison runner has SHA-256
 The QAD checkpoint is **research-only** as a deployment target. The AA-LCR
 artifact is **qualified** for the exact checkpoint, runtime, dataset, sampling,
 and equality-checker identities reported above.
+
+## Author
+
+Evaluation execution, receipt validation, statistical analysis, and report:
+**Martin Vit**, Local Inference Lab.
