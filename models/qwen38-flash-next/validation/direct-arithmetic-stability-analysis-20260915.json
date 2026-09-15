@@ -1,0 +1,2427 @@
+{
+  "schema": "local-inference-lab.direct-arithmetic-stability-analysis.v1",
+  "status": "qualified",
+  "scope": "Exact direct-answer integer arithmetic under the declared served-system configurations",
+  "source_artifacts": {
+    "attempts.jsonl": {
+      "path": "/mnt/luke/evals/qwen38-direct-arithmetic-chat-none-low-600x-20260915/attempts.jsonl",
+      "sha256": "a0bb63bc8309d567419e61e51d908acc121bfca95af41ab7f3280d9f2e29059b"
+    },
+    "run-config.json": {
+      "path": "/mnt/luke/evals/qwen38-direct-arithmetic-chat-none-low-600x-20260915/run-config.json",
+      "sha256": "aa3827844d58af6045f6f418e4c01b3553b1ce70b31b415f3ca8875c798f2e8c"
+    },
+    "suite.json": {
+      "path": "/mnt/luke/evals/qwen38-direct-arithmetic-chat-none-low-600x-20260915/suite.json",
+      "sha256": "ecffaa3d6d19e75dc49e515b1cc84ec78db0ed8685ead4dc39d149817900fbc5"
+    },
+    "summary.json": {
+      "path": "/mnt/luke/evals/qwen38-direct-arithmetic-chat-none-low-600x-20260915/summary.json",
+      "sha256": "f8a43d381a053de0966d97a71394b228910b6ccc815ac18d7ccda4d81b6daf18"
+    }
+  },
+  "generalization": {
+    "cells": [
+      {
+        "model_label": "NVFP4",
+        "reasoning_effort": "low",
+        "temperature": 0.0,
+        "attempts": 600,
+        "correct": 599,
+        "wrong": 1,
+        "accuracy_percent": 99.833333,
+        "answer_classes": {
+          "exact": 599,
+          "incorrect_integer_same_length": 1
+        }
+      },
+      {
+        "model_label": "NVFP4",
+        "reasoning_effort": "low",
+        "temperature": 1.0,
+        "attempts": 600,
+        "correct": 596,
+        "wrong": 4,
+        "accuracy_percent": 99.333333,
+        "answer_classes": {
+          "exact": 596,
+          "non_integer_format": 4
+        }
+      },
+      {
+        "model_label": "NVFP4",
+        "reasoning_effort": "none",
+        "temperature": 0.0,
+        "attempts": 1800,
+        "correct": 1424,
+        "wrong": 376,
+        "accuracy_percent": 79.111111,
+        "answer_classes": {
+          "exact": 1424,
+          "incorrect_integer_same_length": 288,
+          "incorrect_integer_shorter": 65,
+          "non_integer_format": 10,
+          "incorrect_integer_longer": 13
+        }
+      },
+      {
+        "model_label": "NVFP4",
+        "reasoning_effort": "none",
+        "temperature": 1.0,
+        "attempts": 1800,
+        "correct": 1354,
+        "wrong": 446,
+        "accuracy_percent": 75.222222,
+        "answer_classes": {
+          "exact": 1354,
+          "incorrect_integer_same_length": 295,
+          "incorrect_integer_shorter": 76,
+          "non_integer_format": 64,
+          "incorrect_integer_longer": 11
+        }
+      },
+      {
+        "model_label": "QAD",
+        "reasoning_effort": "low",
+        "temperature": 0.0,
+        "attempts": 600,
+        "correct": 600,
+        "wrong": 0,
+        "accuracy_percent": 100.0,
+        "answer_classes": {
+          "exact": 600
+        }
+      },
+      {
+        "model_label": "QAD",
+        "reasoning_effort": "low",
+        "temperature": 1.0,
+        "attempts": 600,
+        "correct": 596,
+        "wrong": 4,
+        "accuracy_percent": 99.333333,
+        "answer_classes": {
+          "exact": 596,
+          "non_integer_format": 3,
+          "incorrect_integer_same_length": 1
+        }
+      },
+      {
+        "model_label": "QAD",
+        "reasoning_effort": "none",
+        "temperature": 0.0,
+        "attempts": 1800,
+        "correct": 1455,
+        "wrong": 345,
+        "accuracy_percent": 80.833333,
+        "answer_classes": {
+          "exact": 1455,
+          "incorrect_integer_same_length": 278,
+          "incorrect_integer_longer": 16,
+          "incorrect_integer_shorter": 47,
+          "non_integer_format": 4
+        }
+      },
+      {
+        "model_label": "QAD",
+        "reasoning_effort": "none",
+        "temperature": 1.0,
+        "attempts": 1800,
+        "correct": 1378,
+        "wrong": 422,
+        "accuracy_percent": 76.555556,
+        "answer_classes": {
+          "incorrect_integer_shorter": 62,
+          "exact": 1378,
+          "incorrect_integer_same_length": 303,
+          "incorrect_integer_longer": 13,
+          "non_integer_format": 44
+        }
+      }
+    ],
+    "task_cluster_comparisons": [
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0
+        ],
+        "family": null,
+        "task_clusters": 600,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            3
+          ],
+          "QAD": [
+            3
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 79.111111,
+        "candidate_accuracy_percent": 80.833333,
+        "candidate_minus_baseline_points": 1.722222,
+        "baseline_bootstrap_95_percent_interval": [
+          76.055556,
+          82.111111
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          77.777778,
+          83.777778
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          0.611111,
+          2.888889
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.000965,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          1.0
+        ],
+        "family": null,
+        "task_clusters": 600,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            3
+          ],
+          "QAD": [
+            3
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 75.222222,
+        "candidate_accuracy_percent": 76.555556,
+        "candidate_minus_baseline_points": 1.333333,
+        "baseline_bootstrap_95_percent_interval": [
+          72.166667,
+          78.222222
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          73.5,
+          79.5
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -0.333333,
+          3.0
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.059565,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": null,
+        "task_clusters": 600,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 77.166667,
+        "candidate_accuracy_percent": 78.694444,
+        "candidate_minus_baseline_points": 1.527778,
+        "baseline_bootstrap_95_percent_interval": [
+          74.194444,
+          80.083333
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          75.722222,
+          81.611111
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          0.5,
+          2.555556
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.001595,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "low",
+        "temperatures": [
+          0.0
+        ],
+        "family": null,
+        "task_clusters": 600,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            1
+          ],
+          "QAD": [
+            1
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 99.833333,
+        "candidate_accuracy_percent": 100.0,
+        "candidate_minus_baseline_points": 0.166667,
+        "baseline_bootstrap_95_percent_interval": [
+          99.5,
+          100.0
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          100.0,
+          100.0
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          0.0,
+          0.5
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.369155,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "low",
+        "temperatures": [
+          1.0
+        ],
+        "family": null,
+        "task_clusters": 600,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            1
+          ],
+          "QAD": [
+            1
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 99.333333,
+        "candidate_accuracy_percent": 99.333333,
+        "candidate_minus_baseline_points": 0.0,
+        "baseline_bootstrap_95_percent_interval": [
+          98.666667,
+          99.833333
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          98.666667,
+          99.833333
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -0.833333,
+          0.833333
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.583175,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "low",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": null,
+        "task_clusters": 600,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            2
+          ],
+          "QAD": [
+            2
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 99.583333,
+        "candidate_accuracy_percent": 99.666667,
+        "candidate_minus_baseline_points": 0.083333,
+        "baseline_bootstrap_95_percent_interval": [
+          99.166667,
+          99.916667
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          99.333333,
+          99.916667
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -0.333333,
+          0.5
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.42751,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      }
+    ],
+    "family_comparisons_for_reasoning_none": [
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": "borrow-subtraction",
+        "task_clusters": 100,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 97.0,
+        "candidate_accuracy_percent": 96.666667,
+        "candidate_minus_baseline_points": -0.333333,
+        "baseline_bootstrap_95_percent_interval": [
+          93.833333,
+          99.333333
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          93.333333,
+          99.166667
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -1.333333,
+          0.5
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.814635,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": "carry-addition",
+        "task_clusters": 100,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 83.333333,
+        "candidate_accuracy_percent": 87.666667,
+        "candidate_minus_baseline_points": 4.333333,
+        "baseline_bootstrap_95_percent_interval": [
+          77.5,
+          88.666667
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          82.0,
+          92.666667
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          1.333333,
+          7.5
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.001355,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": "carry-product",
+        "task_clusters": 100,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 95.833333,
+        "candidate_accuracy_percent": 95.5,
+        "candidate_minus_baseline_points": -0.333333,
+        "baseline_bootstrap_95_percent_interval": [
+          93.666667,
+          97.666667
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          92.666667,
+          97.666667
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -2.166667,
+          1.5
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.645975,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": "exact-division",
+        "task_clusters": 100,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 81.5,
+        "candidate_accuracy_percent": 85.333333,
+        "candidate_minus_baseline_points": 3.833333,
+        "baseline_bootstrap_95_percent_interval": [
+          76.666667,
+          86.0
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          80.5,
+          89.833333
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -0.0,
+          7.666667
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.026955,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": "near-power-product",
+        "task_clusters": 100,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 97.166667,
+        "candidate_accuracy_percent": 97.333333,
+        "candidate_minus_baseline_points": 0.166667,
+        "baseline_bootstrap_95_percent_interval": [
+          95.666667,
+          98.5
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          96.166667,
+          98.5
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -1.5,
+          2.0
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.39633,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      },
+      {
+        "reasoning_effort": "none",
+        "temperatures": [
+          0.0,
+          1.0
+        ],
+        "family": "two-operation",
+        "task_clusters": 100,
+        "attempts_per_task_and_model": {
+          "NVFP4": [
+            6
+          ],
+          "QAD": [
+            6
+          ]
+        },
+        "baseline_label": "NVFP4",
+        "candidate_label": "QAD",
+        "baseline_accuracy_percent": 8.166667,
+        "candidate_accuracy_percent": 9.666667,
+        "candidate_minus_baseline_points": 1.5,
+        "baseline_bootstrap_95_percent_interval": [
+          4.666667,
+          12.333333
+        ],
+        "candidate_bootstrap_95_percent_interval": [
+          5.666667,
+          14.166667
+        ],
+        "candidate_minus_baseline_bootstrap_95_percent_interval_points": [
+          -0.833333,
+          4.0
+        ],
+        "bootstrap_fraction_at_or_below_zero": 0.11761,
+        "bootstrap_draws": 200000,
+        "bootstrap_unit": "task_id; all retained temperatures and repeats remain inside a sampled task"
+      }
+    ],
+    "combined_answer_classes": [
+      {
+        "model_label": "NVFP4",
+        "reasoning_effort": "none",
+        "attempts": 3600,
+        "counts": {
+          "exact": 2778,
+          "incorrect_integer_same_length": 583,
+          "incorrect_integer_shorter": 141,
+          "non_integer_format": 74,
+          "incorrect_integer_longer": 24
+        }
+      },
+      {
+        "model_label": "QAD",
+        "reasoning_effort": "none",
+        "attempts": 3600,
+        "counts": {
+          "exact": 2833,
+          "incorrect_integer_shorter": 109,
+          "incorrect_integer_same_length": 581,
+          "incorrect_integer_longer": 29,
+          "non_integer_format": 48
+        }
+      }
+    ],
+    "task_reliability": [
+      {
+        "model_label": "NVFP4",
+        "reasoning_effort": "none",
+        "attempts_per_task": [
+          6
+        ],
+        "tasks_by_correct_attempt_count": {
+          "0": 86,
+          "1": 20,
+          "2": 12,
+          "3": 9,
+          "4": 28,
+          "5": 75,
+          "6": 370
+        }
+      },
+      {
+        "model_label": "QAD",
+        "reasoning_effort": "none",
+        "attempts_per_task": [
+          6
+        ],
+        "tasks_by_correct_attempt_count": {
+          "0": 89,
+          "1": 13,
+          "2": 6,
+          "3": 12,
+          "4": 22,
+          "5": 64,
+          "6": 394
+        }
+      }
+    ],
+    "statistical_contract": {
+      "bootstrap_seed": 20260915,
+      "bootstrap_draws": 200000,
+      "interval": "two-sided 95% percentile interval",
+      "resampling_unit": "task_id",
+      "warning": "Matching by task controls task difficulty; independently sampled model outputs are not paired causal observations."
+    }
+  },
+  "external_sentinel": {
+    "prompt": "Case stability3-effort-76. Compute 99 times 17. Give only the integer as your final answer.",
+    "expected": "1683",
+    "source_gist": "https://gist.github.com/ktsaou/cd36c6bed6a4a1947ff15c632964dd2d",
+    "source_revision": "8e2d144ef0ac4287183cbc7a34b7ec22e3c993be",
+    "source_script_sha256": "f1d39496647be574c7ed0cd2456c6fea0a12b04f2990f8e9ce4ff0329f9774e2",
+    "reasoning_none": {
+      "root": "/mnt/luke/evals/qwen38-nvfp4-vs-qad-arithmetic-probe-none-20260915",
+      "json_receipts": 112,
+      "receipt_set_sha256": "ffe741fed2f7acd4ada3cbee81c273fff3ddccd2d3220b20f8e01d642082398f",
+      "temperature_cells": [
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 596,
+          "wrong": 4,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 4
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 598,
+          "wrong": 2,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 2
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 597,
+          "wrong": 3,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 3
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 598,
+          "wrong": 2,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 2
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 596,
+          "wrong": 4,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 4
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 590,
+          "wrong": 10,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 7,
+            "1533": 1,
+            "1503": 1,
+            "1513": 1
+          }
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 599,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "1503": 1
+          }
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 599,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        }
+      ],
+      "api_stream_cells": [
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 98,
+          "wrong": 2,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 2
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 98,
+          "wrong": 2,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 2
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 98,
+          "wrong": 2,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 2
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 97,
+          "wrong": 3,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 2,
+            "1533": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 98,
+          "wrong": 2,
+          "request_errors": 0,
+          "wrong_answers": {
+            "1503": 1,
+            "153": 1
+          }
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 96,
+          "wrong": 4,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 3,
+            "1513": 1
+          }
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.1,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.2,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.5,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.7,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "1503": 1
+          }
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 99,
+          "wrong": 1,
+          "request_errors": 0,
+          "wrong_answers": {
+            "153": 1
+          }
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 0.9,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "none",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        }
+      ]
+    },
+    "reasoning_low_control": {
+      "root": "/mnt/luke/evals/qwen38-nvfp4-vs-qad-arithmetic-probe-low-control-20260915",
+      "json_receipts": 32,
+      "receipt_set_sha256": "d1a308c942b3a6c0b430723ceccafebadc56bdbb7bc7664b4fcbdea449643fb8",
+      "temperature_cells": [
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        }
+      ],
+      "api_stream_cells": [
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "NVFP4",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 0.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "chat",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "messages",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": false,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        },
+        {
+          "model_label": "QAD",
+          "reasoning_effort": "low",
+          "temperature": 1.0,
+          "api": "responses",
+          "stream": true,
+          "attempts": 100,
+          "completed": 100,
+          "correct": 100,
+          "wrong": 0,
+          "request_errors": 0,
+          "wrong_answers": {}
+        }
+      ]
+    },
+    "replica_isolation": {
+      "root": "/mnt/luke/evals/qwen38-arithmetic-probe-replica-isolation-20260915",
+      "json_receipts": 9,
+      "receipt_set_sha256": "63ab97ae34a57fc1b3b9ecdf01a2481264821845a4e88cd177d6f674a1ab5567",
+      "cells": [
+        {
+          "replica_role": "non-qad-healthy",
+          "profile": "temp0-c1",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "non-qad-healthy",
+          "profile": "temp0-c32",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "non-qad-healthy",
+          "profile": "temp1-c32",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "non-qad-problem",
+          "profile": "temp0-c1",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "non-qad-problem",
+          "profile": "temp0-c32",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "non-qad-problem",
+          "profile": "temp1-c32",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "qad-control",
+          "profile": "temp0-c1",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "qad-control",
+          "profile": "temp0-c32",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        },
+        {
+          "replica_role": "qad-control",
+          "profile": "temp1-c32",
+          "attempts": 600,
+          "completed": 600,
+          "correct": 600,
+          "wrong": 0,
+          "request_errors": 0
+        }
+      ]
+    }
+  }
+}
