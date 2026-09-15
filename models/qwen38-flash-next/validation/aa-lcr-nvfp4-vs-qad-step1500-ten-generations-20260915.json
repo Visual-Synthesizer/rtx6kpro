@@ -1,0 +1,253 @@
+{
+  "artifact_kind": "AA-LCR segmented checkpoint comparison",
+  "attempt_label_contingency": {
+    "baseline_only_correct": 53,
+    "both_correct": 722,
+    "both_incorrect": 153,
+    "candidate_only_correct": 72,
+    "interpretation": "descriptive only; matching repeat numbers do not pair stochastic generations and therefore do not define a McNemar test"
+  },
+  "candidate_minus_baseline": 0.019,
+  "categories": {
+    "Academia": {
+      "attempts": 50,
+      "baseline_correct": 44,
+      "baseline_score": 0.88,
+      "candidate_correct": 47,
+      "candidate_minus_baseline": 0.06,
+      "candidate_score": 0.94,
+      "questions": 5
+    },
+    "Company_Documents": {
+      "attempts": 630,
+      "baseline_correct": 500,
+      "baseline_score": 0.7936507936507936,
+      "candidate_correct": 523,
+      "candidate_minus_baseline": 0.03650793650793651,
+      "candidate_score": 0.8301587301587302,
+      "questions": 63
+    },
+    "Government_Consultations": {
+      "attempts": 110,
+      "baseline_correct": 72,
+      "baseline_score": 0.6545454545454545,
+      "candidate_correct": 66,
+      "candidate_minus_baseline": -0.05454545454545454,
+      "candidate_score": 0.6,
+      "questions": 11
+    },
+    "Industry_Reports": {
+      "attempts": 80,
+      "baseline_correct": 65,
+      "baseline_score": 0.8125,
+      "candidate_correct": 62,
+      "candidate_minus_baseline": -0.0375,
+      "candidate_score": 0.775,
+      "questions": 8
+    },
+    "Legal": {
+      "attempts": 60,
+      "baseline_correct": 40,
+      "baseline_score": 0.6666666666666666,
+      "candidate_correct": 41,
+      "candidate_minus_baseline": 0.016666666666666666,
+      "candidate_score": 0.6833333333333333,
+      "questions": 6
+    },
+    "Marketing": {
+      "attempts": 60,
+      "baseline_correct": 44,
+      "baseline_score": 0.7333333333333333,
+      "candidate_correct": 46,
+      "candidate_minus_baseline": 0.03333333333333333,
+      "candidate_score": 0.7666666666666667,
+      "questions": 6
+    },
+    "Survey_Reports": {
+      "attempts": 10,
+      "baseline_correct": 10,
+      "baseline_score": 1.0,
+      "candidate_correct": 9,
+      "candidate_minus_baseline": -0.1,
+      "candidate_score": 0.9,
+      "questions": 1
+    }
+  },
+  "comparison_scope": "AA-LCR v1.1 local reproduction with 10 independently sampled generations per question and one GPT-5.6 Luna medium equality-checker verdict per response",
+  "judge_contract": {
+    "codex_cli_version": "codex-cli 0.154.0",
+    "dataset_revision": "9a77ef56b717057ade24ceab4d273712a0b4f19e",
+    "execution_isolation": {
+      "ephemeral_session": true,
+      "sandbox": "read-only",
+      "user_config_loaded": false,
+      "workspace": "empty"
+    },
+    "model": "gpt-5.6-luna",
+    "prompt_contract": "AA-LCR v1.1 system and user prompts; emit a JSON verdict of CORRECT or INCORRECT",
+    "provider": "OpenAI Codex CLI authenticated with ChatGPT",
+    "reasoning_effort": "medium",
+    "system_prompt_sha256": "e5ed5b4646e01151f43e9ea97ba8490208151d4317c594963719f37dcecf40ca"
+  },
+  "limitations": [
+    "The 100 benchmark questions define the resampling population; the interval does not quantify every possible long-context task.",
+    "Each checkpoint produced 10 stochastic generations per question, so a larger generation sample could change the point estimate.",
+    "The equality checker was invoked once per response and can contribute classification error.",
+    "The evaluation measures the complete served system and does not isolate checkpoint weights from KV-cache quantization, kernels, or speculative decoding."
+  ],
+  "models": {
+    "baseline": {
+      "attempts": 1000,
+      "correct": 775,
+      "name": "Qwen3.8-Flash-Next NVFP4",
+      "score": 0.775,
+      "segments": [
+        {
+          "candidate_receipt_set_sha256": "79bc7dd4a412ffd55357ba6f0410f21bbd8940c08224c89b460135ebedfef3d8",
+          "generation_completeness_sha256": "d25f31c58301139324a5ba25757e752e57752adf74204a0c77b76870837de97e",
+          "generation_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-aa-lcr-v1.1",
+          "generation_manifest_sha256": "931781e7eb2c224cd6c438f7f6c188bd25e8f2a3c3cf20e701f3af10b543efef",
+          "global_repeat_start": 0,
+          "global_repeat_stop_exclusive": 3,
+          "judge_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-aa-lcr-v1.1-judge-gpt56-luna-medium",
+          "judge_receipt_set_sha256": "a1ef3818d9cd8f073c6cdde7497f8408ee5cfe6ca6cc5d4db73b59cbe102cc8a",
+          "judge_summary_sha256": "ad30821ea6afb40d6773fa591333077b9ae1d0c528fb4a9223d346887e2799a3",
+          "local_repeats": 3,
+          "segment_index": 0
+        },
+        {
+          "candidate_receipt_set_sha256": "b57f694c090dd3d71d9f95875ebaa66c486684065e6425ed35d6f4e371b53db0",
+          "generation_completeness_sha256": "b503effb74de0a0309a5afcd03cc0a92194334157783b5a3df6c24388edc1ef3",
+          "generation_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-aa-lcr-v1.1-independent-7",
+          "generation_manifest_sha256": "d7c39582bbd5163ae84d57a981f94d24df1bdc7aaab59e2723255782f0635a6b",
+          "global_repeat_start": 3,
+          "global_repeat_stop_exclusive": 10,
+          "judge_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-aa-lcr-v1.1-independent-7-judge-gpt56-luna-medium",
+          "judge_receipt_set_sha256": "820bd176e35fd18426dd76cefc04bc9c234fdfaeb0fe548ff190b78667622543",
+          "judge_summary_sha256": "160e08863c5ec708cf486089ddffd08966dac6ca284fa01dcb36d0d7b99438f8",
+          "local_repeats": 7,
+          "segment_index": 1
+        }
+      ]
+    },
+    "candidate": {
+      "attempts": 1000,
+      "correct": 794,
+      "name": "Qwen3.8-Flash-Next NVFP4 QAD step1500 v1",
+      "score": 0.794,
+      "segments": [
+        {
+          "candidate_receipt_set_sha256": "e83a1734ecc5f84562771eaed3b56fcaccc5e691ca47bd0def0094b5121b3e0d",
+          "generation_completeness_sha256": "b19c288499e1849291b1efd5d81926710a1a73a002ca31a20fc97e8ddb9681f8",
+          "generation_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-qad-step1500-aa-lcr-v1.1",
+          "generation_manifest_sha256": "5a41ef3038a6b20299b70c88ba819fd4564e38293a67d0e010c523d13686ffe0",
+          "global_repeat_start": 0,
+          "global_repeat_stop_exclusive": 3,
+          "judge_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-qad-step1500-aa-lcr-v1.1-judge-gpt56-luna-medium",
+          "judge_receipt_set_sha256": "435209aa1cd30097fa5a1aa919ef6d418d7f3cf9d1e9b3d149c236a99790d396",
+          "judge_summary_sha256": "59e01ebf127cc4023cb799e65a764cbb4f95b106853c44b8e3cd5beb3e2d914a",
+          "local_repeats": 3,
+          "segment_index": 0
+        },
+        {
+          "candidate_receipt_set_sha256": "196773b6fd32959b376ce53748f4a8d9b4093871a253dd1e7c7636e61cf932d4",
+          "generation_completeness_sha256": "36b605a6619034dfc356fb887045271c82ebc7c95d9e247d3d371540222ff2a6",
+          "generation_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-qad-step1500-aa-lcr-v1.1-independent-7",
+          "generation_manifest_sha256": "83e95da236a5a8b2a949010c310b13ebe6a77abf9966d08a951198cd6f22bb96",
+          "global_repeat_start": 3,
+          "global_repeat_stop_exclusive": 10,
+          "judge_directory": "/mnt/luke/evals/qwen38-flash-next-nvfp4-qad-step1500-aa-lcr-v1.1-independent-7-judge-gpt56-luna-medium",
+          "judge_receipt_set_sha256": "b6738721a27c38b254f445fa845fd9df6bfe2ef89f9057b2e2994bcac348f69d",
+          "judge_summary_sha256": "c248f4f59a3994bcd202cc83a70b812404f68f535ae53c1f0710a7e581fb0c4c",
+          "local_repeats": 7,
+          "segment_index": 1
+        }
+      ]
+    }
+  },
+  "per_repeat": {
+    "0": {
+      "attempts": 100,
+      "baseline_correct": 77,
+      "candidate_correct": 79,
+      "candidate_minus_baseline": 0.02
+    },
+    "1": {
+      "attempts": 100,
+      "baseline_correct": 75,
+      "candidate_correct": 80,
+      "candidate_minus_baseline": 0.05
+    },
+    "2": {
+      "attempts": 100,
+      "baseline_correct": 79,
+      "candidate_correct": 81,
+      "candidate_minus_baseline": 0.02
+    },
+    "3": {
+      "attempts": 100,
+      "baseline_correct": 75,
+      "candidate_correct": 77,
+      "candidate_minus_baseline": 0.02
+    },
+    "4": {
+      "attempts": 100,
+      "baseline_correct": 80,
+      "candidate_correct": 79,
+      "candidate_minus_baseline": -0.01
+    },
+    "5": {
+      "attempts": 100,
+      "baseline_correct": 79,
+      "candidate_correct": 78,
+      "candidate_minus_baseline": -0.01
+    },
+    "6": {
+      "attempts": 100,
+      "baseline_correct": 80,
+      "candidate_correct": 80,
+      "candidate_minus_baseline": 0.0
+    },
+    "7": {
+      "attempts": 100,
+      "baseline_correct": 76,
+      "candidate_correct": 81,
+      "candidate_minus_baseline": 0.05
+    },
+    "8": {
+      "attempts": 100,
+      "baseline_correct": 79,
+      "candidate_correct": 83,
+      "candidate_minus_baseline": 0.04
+    },
+    "9": {
+      "attempts": 100,
+      "baseline_correct": 75,
+      "candidate_correct": 76,
+      "candidate_minus_baseline": 0.01
+    }
+  },
+  "question_cluster_bootstrap": {
+    "baseline_score_95_interval": [
+      0.708,
+      0.837
+    ],
+    "bootstrap_probability_candidate_minus_baseline_at_most_zero": 0.026967170431709483,
+    "candidate_minus_baseline_95_interval": [
+      0.0,
+      0.038
+    ],
+    "candidate_score_95_interval": [
+      0.727,
+      0.856
+    ],
+    "method": "exact empirical bootstrap distribution from resampling 100 question clusters; every cluster preserves all 10 generations from each checkpoint"
+  },
+  "question_mean_outcomes": {
+    "baseline_higher": 15,
+    "candidate_higher": 24,
+    "equal": 61
+  },
+  "repetitions_per_question": 10,
+  "status": "qualified"
+}

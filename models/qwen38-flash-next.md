@@ -23,6 +23,17 @@ the public source composition; it does not claim a repeated Qwen serving matrix
 or a Qwen speedup. Its split-NVFP4 SwiGLU correction is relevant to models that
 declare a finite activation limit. See the [R35 scope and changelog](glm-5.3-flash/validation/swiglu-reviewed-composition-r35.md).
 
+## Quality evaluation
+
+The qualified
+[AA-LCR v1.1 comparison of published NVFP4 and QAD step 1,500](qwen38-flash-next/aa-lcr-nvfp4-vs-qad-step1500.md)
+uses ten independent generations per question with GPT-5.6 Luna at medium
+reasoning as the equality checker. Published NVFP4 scored 77.5% and the
+quantization-aware-distillation (QAD) checkpoint scored 79.4%. The +1.9-point
+difference has a question-cluster bootstrap 95% interval of 0.0 to +3.8 points,
+which favors QAD without strict positive separation under the declared
+two-sided interval criterion.
+
 ## Start on one GPU: TP1
 
 Status: **qualified** for text, MTP3, 8-bit floating-point (FP8) key/value (KV)
