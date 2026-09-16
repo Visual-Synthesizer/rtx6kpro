@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-09-16](2026-09/2026-09-16.md) | Measured r37 to r38 on 4x Max-Q at 300W stock with TP4/DCP1 and VLLM_USE_BREAKABLE_CUDAGRAPH=1: KV p |
 | [2026-09-15](2026-09/2026-09-15.md) | DS4.1-Flash repetitive thinking loops were reported: one user reported loops repeating the same toke |
 | [2026-09-14](2026-09/2026-09-14.md) | An R37 Docker image included Astra experimental PRs converting PyTorch prefill paths from O(N^2) to  |
 | [2026-09-13](2026-09/2026-09-13.md) | SGLang guide ormandj/sglang-glm53-flash-sm120 v0.4.3 and live verification report max_total_tokens=5 |
