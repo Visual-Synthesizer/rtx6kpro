@@ -56,7 +56,8 @@ its SHA-256 input identity and exact primary-record/event audit validate.
 A malformed, empty, or transiently failed structured model response is retried
 twice before the run fails; retries do not add an output-token ceiling. A
 citation decision that retains an item without identifying valid source
-evidence is incomplete and enters the bounded candidate-audit recovery path.
+evidence, or a citation repair that puts a URL in publication text, is
+incomplete and enters the bounded candidate-audit recovery path.
 A complete run with no independently meaningful event stores
 `status=no_signal` and does not publish filler to Discord or GitHub.
 
