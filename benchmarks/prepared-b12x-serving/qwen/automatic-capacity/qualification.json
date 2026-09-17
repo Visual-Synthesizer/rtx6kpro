@@ -1,0 +1,20 @@
+{
+  "schema": "automatic-kv-serving-qualification/v1",
+  "status": "qualified",
+  "image_id": "sha256:dada56080b813ffcd38b18f4d3dc7c548058cfe2222fe3e5a49e2893cd674b92",
+  "checks": {
+    "exact_image": true,
+    "no_source_overrides": true,
+    "automatic_kv": true,
+    "full_and_piecewise": true,
+    "tp1": true,
+    "fp8_kv": true,
+    "mtp3": true,
+    "functional": true,
+    "capacity": true
+  },
+  "logical_kv_capacity_tokens": 773216,
+  "scope": "TP1/MTP3 Qwen text startup, captured graphs, and four bounded API checks with automatic KV sizing; no throughput or broad quality claim.",
+  "runtime": "qwen/automatic-capacity/runtime.json",
+  "launch": "qwen/automatic-capacity/launch.json"
+}

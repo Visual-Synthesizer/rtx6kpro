@@ -1,0 +1,83 @@
+W0917 11:11:55.879000 7 usr/local/lib/python3.12/dist-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W0917 11:11:55.879000 7 usr/local/lib/python3.12/dist-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W0917 11:11:55.879000 7 usr/local/lib/python3.12/dist-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+{
+  "source_sha256": "bd58b7ea6efe9e9b584a58c8556bd0be63d5a2f09add27f8ae604d778e1a7b19",
+  "iterations": 1000,
+  "repeats": 5,
+  "scope": "CPU metadata lookup; no collective or model execution",
+  "results": [
+    {
+      "declarations": 64,
+      "case": "hit",
+      "microseconds_per_call": [
+        0.49141794443130493,
+        0.4825389478355646,
+        0.4889480769634247,
+        0.4861180204898119,
+        0.488888006657362
+      ],
+      "median_us": 0.488888006657362
+    },
+    {
+      "declarations": 64,
+      "case": "miss",
+      "microseconds_per_call": [
+        0.6839369889348745,
+        0.6860168650746346,
+        0.6801181007176638,
+        0.6765769794583321,
+        0.6694579496979713
+      ],
+      "median_us": 0.6801181007176638
+    },
+    {
+      "declarations": 512,
+      "case": "hit",
+      "microseconds_per_call": [
+        0.4997779615223408,
+        0.4996678326278925,
+        0.4998380318284035,
+        0.4993579350411892,
+        0.5053090862929821
+      ],
+      "median_us": 0.4997779615223408
+    },
+    {
+      "declarations": 512,
+      "case": "miss",
+      "microseconds_per_call": [
+        0.6984879728406668,
+        0.6973268464207649,
+        0.6942069157958031,
+        0.699987867847085,
+        0.6964670028537512
+      ],
+      "median_us": 0.6973268464207649
+    },
+    {
+      "declarations": 4096,
+      "case": "hit",
+      "microseconds_per_call": [
+        0.508028082549572,
+        0.5053379572927952,
+        0.5028080195188522,
+        0.5009481683373451,
+        0.5041179247200489
+      ],
+      "median_us": 0.5041179247200489
+    },
+    {
+      "declarations": 4096,
+      "case": "miss",
+      "microseconds_per_call": [
+        0.7148468866944313,
+        0.697957118973136,
+        0.6914481054991484,
+        0.6913468241691589,
+        0.6889968644827604
+      ],
+      "median_us": 0.6914481054991484
+    }
+  ]
+}

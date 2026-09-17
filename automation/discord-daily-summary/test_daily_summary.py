@@ -416,6 +416,85 @@ class ModelRequestTest(unittest.TestCase):
 
 
 class CitationVerificationTest(unittest.TestCase):
+    def test_recovers_repaired_text_that_contains_a_url(self) -> None:
+        source = record(message_id="10", content="B12X added a planner.")
+        candidates = {
+            "audit": [{"event_id": "e0001", "disposition": "publish", "reason": "Fix"}],
+            "items": [
+                {
+                    "section": "releases_and_fixes",
+                    "text": "B12X added a planner.",
+                    "event_ids": ["e0001"],
+                    "source_urls": [source.url],
+                }
+            ],
+        }
+        client = daily_summary.LocalModelClient("http://model", "model")
+        client.complete_json = Mock(
+            side_effect=[
+                (
+                    {
+                        "candidates": [
+                            {
+                                "id": "i0001",
+                                "keep": False,
+                                "reason": "Rewrite the statement.",
+                                "used_source_numbers": [],
+                            }
+                        ]
+                    },
+                    {},
+                ),
+                (
+                    {
+                        "candidates": [
+                            {
+                                "id": "i0001",
+                                "keep": True,
+                                "reason": "Supported.",
+                                "text": "B12X added a planner. https://example.com",
+                                "used_source_numbers": [0],
+                            }
+                        ]
+                    },
+                    {},
+                ),
+                (
+                    {
+                        "candidates": [
+                            {
+                                "id": "i0001",
+                                "keep": True,
+                                "reason": "Supported.",
+                                "text": "B12X added a planner.",
+                                "used_source_numbers": [0],
+                            }
+                        ]
+                    },
+                    {},
+                ),
+                (
+                    {
+                        "candidates": [
+                            {
+                                "id": "i0001",
+                                "keep": True,
+                                "reason": "Supported.",
+                                "used_source_numbers": [0],
+                            }
+                        ]
+                    },
+                    {},
+                ),
+            ]
+        )
+
+        result = client.verify_candidates(candidates, [source])
+
+        self.assertEqual(len(result["items"]), 1)
+        self.assertEqual(result["items"][0]["text"], "B12X added a planner.")
+        self.assertEqual(client.complete_json.call_count, 4)
+
     def test_recovers_a_retained_candidate_without_valid_evidence(self) -> None:
         source = record(message_id="10", content="B12X added a planner.")
         candidates = {

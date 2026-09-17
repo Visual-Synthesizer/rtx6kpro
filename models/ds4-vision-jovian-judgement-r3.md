@@ -1,5 +1,9 @@
 # DeepSeek-V4-Flash Vision Jovian Judgement r3
 
+Historical image-specific deployment and measurement record. For the
+profile-enabled shared image, use the [Vision model page](deepseek-v4-flash-vision.md)
+and [unified Docker guide](../docs/unified-vllm-docker.md).
+
 **Status: qualified for TP2/DCP1 target-only and fixed probabilistic DSpark K3
 serving on NVIDIA SM120.** This specification covers text and image inference
 with `deepseek-ai/DeepSeek-V4-Flash-Vision-Exp`. GPU KV storage is the default;

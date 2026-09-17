@@ -1,0 +1,954 @@
+{
+  "model": "DeepSeek-V4.1-Flash",
+  "base": "http://127.0.0.1:5058",
+  "temperature": 1,
+  "scope": "HTTP functional checks; synthetic tool results",
+  "cases": [
+    {
+      "name": "ordinary_chat",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "What is 7 times 8? Answer only with the number."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false
+        }
+      },
+      "response": {
+        "role": "assistant",
+        "content": "56",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "reasoning": null
+      },
+      "finish_reason": "stop",
+      "elapsed_seconds": 0.17557814507745206,
+      "passed": true
+    },
+    {
+      "name": "reminder_role",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Use the request marker in the reminder when asked."
+          },
+          {
+            "role": "latest_reminder",
+            "content": "Request marker: cedar-418."
+          },
+          {
+            "role": "user",
+            "content": "What is the request marker? Reply with the marker only."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false
+        }
+      },
+      "response": {
+        "role": "assistant",
+        "content": "cedar-418",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "reasoning": null
+      },
+      "finish_reason": "stop",
+      "elapsed_seconds": 0.18327039713039994,
+      "passed": true
+    },
+    {
+      "name": "auto_inventory",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Use the inventory lookup tool to get warehouse inventory, not billing for SKU A1. Call the tool; do not guess."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 768,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": "inventory",
+              "description": "Read warehouse inventory and stock counts for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "namespace": {
+              "name": "billing",
+              "description": "Read invoice payment status for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "role": "assistant",
+        "content": "I'll look up the warehouse inventory for SKU A1.\n\n",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-af488bc159f57504",
+            "type": "function",
+            "function": {
+              "name": "inventory::lookup",
+              "arguments": "{\"sku\": \"A1\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "finish_reason": "tool_calls",
+      "elapsed_seconds": 0.2809526480268687,
+      "passed": true
+    },
+    {
+      "name": "history_inventory",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Use the inventory lookup tool to get warehouse inventory, not billing for SKU A1. Call the tool; do not guess."
+          },
+          {
+            "role": "assistant",
+            "content": "I'll look up the warehouse inventory for SKU A1.\n\n",
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-af488bc159f57504",
+                "type": "function",
+                "function": {
+                  "name": "lookup",
+                  "arguments": "{\"sku\": \"A1\"}"
+                },
+                "namespace": {
+                  "name": "inventory"
+                }
+              }
+            ],
+            "reasoning": null
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-af488bc159f57504",
+            "content": "{\"result\":\"verified-code-642\"}"
+          },
+          {
+            "role": "user",
+            "content": "Return the exact result string from the tool."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": true,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": "inventory",
+              "description": "Read warehouse inventory and stock counts for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "namespace": {
+              "name": "billing",
+              "description": "Read invoice payment status for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ],
+        "tool_choice": "none"
+      },
+      "response": {
+        "role": "assistant",
+        "content": "The exact result string from the inventory lookup tool for SKU A1 is:\n\n**`verified-code-642`**"
+      },
+      "finish_reason": "stop",
+      "elapsed_seconds": 0.2535306189674884,
+      "passed": true
+    },
+    {
+      "name": "auto_billing",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Use the billing lookup tool to get invoice payment status, not inventory for SKU A1. Call the tool; do not guess."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 768,
+        "seed": 1742,
+        "stream": true,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": "inventory",
+              "description": "Read warehouse inventory and stock counts for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "namespace": {
+              "name": "billing",
+              "description": "Read invoice payment status for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "role": "assistant",
+        "content": "I'll look up the invoice payment status for SKU A1 using the billing tool.\n\n",
+        "tool_calls": [
+          {
+            "type": "function",
+            "id": "chatcmpl-tool-a8e154334b3e9f07",
+            "function": {
+              "name": "billing::lookup",
+              "arguments": "{\"sku\": \"A1\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls",
+      "elapsed_seconds": 0.2986788849812001,
+      "passed": true
+    },
+    {
+      "name": "history_billing",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Use the billing lookup tool to get invoice payment status, not inventory for SKU A1. Call the tool; do not guess."
+          },
+          {
+            "role": "assistant",
+            "content": "I'll look up the invoice payment status for SKU A1 using the billing tool.\n\n",
+            "tool_calls": [
+              {
+                "type": "function",
+                "id": "chatcmpl-tool-a8e154334b3e9f07",
+                "function": {
+                  "name": "lookup",
+                  "arguments": "{\"sku\": \"A1\"}"
+                },
+                "namespace": {
+                  "name": "billing"
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-a8e154334b3e9f07",
+            "content": "{\"result\":\"verified-code-642\"}"
+          },
+          {
+            "role": "user",
+            "content": "Return the exact result string from the tool."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": "inventory",
+              "description": "Read warehouse inventory and stock counts for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "namespace": {
+              "name": "billing",
+              "description": "Read invoice payment status for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ],
+        "tool_choice": "none"
+      },
+      "response": {
+        "role": "assistant",
+        "content": "verified-code-642",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "reasoning": null
+      },
+      "finish_reason": "stop",
+      "elapsed_seconds": 0.18959011719562113,
+      "passed": true
+    },
+    {
+      "name": "auto_inventory_thinking",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Use the inventory lookup tool to get warehouse inventory, not billing for SKU A1. Call the tool; do not guess."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 768,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": true
+        },
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": "inventory",
+              "description": "Read warehouse inventory and stock counts for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "namespace": {
+              "name": "billing",
+              "description": "Read invoice payment status for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "role": "assistant",
+        "content": null,
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-849c0bb98fe16e46",
+            "type": "function",
+            "function": {
+              "name": "inventory::lookup",
+              "arguments": "{\"sku\": \"A1\"}"
+            }
+          }
+        ],
+        "reasoning": "The user wants me to use the inventory lookup tool for SKU A1. Let me do that."
+      },
+      "finish_reason": "tool_calls",
+      "elapsed_seconds": 0.2886737051885575,
+      "passed": true
+    },
+    {
+      "name": "history_inventory_thinking",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Use the inventory lookup tool to get warehouse inventory, not billing for SKU A1. Call the tool; do not guess."
+          },
+          {
+            "role": "assistant",
+            "content": null,
+            "refusal": null,
+            "annotations": null,
+            "audio": null,
+            "function_call": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-849c0bb98fe16e46",
+                "type": "function",
+                "function": {
+                  "name": "lookup",
+                  "arguments": "{\"sku\": \"A1\"}"
+                },
+                "namespace": {
+                  "name": "inventory"
+                }
+              }
+            ],
+            "reasoning": "The user wants me to use the inventory lookup tool for SKU A1. Let me do that."
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-849c0bb98fe16e46",
+            "content": "{\"result\":\"verified-code-642\"}"
+          },
+          {
+            "role": "user",
+            "content": "Return the exact result string from the tool."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": true,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": "inventory",
+              "description": "Read warehouse inventory and stock counts for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          },
+          {
+            "type": "function",
+            "namespace": {
+              "name": "billing",
+              "description": "Read invoice payment status for a SKU."
+            },
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ],
+        "tool_choice": "none"
+      },
+      "response": {
+        "role": "assistant",
+        "content": "verified-code-642"
+      },
+      "finish_reason": "stop",
+      "elapsed_seconds": 0.1866792170330882,
+      "passed": true
+    },
+    {
+      "name": "named_choice_function_namespace",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Get invoice payment status for SKU A1."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              },
+              "namespace": {
+                "name": "inventory",
+                "description": "Read warehouse inventory and stock counts for a SKU."
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "lookup",
+              "description": "Read invoice payment status for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              },
+              "namespace": {
+                "name": "billing",
+                "description": "Read invoice payment status for a SKU."
+              }
+            }
+          }
+        ],
+        "tool_choice": {
+          "type": "function",
+          "function": {
+            "name": "lookup",
+            "namespace": {
+              "name": "billing"
+            }
+          }
+        }
+      },
+      "response": {
+        "role": "assistant",
+        "content": "I'll look up the invoice payment status for SKU A1.\n\n",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-90009c8a86de094c",
+            "type": "function",
+            "function": {
+              "name": "billing::lookup",
+              "arguments": "{\"sku\": \"A1\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "finish_reason": "stop",
+      "elapsed_seconds": 0.2877681858371943,
+      "passed": true
+    },
+    {
+      "name": "plain_tool",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Call lookup to get warehouse stock for SKU A1."
+          }
+        ],
+        "temperature": 1.0,
+        "max_tokens": 384,
+        "seed": 1742,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "lookup",
+              "description": "Read warehouse inventory and stock counts for a SKU.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sku"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "role": "assistant",
+        "content": "I'll look up the warehouse stock for SKU A1.\n\n",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [
+          {
+            "id": "chatcmpl-tool-9627021f4a3b1009",
+            "type": "function",
+            "function": {
+              "name": "lookup",
+              "arguments": "{\"sku\": \"A1\"}"
+            }
+          }
+        ],
+        "reasoning": null
+      },
+      "finish_reason": "tool_calls",
+      "elapsed_seconds": 0.27733643911778927,
+      "passed": true
+    },
+    {
+      "name": "qualified_conflict",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "temperature": 1.0,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hello"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "namespace": "inventory",
+            "function": {
+              "name": "billing::lookup"
+            }
+          }
+        ]
+      },
+      "response": {
+        "error": {
+          "message": "1 validation error:\n  {'type': 'value_error', 'loc': ('body',), 'msg': 'Value error, Conflicting tool namespaces in the qualified name', 'input': {'model': 'DeepSeek-V4.1-Flash', 'temperature': 1.0, 'messages': [{'role': 'user', 'content': 'Hello'}], 'tools': [{'type': 'function', 'namespace': 'inventory', 'function': {'name': 'billing::lookup'}}]}, 'ctx': {'error': ValueError('Conflicting tool namespaces in the qualified name')}}",
+          "type": "Bad Request",
+          "param": "body",
+          "code": 400
+        }
+      },
+      "http_status": 400,
+      "passed": true
+    },
+    {
+      "name": "malformed_namespace",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "temperature": 1.0,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hello"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "namespace": {
+              "name": false
+            },
+            "function": {
+              "name": "lookup"
+            }
+          }
+        ]
+      },
+      "response": {
+        "error": {
+          "message": "1 validation error:\n  {'type': 'value_error', 'loc': ('body',), 'msg': \"Value error, Tool namespace must be a nonempty string without '::'\", 'input': {'model': 'DeepSeek-V4.1-Flash', 'temperature': 1.0, 'messages': [{'role': 'user', 'content': 'Hello'}], 'tools': [{'type': 'function', 'namespace': {'name': False}, 'function': {'name': 'lookup'}}]}, 'ctx': {'error': ValueError(\"Tool namespace must be a nonempty string without '::'\")}}",
+          "type": "Bad Request",
+          "param": "body",
+          "code": 400
+        }
+      },
+      "http_status": 400,
+      "passed": true
+    },
+    {
+      "name": "invalid_tool_calls_int",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "temperature": 1.0,
+        "messages": [
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": 1
+          },
+          {
+            "role": "user",
+            "content": "Continue."
+          }
+        ]
+      },
+      "response": {
+        "error": {
+          "message": "21 validation errors:\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'role'), 'msg': \"Input should be 'developer'\", 'input': 'assistant', 'ctx': {'expected': \"'developer'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'role'), 'msg': \"Input should be 'system'\", 'input': 'assistant', 'ctx': {'expected': \"'system'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'content', 'generator[union[...,...,...,...]]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'role'), 'msg': \"Input should be 'user'\", 'input': 'assistant', 'ctx': {'expected': \"'user'\"}}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionAssistantMessageParam', 'tool_calls'), 'msg': 'Input should be iterable', 'input': 1}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'role'), 'msg': \"Input should be 'tool'\", 'input': 'assistant', 'ctx': {'expected': \"'tool'\"}}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'tool_call_id'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': 1}}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'ChatCompletionFunctionMessageParam', 'name'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': 1}}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionFunctionMessageParam', 'role'), 'msg': \"Input should be 'function'\", 'input': 'assistant', 'ctx': {'expected': \"'function'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'content', 'list[union[...,...,...,...,ChatCompletionContentPartAudioParam,ChatCompletionContentPartVideoParam,...,CustomChatCompletionContentPILImageParam,CustomChatCompletionContentSimpleImageParam,ChatCompletionContentPartImageEmbedsParam,ChatCompletionContentPartAudioEmbedsParam,ChatCompletionContentPartPromptEmbedsParam,CustomChatCompletionContentSimpleAudioParam,CustomChatCompletionContentSimpleVideoParam,CustomChatCompletionContentToolReferenceParam,str,CustomThinkCompletionContentParam]]'), 'msg': 'Input should be a valid list', 'input': None}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'tool_calls'), 'msg': 'Input should be a valid list', 'input': 1}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'Message', 'author'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': 1}}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'Message', 'content'), 'msg': 'Input should be a valid list', 'input': None}",
+          "type": "Bad Request",
+          "param": "body.messages.0.ChatCompletionDeveloperMessageParam.content",
+          "code": 400
+        }
+      },
+      "http_status": 400,
+      "passed": true
+    },
+    {
+      "name": "invalid_tool_calls_bool",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "temperature": 1.0,
+        "messages": [
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": false
+          },
+          {
+            "role": "user",
+            "content": "Continue."
+          }
+        ]
+      },
+      "response": {
+        "error": {
+          "message": "21 validation errors:\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'role'), 'msg': \"Input should be 'developer'\", 'input': 'assistant', 'ctx': {'expected': \"'developer'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'role'), 'msg': \"Input should be 'system'\", 'input': 'assistant', 'ctx': {'expected': \"'system'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'content', 'generator[union[...,...,...,...]]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'role'), 'msg': \"Input should be 'user'\", 'input': 'assistant', 'ctx': {'expected': \"'user'\"}}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionAssistantMessageParam', 'tool_calls'), 'msg': 'Input should be iterable', 'input': False}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'role'), 'msg': \"Input should be 'tool'\", 'input': 'assistant', 'ctx': {'expected': \"'tool'\"}}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'tool_call_id'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': False}}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'ChatCompletionFunctionMessageParam', 'name'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': False}}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionFunctionMessageParam', 'role'), 'msg': \"Input should be 'function'\", 'input': 'assistant', 'ctx': {'expected': \"'function'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'content', 'list[union[...,...,...,...,ChatCompletionContentPartAudioParam,ChatCompletionContentPartVideoParam,...,CustomChatCompletionContentPILImageParam,CustomChatCompletionContentSimpleImageParam,ChatCompletionContentPartImageEmbedsParam,ChatCompletionContentPartAudioEmbedsParam,ChatCompletionContentPartPromptEmbedsParam,CustomChatCompletionContentSimpleAudioParam,CustomChatCompletionContentSimpleVideoParam,CustomChatCompletionContentToolReferenceParam,str,CustomThinkCompletionContentParam]]'), 'msg': 'Input should be a valid list', 'input': None}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'tool_calls'), 'msg': 'Input should be a valid list', 'input': False}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'Message', 'author'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': False}}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'Message', 'content'), 'msg': 'Input should be a valid list', 'input': None}",
+          "type": "Bad Request",
+          "param": "body.messages.0.ChatCompletionDeveloperMessageParam.content",
+          "code": 400
+        }
+      },
+      "http_status": 400,
+      "passed": true
+    },
+    {
+      "name": "invalid_tool_calls_float",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "temperature": 1.0,
+        "messages": [
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": 1.5
+          },
+          {
+            "role": "user",
+            "content": "Continue."
+          }
+        ]
+      },
+      "response": {
+        "error": {
+          "message": "21 validation errors:\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionDeveloperMessageParam', 'role'), 'msg': \"Input should be 'developer'\", 'input': 'assistant', 'ctx': {'expected': \"'developer'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionSystemMessageParam', 'role'), 'msg': \"Input should be 'system'\", 'input': 'assistant', 'ctx': {'expected': \"'system'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'content', 'generator[union[...,...,...,...]]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionUserMessageParam', 'role'), 'msg': \"Input should be 'user'\", 'input': 'assistant', 'ctx': {'expected': \"'user'\"}}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionAssistantMessageParam', 'tool_calls'), 'msg': 'Input should be iterable', 'input': 1.5}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'iterable_type', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'content', 'generator[...]'), 'msg': 'Input should be iterable', 'input': None}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'role'), 'msg': \"Input should be 'tool'\", 'input': 'assistant', 'ctx': {'expected': \"'tool'\"}}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'ChatCompletionToolMessageParam', 'tool_call_id'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': 1.5}}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'ChatCompletionFunctionMessageParam', 'name'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': 1.5}}\n  {'type': 'literal_error', 'loc': ('body', 'messages', 0, 'ChatCompletionFunctionMessageParam', 'role'), 'msg': \"Input should be 'function'\", 'input': 'assistant', 'ctx': {'expected': \"'function'\"}}\n  {'type': 'string_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'content', 'str'), 'msg': 'Input should be a valid string', 'input': None}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'content', 'list[union[...,...,...,...,ChatCompletionContentPartAudioParam,ChatCompletionContentPartVideoParam,...,CustomChatCompletionContentPILImageParam,CustomChatCompletionContentSimpleImageParam,ChatCompletionContentPartImageEmbedsParam,ChatCompletionContentPartAudioEmbedsParam,ChatCompletionContentPartPromptEmbedsParam,CustomChatCompletionContentSimpleAudioParam,CustomChatCompletionContentSimpleVideoParam,CustomChatCompletionContentToolReferenceParam,str,CustomThinkCompletionContentParam]]'), 'msg': 'Input should be a valid list', 'input': None}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'CustomChatCompletionMessageParam', 'tool_calls'), 'msg': 'Input should be a valid list', 'input': 1.5}\n  {'type': 'missing', 'loc': ('body', 'messages', 0, 'Message', 'author'), 'msg': 'Field required', 'input': {'role': 'assistant', 'content': None, 'tool_calls': 1.5}}\n  {'type': 'list_type', 'loc': ('body', 'messages', 0, 'Message', 'content'), 'msg': 'Input should be a valid list', 'input': None}",
+          "type": "Bad Request",
+          "param": "body.messages.0.ChatCompletionDeveloperMessageParam.content",
+          "code": 400
+        }
+      },
+      "http_status": 400,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

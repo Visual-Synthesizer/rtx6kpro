@@ -1,0 +1,164 @@
+{
+  "image_id": "sha256:dada56080b813ffcd38b18f4d3dc7c548058cfe2222fe3e5a49e2893cd674b92",
+  "scope": "Changed package source files for the integrated model-resource PRs and JJ device-timing/grammar updates. This is a byte-identity check, not a behavioral test.",
+  "packages": [
+    {
+      "name": "vllm",
+      "source_commit": "1048fc5439d693d99e73cb7f5f09b0a06ee70b6c",
+      "comparison_bases": [
+        "8e1f1e587f8d24faf606f334a1c4bdaaa6bd4368",
+        "25cee3ef438d859acd983ddd5172585b3aa1be5d"
+      ],
+      "files": [
+        {
+          "path": "vllm/distributed/device_communicators/b12x_pcie_all_reduce.py",
+          "source_sha256": "e438d8cbc11355f267195538ac808fb4a8a67bc521524892354a8d085e796b62",
+          "image_sha256": "e438d8cbc11355f267195538ac808fb4a8a67bc521524892354a8d085e796b62",
+          "match": true
+        },
+        {
+          "path": "vllm/model_executor/layers/fused_moe/b12x.py",
+          "source_sha256": "74111f942a54b588148095f0611a3e0886ee5e88b740552d0d93380e8b1c7ab8",
+          "image_sha256": "74111f942a54b588148095f0611a3e0886ee5e88b740552d0d93380e8b1c7ab8",
+          "match": true
+        },
+        {
+          "path": "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py",
+          "source_sha256": "2f1848018cdc18081840f2455cc85ed79110dc2463c8fe068d481dcc5466e5a8",
+          "image_sha256": "2f1848018cdc18081840f2455cc85ed79110dc2463c8fe068d481dcc5466e5a8",
+          "match": true
+        },
+        {
+          "path": "vllm/model_executor/layers/mamba/ops/b12x_gdn_prefill.py",
+          "source_sha256": "3967f54417a12246c60b0fc420bfe226d69dbfd2c6bcdb98b89eda439f0157a9",
+          "image_sha256": "3967f54417a12246c60b0fc420bfe226d69dbfd2c6bcdb98b89eda439f0157a9",
+          "match": true
+        },
+        {
+          "path": "vllm/model_executor/warmup/b12x_prepare.py",
+          "source_sha256": "3f2c5d6638d549edcaba0458cee77aa6627ccb1541f1e8adfd3efa43e611c48b",
+          "image_sha256": "3f2c5d6638d549edcaba0458cee77aa6627ccb1541f1e8adfd3efa43e611c48b",
+          "match": true
+        },
+        {
+          "path": "vllm/models/deepseek_v4/nvidia/b12x.py",
+          "source_sha256": "0699b74d124029b88110fa11b69314279073bda4629740e3ff5232bda3224fa3",
+          "image_sha256": "0699b74d124029b88110fa11b69314279073bda4629740e3ff5232bda3224fa3",
+          "match": true
+        },
+        {
+          "path": "vllm/models/deepseek_v4/nvidia/b12x_indexer.py",
+          "source_sha256": "46531676c4d606b6819ed7db688acd10022c4442aa645b0cdc19313c69ad3d54",
+          "image_sha256": "46531676c4d606b6819ed7db688acd10022c4442aa645b0cdc19313c69ad3d54",
+          "match": true
+        },
+        {
+          "path": "vllm/models/deepseek_v4_1/attention.py",
+          "source_sha256": "99f8a32d3ee5fdd915fe501b4912ed59f428156441496dd4362749fd67c123fa",
+          "image_sha256": "99f8a32d3ee5fdd915fe501b4912ed59f428156441496dd4362749fd67c123fa",
+          "match": true
+        },
+        {
+          "path": "vllm/models/deepseek_v4_1/b12x_layers.py",
+          "source_sha256": "94d2b3ca516e7eae300cc133d72380ca8f640ec993689819192b877e9e241ed4",
+          "image_sha256": "94d2b3ca516e7eae300cc133d72380ca8f640ec993689819192b877e9e241ed4",
+          "match": true
+        },
+        {
+          "path": "vllm/models/deepseek_v4_1/nvidia/dspark.py",
+          "source_sha256": "f07204bf7aead3f9ad6f19158de27a859dd7fd5b48006de8cb3688bb5c07f84b",
+          "image_sha256": "f07204bf7aead3f9ad6f19158de27a859dd7fd5b48006de8cb3688bb5c07f84b",
+          "match": true
+        },
+        {
+          "path": "vllm/utils/b12x.py",
+          "source_sha256": "9b7ec5c3bdf6503015090283ba6de5e3ee530d427998bb3bd684d8efe8847f25",
+          "image_sha256": "9b7ec5c3bdf6503015090283ba6de5e3ee530d427998bb3bd684d8efe8847f25",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/attention/backends/mla/b12x_indexer.py",
+          "source_sha256": "441ad3434ee6a1cd2e539cc501dd12749dcc6e12d3c415ba9dcb9247e6978007",
+          "image_sha256": "441ad3434ee6a1cd2e539cc501dd12749dcc6e12d3c415ba9dcb9247e6978007",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/core/sched/output.py",
+          "source_sha256": "96623adc4ddf9f603bb3eebae63d8d1ae5d34922b1d89b3c4e6f593f419ebd00",
+          "image_sha256": "96623adc4ddf9f603bb3eebae63d8d1ae5d34922b1d89b3c4e6f593f419ebd00",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/core/sched/scheduler.py",
+          "source_sha256": "bc256cdbd80dcab9a1f963c1d8147cbb2eed84d1a99d1c5069a3c9096cb7a5db",
+          "image_sha256": "bc256cdbd80dcab9a1f963c1d8147cbb2eed84d1a99d1c5069a3c9096cb7a5db",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/worker/b12x_startup.py",
+          "source_sha256": "efab38f7aa8f45af23937ac0932ba0a251ccacec0c2bd9eb9aba75bce66bc392",
+          "image_sha256": "efab38f7aa8f45af23937ac0932ba0a251ccacec0c2bd9eb9aba75bce66bc392",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/worker/gpu/model_runner.py",
+          "source_sha256": "7d8f592546d17985fb7a1156be0600755fcb08e960f47ae2384d4a68e2f9110f",
+          "image_sha256": "7d8f592546d17985fb7a1156be0600755fcb08e960f47ae2384d4a68e2f9110f",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/worker/gpu/sample/batch_shard.py",
+          "source_sha256": "f0ed32df96bc6aab10d961705919faf2501627e18e6dd8f3920b782af6268506",
+          "image_sha256": "f0ed32df96bc6aab10d961705919faf2501627e18e6dd8f3920b782af6268506",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/worker/gpu/structured_outputs.py",
+          "source_sha256": "27d1fc84e5ca5f07ffd1cd6ce2b4bab0a530f3bce67ff0dd271782a805e61b4f",
+          "image_sha256": "27d1fc84e5ca5f07ffd1cd6ce2b4bab0a530f3bce67ff0dd271782a805e61b4f",
+          "match": true
+        },
+        {
+          "path": "vllm/v1/worker/workspace.py",
+          "source_sha256": "639e5785c08694855c0219051817fcaf0533b2f68454e6640d781602a3a9b07f",
+          "image_sha256": "639e5785c08694855c0219051817fcaf0533b2f68454e6640d781602a3a9b07f",
+          "match": true
+        }
+      ]
+    },
+    {
+      "name": "b12x",
+      "source_commit": "d9b572754a8a81888b355523888b778fe73e1b6b",
+      "comparison_bases": [
+        "02407f653609e2c4c49db2efb5f77835d2e04e32"
+      ],
+      "files": [
+        {
+          "path": "b12x/attention/sparse_mla/__init__.py",
+          "source_sha256": "4564b71c6d70833f4dd96d0a231eb8b903d5af89c56ccedba7ef27f931a3a591",
+          "image_sha256": "4564b71c6d70833f4dd96d0a231eb8b903d5af89c56ccedba7ef27f931a3a591",
+          "match": true
+        },
+        {
+          "path": "b12x/attention/sparse_mla/api.py",
+          "source_sha256": "b75114fe676381de1291d065ac9a8a8dd6c7116523e9cb5010582400cefd6c94",
+          "image_sha256": "b75114fe676381de1291d065ac9a8a8dd6c7116523e9cb5010582400cefd6c94",
+          "match": true
+        },
+        {
+          "path": "b12x/attention/sparse_mla/pooled_selection.py",
+          "source_sha256": "71a104169c2e30b2a4347f9129e0b67caf27ab7b5053fea41836228fc468418d",
+          "image_sha256": "71a104169c2e30b2a4347f9129e0b67caf27ab7b5053fea41836228fc468418d",
+          "match": true
+        },
+        {
+          "path": "b12x/comm/pcie/pcie_twoshot_bf16.py",
+          "source_sha256": "ff930077519716e5cdbe1d4a52074fc64193b89441ba1bdcdfbfd510d3d64c3e",
+          "image_sha256": "ff930077519716e5cdbe1d4a52074fc64193b89441ba1bdcdfbfd510d3d64c3e",
+          "match": true
+        }
+      ]
+    }
+  ],
+  "status": "qualified"
+}

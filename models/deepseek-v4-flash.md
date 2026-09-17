@@ -1,44 +1,109 @@
-# DeepSeek-V4-Flash Runbook Hub
+# DeepSeek-V4-Flash
 
-Use this page as the stable entry point for DeepSeek-V4-Flash and DSpark on RTX
-PRO 6000 Blackwell. Release pages are immutable measurement and deployment
-specifications.
+Serve `deepseek-ai/DeepSeek-V4-Flash-0731` using the `ds4-flash` profile in
+the [shared vLLM Docker guide](../docs/unified-vllm-docker.md). The image is
+shared with GLM, Qwen and DeepSeek Vision; its model profile selects the
+DSpark and B12X defaults.
 
-For the distinct DeepSeek-V4.1 model and its native DSpark/Engram layout, use
-[DeepSeek-V4.1-Flash](deepseek-v4.1-flash.md). Its RAM/SSD table controls do not
-configure KV offload for DeepSeek-V4-Flash.
+Status: **implemented** profile with **qualified** bounded TP2/DCP1, fixed-K5
+measurements below. For image input, use the separate
+[DeepSeek V4 Vision profile](deepseek-v4-flash-vision.md). For Engram tables
+and native V4.1 DSpark, use [DeepSeek V4.1](deepseek-v4.1-flash.md).
 
-## Recommended Deployment
+## Start the server
 
-| Need | Page |
+Select `LIL_IMAGE` in the [shared image section](../docs/unified-vllm-docker.md#select-the-image),
+then use these values with the [common launch command](../docs/unified-vllm-docker.md#start-a-server):
+
+```bash
+PROFILE=ds4-flash
+GPU_DEVICES=0,1
+TP=2
+PORT=8000
+SERVE_ARGS=(--mode dspark --draft-tokens 5)
+```
+
+The API model name is `DeepSeek-V4-Flash-0731`. The profile pins compatible
+checkpoint and remote-code revisions internally; a plain Hugging Face name
+does not remove that source contract. Revision overrides require their own
+qualification. Checkpoint downloads use the shared persistent model volume.
+
+Use `SERVE_ARGS=(--mode off)` for target-only serving. That mode is implemented
+but not timed in this wheel-image comparison.
+
+## Serving defaults and alternatives
+
+| Setting | Profile behavior |
 |---|---|
-| Serve DeepSeek-V4-Flash-0731 fixed K5 with optional engine-driven LMCache | [DeepSeek-V4-Flash Jovian Judgement r9](ds4-jovian-judgement-r9.md) |
-| Serve DeepSeek-V4-Flash-Vision-Exp fixed K3 with measured GPU KV admission | [DeepSeek-V4-Flash Jovian Judgement r9](ds4-jovian-judgement-r9.md) |
-| Serve the qualified fixed-K5 source composition | [DeepSeek-V4-Flash-0731 Infernal Invocation r21](ds4dspark-infernal-invocation-r21.md) |
-| Test the target-only 2.11M-KV capacity profile | [DeepSeek-V4-Flash-0731 Infernal Invocation r19 preview](ds4dspark-infernal-invocation-r19.md) |
-| Serve the 0731 DSpark checkpoint | [DeepSeek-V4-Flash-0731 Infernal Invocation r18](ds4dspark-infernal-invocation-r18.md) |
-| Test topology-calibrated B12X transport | [B12X PCIe transport calibration](ds4f-b12x-pcie-autotune.md) |
-| Inspect the Gilded Gnosis baseline | [DeepSeek-V4-Flash-0731 Gilded Gnosis r33](ds4dspark-v20-r33.md) |
-| Inspect the Fathomless TP2/TP4 sweep | [DeepSeek-V4-Flash v10 Fathomless Validation](ds4dspark-v10.md) |
-| Inspect the full DSpark and standard-MTP sweep | [DeepSeek-V4-Flash and DSpark v9](ds4dspark-v9.md) |
-| Diagnose empty reasoning before tool calls | [DS4 empty-think troubleshooting](ds4f-empty-think/README.md) |
+| Parallelism / speculation | TP2/DCP1, fixed DSpark K5, probabilistic proposals, standard rejection |
+| Backends | B12X attention and W4A8 MoE; native dense selection |
+| KV / prefix cache | FP8 compressed attention KV, prefix caching enabled, retention interval 4096 |
+| Graphs | Full-and-piecewise, default graph cap 48; breakable prefill off |
+| Scheduler | 4096 tokens, eight sequences |
+| Context / GPU fraction | Native automatic context admission, `max-model-len=-1`; GPU fraction .975 |
+| Sampling / reasoning | Temperature 1/top-p .95, thinking enabled, `high` |
 
-## Serving Contracts
+The profile leaves `--linear-backend` unspecified; that is native selection,
+not a guarantee that every projection uses a particular kernel. Do not copy
+GLM's complete backend environment into this recipe.
 
-| Area | Specification |
+DSpark and standard Multi-Token Prediction (MTP) use different checkpoint
+contracts. The following standard-MTP alternative is **implemented**, but
+not qualified by the DSpark measurements on this page:
+
+```bash
+SERVE_ARGS=(--model deepseek-ai/DeepSeek-V4-Flash
+  --served-model-name DeepSeek-V4-Flash --mode mtp --draft-tokens 3)
+```
+
+GPU-only KV is the default. LMCache RAM/filesystem offload is opt-in through
+the [shared cache controls](../docs/unified-vllm-docker.md#cache-storage-gpu-lmcache-or-native-offload).
+The published beta has package/native contract checks, not a repeated
+whole-model RAM/restart-filesystem matrix. Historical R9 restore qualification
+does not automatically qualify another image. Native KV offload is unsupported
+by this profile. DeepSeek V4.1's Engram RAM/SSD controls are unrelated to it.
+
+## Measured performance
+
+Same stock RTX PRO 6000 Workstation pair, TP2/DCP1, fixed K5, 4096-token
+budget, eight sequences, FP8 KV, GPU-only cache and configured context limit
+1,048,576. Decode uses temperature 1/top-p **1**, not the profile's .95 default,
+with three warmed 30-second context-zero runs. C8 is aggregate.
+Prefill is uncached nominal 32K, measured from client time to first token.
+
+| Metric | Community R9 → wheel image | Change |
+|---|---:|---:|
+| C1 output | 191.35 → 190.12 tok/s | −0.64% |
+| C8 output | 653.53 → 669.56 tok/s | +2.45% |
+| 32K prefill | 13,527 → 13,863 tok/s | +2.48% |
+| Logical KV tokens | 1,192,983 → 1,293,619 | +8.44% |
+
+All four API checks and six decode cells pass. C1 request-verifier throughput
+rises 1.92%, while accepted length changes from 2.662 to 2.593; the small
+output decrease is retained, not called a regression-free result. Configuring
+a million-token limit is not a million-token request test.
+[Exact image identities, parameters and raw samples](../benchmarks/prepared-b12x-serving/).
+
+## Historical deployment and measurement records
+
+These pages retain their image-specific launchers, source locks and results.
+Their environment variables are not a second configuration source for the
+unified image.
+
+| Need | Record |
 |---|---|
-| Vision checkpoint | `deepseek-ai/DeepSeek-V4-Flash-Vision-Exp`; fixed probabilistic K3 in Jovian Judgement r9 |
-| DSpark K5 image line | Jovian Judgement r9 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
-| Target-only capacity study | Infernal Invocation r19 for `deepseek-ai/DeepSeek-V4-Flash-0731` |
-| DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-0731` |
-| Standard-MTP checkpoint | `deepseek-ai/DeepSeek-V4-Flash` |
-| Archived DSpark checkpoint | `deepseek-ai/DeepSeek-V4-Flash-DSpark` |
-| General-purpose DSpark profile | fixed probabilistic K5, InstantTensor `BUFFERED`, B12X W4A8, FP8 compressed MLA KV |
-| KV offload | Jovian Judgement profiles use optional engine-driven LMCache; native CPU/filesystem profiles are historical and unsupported in JJ |
-| Backend family | B12X; archived pages also describe SparkInfer, Lucifer, and CUTLASS implementations |
-| Speculative decoding | Standard MTP and DSpark use different checkpoint, graph, and verifier contracts |
+| Text K5 / Vision K3, GPU KV and text LMCache restore | [Jovian Judgement R9](ds4-jovian-judgement-r9.md) |
+| Shared community GLM/Qwen/DS4 image | [Shared community-runtime record](ds4-jovian-community-r29.md) |
+| Qualified Infernal source composition | [Infernal Invocation R21](ds4dspark-infernal-invocation-r21.md) |
+| Target-only 2.11M-KV capacity study | [Infernal Invocation R19](ds4dspark-infernal-invocation-r19.md) |
+| 0731 checkpoint deployment | [Infernal Invocation R18](ds4dspark-infernal-invocation-r18.md) |
+| Topology-calibrated transport | [B12X PCIe transport calibration](ds4f-b12x-pcie-autotune.md) |
+| Gilded source composition | [Gilded Gnosis R33](ds4dspark-v20-r33.md) |
+| Fathomless TP2/TP4 sweep | [Fathomless validation](ds4dspark-v10.md) |
+| DSpark and standard-MTP sweep | [DSpark/MTP reference](ds4dspark-v9.md) |
+| Empty reasoning before tool calls | [Troubleshooting](ds4f-empty-think/README.md) |
 
-## Release Namespace Map
+### Release namespace map
 
 | Source line | Revision namespace | Serving specification |
 |---|---|---|
@@ -48,16 +113,6 @@ configure KV offload for DeepSeek-V4-Flash.
 | Fathomless Firmament | `v9` and `v10` | [v10](ds4dspark-v10.md), [v9](ds4dspark-v9.md) |
 | Eldritch Enlightenment | DS4 Flash `v1-v6` | [v6](ds4-flash-v6.md), [v5](ds4-flash-v5.md), [v4](ds4-flash-v4.md), [v3](ds4-flash-v3.md), [v2](ds4-flash-v2.md), [v1](ds4-flash-v1.md) |
 
-Gilded Gnosis pages remain historical specifications. Infernal Invocation
-revision numbers do not continue the Gilded Gnosis `v20-r*` sequence because
-the source branches have different identities and merge contracts.
-
-## Operational Invariants
-
-- Standard MTP and DSpark are not interchangeable.
-- Confirm model revision, backend markers, graph coverage, and source-tree
-  labels before comparing performance.
-- Keep `NCCL_GRAPH_FILE` unset unless it names an existing NCCL XML topology
-  file.
-- Reuse release-scoped JIT caches. CuTe and FlashInfer compilation can dominate
-  the first startup for an uncovered shape.
+Revision numbers belong to their source line, not to one global sequence.
+Source review and unresolved items:
+[issue #773](https://github.com/local-inference-lab/vllm/issues/773).

@@ -1,0 +1,329 @@
+{
+  "name": "qualify-qwen-beta-prefill-windows",
+  "profile": "qwen",
+  "arm": "beta",
+  "image": "sha256:0c4b935622a16713bc56994a409b5cbec84dfd008561f7e2e2f4a4aa5b2ae3ba",
+  "argv": [
+    "docker",
+    "run",
+    "-d",
+    "--name",
+    "qualify-qwen-beta-prefill-windows",
+    "--init",
+    "--restart=no",
+    "--gpus",
+    "\"device=4\"",
+    "--network",
+    "host",
+    "--ipc",
+    "host",
+    "--shm-size",
+    "32g",
+    "--cpus",
+    "64",
+    "--memory",
+    "512g",
+    "--memory-swap",
+    "512g",
+    "--ulimit",
+    "memlock=-1",
+    "--ulimit",
+    "stack=67108864:67108864",
+    "--security-opt",
+    "seccomp=unconfined",
+    "--mount",
+    "type=bind,src=/root/.cache/huggingface/hub/models--local-inference-lab--Qwen3.8-Flash-Next-NVFP4,dst=/model-repo,readonly",
+    "--mount",
+    "type=volume,src=qualification-qwen-beta,dst=/cache",
+    "-e",
+    "PORT=5058",
+    "-e",
+    "TP=1",
+    "-e",
+    "DCP=1",
+    "-e",
+    "HF_HUB_OFFLINE=1",
+    "-e",
+    "HF_HOME=/cache/huggingface",
+    "-e",
+    "NCCL_SOCKET_IFNAME=lo",
+    "-e",
+    "GLOO_SOCKET_IFNAME=lo",
+    "-e",
+    "MODEL=/model-repo/snapshots/b797d2e1160b9596b2570e56c1d3590faa09d4ed",
+    "-e",
+    "PROFILE=qwen38-flash-next",
+    "-e",
+    "HARDWARE_PROFILE=rtx-pro-6000-pcie",
+    "sha256:0c4b935622a16713bc56994a409b5cbec84dfd008561f7e2e2f4a4aa5b2ae3ba",
+    "--",
+    "--override-generation-config",
+    "{\"temperature\":1.0,\"top_p\":0.95,\"top_k\":20}",
+    "--kv-cache-memory-bytes",
+    "8589934592"
+  ],
+  "checkpoint": {
+    "target": "/root/.cache/huggingface/hub/models--local-inference-lab--Qwen3.8-Flash-Next-NVFP4/snapshots/b797d2e1160b9596b2570e56c1d3590faa09d4ed"
+  },
+  "gpus": [
+    4
+  ],
+  "device_query": "4, GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e, 0\n",
+  "checkpoint_files": {
+    "target": {
+      "metadata_sha256": {
+        "config.json": "2d655dfa625c3c018f9685031367bc83f8532d3faf3333d7c838b2bdc13b8a7e",
+        "model.safetensors.index.json": "435eef76fc10fc6e932a208a1f85a86bc9c7ffc389b27b34ba83bb6a5d0371e9",
+        "generation_config.json": "735ec63e625c2086fbec18327233a03a7b060fddabfd7915af4e6fdcec3187a2"
+      },
+      "shards": [
+        {
+          "name": "model-00001-of-00034.safetensors",
+          "bytes": 2841505880,
+          "inode": 160508025,
+          "device": 66310,
+          "mtime_ns": 1788372719958136969
+        },
+        {
+          "name": "model-00002-of-00034.safetensors",
+          "bytes": 1575009800,
+          "inode": 160508027,
+          "device": 66310,
+          "mtime_ns": 1788372677322271510
+        },
+        {
+          "name": "model-00003-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508035,
+          "device": 66310,
+          "mtime_ns": 1788372676670273567
+        },
+        {
+          "name": "model-00004-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508039,
+          "device": 66310,
+          "mtime_ns": 1788372699387201883
+        },
+        {
+          "name": "model-00005-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508037,
+          "device": 66310,
+          "mtime_ns": 1788372699079202855
+        },
+        {
+          "name": "model-00006-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508041,
+          "device": 66310,
+          "mtime_ns": 1788372698129205853
+        },
+        {
+          "name": "model-00007-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508043,
+          "device": 66310,
+          "mtime_ns": 1788372716364148310
+        },
+        {
+          "name": "model-00008-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508045,
+          "device": 66310,
+          "mtime_ns": 1788372704392186089
+        },
+        {
+          "name": "model-00009-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508047,
+          "device": 66310,
+          "mtime_ns": 1788372787412924096
+        },
+        {
+          "name": "model-00010-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508049,
+          "device": 66310,
+          "mtime_ns": 1788372800113884013
+        },
+        {
+          "name": "model-00011-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508051,
+          "device": 66310,
+          "mtime_ns": 1788372830851787005
+        },
+        {
+          "name": "model-00012-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508053,
+          "device": 66310,
+          "mtime_ns": 1788372836266769915
+        },
+        {
+          "name": "model-00013-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508055,
+          "device": 66310,
+          "mtime_ns": 1788372871493658735
+        },
+        {
+          "name": "model-00014-of-00034.safetensors",
+          "bytes": 1575009808,
+          "inode": 160508057,
+          "device": 66310,
+          "mtime_ns": 1788372858630699333
+        },
+        {
+          "name": "model-00015-of-00034.safetensors",
+          "bytes": 1575009816,
+          "inode": 160508059,
+          "device": 66310,
+          "mtime_ns": 1788372925982486757
+        },
+        {
+          "name": "model-00016-of-00034.safetensors",
+          "bytes": 1575009824,
+          "inode": 160508061,
+          "device": 66310,
+          "mtime_ns": 1788372924968489957
+        },
+        {
+          "name": "model-00017-of-00034.safetensors",
+          "bytes": 1575009824,
+          "inode": 160508063,
+          "device": 66310,
+          "mtime_ns": 1788373032291151203
+        },
+        {
+          "name": "model-00018-of-00034.safetensors",
+          "bytes": 1575009824,
+          "inode": 160508065,
+          "device": 66310,
+          "mtime_ns": 1788373011381217206
+        },
+        {
+          "name": "model-00019-of-00034.safetensors",
+          "bytes": 2438722732,
+          "inode": 160508067,
+          "device": 66310,
+          "mtime_ns": 1788372960364378237
+        },
+        {
+          "name": "model-00020-of-00034.safetensors",
+          "bytes": 5133924592,
+          "inode": 160508069,
+          "device": 66310,
+          "mtime_ns": 1788373155932760911
+        },
+        {
+          "name": "model-00021-of-00034.safetensors",
+          "bytes": 5194891408,
+          "inode": 160508071,
+          "device": 66310,
+          "mtime_ns": 1788373220848555985
+        },
+        {
+          "name": "model-00022-of-00034.safetensors",
+          "bytes": 5133933936,
+          "inode": 160508073,
+          "device": 66310,
+          "mtime_ns": 1788373256376443828
+        },
+        {
+          "name": "model-00023-of-00034.safetensors",
+          "bytes": 5194908864,
+          "inode": 160508075,
+          "device": 66310,
+          "mtime_ns": 1788373352530140276
+        },
+        {
+          "name": "model-00024-of-00034.safetensors",
+          "bytes": 5188755712,
+          "inode": 160508077,
+          "device": 66310,
+          "mtime_ns": 1788373464380787157
+        },
+        {
+          "name": "model-00025-of-00034.safetensors",
+          "bytes": 5133940040,
+          "inode": 160508079,
+          "device": 66310,
+          "mtime_ns": 1788373416461938441
+        },
+        {
+          "name": "model-00026-of-00034.safetensors",
+          "bytes": 5194907416,
+          "inode": 160508081,
+          "device": 66310,
+          "mtime_ns": 1788373511170639435
+        },
+        {
+          "name": "model-00027-of-00034.safetensors",
+          "bytes": 5133940216,
+          "inode": 160508083,
+          "device": 66310,
+          "mtime_ns": 1788373567532461491
+        },
+        {
+          "name": "model-00028-of-00034.safetensors",
+          "bytes": 5194907672,
+          "inode": 160508085,
+          "device": 66310,
+          "mtime_ns": 1788373671515133194
+        },
+        {
+          "name": "model-00029-of-00034.safetensors",
+          "bytes": 5133939992,
+          "inode": 160508087,
+          "device": 66310,
+          "mtime_ns": 1788373728413953547
+        },
+        {
+          "name": "model-00030-of-00034.safetensors",
+          "bytes": 5194908960,
+          "inode": 160508089,
+          "device": 66310,
+          "mtime_ns": 1788373748057891526
+        },
+        {
+          "name": "model-00031-of-00034.safetensors",
+          "bytes": 5188755536,
+          "inode": 160508091,
+          "device": 66310,
+          "mtime_ns": 1788373779044793690
+        },
+        {
+          "name": "model-00032-of-00034.safetensors",
+          "bytes": 5133940208,
+          "inode": 160508093,
+          "device": 66310,
+          "mtime_ns": 1788373778065796781
+        },
+        {
+          "name": "model-00033-of-00034.safetensors",
+          "bytes": 5021547836,
+          "inode": 160508095,
+          "device": 66310,
+          "mtime_ns": 1788373750822882796
+        },
+        {
+          "name": "model-00034-of-00034.safetensors",
+          "bytes": 1597270800,
+          "inode": 160508097,
+          "device": 66310,
+          "mtime_ns": 1788373654333187442
+        },
+        {
+          "name": "model-inputscales.safetensors",
+          "bytes": 9669936,
+          "inode": 160508099,
+          "device": 66310,
+          "mtime_ns": 1788373576969431697
+        }
+      ]
+    }
+  },
+  "source_overrides": {}
+}

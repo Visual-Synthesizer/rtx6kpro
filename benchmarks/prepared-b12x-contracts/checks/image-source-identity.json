@@ -1,0 +1,40 @@
+{
+  "image": "sha256:0c4b935622a16713bc56994a409b5cbec84dfd008561f7e2e2f4a4aa5b2ae3ba",
+  "sources": {
+    "vllm": "b4551e2abd4b47be76ece67d84090888795fcd3f",
+    "b12x": "b9f44defd3a871f8c81d51846f3949ac15ace73d"
+  },
+  "expected": {
+    "vllm/distributed/device_communicators/b12x_pcie_all_reduce.py": "0f355bec3b77aaeee66922106784411aa1ad6103f8ace139c5eef53d00a97127",
+    "vllm/entrypoints/openai/chat_completion/protocol.py": "645268d03638f445e4484eb95f91346fabadcbb7fa95d9a2cafd95c5ec58599c",
+    "vllm/models/glm5next/nvidia/pooled_indexer.py": "2325a4253abab635be2a126b62e8966179ded5fec55c22a585b223c57a4bec92",
+    "vllm/tokenizers/deepseek_v41.py": "0afb465c862ae1414f92e410bc8e0a16b918e03728d7ce254f35edbab65952f1",
+    "vllm/tokenizers/deepseek_v41_encoding.py": "9668de7a1542a351049db8914b62c9ef1a3ba0624b3ecbcc289900eac1ed758a",
+    "vllm/utils/tool_names.py": "d2cc3e771d2e2072f02d43879b4012a0eb97a66b1cd1ff206e851abf3a989e67",
+    "b12x/attention/dsa_indexer/_preparation.py": "c1ff0e5f2dff7f8a013c69308f5eba5bf14494ce6e91b3cf0a18f4727866d41a",
+    "b12x/attention/dsa_indexer/_tuning.py": "1ef14116b5fc2b273d7c4c102f0021af2250734faa5b2866d85ff507eebde0a8",
+    "b12x/attention/sparse_mla/__init__.py": "296fc257fad0e8ee3edffea87d1a113f617583c8181044536cec08364906bb52",
+    "b12x/attention/sparse_mla/_tuning.py": "6ca5fbdea9ce61f596b58ea6fae3308f145e2a475f1b086d81109fc00dcaaba9",
+    "b12x/attention/sparse_mla/api.py": "d2198041dd8f778543bfdeb7e30a37b5709174fd1e99bf6147452f4540a3227b",
+    "b12x/attention/sparse_mla/pooled_selection.py": "790d7fc497f146d0696e891fa054d2df6b5e91d131260970a009f4d7006e0e1c",
+    "b12x/preparation/session.py": "7fea0e72fbff3736b8e352cd90b009286220f5d2d65945d75e3c3b8f7a21a0b5",
+    "b12x/sequence/_shared/delta_prefill/_cute_kernels.py": "c139c38f1281c799795b6e04a41bafd6e273e386acd6e26ae89486eba26d3425"
+  },
+  "installed": {
+    "vllm/distributed/device_communicators/b12x_pcie_all_reduce.py": "0f355bec3b77aaeee66922106784411aa1ad6103f8ace139c5eef53d00a97127",
+    "vllm/entrypoints/openai/chat_completion/protocol.py": "645268d03638f445e4484eb95f91346fabadcbb7fa95d9a2cafd95c5ec58599c",
+    "vllm/models/glm5next/nvidia/pooled_indexer.py": "2325a4253abab635be2a126b62e8966179ded5fec55c22a585b223c57a4bec92",
+    "vllm/tokenizers/deepseek_v41.py": "0afb465c862ae1414f92e410bc8e0a16b918e03728d7ce254f35edbab65952f1",
+    "vllm/tokenizers/deepseek_v41_encoding.py": "9668de7a1542a351049db8914b62c9ef1a3ba0624b3ecbcc289900eac1ed758a",
+    "vllm/utils/tool_names.py": "d2cc3e771d2e2072f02d43879b4012a0eb97a66b1cd1ff206e851abf3a989e67",
+    "b12x/attention/dsa_indexer/_preparation.py": "c1ff0e5f2dff7f8a013c69308f5eba5bf14494ce6e91b3cf0a18f4727866d41a",
+    "b12x/attention/dsa_indexer/_tuning.py": "1ef14116b5fc2b273d7c4c102f0021af2250734faa5b2866d85ff507eebde0a8",
+    "b12x/attention/sparse_mla/__init__.py": "296fc257fad0e8ee3edffea87d1a113f617583c8181044536cec08364906bb52",
+    "b12x/attention/sparse_mla/_tuning.py": "6ca5fbdea9ce61f596b58ea6fae3308f145e2a475f1b086d81109fc00dcaaba9",
+    "b12x/attention/sparse_mla/api.py": "d2198041dd8f778543bfdeb7e30a37b5709174fd1e99bf6147452f4540a3227b",
+    "b12x/attention/sparse_mla/pooled_selection.py": "790d7fc497f146d0696e891fa054d2df6b5e91d131260970a009f4d7006e0e1c",
+    "b12x/preparation/session.py": "7fea0e72fbff3736b8e352cd90b009286220f5d2d65945d75e3c3b8f7a21a0b5",
+    "b12x/sequence/_shared/delta_prefill/_cute_kernels.py": "c139c38f1281c799795b6e04a41bafd6e273e386acd6e26ae89486eba26d3425"
+  },
+  "passed": true
+}

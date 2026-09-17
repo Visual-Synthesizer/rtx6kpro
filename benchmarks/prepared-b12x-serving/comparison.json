@@ -1,0 +1,952 @@
+{
+  "schema": "model-serving-comparison/v1",
+  "image_id": "sha256:dada56080b813ffcd38b18f4d3dc7c548058cfe2222fe3e5a49e2893cd674b92",
+  "scope": "Compare source-locked serving receipts with published-image measurements.\n\nQualification means that the declared functional and measurement checks pass.\nIt does not mean every negative performance delta is statistically insignificant.\nThe evidence protocol uses three warmed 30-second decode runs at temperature 1,\ncontext zero, and one sustained uncached 32K prefill window per serving arm.\n",
+  "status": "qualified",
+  "models": {
+    "glm-mtp": {
+      "errors": {
+        "reference": [],
+        "image": []
+      },
+      "change_percent": {
+        "C1_output_tok_s_median": 0.8924258071023816,
+        "C1_request_verifier_steps_s_median": 0.7635535762898993,
+        "C8_output_tok_s_median": 0.36544921684085185,
+        "C8_request_verifier_steps_s_median": 0.45307134424987794,
+        "prefill32k_tok_s": 1.6175319593008108,
+        "logical_kv_capacity_tokens": 15.88428330952083
+      },
+      "reference": {
+        "path": "glm-mtp/reference",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 247.1233136149575,
+            "output_tok_s_range": [
+              242.66156752491153,
+              251.25675162204595
+            ],
+            "request_verifier_steps_s_median": 99.48947218389547,
+            "accepted_length_median": 2.484411666107945
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 872.6665973752912,
+            "output_tok_s_range": [
+              847.4597070752726,
+              886.1073312082037
+            ],
+            "request_verifier_steps_s_median": 349.28010272565547,
+            "accepted_length_median": 2.498472116119175
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 3645144,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.137,
+            "prefill_seconds": 2.137,
+            "tok_per_sec": 15332,
+            "client_ttft_seconds": 2.137,
+            "client_tok_per_sec": 15332,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "sieve": {
+          "qualify-glm-mtp-reference": {
+            "output_tok_s": 326.1508170869741,
+            "verifier_steps_s": 96.30325617297875,
+            "accepted_per_step": 2.349282296650718
+          }
+        },
+        "sieve_finish_reasons": [
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop"
+        ],
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "4",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "32",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"}",
+          "--speculative-config": "{\"method\":\"mtp\",\"num_speculative_tokens\":3,\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"moe_backend\":\"marlin\",\"attention_backend\":\"B12X\"}"
+        },
+        "prefill32k_tok_s": 15332
+      },
+      "image": {
+        "path": "glm-mtp/image",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 249.32870584102395,
+            "output_tok_s_range": [
+              247.00558245383738,
+              260.25056178105564
+            ],
+            "request_verifier_steps_s_median": 100.24912760678755,
+            "accepted_length_median": 2.4906728847435042
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 875.8557506210309,
+            "output_tok_s_range": [
+              871.5396365390775,
+              877.8088457071719
+            ],
+            "request_verifier_steps_s_median": 350.862590782272,
+            "accepted_length_median": 2.496292775665399
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 4224149,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.103,
+            "prefill_seconds": 2.103,
+            "tok_per_sec": 15580,
+            "client_ttft_seconds": 2.103,
+            "client_tok_per_sec": 15580,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "sieve": {
+          "qualify-glm-mtp-beta-wheel-memory": {
+            "output_tok_s": 325.7479723374038,
+            "verifier_steps_s": 97.32921546771423,
+            "accepted_per_step": 2.311004784688995
+          }
+        },
+        "sieve_finish_reasons": [
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop"
+        ],
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "4",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "32",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"}",
+          "--speculative-config": "{\"method\":\"mtp\",\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"moe_backend\":\"marlin\",\"attention_backend\":\"B12X\",\"num_speculative_tokens\":3}"
+        },
+        "prefill32k_tok_s": 15580
+      }
+    },
+    "glm-dflash": {
+      "errors": {
+        "reference": [],
+        "image": []
+      },
+      "change_percent": {
+        "C1_output_tok_s_median": 4.071232753503207,
+        "C1_request_verifier_steps_s_median": 4.909379050856022,
+        "C8_output_tok_s_median": 6.621877609947302,
+        "C8_request_verifier_steps_s_median": 6.447499363711984,
+        "prefill32k_tok_s": 1.2614236066417872,
+        "logical_kv_capacity_tokens": 22.918826707515684
+      },
+      "reference": {
+        "path": "glm-dflash/reference",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 211.22721542985514,
+            "output_tok_s_range": [
+              209.4614007608962,
+              215.2075137482116
+            ],
+            "request_verifier_steps_s_median": 81.16950061599988,
+            "accepted_length_median": 2.6074074074074076
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 673.2558285932365,
+            "output_tok_s_range": [
+              660.6147374204079,
+              685.7802383282931
+            ],
+            "request_verifier_steps_s_median": 260.5549394080381,
+            "accepted_length_median": 2.583930399181167
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 3676628,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.109,
+            "prefill_seconds": 2.109,
+            "tok_per_sec": 15538,
+            "client_ttft_seconds": 2.109,
+            "client_tok_per_sec": 15538,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "sieve": {
+          "qualify-glm53-dflash2-r35-gpu4-7": {
+            "output_tok_s": 458.1397598866714,
+            "verifier_steps_s": 77.76903316480278,
+            "accepted_per_step": 4.841379310344828
+          }
+        },
+        "sieve_finish_reasons": [
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop"
+        ],
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "4",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "32",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"}",
+          "--speculative-config": "{\"method\":\"dflash\",\"model\":\"/draft-repo/snapshots/dfa270d7eb8df37e0cd0d4420f8dd0bd24ffcd50\",\"num_speculative_tokens\":7,\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"kv_cache_dtype\":\"auto\",\"attention_backend\":\"FLASH_ATTN\"}"
+        },
+        "prefill32k_tok_s": 15538
+      },
+      "image": {
+        "path": "glm-dflash/image",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 219.82676700874816,
+            "output_tok_s_range": [
+              214.2197112593583,
+              220.22898388811802
+            ],
+            "request_verifier_steps_s_median": 85.15441907492622,
+            "accepted_length_median": 2.5747754783287777
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 717.8380055645173,
+            "output_tok_s_range": [
+              711.8003915910548,
+              718.8207922203222
+            ],
+            "request_verifier_steps_s_median": 277.35421746849147,
+            "accepted_length_median": 2.5814539347408827
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 4519268,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.083,
+            "prefill_seconds": 2.083,
+            "tok_per_sec": 15734,
+            "client_ttft_seconds": 2.083,
+            "client_tok_per_sec": 15734,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "sieve": {
+          "qualify-glm-dflash-beta-wheel-memory": {
+            "output_tok_s": 461.41536891998015,
+            "verifier_steps_s": 81.87972692910495,
+            "accepted_per_step": 4.642857142857143
+          }
+        },
+        "sieve_finish_reasons": [
+          "stop",
+          "stop",
+          "stop",
+          "stop",
+          "stop"
+        ],
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "4",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "32",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"}",
+          "--speculative-config": "{\"method\":\"dflash\",\"model\":\"/draft-repo/snapshots/dfa270d7eb8df37e0cd0d4420f8dd0bd24ffcd50\",\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"attention_backend\":\"FLASH_ATTN\",\"kv_cache_dtype\":\"auto\",\"num_speculative_tokens\":7}"
+        },
+        "prefill32k_tok_s": 15734
+      }
+    },
+    "ds41": {
+      "errors": {
+        "reference": [],
+        "image": []
+      },
+      "change_percent": {
+        "C1_output_tok_s_median": 2.281497706722102,
+        "C1_request_verifier_steps_s_median": 5.561014794180985,
+        "C8_output_tok_s_median": 2.80195313714493,
+        "C8_request_verifier_steps_s_median": 2.667389542748877,
+        "prefill32k_tok_s": 0.771950794362275,
+        "logical_kv_capacity_tokens": 4.690363942005549
+      },
+      "reference": {
+        "path": "ds41/reference",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 250.87135699515215,
+            "output_tok_s_range": [
+              233.02328793515463,
+              260.64187443739104
+            ],
+            "request_verifier_steps_s_median": 94.88104744295056,
+            "accepted_length_median": 2.64476458186929
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 808.1749339419712,
+            "output_tok_s_range": [
+              776.2264013271661,
+              814.1335484603668
+            ],
+            "request_verifier_steps_s_median": 352.16582784696317,
+            "accepted_length_median": 2.3263598326359833
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 4503190,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 1.632,
+            "prefill_seconds": 1.632,
+            "tok_per_sec": 20079,
+            "client_ttft_seconds": 1.632,
+            "client_tok_per_sec": 20079,
+            "prompt_tokens": 32770,
+            "samples": 15,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "4",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "131072",
+          "--max-num-seqs": "32",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"method\":\"dspark\",\"num_speculative_tokens\":7,\"draft_tensor_parallel_size\":4,\"attention_backend\":\"B12X\",\"draft_sample_method\":\"greedy\",\"rejection_sample_method\":\"standard\",\"enable_adaptive_verification\":true,\"adaptive_verification_cost_scale\":1.0}"
+        },
+        "prefill32k_tok_s": 20079
+      },
+      "image": {
+        "path": "ds41/image",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 256.59498125181915,
+            "output_tok_s_range": [
+              251.53488428295523,
+              260.67784685340814
+            ],
+            "request_verifier_steps_s_median": 100.15739652812692,
+            "accepted_length_median": 2.562250332889481
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 830.8196168571773,
+            "output_tok_s_range": [
+              828.092594393974,
+              834.8352509227157
+            ],
+            "request_verifier_steps_s_median": 361.5594623120881,
+            "accepted_length_median": 2.329019459663707
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 4714406,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 1.62,
+            "prefill_seconds": 1.62,
+            "tok_per_sec": 20234,
+            "client_ttft_seconds": 1.62,
+            "client_tok_per_sec": 20234,
+            "prompt_tokens": 32770,
+            "samples": 15,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "4",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "131072",
+          "--max-num-seqs": "32",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"}",
+          "--speculative-config": "{\"method\":\"dspark\",\"attention_backend\":\"B12X\",\"draft_sample_method\":\"greedy\",\"rejection_sample_method\":\"standard\",\"num_speculative_tokens\":7,\"draft_tensor_parallel_size\":4,\"enable_adaptive_verification\":true,\"adaptive_verification_cost_scale\":1.0}"
+        },
+        "prefill32k_tok_s": 20234
+      }
+    },
+    "ds4-text": {
+      "errors": {
+        "reference": [],
+        "image": []
+      },
+      "change_percent": {
+        "C1_output_tok_s_median": -0.6398837188821505,
+        "C1_request_verifier_steps_s_median": 1.9247088002138701,
+        "C8_output_tok_s_median": 2.4533943561405813,
+        "C8_request_verifier_steps_s_median": 2.650596849813436,
+        "prefill32k_tok_s": 2.48392104679529,
+        "logical_kv_capacity_tokens": 8.435660860213435
+      },
+      "reference": {
+        "path": "ds4-text/reference",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 191.34852999287654,
+            "output_tok_s_range": [
+              183.5253700227206,
+              199.2024487740594
+            ],
+            "request_verifier_steps_s_median": 71.92495513988051,
+            "accepted_length_median": 2.661873840445269
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 653.5267280128321,
+            "output_tok_s_range": [
+              644.9029236773627,
+              661.2059365563517
+            ],
+            "request_verifier_steps_s_median": 244.463698972845,
+            "accepted_length_median": 2.6733078602620086
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 1192983,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.423,
+            "prefill_seconds": 2.423,
+            "tok_per_sec": 13527,
+            "client_ttft_seconds": 2.423,
+            "client_tok_per_sec": 13527,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": 8,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "2",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "8",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"model\":\"/model-repo/snapshots/9e165c30e2704aec5d9d593cce3eebd58bbef1cb\",\"method\":\"dspark\",\"num_speculative_tokens\":5,\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\"}"
+        },
+        "prefill32k_tok_s": 13527
+      },
+      "image": {
+        "path": "ds4-text/image",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 190.1241219031318,
+            "output_tok_s_range": [
+              188.7301745389634,
+              193.24182160099807
+            ],
+            "request_verifier_steps_s_median": 73.30930108100767,
+            "accepted_length_median": 2.5934515688949524
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 669.5603158737691,
+            "output_tok_s_range": [
+              657.8122833938934,
+              670.7743492649042
+            ],
+            "request_verifier_steps_s_median": 250.94344607675663,
+            "accepted_length_median": 2.66817215727949
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 1293619,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.364,
+            "prefill_seconds": 2.364,
+            "tok_per_sec": 13863,
+            "client_ttft_seconds": 2.364,
+            "client_tok_per_sec": 13863,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "2",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "8",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"method\":\"dspark\",\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"num_speculative_tokens\":5,\"model\":\"/model-repo/snapshots/9e165c30e2704aec5d9d593cce3eebd58bbef1cb\"}"
+        },
+        "prefill32k_tok_s": 13863
+      }
+    },
+    "ds4-vision": {
+      "errors": {
+        "reference": [],
+        "image": []
+      },
+      "change_percent": {
+        "C1_output_tok_s_median": 9.167339562061262,
+        "C1_request_verifier_steps_s_median": 10.04136631219037,
+        "C4_output_tok_s_median": 2.82522620671799,
+        "C4_request_verifier_steps_s_median": 2.761116599459612,
+        "prefill32k_tok_s": 2.185213708124767,
+        "logical_kv_capacity_tokens": 5.695170343565592
+      },
+      "reference": {
+        "path": "ds4-vision/reference",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 169.91522495444462,
+            "output_tok_s_range": [
+              165.66937572552686,
+              174.26499128908262
+            ],
+            "request_verifier_steps_s_median": 79.50130002120353,
+            "accepted_length_median": 2.1322175732217574
+          },
+          "4": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 411.4889708517948,
+            "output_tok_s_range": [
+              405.3914935626323,
+              412.0510365319869
+            ],
+            "request_verifier_steps_s_median": 190.7828985723624,
+            "accepted_length_median": 2.1384268884268884
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 1215925,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 3.155,
+            "prefill_seconds": 3.155,
+            "tok_per_sec": 10388,
+            "client_ttft_seconds": 3.155,
+            "client_tok_per_sec": 10388,
+            "prompt_tokens": 32770,
+            "samples": 9,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "2",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "4",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"model\":\"/model-repo/snapshots/6821d6ad3681a4b137b066b76094fa82ebd0a380\",\"method\":\"dspark\",\"num_speculative_tokens\":3,\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\"}"
+        },
+        "prefill32k_tok_s": 10388
+      },
+      "image": {
+        "path": "ds4-vision/image",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 185.49193059365882,
+            "output_tok_s_range": [
+              185.0373316025296,
+              192.77650820302753
+            ],
+            "request_verifier_steps_s_median": 87.48431677928606,
+            "accepted_length_median": 2.1150914634146343
+          },
+          "4": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 423.11446509405386,
+            "output_tok_s_range": [
+              422.2709086731451,
+              436.44606061494943
+            ],
+            "request_verifier_steps_s_median": 196.05063685377408,
+            "accepted_length_median": 2.162747102931152
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 1285174,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 3.087,
+            "prefill_seconds": 3.087,
+            "tok_per_sec": 10615,
+            "client_ttft_seconds": 3.087,
+            "client_tok_per_sec": 10615,
+            "prompt_tokens": 32770,
+            "samples": 9,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "2",
+          "--max-num-batched-tokens": "4096",
+          "--max-model-len": "1048576",
+          "--max-num-seqs": "4",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"method\":\"dspark\",\"draft_sample_method\":\"probabilistic\",\"rejection_sample_method\":\"standard\",\"num_speculative_tokens\":3,\"model\":\"/model-repo/snapshots/6821d6ad3681a4b137b066b76094fa82ebd0a380\"}"
+        },
+        "prefill32k_tok_s": 10615
+      }
+    },
+    "qwen": {
+      "errors": {
+        "reference": [],
+        "image": []
+      },
+      "change_percent": {
+        "C1_output_tok_s_median": 9.93834751620506,
+        "C1_request_verifier_steps_s_median": 1.9161660269547243,
+        "C8_output_tok_s_median": 3.766406993077198,
+        "C8_request_verifier_steps_s_median": 3.43011215065383,
+        "prefill32k_tok_s": -1.4622733476311156,
+        "logical_kv_capacity_tokens": 0
+      },
+      "reference": {
+        "path": "qwen/reference",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 172.91981919393947,
+            "output_tok_s_range": [
+              163.73180566138515,
+              184.33199275711007
+            ],
+            "request_verifier_steps_s_median": 81.89923585301777,
+            "accepted_length_median": 2.1051136363636367
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 664.8898505639683,
+            "output_tok_s_range": [
+              609.4526487282884,
+              692.9961314213866
+            ],
+            "request_verifier_steps_s_median": 322.2253405471235,
+            "accepted_length_median": 2.0634312913907285
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 517581,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.13,
+            "prefill_seconds": 2.13,
+            "tok_per_sec": 15387,
+            "client_ttft_seconds": 2.13,
+            "client_tok_per_sec": 15387,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "1",
+          "--max-num-batched-tokens": "6019",
+          "--max-model-len": "262144",
+          "--max-num-seqs": "16",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"method\":\"mtp\",\"num_speculative_tokens\":3,\"moe_backend\":\"b12x\"}"
+        },
+        "prefill32k_tok_s": 15387
+      },
+      "image": {
+        "path": "qwen/image",
+        "decode": {
+          "1": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 190.10519174982664,
+            "output_tok_s_range": [
+              180.46536023454686,
+              198.08575476076143
+            ],
+            "request_verifier_steps_s_median": 83.46856118676882,
+            "accepted_length_median": 2.279888044782087
+          },
+          "8": {
+            "samples": 3,
+            "invalid_samples": 0,
+            "output_tok_s_median": 689.9323083918702,
+            "output_tok_s_range": [
+              682.666279287499,
+              704.8012893435432
+            ],
+            "request_verifier_steps_s_median": 333.278031105716,
+            "accepted_length_median": 2.0707566052842274
+          }
+        },
+        "status": "completed",
+        "error": null,
+        "smoke": true,
+        "logical_kv_capacity_tokens": 517581,
+        "prefill": {
+          "32768": {
+            "ttft_seconds": 2.161,
+            "prefill_seconds": 2.161,
+            "tok_per_sec": 15162,
+            "client_ttft_seconds": 2.161,
+            "client_tok_per_sec": 15162,
+            "prompt_tokens": 32770,
+            "samples": 12,
+            "method": "client",
+            "server_validation": {
+              "method": "",
+              "tok_per_sec": 0,
+              "prefill_seconds": 0,
+              "prompt_tokens": 0,
+              "request_prompt_tokens": 0,
+              "cached_tokens": 0,
+              "token_source": "",
+              "samples": 0,
+              "invalid_reason": ""
+            },
+            "hardware_summary": {}
+          }
+        },
+        "separately_recorded_concurrency": null,
+        "benchmark_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+        "serving_arguments": {
+          "--tensor-parallel-size": "1",
+          "--max-num-batched-tokens": "6019",
+          "--max-model-len": "262144",
+          "--max-num-seqs": "16",
+          "--kv-cache-dtype": "fp8",
+          "--compilation-config": "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"custom_ops\":[\"all\"]}",
+          "--speculative-config": "{\"method\":\"mtp\",\"moe_backend\":\"b12x\",\"num_speculative_tokens\":3}"
+        },
+        "prefill32k_tok_s": 15162
+      }
+    }
+  }
+}

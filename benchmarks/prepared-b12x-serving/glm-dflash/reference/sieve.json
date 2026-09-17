@@ -1,0 +1,295 @@
+{
+  "method": "Compare complete Sieve chat requests and speculative counters on idle APIs.\n\nEach endpoint receives a full warmup followed by interleaved seeded requests.\nOutput throughput uses llmbench coding-peak semantics (all completion tokens\ndivided by first-content-to-stream-end time). Counter-derived rates include\nthe request's prefill; raw outputs and timings permit independent inspection.\n",
+  "warmups": [
+    {
+      "arm": "qualify-glm53-dflash2-r35-gpu4-7",
+      "base": "http://127.0.0.1:5058",
+      "payload": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python script that implements the Sieve of Eratosthenes."
+          }
+        ],
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "seed": 20260915,
+        "max_tokens": 4096,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "usage": {
+        "prompt_tokens": 28,
+        "total_tokens": 818,
+        "completion_tokens": 790,
+        "completion_tokens_details": {
+          "reasoning_tokens": 19
+        }
+      },
+      "finish_reason": "stop",
+      "ttft_seconds": 0.05665415804833174,
+      "decode_seconds": 1.7136676969239488,
+      "request_seconds": 1.7703218549722806,
+      "output_tok_s": 460.9995283321604,
+      "verifier_steps_s": 76.25731988837353,
+      "accepted_per_step": 4.844444444444444,
+      "acceptance_fraction": 0.692063492063492,
+      "counters": {
+        "vllm:spec_decode_num_drafts_total": 135.0,
+        "vllm:spec_decode_num_draft_tokens_total": 945.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 654.0,
+        "vllm:generation_tokens_total": 790.0
+      },
+      "content": "# Sieve of Eratosthenes\n\n```python\ndef sieve_of_eratosthenes(n: int) -> list[int]:\n    \"\"\"\n    Return a list of all prime numbers up to and including n\n    using the Sieve of Eratosthenes algorithm.\n\n    Time complexity:  O(n log log n)\n    Space complexity: O(n)\n    \"\"\"\n    if n < 2:\n        return []\n\n    # Boolean list: is_prime[i] is True if i is (potentially) prime.\n    # Start by assuming everything is prime, then eliminate composites.\n    is_prime = [True] * (n + 1)\n    is_prime[0] = is_prime[1] = False\n\n    # Only need to sieve up to sqrt(n): any composite <= n\n    # must have a factor <= sqrt(n).\n    for p in range(2, int(n ** 0.5) + 1):\n        if is_prime[p]:\n            # Mark all multiples of p (starting at p*p) as composite.\n            # Multiples smaller than p*p were already marked by smaller primes.\n            for multiple in range(p * p, n + 1, p):\n                is_prime[multiple] = False\n\n    return [i for i, prime in enumerate(is_prime) if prime]\n\n\ndef main():\n    try:\n        n = int(input(\"Find all primes up to: \"))\n    except ValueError:\n        print(\"Please enter a valid integer.\")\n        return\n\n    if n < 0:\n        print(\"Please enter a non-negative integer.\")\n        return\n\n    primes = sieve_of_eratosthenes(n)\n\n    print(f\"Primes up to {n}:\")\n    print(primes)\n    print(f\"Found {len(primes)} primes.\")\n\n\nif __name__ == \"__main__\":\n    main()\n```\n\n## Example output\n\n```\nFind all primes up to: 50\nPrimes up to 50:\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]\nFound 15 primes.\n```\n\n## Key optimizations explained\n\n1. **Start marking at `p * p`** \u2014 smaller multiples of `p` (like `2p`, `3p`) were already eliminated by smaller primes.\n2. **Only sieve to `\u221an`** \u2014 every composite number `\u2264 n` has at least one prime factor `\u2264 \u221an`, so no composites survive past that point.\n3. **Boolean array instead of a set** \u2014 a flat list is faster and more memory-predictable for this use case.\n\n## Bonus: memory-optimized version\n\nFor very large `n`, you can use slice assignment (implemented in C, much faster than a Python loop) and represent flags as bytes:\n\n```python\ndef sieve_fast(n: int) -> list[int]:\n    if n < 2:\n        return []\n    is_prime = bytearray([1]) * (n + 1)\n    is_prime[0] = is_prime[1] = 0\n    for p in range(2, int(n ** 0.5) + 1):\n        if is_prime[p]:\n            # Slice assignment marks all multiples at once in C speed\n            is_prime[p * p :: p] = bytearray(len(range(p * p, n + 1, p)))\n    return [i for i in range(n + 1) if is_prime[i]]\n```\n\nThis version is typically 5\u201310\u00d7 faster for large inputs (e.g., `n = 10_000_000`).",
+      "reasoning": "Write a clean Python script with the sieve, maybe with a function, validation, and demo.",
+      "profile_triggered": false
+    }
+  ],
+  "samples": [
+    {
+      "arm": "qualify-glm53-dflash2-r35-gpu4-7",
+      "run": 0,
+      "base": "http://127.0.0.1:5058",
+      "payload": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python script that implements the Sieve of Eratosthenes."
+          }
+        ],
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "seed": 20260916,
+        "max_tokens": 4096,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "usage": {
+        "prompt_tokens": 28,
+        "total_tokens": 876,
+        "completion_tokens": 848,
+        "completion_tokens_details": {
+          "reasoning_tokens": 22
+        }
+      },
+      "finish_reason": "stop",
+      "ttft_seconds": 0.007318502990528941,
+      "decode_seconds": 1.8509635579539463,
+      "request_seconds": 1.8582820609444752,
+      "output_tok_s": 458.1397598866714,
+      "verifier_steps_s": 78.02905869214682,
+      "accepted_per_step": 4.841379310344828,
+      "acceptance_fraction": 0.6916256157635468,
+      "counters": {
+        "vllm:spec_decode_num_drafts_total": 145.0,
+        "vllm:spec_decode_num_draft_tokens_total": 1015.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 702.0,
+        "vllm:generation_tokens_total": 848.0
+      },
+      "content": "# Sieve of Eratosthenes\n\nHere's a Python implementation of the Sieve of Eratosthenes, a classic algorithm for finding all prime numbers up to a given limit:\n\n```python\ndef sieve_of_eratosthenes(limit):\n    \"\"\"\n    Find all prime numbers up to 'limit' using the Sieve of Eratosthenes.\n\n    Args:\n        limit (int): The upper bound (inclusive) for finding primes.\n\n    Returns:\n        list: A list of all prime numbers <= limit.\n    \"\"\"\n    if limit < 2:\n        return []\n\n    # Initialize a boolean array: True means \"potentially prime\"\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False  # 0 and 1 are not prime\n\n    # Only need to check factors up to sqrt(limit)\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            # Mark all multiples of 'number' as not prime,\n            # starting from number^2 (smaller multiples already marked)\n            for multiple in range(number * number, limit + 1, number):\n                is_prime[multiple] = False\n\n    # Collect all numbers still marked as prime\n    return [num for num, prime in enumerate(is_prime) if prime]\n\n\ndef main():\n    limit = 100\n    primes = sieve_of_eratosthenes(limit)\n\n    print(f\"Prime numbers up to {limit}:\")\n    print(primes)\n    print(f\"\\nTotal count: {len(primes)}\")\n\n\nif __name__ == \"__main__\":\n    main()\n```\n\n## Sample Output\n\n```\nPrime numbers up to 100:\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]\n\nTotal count: 25\n```\n\n## How It Works\n\n1. **Create a boolean array** of size `limit + 1`, where each index represents a number. All start as `True` (potentially prime).\n2. **Mark 0 and 1** as non-prime since they don't qualify by definition.\n3. **Iterate from 2 to \u221alimit**: For each number still marked prime, mark all of its multiples as non-prime. We start marking at `number\u00b2` because smaller multiples (like `2n`, `3n`) were already marked by smaller primes.\n4. **Collect results**: Any index still marked `True` is prime.\n\n## Key Optimizations\n\n- **Starting at `number\u00b2`**: When marking multiples, we skip everything below the square since those were already handled by smaller primes.\n- **Stopping at \u221alimit**: Any composite number \u2264 limit must have a factor \u2264 \u221alimit, so no further checking is needed.\n\n## Bonus: More Memory-Efficient Version\n\nFor very large limits, you can use slicing and a `bytearray` for better performance:\n\n```python\ndef sieve_fast(limit):\n    if limit < 2:\n        return []\n    is_prime = bytearray([1]) * (limit + 1)\n    is_prime[0] = is_prime[1] = 0\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            # Slice assignment is much faster than a Python loop\n            is_prime[number*number::number] = bytearray(len(range(number*number, limit + 1, number)))\n    return [i for i, prime in enumerate(is_prime) if prime]\n```\n\nThis version can sieve up to 10 million in well under a second on typical hardware.",
+      "reasoning": "Write a clean Python script with Sieve of Eratosthenes, maybe with explanation and example usage.",
+      "profile_triggered": false
+    },
+    {
+      "arm": "qualify-glm53-dflash2-r35-gpu4-7",
+      "run": 1,
+      "base": "http://127.0.0.1:5058",
+      "payload": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python script that implements the Sieve of Eratosthenes."
+          }
+        ],
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "seed": 20260917,
+        "max_tokens": 4096,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "usage": {
+        "prompt_tokens": 28,
+        "total_tokens": 758,
+        "completion_tokens": 730,
+        "completion_tokens_details": {
+          "reasoning_tokens": 16
+        }
+      },
+      "finish_reason": "stop",
+      "ttft_seconds": 0.006694436073303223,
+      "decode_seconds": 1.6777806649915874,
+      "request_seconds": 1.6844751010648906,
+      "output_tok_s": 435.0985890063647,
+      "verifier_steps_s": 77.76903316480278,
+      "accepted_per_step": 4.564885496183206,
+      "acceptance_fraction": 0.6521264994547438,
+      "counters": {
+        "vllm:spec_decode_num_drafts_total": 131.0,
+        "vllm:spec_decode_num_draft_tokens_total": 917.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 598.0,
+        "vllm:generation_tokens_total": 730.0
+      },
+      "content": "# Sieve of Eratosthenes in Python\n\nHere's a clean, efficient implementation:\n\n```python\ndef sieve_of_eratosthenes(limit):\n    \"\"\"\n    Find all prime numbers up to `limit` (inclusive) using\n    the Sieve of Eratosthenes.\n\n    Args:\n        limit (int): The upper bound to search for primes.\n\n    Returns:\n        list[int]: A list of all primes <= limit.\n    \"\"\"\n    if limit < 2:\n        return []\n\n    # is_prime[i] will be True if i is prime\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False\n\n    # Only need to sieve up to sqrt(limit)\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            # Mark all multiples of `number` as composite,\n            # starting at number^2 (smaller multiples already marked)\n            for multiple in range(number * number, limit + 1, number):\n                is_prime[multiple] = False\n\n    return [i for i, prime in enumerate(is_prime) if prime]\n\n\nif __name__ == \"__main__\":\n    limit = int(input(\"Enter the upper limit: \") or 100)\n    primes = sieve_of_eratosthenes(limit)\n\n    print(f\"Primes up to {limit}:\")\n    print(primes)\n    print(f\"Count: {len(primes)}\")\n```\n\n## Example Output\n\n```\nEnter the upper limit: 50\nPrimes up to 50:\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]\nCount: 15\n```\n\n## How It Works\n\n1. **Create a boolean list** \u2014 assume every number from 0 to `limit` is prime.\n2. **Mark 0 and 1 as non-prime** explicitly.\n3. **For each number starting at 2**, if it's still marked prime, mark all of its multiples as composite.\n4. **Optimization**: Start marking at `number\u00b2` \u2014 smaller multiples were already marked by smaller primes. Also, you only need to iterate up to `\u221alimit`, since any composite \u2264 limit must have a factor \u2264 \u221alimit.\n5. **Collect the survivors** \u2014 indices still marked `True` are prime.\n\n## Performance Note\n\nFor large limits, you can speed up the inner loop using slice assignment, which is much faster in Python:\n\n```python\ndef sieve_fast(limit):\n    if limit < 2:\n        return []\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            is_prime[number * number :: number] = [False] * len(\n                range(number * number, limit + 1, number)\n            )\n    return [i for i, prime in enumerate(is_prime) if prime]\n```\n\n**Time complexity:** O(n log log n) \u2014 nearly linear, which is why this 2,200-year-old algorithm is still the go-to method for generating primes in bulk.",
+      "reasoning": "Simple task. Provide a script with implementation, maybe CLI argument, and explanation.",
+      "profile_triggered": false
+    },
+    {
+      "arm": "qualify-glm53-dflash2-r35-gpu4-7",
+      "run": 2,
+      "base": "http://127.0.0.1:5058",
+      "payload": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python script that implements the Sieve of Eratosthenes."
+          }
+        ],
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "seed": 20260918,
+        "max_tokens": 4096,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "usage": {
+        "prompt_tokens": 28,
+        "total_tokens": 791,
+        "completion_tokens": 763,
+        "completion_tokens_details": {
+          "reasoning_tokens": 27
+        }
+      },
+      "finish_reason": "stop",
+      "ttft_seconds": 0.006504997960291803,
+      "decode_seconds": 1.849925062037073,
+      "request_seconds": 1.8564300599973649,
+      "output_tok_s": 412.44913951260867,
+      "verifier_steps_s": 77.56823330053403,
+      "accepted_per_step": 4.291666666666667,
+      "acceptance_fraction": 0.6130952380952381,
+      "counters": {
+        "vllm:spec_decode_num_drafts_total": 144.0,
+        "vllm:spec_decode_num_draft_tokens_total": 1008.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 618.0,
+        "vllm:generation_tokens_total": 763.0
+      },
+      "content": "# Sieve of Eratosthenes in Python\n\nThe Sieve of Eratosthenes finds all prime numbers up to a given limit by iteratively marking the multiples of each prime as composite.\n\n## Basic Implementation\n\n```python\ndef sieve_of_eratosthenes(limit):\n    \"\"\"\n    Find all prime numbers up to `limit` (inclusive) using\n    the Sieve of Eratosthenes.\n\n    Args:\n        limit: The upper bound (inclusive) for finding primes.\n\n    Returns:\n        A list of all prime numbers up to and including `limit`.\n    \"\"\"\n    if limit < 2:\n        return []\n\n    # Initialize a boolean list: True means \"assumed prime\"\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False  # 0 and 1 are not prime\n\n    # Only need to sieve up to sqrt(limit)\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            # Mark all multiples of `number` starting from its square\n            # as composite. Multiples below the square were already\n            # marked by smaller primes.\n            for multiple in range(number * number, limit + 1, number):\n                is_prime[multiple] = False\n\n    # Collect indices that are still marked True\n    return [num for num, prime in enumerate(is_prime) if prime]\n\n\nif __name__ == \"__main__\":\n    n = 50\n    primes = sieve_of_eratosthenes(n)\n    print(f\"Primes up to {n}:\")\n    print(primes)\n```\n\n**Output:**\n```\nPrimes up to 50:\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]\n```\n\n## Faster Variant (Slice Assignment)\n\nFor large limits, using slice assignment is significantly faster than a nested Python loop:\n\n```python\ndef sieve_of_eratosthenes_fast(limit):\n    if limit < 2:\n        return []\n\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False\n\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            # Mark multiples in one vectorized slice operation\n            is_prime[number * number :: number] = [False] * len(\n                range(number * number, limit + 1, number)\n            )\n\n    return [num for num, prime in enumerate(is_prime) if prime]\n```\n\n## Key Points\n\n- **Time complexity:** O(n log log n) \u2014 very efficient for finding all primes below n\n- **Space complexity:** O(n) for the boolean array\n- **Why start at `number\u00b2`?** Smaller multiples (e.g., `3\u00d75` for prime 5) were already crossed out by smaller primes (3)\n- **Why stop at `\u221alimit`?** Any composite number \u2264 limit must have a factor \u2264 \u221alimit\n\nYou can also wrap it in a small CLI by replacing the `__main__` block with:\n\n```python\nimport sys\nn = int(sys.argv[1]) if len(sys.argv) > 1 else 100\nprint(sieve_of_eratosthenes_fast(n))\n```",
+      "reasoning": "Write a clean Sieve of Eratosthenes script with explanation, maybe CLI usage, returning primes list. Include example usage.",
+      "profile_triggered": false
+    },
+    {
+      "arm": "qualify-glm53-dflash2-r35-gpu4-7",
+      "run": 3,
+      "base": "http://127.0.0.1:5058",
+      "payload": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python script that implements the Sieve of Eratosthenes."
+          }
+        ],
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "seed": 20260919,
+        "max_tokens": 4096,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "usage": {
+        "prompt_tokens": 28,
+        "total_tokens": 849,
+        "completion_tokens": 821,
+        "completion_tokens_details": {
+          "reasoning_tokens": 20
+        }
+      },
+      "finish_reason": "stop",
+      "ttft_seconds": 0.006459738011471927,
+      "decode_seconds": 1.7603848819853738,
+      "request_seconds": 1.7668446199968457,
+      "output_tok_s": 466.37528440602756,
+      "verifier_steps_s": 78.10534012902977,
+      "accepted_per_step": 4.942028985507246,
+      "acceptance_fraction": 0.7060041407867494,
+      "counters": {
+        "vllm:spec_decode_num_drafts_total": 138.0,
+        "vllm:spec_decode_num_draft_tokens_total": 966.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 682.0,
+        "vllm:generation_tokens_total": 821.0
+      },
+      "content": "# Sieve of Eratosthenes in Python\n\nThe Sieve of Eratosthenes is an ancient algorithm for finding all prime numbers up to a given limit. Here's a complete implementation:\n\n```python\ndef sieve_of_eratosthenes(limit):\n    \"\"\"\n    Find all prime numbers up to 'limit' using the Sieve of Eratosthenes.\n\n    Args:\n        limit (int): The upper bound (inclusive) to search for primes.\n\n    Returns:\n        list: A list of all prime numbers up to and including 'limit'.\n    \"\"\"\n    if limit < 2:\n        return []\n\n    # Start by assuming every number is prime\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False  # 0 and 1 are not prime\n\n    # Only need to sieve up to sqrt(limit)\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            # Mark all multiples of 'number' as composite,\n            # starting from number^2 (smaller multiples already marked)\n            for multiple in range(number * number, limit + 1, number):\n                is_prime[multiple] = False\n\n    # Collect the numbers still marked as prime\n    return [num for num, prime in enumerate(is_prime) if prime]\n\n\ndef main():\n    limit = 100\n    primes = sieve_of_eratosthenes(limit)\n\n    print(f\"Primes up to {limit}:\")\n    print(primes)\n    print(f\"\\nFound {len(primes)} primes.\")\n\n\nif __name__ == \"__main__\":\n    main()\n```\n\n**Output:**\n```\nPrimes up to 100:\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]\n\nFound 25 primes.\n```\n\n## How It Works\n\n1. **Initialize** a boolean list where every index represents a number, all marked `True` (potentially prime).\n2. **Mark 0 and 1** as non-prime.\n3. **Iterate** from 2 up to \u221alimit. For each number still marked prime, mark all of its multiples as composite.\n4. **Start marking at `number\u00b2`** \u2014 smaller multiples were already crossed off by smaller primes (e.g., multiples of 5 below 25 were handled by 2 and 3).\n5. **Collect** the remaining `True` indices \u2014 these are the primes.\n\n## Key Optimizations Used\n\n- **Outer loop stops at \u221alimit**: any composite \u2264 limit must have a factor \u2264 \u221alimit.\n- **Inner loop starts at `number\u00b2`**: avoids redundant marking.\n\n## Optional: Faster Version with Slice Assignment\n\nFor large limits, replacing the inner loop with slice assignment is significantly faster:\n\n```python\ndef sieve_fast(limit):\n    if limit < 2:\n        return []\n    is_prime = bytearray([1]) * (limit + 1)\n    is_prime[0] = is_prime[1] = 0\n    for number in range(2, int(limit ** 0.5) + 1):\n        if is_prime[number]:\n            is_prime[number * number :: number] = bytearray(\n                len(is_prime[number * number :: number])\n            )\n    return [num for num, prime in enumerate(is_prime) if prime]\n```\n\nThe algorithm runs in **O(n log log n)** time, making it one of the most efficient ways to find all primes up to a limit.",
+      "reasoning": "Write a Python script implementing Sieve of Eratosthenes, with explanation and example usage.",
+      "profile_triggered": false
+    },
+    {
+      "arm": "qualify-glm53-dflash2-r35-gpu4-7",
+      "run": 4,
+      "base": "http://127.0.0.1:5058",
+      "payload": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python script that implements the Sieve of Eratosthenes."
+          }
+        ],
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "seed": 20260920,
+        "max_tokens": 4096,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "usage": {
+        "prompt_tokens": 28,
+        "total_tokens": 764,
+        "completion_tokens": 736,
+        "completion_tokens_details": {
+          "reasoning_tokens": 27
+        }
+      },
+      "finish_reason": "stop",
+      "ttft_seconds": 0.006954874959774315,
+      "decode_seconds": 1.5113808340393007,
+      "request_seconds": 1.518335708999075,
+      "output_tok_s": 486.97190239800386,
+      "verifier_steps_s": 77.71667313139106,
+      "accepted_per_step": 5.228813559322034,
+      "acceptance_fraction": 0.7469733656174334,
+      "counters": {
+        "vllm:spec_decode_num_drafts_total": 118.0,
+        "vllm:spec_decode_num_draft_tokens_total": 826.0,
+        "vllm:spec_decode_num_accepted_tokens_total": 617.0,
+        "vllm:generation_tokens_total": 736.0
+      },
+      "content": "# Sieve of Eratosthenes\n\n```python\ndef sieve_of_eratosthenes(limit: int) -> list[int]:\n    \"\"\"\n    Find all prime numbers up to a given limit using the\n    Sieve of Eratosthenes algorithm.\n\n    Args:\n        limit: The upper bound (inclusive) to search for primes.\n\n    Returns:\n        A list of all prime numbers up to and including the limit.\n    \"\"\"\n    if limit < 2:\n        return []\n\n    # Assume all numbers are prime initially\n    is_prime = [True] * (limit + 1)\n    is_prime[0] = is_prime[1] = False  # 0 and 1 are not prime\n\n    # Only need to sieve up to sqrt(limit)\n    for num in range(2, int(limit ** 0.5) + 1):\n        if is_prime[num]:\n            # Mark all multiples of num as not prime,\n            # starting from num*num (smaller ones are already marked)\n            for multiple in range(num * num, limit + 1, num):\n                is_prime[multiple] = False\n\n    return [n for n, prime in enumerate(is_prime) if prime]\n\n\ndef main():\n    limit = int(input(\"Enter the upper limit: \"))\n    primes = sieve_of_eratosthenes(limit)\n\n    print(f\"Prime numbers up to {limit}:\")\n    print(primes)\n    print(f\"Total count: {len(primes)}\")\n\n\nif __name__ == \"__main__\":\n    main()\n```\n\n## Example Output\n\n```\nEnter the upper limit: 50\nPrime numbers up to 50:\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]\nTotal count: 15\n```\n\n## How It Works\n\n1. **Create a boolean list** \u2014 assume every number from 0 to `limit` is prime.\n2. **Mark 0 and 1** as non-prime (special cases).\n3. **Iterate from 2 to \u221alimit** \u2014 for each number still marked as prime, mark all its multiples as non-prime. We start at `num * num` because smaller multiples were already marked by smaller primes.\n4. **Collect results** \u2014 all indices still marked `True` are prime.\n\n## Performance Notes\n\n- **Time complexity:** O(n log log n)\n- **Space complexity:** O(n)\n\n### Bonus: Optimized version using slice assignment (faster in practice)\n\n```python\ndef sieve_fast(limit: int) -> list[int]:\n    if limit < 2:\n        return []\n    is_prime = bytearray([1]) * (limit + 1)\n    is_prime[0] = is_prime[1] = 0\n    for num in range(2, int(limit ** 0.5) + 1):\n        if is_prime[num]:\n            is_prime[num * num :: num] = bytearray(\n                len(range(num * num, limit + 1, num))\n            )\n    return [n for n in range(limit + 1) if is_prime[n]]\n```\n\nThis version uses `bytearray` and slice assignment, which moves the inner loop into C-level operations and can be 5\u201310x faster for large limits.",
+      "reasoning": "Write a clean Python script implementing Sieve of Eratosthenes, with a function, maybe user input, and example usage.",
+      "profile_triggered": false
+    }
+  ],
+  "summary": {
+    "qualify-glm53-dflash2-r35-gpu4-7": {
+      "output_tok_s": 458.1397598866714,
+      "verifier_steps_s": 77.76903316480278,
+      "accepted_per_step": 4.841379310344828
+    }
+  }
+}
