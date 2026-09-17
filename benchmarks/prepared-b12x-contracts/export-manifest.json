@@ -339,6 +339,74 @@
     {
       "path": "checks/prepared-twoshot-ownership.log",
       "sha256": "ed942b8cc946ec50a1a7ada9173f8a08cbb5126100c8d72e80eb060d7b0017e9"
+    },
+    {
+      "path": "qwen/reference/functional-checks.json",
+      "sha256": "369d36785c3326d138cf6280b3caca28ab5bc82dfe59b1bbf8d61829a8fb6ba9"
+    },
+    {
+      "path": "qwen/reference/test-commands.json",
+      "sha256": "5c8a0205b034ad99b3852153158b4056800e7429e60f255e8a45f148094cded0"
+    },
+    {
+      "path": "qwen/reference/launch.json",
+      "sha256": "afed7e263d7c05459e473386124cdc1e85c35a2fa181eb13606d7add8853de4f"
+    },
+    {
+      "path": "qwen/reference/runtime.json",
+      "sha256": "049bd230182361ec3924203841ee27a174a135ae4d73aeaee5436eee22fa57da"
+    },
+    {
+      "path": "qwen/reference/prefill-2.json",
+      "sha256": "e04d158d6076ace9609101c0559b5d721447c8736fd73202147de5ba4bb913d5"
+    },
+    {
+      "path": "qwen/reference/prefill-3.json",
+      "sha256": "a4a8f210a1ed2c02b2c2c24516ce40dd6e1efa2c6eb545ac67ef0d3540c8eb26"
+    },
+    {
+      "path": "qwen/reference/prefill.json",
+      "sha256": "c6cd155b5dfe1caea90e7aa560d88c88dbfe8af89bfbf1aa3f806c23a1e32bac"
+    },
+    {
+      "path": "qwen/integration/functional-checks.json",
+      "sha256": "2ab770246b67d6fd431cddbbfa6bfeeb331fc5cbe8cf316ebd63cedddec1f3dd"
+    },
+    {
+      "path": "qwen/integration/test-commands.json",
+      "sha256": "c23bd27dda4246e3524f5212bd3816f74d1a2df820f2d9bd1a1627003613647a"
+    },
+    {
+      "path": "qwen/integration/launch.json",
+      "sha256": "b56209b0a3851541bffbe1db506bac18ae26416b2f6774e7343d76db3b045301"
+    },
+    {
+      "path": "qwen/integration/runtime.json",
+      "sha256": "edfb9004c0496803abe928bb47a55bf87bf1865a8f40d49287c661421aaa7cac"
+    },
+    {
+      "path": "qwen/integration/prefill-2.json",
+      "sha256": "d77472b91c671cbb43e742ad0a730bfb9a4ec1e6c0066f7e337f769b1bb41dbe"
+    },
+    {
+      "path": "qwen/integration/prefill-3.json",
+      "sha256": "65840eb342a0aa2394c66a0f0d094c3c84083a29e4ed794742ed5f5899b08904"
+    },
+    {
+      "path": "qwen/integration/prefill.json",
+      "sha256": "5881d23f0707b2b00e24e4bd676756e6b2633b01234bc2ef9d2ff6eaa30e45f9"
+    },
+    {
+      "path": "checks/qwen-prefill-resolved-contract.json",
+      "sha256": "5744ae5058700ee21bf34c08d52746be92bf5e20617f5bdf82bacb2121102124"
+    },
+    {
+      "path": "checks/container-release.json",
+      "sha256": "22df00b8690edb3371eef5a49baa27ca6009197373f805d87ba6a6e4e5695f73"
+    },
+    {
+      "path": "checks/community-assembly-beta.json",
+      "sha256": "e0ad096d322b1931d6aba7fe3962b17bf19d7ec9d9151731736fe52fe8f5ae39"
     }
   ]
 }

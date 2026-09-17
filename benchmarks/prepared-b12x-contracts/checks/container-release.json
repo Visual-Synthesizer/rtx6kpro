@@ -1,0 +1,94 @@
+{
+  "alias": "ghcr.io/local-inference-lab/vllm:jovian-judgement-beta",
+  "alias_updated": false,
+  "assembly_sha256": "571772abefffbaa18536c17e9dbe28929bc6848e818478052298ed8c44d370d1",
+  "cache_contract_tests": {
+    "passed": 91,
+    "skipped": 0
+  },
+  "channel": "jovian-judgement",
+  "components": {
+    "b12x": {
+      "archive": "b12x-cu134-b9f44defd3a871f8c81d51846f3949ac15ace73d.tar.zst",
+      "archive_asset_id": 570152610,
+      "archive_sha256": "fac9eebd33933112c9be42229d8a9b64e890e13b2166377b79395d6c67d3a426",
+      "branch": "integration/beta",
+      "manifest_sha256": "e686201c2f9779bbc43f64af5a2f8db8d7b87407060b09e09f2304218f6c78af",
+      "observed_branch_commit": "b9f44defd3a871f8c81d51846f3949ac15ace73d",
+      "release": "b12x-cu134-beta-b9f44defd3a871f8c81d51846f3949ac15ace73d",
+      "release_url": "https://github.com/local-inference-lab/b12x/releases/tag/b12x-cu134-beta-b9f44defd3a871f8c81d51846f3949ac15ace73d",
+      "repository": "local-inference-lab/b12x",
+      "source_commit": "b9f44defd3a871f8c81d51846f3949ac15ace73d"
+    },
+    "flashinfer": {
+      "archive": "flashinfer-cu134-sm120-2206a14e46387a56c093860a46bbbdd00596b75b.tar.zst",
+      "archive_asset_id": 562220280,
+      "archive_sha256": "099d93c14671d82dfc65318cb2c26d43688b8e2d4642fa4b5135e03cbae035e1",
+      "branch": "community/jovian-judgement-cu134-sm120",
+      "manifest_sha256": "9d58cc6beaa3548d836257fe903cdc0c3ce31bbb0c8422bf28cdcc8025458889",
+      "observed_branch_commit": "2206a14e46387a56c093860a46bbbdd00596b75b",
+      "release": "flashinfer-cu134-sm120-beta-2206a14e46387a56c093860a46bbbdd00596b75b",
+      "release_url": "https://github.com/local-inference-lab/flashinfer/releases/tag/flashinfer-cu134-sm120-beta-2206a14e46387a56c093860a46bbbdd00596b75b",
+      "repository": "local-inference-lab/flashinfer",
+      "source_commit": "2206a14e46387a56c093860a46bbbdd00596b75b"
+    },
+    "instanttensor": {
+      "archive": "instanttensor-cu134-95d4729b6d6a991bb8de61877147a9d9d9100b23.tar.zst",
+      "archive_asset_id": 562221052,
+      "archive_sha256": "de27a0b9306589b33e92142b4e2de26cf6b7925117c14f8485a5ff19def01729",
+      "branch": "main",
+      "manifest_sha256": "6e58b73cf3e7775a518dd2bc0ac4f95634779d97894e23bf2a271a94bc42000f",
+      "observed_branch_commit": "95d4729b6d6a991bb8de61877147a9d9d9100b23",
+      "release": "instanttensor-cu134-beta-95d4729b6d6a991bb8de61877147a9d9d9100b23",
+      "release_url": "https://github.com/local-inference-lab/InstantTensor/releases/tag/instanttensor-cu134-beta-95d4729b6d6a991bb8de61877147a9d9d9100b23",
+      "repository": "local-inference-lab/InstantTensor",
+      "source_commit": "95d4729b6d6a991bb8de61877147a9d9d9100b23"
+    },
+    "lmcache": {
+      "archive": "lmcache-cu134-sm120-0c66395db91001cca9d3a9586da12b267340e4de.tar.zst",
+      "archive_asset_id": 568847086,
+      "archive_sha256": "63be94bf42d3b6830080f8db7315614213133435e7aaad37a83feb3809edbc67",
+      "branch": "integration/local-inference-lab",
+      "manifest_sha256": "6146dccdfe83cbc2191fb8962ae29584689ce57e5caef15c374e7a331c834b39",
+      "observed_branch_commit": "0c66395db91001cca9d3a9586da12b267340e4de",
+      "release": "lmcache-cu134-sm120-beta-0c66395db91001cca9d3a9586da12b267340e4de",
+      "release_url": "https://github.com/local-inference-lab/LMCache/releases/tag/lmcache-cu134-sm120-beta-0c66395db91001cca9d3a9586da12b267340e4de",
+      "repository": "local-inference-lab/LMCache",
+      "source_commit": "0c66395db91001cca9d3a9586da12b267340e4de"
+    },
+    "nccl": {
+      "archive": "local-inference-nccl-cu134-93fe05d9f9b6963ef841166a69cd0b30e4efe97b.tar.zst",
+      "archive_asset_id": 562210238,
+      "archive_sha256": "0def6cec946700d247eeb82eb35cb3404f509d554742a4547414698815792fbb",
+      "branch": "canonical/cu134-nccl2312-amd-turin",
+      "manifest_sha256": "0d7e4aee65349bde847ec4866f87033fa6ef8105f485e61bd9e86a48d62548df",
+      "observed_branch_commit": "93fe05d9f9b6963ef841166a69cd0b30e4efe97b",
+      "release": "nccl-cu134-sm120-93fe05d9f9b6963ef841166a69cd0b30e4efe97b",
+      "release_url": "https://github.com/local-inference-lab/nccl-canonical/releases/tag/nccl-cu134-sm120-93fe05d9f9b6963ef841166a69cd0b30e4efe97b",
+      "repository": "local-inference-lab/nccl-canonical",
+      "source_commit": "93fe05d9f9b6963ef841166a69cd0b30e4efe97b"
+    },
+    "vllm": {
+      "archive": "vllm-jovian-cu134-b4551e2abd4b47be76ece67d84090888795fcd3f.tar.zst",
+      "archive_asset_id": 570204337,
+      "archive_sha256": "842d2bc4f0545ba416f7fcb8260a3727efe729241d80d5817c8da13c864fd87a",
+      "branch": "integration/beta",
+      "manifest_sha256": "050b4c43ca556b2ff56ce326c94fd94dbf85a155a9a54b527e2a980a0aed094c",
+      "observed_branch_commit": "b4551e2abd4b47be76ece67d84090888795fcd3f",
+      "release": "vllm-jovian-cu134-beta-b4551e2abd4b47be76ece67d84090888795fcd3f",
+      "release_url": "https://github.com/local-inference-lab/vllm/releases/tag/vllm-jovian-cu134-beta-b4551e2abd4b47be76ece67d84090888795fcd3f",
+      "repository": "local-inference-lab/vllm",
+      "source_commit": "b4551e2abd4b47be76ece67d84090888795fcd3f"
+    }
+  },
+  "digest": "ghcr.io/local-inference-lab/vllm@sha256:dc7babc135cc143f1aef2051c2e180f763d679cdbaeba1cdd09dcb38f352266d",
+  "image": "ghcr.io/local-inference-lab/vllm:jovian-judgement-beta-20260917-571772abefffbaa1",
+  "layers": 68,
+  "qualification_scope": "Native GPU smoke and LMCache checkpoint/filesystem contract tests; model-serving performance and full GLM cache E2E remain unqualified.",
+  "recipe_commit": "b3fe0afe1621273059fb19dee1034e2272043a55",
+  "release_channel": "beta",
+  "release_tag": "jovian-judgement-beta-571772abefffbaa18536c17e9dbe28929bc6848e818478052298ed8c44d370d1",
+  "runtime_manifest_sha256": "d3921a7401922165b87b4dfde084e2bfb2048f733b6f44a9e9fbe5754a52b5a1",
+  "schema": "local-inference-container-assembly/v1",
+  "status": "qualified"
+}

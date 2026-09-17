@@ -35,6 +35,15 @@ Published vLLM beta `8eca34a03304ee681cb8131f28d118f880efb697` adds only the
 segmented-replay test extension to that measured production source. All ten
 public vLLM PR heads and B12X #380 are ancestors of the respective beta heads.
 
+The automatic publisher also produced
+`ghcr.io/local-inference-lab/vllm:jovian-judgement-beta-20260917-571772abefffbaa1`
+with vLLM `b4551e2abd4` and B12X `b9f44defd3a8`. The registry digest and full
+component lock are in `checks/container-release.json`. Its qualification is
+native GPU smoke plus 91 LMCache contract tests, not another full-model timing
+matrix. The receipt records `alias_updated: false`: it must not be described
+as the artifact behind the floating beta tag. The source-equivalent test-only
+integration commit has a separate automatic publication.
+
 | Role | Local image SHA-256 |
 |---|---|
 | Conversation-compatible control before B12X reconciliation | `166fc10a7a9e11eb0e7ef4dfe08ce04731af48c97c8f6e6928272022b161a63d` |
@@ -165,6 +174,29 @@ qualified. Its logical KV capacity remains 4,763,329 tokens. These 128×128
 fixtures do not qualify arbitrary image resolutions or 999-image requests.
 
 ## Evidence interpretation
+
+### Qwen prefill repeat
+
+Status: qualified measurement; the performance gap remains unresolved.
+Qwen3.8-Flash-Next NVFP4, TP1/MTP3, stock GPU 4, CPU PLE, eight GiB KV
+(517,581 logical tokens), 6,019-token scheduler budget, temperature 1/top-p
+.95/top-k 20. Each image has one startup and three warmed 30-second uncached
+32K windows, with 12 samples per window. Both pass four API checks.
+
+| Runtime | Window 1 | Window 2 | Window 3 | Median tok/s |
+|---|---:|---:|---:|---:|
+| Community R35 | 15,344 | 15,258 | 15,219 | 15,258 |
+| Indexed-plan integration image | 15,105 | 15,031 | 14,997 | 15,031 |
+
+The integration median is **−1.49%**. The earlier six-model matrix's −1.46%
+single-window observation is not dismissed as noise or called fixed. These
+windows are not independent startup repetitions; no cause is assigned to
+a kernel, toolchain or individual PR without a discriminating A/B or profile.
+Checkpoint, GPU, benchmark, KV and serving settings match. R35 omits the DCP
+CLI flag; its startup confirms the native default of one, matching the
+integration's explicit DCP1. This repeat does not remeasure decode or vision.
+
+### Reading the receipts
 
 The export manifest records artifact checksums. Per-arm launch/runtime files
 identify GPUs, checkpoint files, arguments and images. Functional checks and
