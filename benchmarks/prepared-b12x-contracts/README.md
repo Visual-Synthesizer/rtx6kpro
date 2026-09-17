@@ -35,14 +35,23 @@ Published vLLM beta `8eca34a03304ee681cb8131f28d118f880efb697` adds only the
 segmented-replay test extension to that measured production source. All ten
 public vLLM PR heads and B12X #380 are ancestors of the respective beta heads.
 
-The automatic publisher also produced
-`ghcr.io/local-inference-lab/vllm:jovian-judgement-beta-20260917-571772abefffbaa1`
-with vLLM `b4551e2abd4` and B12X `b9f44defd3a8`. The registry digest and full
-component lock are in `checks/container-release.json`. Its qualification is
-native GPU smoke plus 91 LMCache contract tests, not another full-model timing
-matrix. The receipt records `alias_updated: false`: it must not be described
-as the artifact behind the floating beta tag. The source-equivalent test-only
-integration commit has a separate automatic publication.
+The wheel-composed publication for vLLM `8eca34a03304` and B12X `b9f44defd3a8`
+is available as:
+
+```text
+ghcr.io/local-inference-lab/vllm:jovian-judgement-beta-20260917-9b2a25a581e55533
+ghcr.io/local-inference-lab/vllm@sha256:8464fb0c1b13a3a80b1ade0421644189f5100a2b30cbb76c1fb9a64f1811bb73
+```
+
+`checks/beta-runtime-container-release.json` records 68 filesystem layers,
+successful native GPU smoke checks, 91 passing LMCache contract tests and
+`alias_updated: true`. Registry inspection on 2026-09-17 confirms that
+`ghcr.io/local-inference-lab/vllm:jovian-judgement-beta` resolves to this digest.
+The complete component lock is in `checks/beta-runtime-assembly.json`.
+These packaging checks are not another full-model timing matrix; the serving
+measurements below use the explicitly identified diagnostic images.
+`checks/container-release.json` is the separate receipt for measured-source
+revision `b4551e2abd4` and does not describe the floating tag.
 
 | Role | Local image SHA-256 |
 |---|---|

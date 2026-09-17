@@ -407,6 +407,14 @@
     {
       "path": "checks/community-assembly-beta.json",
       "sha256": "e0ad096d322b1931d6aba7fe3962b17bf19d7ec9d9151731736fe52fe8f5ae39"
+    },
+    {
+      "path": "checks/beta-runtime-container-release.json",
+      "sha256": "2634b74580ef6ceb91b88fa58f0037f7199dcbbaaa7ecb8f116ca03bac0f21f0"
+    },
+    {
+      "path": "checks/beta-runtime-assembly.json",
+      "sha256": "8176042f0758505282bae498d6db1361bf1f552915ffad02a6b3e90eeb3ea144"
     }
   ]
 }
