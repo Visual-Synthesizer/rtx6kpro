@@ -1,0 +1,271 @@
+Using Python 3.12.3 environment at: /opt/venv
+Resolved 2 packages in 1ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 2 packages in 1ms
+ + pytest-asyncio==1.2.0
+ + tblib==3.1.0
+..........FF....FFFFFFFFFFFFFFFF..FFFFFFFF...F                           [100%]
+=================================== FAILURES ===================================
+__________ test_glm_next_nvfp4_cache_abi_is_fixed_by_plan_and_binding __________
+tests/attention/test_glm_next_mla.py:498: in test_glm_next_nvfp4_cache_abi_is_fixed_by_plan_and_binding
+    sparse_mla.bind(
+/opt/venv/lib/python3.12/site-packages/b12x/attention/sparse_mla/api.py:74: in bind
+    state = _state(plan, device=kv_cache.device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/attention/sparse_mla/_preparation.py:371: in state
+    return require_prepared(plan, TUNING.component_id, device)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/types.py:631: in require_prepared
+    prepared = _LAZY_PREPARER(plan)
+               ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1641: in _prepare_default
+    return prepare_default(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1587: in prepare_default
+    session.prepare((request,), autotune=False)
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:353: in prepare
+    state = job.advance(collective_key=authorization)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:623: in advance
+    return self._advance(collective_key=collective_key, tuning=tuning)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:690: in _advance
+    signal = self._steps.send(send_value)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1434: in _run
+    obligations = yield from self._configure(groups)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:861: in _configure
+    raise ValueError("declaration and session devices differ")
+E   ValueError: declaration and session devices differ
+
+During handling of the above exception, another exception occurred:
+tests/attention/test_glm_next_mla.py:497: in test_glm_next_nvfp4_cache_abi_is_fixed_by_plan_and_binding
+    with pytest.raises(ValueError, match="does not match the sparse MLA plan"):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'does not match the sparse MLA plan'
+E    Input: 'declaration and session devices differ'
+------------------------------ Captured log call -------------------------------
+WARNING  b12x.preparation:session.py:1594 attention.sparse_mla: SparseMlaQuery (max_page_table_width=1, max_q_chunks=0, max_physical_records=0, max_q_rows=1, max_width=1, max_batch=1, max_chunks_per_row=64, max_kv_rows=0, ...) was not prepared before its first use; preparing its default configuration. Repeated matching declarations are logged at DEBUG.
+___________ test_binding_owned_cache_omits_runtime_recipe_selection ____________
+tests/attention/test_glm_next_mla.py:541: in test_binding_owned_cache_omits_runtime_recipe_selection
+    binding = sparse_mla.bind(
+/opt/venv/lib/python3.12/site-packages/b12x/attention/sparse_mla/api.py:74: in bind
+    state = _state(plan, device=kv_cache.device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/attention/sparse_mla/_preparation.py:371: in state
+    return require_prepared(plan, TUNING.component_id, device)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/types.py:631: in require_prepared
+    prepared = _LAZY_PREPARER(plan)
+               ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1641: in _prepare_default
+    return prepare_default(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1587: in prepare_default
+    session.prepare((request,), autotune=False)
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:353: in prepare
+    state = job.advance(collective_key=authorization)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:623: in advance
+    return self._advance(collective_key=collective_key, tuning=tuning)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:690: in _advance
+    signal = self._steps.send(send_value)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1434: in _run
+    obligations = yield from self._configure(groups)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:861: in _configure
+    raise ValueError("declaration and session devices differ")
+E   ValueError: declaration and session devices differ
+------------------------------ Captured log call -------------------------------
+WARNING  b12x.preparation:session.py:1594 attention.sparse_mla: SparseMlaQuery (max_page_table_width=1, max_q_chunks=0, max_physical_records=0, max_q_rows=1, max_width=1, max_batch=1, max_chunks_per_row=64, max_kv_rows=0, ...) was not prepared before its first use; preparing its default configuration. Repeated matching declarations are logged at DEBUG.
+_ test_glm_next_cache_writer_rejects_invalid_contracts[source_shape-ValueError-kv_c must be \\(num_tokens, 512\\)] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_rejects_invalid_contracts[source_dtype-TypeError-kv_c must be BF16] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+
+During handling of the above exception, another exception occurred:
+tests/attention/test_glm_next_mla.py:764: in test_glm_next_cache_writer_rejects_invalid_contracts
+    with pytest.raises(error, match=match):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'kv_c must be BF16'
+E    Input: "concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'"
+_ test_glm_next_cache_writer_rejects_invalid_contracts[cache_shape-ValueError-kv_cache must be] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_rejects_invalid_contracts[cache_dtype-TypeError-kv_cache must be uint8] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+
+During handling of the above exception, another exception occurred:
+tests/attention/test_glm_next_mla.py:764: in test_glm_next_cache_writer_rejects_invalid_contracts
+    with pytest.raises(error, match=match):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'kv_cache must be uint8'
+E    Input: "concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'"
+_ test_glm_next_cache_writer_rejects_invalid_contracts[slot_dtype-TypeError-1-D int32 or int64] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+
+During handling of the above exception, another exception occurred:
+tests/attention/test_glm_next_mla.py:764: in test_glm_next_cache_writer_rejects_invalid_contracts
+    with pytest.raises(error, match=match):
+E   AssertionError: Regex pattern did not match.
+E    Regex: '1-D int32 or int64'
+E    Input: "concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'"
+_ test_glm_next_cache_writer_rejects_invalid_contracts[short_source-ValueError-must cover slot_mapping] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_rejects_invalid_contracts[record_stride-ValueError-packed semantic records] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_rejects_invalid_contracts[overlapping_pages-ValueError-page stride must cover] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_rejects_invalid_contracts[cpu_device-ValueError-all tensors must be on CUDA] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_rejects_invalid_contracts[cpu_device_int32-ValueError-all tensors must be on CUDA] _
+tests/attention/test_glm_next_mla.py:765: in test_glm_next_cache_writer_rejects_invalid_contracts
+    concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_preserves_padded_tail_and_record_abi[slot_dtype0] _
+tests/attention/test_glm_next_mla.py:801: in test_glm_next_cache_writer_preserves_padded_tail_and_record_abi
+    sparse_mla.concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_ test_glm_next_cache_writer_preserves_padded_tail_and_record_abi[slot_dtype1] _
+tests/attention/test_glm_next_mla.py:801: in test_glm_next_cache_writer_preserves_padded_tail_and_record_abi
+    sparse_mla.concat_and_cache_glm_next_mla(kv_c, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_______ test_glm_next_nvfp4_writer_uses_inline_scale_record[slot_dtype0] _______
+tests/attention/test_glm_next_mla.py:849: in test_glm_next_nvfp4_writer_uses_inline_scale_record
+    sparse_mla.compile_glm_next_mla_cache_writer(latent, cache, slots)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/_lib/meta.py:79: in __getattr__
+    raise AttributeError(f"module {module_name!r} has no attribute {name!r}")
+E   AttributeError: module 'b12x.attention.sparse_mla' has no attribute 'compile_glm_next_mla_cache_writer'
+_______ test_glm_next_nvfp4_writer_uses_inline_scale_record[slot_dtype1] _______
+tests/attention/test_glm_next_mla.py:849: in test_glm_next_nvfp4_writer_uses_inline_scale_record
+    sparse_mla.compile_glm_next_mla_cache_writer(latent, cache, slots)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/_lib/meta.py:79: in __getattr__
+    raise AttributeError(f"module {module_name!r} has no attribute {name!r}")
+E   AttributeError: module 'b12x.attention.sparse_mla' has no attribute 'compile_glm_next_mla_cache_writer'
+___________ test_glm_next_nvfp4_writer_rejects_capture_compile_miss ____________
+tests/attention/test_glm_next_mla.py:892: in test_glm_next_nvfp4_writer_rejects_capture_compile_miss
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_______ test_glm_next_public_cpu_reference_path_preserves_model_identity _______
+tests/attention/test_glm_next_mla.py:924: in test_glm_next_public_cpu_reference_path_preserves_model_identity
+    binding = sparse_mla.bind(
+/opt/venv/lib/python3.12/site-packages/b12x/attention/sparse_mla/api.py:74: in bind
+    state = _state(plan, device=kv_cache.device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/attention/sparse_mla/_preparation.py:371: in state
+    return require_prepared(plan, TUNING.component_id, device)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/types.py:631: in require_prepared
+    prepared = _LAZY_PREPARER(plan)
+               ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1641: in _prepare_default
+    return prepare_default(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1587: in prepare_default
+    session.prepare((request,), autotune=False)
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:353: in prepare
+    state = job.advance(collective_key=authorization)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:623: in advance
+    return self._advance(collective_key=collective_key, tuning=tuning)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:690: in _advance
+    signal = self._steps.send(send_value)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:1434: in _run
+    obligations = yield from self._configure(groups)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.12/site-packages/b12x/preparation/session.py:861: in _configure
+    raise ValueError("declaration and session devices differ")
+E   ValueError: declaration and session devices differ
+------------------------------ Captured log call -------------------------------
+WARNING  b12x.preparation:session.py:1594 attention.sparse_mla: SparseMlaQuery (max_page_table_width=8, max_q_chunks=0, max_physical_records=0, max_q_rows=2, max_width=8, max_batch=2, max_chunks_per_row=64, max_kv_rows=0, ...) was not prepared before its first use; preparing its default configuration. Repeated matching declarations are logged at DEBUG.
+_________ test_glm_next_production_decode_matches_packed_record_oracle _________
+tests/attention/test_glm_next_mla.py:1026: in test_glm_next_production_decode_matches_packed_record_oracle
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_________ test_glm_next_nvfp4_decode_matches_dequantized_record_oracle _________
+tests/attention/test_glm_next_mla.py:1094: in test_glm_next_nvfp4_decode_matches_dequantized_record_oracle
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+________ test_glm_next_hybrid_manager_page_replays_across_page_boundary ________
+tests/attention/test_glm_next_mla.py:1210: in test_glm_next_hybrid_manager_page_replays_across_page_boundary
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_______ test_glm_next_production_prefill_2051_replays_without_allocation _______
+tests/attention/test_glm_next_mla.py:1331: in test_glm_next_production_prefill_2051_replays_without_allocation
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+______ test_glm_next_nvfp4_prefill_2051_matches_dequantized_record_oracle ______
+tests/attention/test_glm_next_mla.py:1437: in test_glm_next_nvfp4_prefill_2051_matches_dequantized_record_oracle
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_______ test_glm_next_tp4_hybrid_page_prefill_matches_oracle_and_replays _______
+tests/attention/test_glm_next_mla.py:1552: in test_glm_next_tp4_hybrid_page_prefill_matches_oracle_and_replays
+    sparse_mla.concat_and_cache_glm_next_mla(latent, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_________ test_glm_next_writer_and_reader_use_int64_for_live_high_page _________
+tests/attention/test_glm_next_mla.py:1695: in test_glm_next_writer_and_reader_use_int64_for_live_high_page
+    sparse_mla.concat_and_cache_glm_next_mla(sources, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+______ test_glm_next_nvfp4_writer_and_reader_use_int64_for_live_high_page ______
+tests/attention/test_glm_next_mla.py:1781: in test_glm_next_nvfp4_writer_and_reader_use_int64_for_live_high_page
+    sparse_mla.concat_and_cache_glm_next_mla(sources, cache, slots)
+E   TypeError: concat_and_cache_glm_next_mla() missing 1 required keyword-only argument: 'plan'
+_______________ test_graph_capture_requires_caller_owned_outputs _______________
+tests/comm/test_pcie_twoshot_bf16.py:96: in test_graph_capture_requires_caller_owned_outputs
+    runtime.reduce_scatter(payload)
+E   TypeError: PCIeTwoShotBF16.reduce_scatter() missing 1 required keyword-only argument: 'plan'
+=========================== short test summary info ============================
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_cache_abi_is_fixed_by_plan_and_binding
+FAILED tests/attention/test_glm_next_mla.py::test_binding_owned_cache_omits_runtime_recipe_selection
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[source_shape-ValueError-kv_c must be \\(num_tokens, 512\\)]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[source_dtype-TypeError-kv_c must be BF16]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[cache_shape-ValueError-kv_cache must be]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[cache_dtype-TypeError-kv_cache must be uint8]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[slot_dtype-TypeError-1-D int32 or int64]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[short_source-ValueError-must cover slot_mapping]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[record_stride-ValueError-packed semantic records]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[overlapping_pages-ValueError-page stride must cover]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[cpu_device-ValueError-all tensors must be on CUDA]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_rejects_invalid_contracts[cpu_device_int32-ValueError-all tensors must be on CUDA]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_preserves_padded_tail_and_record_abi[slot_dtype0]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_cache_writer_preserves_padded_tail_and_record_abi[slot_dtype1]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_writer_uses_inline_scale_record[slot_dtype0]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_writer_uses_inline_scale_record[slot_dtype1]
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_writer_rejects_capture_compile_miss
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_public_cpu_reference_path_preserves_model_identity
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_production_decode_matches_packed_record_oracle
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_decode_matches_dequantized_record_oracle
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_hybrid_manager_page_replays_across_page_boundary
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_production_prefill_2051_replays_without_allocation
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_prefill_2051_matches_dequantized_record_oracle
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_tp4_hybrid_page_prefill_matches_oracle_and_replays
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_writer_and_reader_use_int64_for_live_high_page
+FAILED tests/attention/test_glm_next_mla.py::test_glm_next_nvfp4_writer_and_reader_use_int64_for_live_high_page
+FAILED tests/comm/test_pcie_twoshot_bf16.py::test_graph_capture_requires_caller_owned_outputs
+27 failed, 19 passed in 3.91s

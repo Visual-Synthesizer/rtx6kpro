@@ -1,0 +1,4 @@
+PASS shape=(128, 1024): eager and three mutated graph replays
+PASS shape=(32, 4096): eager and three mutated graph replays
+PASS shape=(16, 8192): eager and three mutated graph replays
+PASS shape=(131072,): eager and three mutated graph replays

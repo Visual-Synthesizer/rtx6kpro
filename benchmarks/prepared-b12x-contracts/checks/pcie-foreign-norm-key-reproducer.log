@@ -1,0 +1,24 @@
+W0917 11:27:27.412000 176 usr/local/lib/python3.12/dist-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W0917 11:27:27.413000 176 usr/local/lib/python3.12/dist-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W0917 11:27:27.413000 176 usr/local/lib/python3.12/dist-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+{
+  "source": "/foreign.py",
+  "results": {
+    "declared": true,
+    "different_weight_identity": true,
+    "different_epsilon": true,
+    "contract_satisfied": false
+  }
+}
+W0917 11:27:31.388000 1 usr/local/lib/python3.12/dist-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W0917 11:27:31.388000 1 usr/local/lib/python3.12/dist-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W0917 11:27:31.388000 1 usr/local/lib/python3.12/dist-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+{
+  "source": "/opt/venv/lib/python3.12/site-packages/vllm/distributed/device_communicators/b12x_pcie_all_reduce.py",
+  "results": {
+    "declared": true,
+    "different_weight_identity": false,
+    "different_epsilon": false,
+    "contract_satisfied": true
+  }
+}

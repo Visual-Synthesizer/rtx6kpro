@@ -1,0 +1,16 @@
+[
+  {
+    "label": "runtime",
+    "argv": [
+      "/root/vllm/qwen38next/tmp/unified-runtime-tests/bin/python",
+      "/root/vllm/qwen38next/scripts/glm53-runtime-audit.py",
+      "--container",
+      "qualify-ds41-beta-multimodal-count",
+      "--output",
+      "results/beta-model-qualification-20260916/qualify-ds41-beta-multimodal-count/runtime.json"
+    ],
+    "start_epoch": 1789648051.4213,
+    "returncode": 0,
+    "end_epoch": 1789648051.5351012
+  }
+]

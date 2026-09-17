@@ -1,0 +1,771 @@
+{
+  "model": "GLM-5.3-Flash-NVFP4",
+  "base": "http://127.0.0.1:5058",
+  "temperature": 1,
+  "image_dimensions": [
+    128,
+    128
+  ],
+  "cases": [
+    {
+      "name": "images_2",
+      "image_count": 2,
+      "request": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABwUlEQVR4nO3XvY3CQBRF4QsNOEEsP61QiDPqQFRDB45cANABFIEFCQ0wm+5svnuCOZ9e5uRJx9LTzEpEmtMLtM4AMAPADAAzAKwO0HUZhlyvGYZ0HbRSW+oAx2PO5+x2uVxyOEArNab8nPu9bDYlKdttud3Kr6/OH8yseog9n/n6yueT+TyPR5ZL6rdoh0cYVgeYpqxWSbJeZ5qQhVpTBxjH9H2S9H3GEVmoNfUN6LqcTlks8nplv8/7Ta3VjjqA/p1HGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYNPnmmW3pgPrAAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABY0lEQVR4nO3XsRHCQAwAQUEFDimfHqjDfTi0K4D8C2AD31agmRvN6x8z34nz1APcXQGwAmAFwAqArQG2bd7vuS4yzB2tAT6f2ff5dpr+y2P5B7xecxxznrNtaKKbWTfgOMgY99UjjBUAKwBWAGy9gvJnbQBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsA9gPunBILUvfM3wAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_tokens": 96,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "http_status": 200,
+      "response": {
+        "id": "chatcmpl-9f57dd55dd60d36e",
+        "object": "chat.completion",
+        "created": 1789644178,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "The last image is blue with \"1\" text.</think>Blue",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": 154827,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.1.dev20880+g1048fc543-tp4-f536ea89",
+        "usage": {
+          "prompt_tokens": 84,
+          "total_tokens": 98,
+          "completion_tokens": 14,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      },
+      "elapsed_seconds": 0.2657301879953593,
+      "passed": true
+    },
+    {
+      "name": "images_8",
+      "image_count": 8,
+      "request": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABwUlEQVR4nO3XvY3CQBRF4QsNOEEsP61QiDPqQFRDB45cANABFIEFCQ0wm+5svnuCOZ9e5uRJx9LTzEpEmtMLtM4AMAPADAAzAKwO0HUZhlyvGYZ0HbRSW+oAx2PO5+x2uVxyOEArNab8nPu9bDYlKdttud3Kr6/OH8yseog9n/n6yueT+TyPR5ZL6rdoh0cYVgeYpqxWSbJeZ5qQhVpTBxjH9H2S9H3GEVmoNfUN6LqcTlks8nplv8/7Ta3VjjqA/p1HGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYNPnmmW3pgPrAAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABYUlEQVR4nO3WsRGDQAwAwccVEFI+PbgO+iCECnBucjbgtgLN32he0zUiffQAb1cArABYAbACYLcA8zzWdZynGOaNbgG+37Ft4+o6fcj0/9LLMvZ9HMeYZzHP69w2YN/FGO/VJ4wVACsAVgDsdgXlWW0AVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAPYD5oYSCypB6mIAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABx0lEQVR4nO3XoU0EURRA0b8bJG6zFWDogA5QSAwSWoI2UFRAsCsQJKynBTQfywIWjph78szMmJfc+ZPMao5Ia73A0hUAKwBWAKwA2I8ANzfj6Wk8P4/zc7HP8syvs93Ox8e5Xs/T0/n6Or89bf5gDk/AZjPu7sbHx3h7G5sNeiWW5ejgar8f+/0YY1xejocHstDi/HIuTk7my8vcbvnxXML8uHV8PHe7eXbGN1vIHF6vVvP+fl5d8bWWM6v59Xt0fT1ub8duN8YY7+/j4kJ8FJflMED+XX/CWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsANgnzBwhH/ovpUoAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABz0lEQVR4nO3XLY4CQRRF4cuPwozGEDw7wCIRsBEsq8AhUYBiFzgUHhaBbAMJNbozM27CEXW+PFMp85KTdKo7JSJ16QVqZwCYAWAGgBkA1g4wGOR0yvmc6zXzObRSXTqtZ+h6nfc7m02Gw1wuGY+hrSrSb512uzRNkkwmeb2QhapTfs7xWJqmzGa/XDn/PX9cLBblcMCXq2Ha5+229PslKb1eeTzw5WqY9ivo6yvLZZJMp7nfP/89rFD7FTQaZb9Pt5vnM6tVbjdqrXq0A+jj/BOGGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAfQM1jKWQt3NyogAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABpklEQVR4nO3YrW3DYBRA0S8lJY0UnFkyQWjX6QCBnaEgIFMUZpywgEh1af8C6wN8jx4zedL1A/ZqGpEe9AJLVwCsAFgBsAJgdwLs9+N6nXeThforwHo9Xl7G7Tb7Mkv0V4DDYby+jo+P2ZdZol8Bdrux3Y7TSSyzSNPXeXyczudpu53GmC6X6cfT5h/m+wU8P4/1ehyP4/19PD2Ntzf0VizI6u6/oMtlbDYzbrJQfQdg9y8gs+gCsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbBPF4mZydTmyjwAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABxklEQVR4nO3Yvy12ARiH4ef9lGqFTiJm0GhVrGACayiMIFEwgwnewgKiplEwgoK86pNvgKs49zXBL7nz5PzZ7CbSPz1g7QqAFQArAFYAbBng/Hze32e7ne12bm7QpHXZLF5Dr65mf3/u7tSaFVpewOHhfH6iJSv1X4CLi3l+nqenOT5Gk9ZlGWC3m5eXOTubx8e5v0eT1mX5DDg6mo+P+f2dvb35+pqDAzVrPZYXcHs7l5czM6en8/pKBq3N8gJOTubhYX5+5vt7rq/n7U3NWo9Nf0OtvoSxAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsD+F7SyJHZewngAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB2klEQVR4nO3XMYrCUBRG4V8zpJraBYi4BxtxBa4jrY2rEAT7dK7DQhBrW8HC2sLCVnjTmulnTpHzcZuQ5sJ5L5BBiUhDeoG+MwDMADADwAwA6wYYDrPb5XzO8ZjxGFqpX7oBmiavV2azbLfZbKCVeqZ8zulUJpOSlLou63X59db5g/nq1JhOs1xmuczzmdUKOhL90v0E1XXu9ywW2e/TttBKPdO5EddrqaqSlKoqjwd+Pfsw3RtwOGQ+T5L5PJcLciD6ZlA+n0ajtG2+v/N+p2lyu1Fr9Uc3gP6df8IwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzACwH7NAJm7lhe9tAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABs0lEQVR4nO3XoU0tURRA0fMIoQJCCAJFoAQcHeApgOIwFAEWgaYFFB3MN1/wXrCwxN0rR8yMusk+k8nsZraJc6QPsLoCYAXACoAVADv+fvP0NOfnMzMnJ3N9Paen5kxL2Qvw8PD/4vFxLi/Bada0Hcxut72/b2dnh8+b35gfvgH39/P2Np+ff78Kizps8vKy3dz41VhkDt+A29v5+pqPD7IKi9oL8vy83d35vVhn9t6Aq6u5uJjXV7UKK9rNbPoMS+tPGCsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQD7B4iclLTNEfN6AAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_tokens": 96,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "http_status": 200,
+      "response": {
+        "id": "chatcmpl-ac24c74da9a69821",
+        "object": "chat.completion",
+        "created": 1789644178,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "The last image (labeled 7) has a blue background.</think>Blue",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": 154827,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.1.dev20880+g1048fc543-tp4-f536ea89",
+        "usage": {
+          "prompt_tokens": 246,
+          "total_tokens": 263,
+          "completion_tokens": 17,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      },
+      "elapsed_seconds": 0.19432948110625148,
+      "passed": true
+    },
+    {
+      "name": "images_16",
+      "image_count": 16,
+      "request": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABwUlEQVR4nO3XvY3CQBRF4QsNOEEsP61QiDPqQFRDB45cANABFIEFCQ0wm+5svnuCOZ9e5uRJx9LTzEpEmtMLtM4AMAPADAAzAKwO0HUZhlyvGYZ0HbRSW+oAx2PO5+x2uVxyOEArNab8nPu9bDYlKdttud3Kr6/OH8yseog9n/n6yueT+TyPR5ZL6rdoh0cYVgeYpqxWSbJeZ5qQhVpTBxjH9H2S9H3GEVmoNfUN6LqcTlks8nplv8/7Ta3VjjqA/p1HGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYNPnmmW3pgPrAAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABYUlEQVR4nO3WsRGDQAwAwccVEFI+PbgO+iCECnBucjbgtgLN32he0zUiffQAb1cArABYAbACYLcA8zzWdZynGOaNbgG+37Ft4+o6fcj0/9LLMvZ9HMeYZzHP69w2YN/FGO/VJ4wVACsAVgDsdgXlWW0AVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAPYD5oYSCypB6mIAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABx0lEQVR4nO3XoU0EURRA0b8bJG6zFWDogA5QSAwSWoI2UFRAsCsQJKynBTQfywIWjph78szMmJfc+ZPMao5Ia73A0hUAKwBWAKwA2I8ANzfj6Wk8P4/zc7HP8syvs93Ox8e5Xs/T0/n6Or89bf5gDk/AZjPu7sbHx3h7G5sNeiWW5ejgar8f+/0YY1xejocHstDi/HIuTk7my8vcbvnxXML8uHV8PHe7eXbGN1vIHF6vVvP+fl5d8bWWM6v59Xt0fT1ub8duN8YY7+/j4kJ8FJflMED+XX/CWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsANgnzBwhH/ovpUoAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABz0lEQVR4nO3XLY4CQRRF4cuPwozGEDw7wCIRsBEsq8AhUYBiFzgUHhaBbAMJNbozM27CEXW+PFMp85KTdKo7JSJ16QVqZwCYAWAGgBkA1g4wGOR0yvmc6zXzObRSXTqtZ+h6nfc7m02Gw1wuGY+hrSrSb512uzRNkkwmeb2QhapTfs7xWJqmzGa/XDn/PX9cLBblcMCXq2Ha5+229PslKb1eeTzw5WqY9ivo6yvLZZJMp7nfP/89rFD7FTQaZb9Pt5vnM6tVbjdqrXq0A+jj/BOGGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAfQM1jKWQt3NyogAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABpklEQVR4nO3YrW3DYBRA0S8lJY0UnFkyQWjX6QCBnaEgIFMUZpywgEh1af8C6wN8jx4zedL1A/ZqGpEe9AJLVwCsAFgBsAJgdwLs9+N6nXeThforwHo9Xl7G7Tb7Mkv0V4DDYby+jo+P2ZdZol8Bdrux3Y7TSSyzSNPXeXyczudpu53GmC6X6cfT5h/m+wU8P4/1ehyP4/19PD2Ntzf0VizI6u6/oMtlbDYzbrJQfQdg9y8gs+gCsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbBPF4mZydTmyjwAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABxklEQVR4nO3Yvy12ARiH4ef9lGqFTiJm0GhVrGACayiMIFEwgwnewgKiplEwgoK86pNvgKs49zXBL7nz5PzZ7CbSPz1g7QqAFQArAFYAbBng/Hze32e7ne12bm7QpHXZLF5Dr65mf3/u7tSaFVpewOHhfH6iJSv1X4CLi3l+nqenOT5Gk9ZlGWC3m5eXOTubx8e5v0eT1mX5DDg6mo+P+f2dvb35+pqDAzVrPZYXcHs7l5czM6en8/pKBq3N8gJOTubhYX5+5vt7rq/n7U3NWo9Nf0OtvoSxAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsD+F7SyJHZewngAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB2klEQVR4nO3XMYrCUBRG4V8zpJraBYi4BxtxBa4jrY2rEAT7dK7DQhBrW8HC2sLCVnjTmulnTpHzcZuQ5sJ5L5BBiUhDeoG+MwDMADADwAwA6wYYDrPb5XzO8ZjxGFqpX7oBmiavV2azbLfZbKCVeqZ8zulUJpOSlLou63X59db5g/nq1JhOs1xmuczzmdUKOhL90v0E1XXu9ywW2e/TttBKPdO5EddrqaqSlKoqjwd+Pfsw3RtwOGQ+T5L5PJcLciD6ZlA+n0ajtG2+v/N+p2lyu1Fr9Uc3gP6df8IwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzACwH7NAJm7lhe9tAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABs0lEQVR4nO3XsU3DUBRA0R+EmCBCiCIVIiOkywb0DMBwNAwRWgpqVqBiA9PQhKREnOLfo1fYcvOl+yzLq2VEutAHmF0BsAJgBcAKgF0e3T0/j5ubMca4uhr392O9JmeaynGAx8efi6ensdn8/2lmtJzOarW8vy/X12ceNX89574BDw/j7W18fv77MkzpTJbDYdlu+WpMMidvwG43vr7Gx4dYhin9bvLysuz3fC/mmeM34O5u3N6O11e0DDNaLfoEk+tPGCsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQD7BnablLRz+DFaAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB1klEQVR4nO3XIY7CYBRF4cswDgkbIKwBQZBYHGEHCNbDAtgKISRsgIQEh0WAruKNpeNnjuj58kxT85LTv017FZG+6AW6zgAwA8AMADMArB1gscj5nMMhp1NmM2iljqnPud9rPK6kJpO6XuvXXecPpn0Cns8Mh0kyHGYwQB6IzmkFmU6raepyqaap5RJ/Orow7evjsVarSmq9rv0eX64L06vP4/B6ZTTK+51+P49HRiPoWHZI+xtwu2U+T5LZLPc7sU/nfLeuttvsdklSlc0GWahr2q8g/Tv/hGEGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWAGgBkAZgCYAWA/znSn6JcYoT4AAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB10lEQVR4nO3XIW4CURRG4Z9OwhaQpAnsgB3gECRsgFTg8WwEi2MDGIIAgUTVsQZ2gODWMvXtEXO+XDMZc5Mz7yXTq4j0QS/QdQaAGQBmAJgBYO0An585HnO55HDIYACt1DH1PqdTTaeV1HRa2239euv8wbSfH49qmkqqaep+x5frwrSvoO/vzOdJslh4Bf2PdoDVKstlzucMh3k+oZU6pnUiNpvq9yup8biuV/x4dmHaJ2AyyWyWJF9f2e+RD6JrevX+NBplt0vT5HbLep3Xi1qrO9oB9O/8E4YZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoD9AFVBorKzdXCfAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB6klEQVR4nO3YPWoCURhG4ddsYCwE/7biQuxcR3AzugNBcAFqa6V7UMFCV3DTGEI0wSJhTjHn4TZ3mOKDM8MdplUi0hs9QNMZAGYAmAFgBoA9BWi3M5vldrtvqyqLRbbbLBapqpqHa4KnAMtldruUz6/T6TTrdUajbDZ5f695uEYoD6vXK0m5Xu/bw6EMBiUpw2HZ7x9vdv15Pb0Bp9O3bbd7v3I8ptut6aFoEg9h2KsA53N6vSTp93M+1zBQ07wKsFplPE6S8TirVQ0DNU3r559x12va7SSpqszn6XRyuWQy+fo81T/5JYDq4iEMMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwA+wBsCbF385yS+AAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABZElEQVR4nO3WsQ3CMBBAUcMElBmfHZgje1AmE5ieSKGJ9Ave01VXWfqy7NsclO71Af6dADEBYgLEBIgdAjwe4/kc+3624TqHAK/XWNcx59mGC82vWZY5xty2s425bg434P3+veE6HuGYADEBYgLEbn6XLTcgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATIPYB3lKau3wWOREAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB9klEQVR4nO3XMWoCYRBA4VHSaSGIYG/jDbyBNpZa2ImNlXfyAlaeQGwtLAQ9glgp2E+KhEg0kEDAB+77mGYXi4G3/y6WMkQq0wsUnQFgBoAZAGYA2EOAWi3m87hcbncmk1ivY7uNbveZmxVF3s16nbNZns+fl41GrlZZLme7nfv9/Y+df8/DrWYzI24B2u0cDjMiK5U8nfB1X2/e7k/E8fjt8nCIwyEiYjCI5fI5h7JYfi7zdQI+ptXK3S4bDfx5eb35Q4BqNTeb7HTwXV9yfgtQKuVikaMRvuirzsM34M54HL1e1Osxncb1Gv3+E96KhVJKeoOC858wzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMAzAAwA8AMADMA7B0LUq0TAEl8lwAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB/UlEQVR4nO3XPU4CYRRG4VcwFDZgZ+VCrEi0w0QWoqsx9ioVtRuwJ/QS1mCCBQ3NtfCnAI0mRk7CnCe3mZ/iJqeYb/YqIrXoBZrOADADwAwAMwBsI0Cvl9vbvLy8Xx4cZDzO42Om0wwGW16uCTYCPDxkOk19nE4vLzOZpN/P+Xlubra8XCPU2hwdVVKLxfvl4WF1OpXU2VnN5+svO3+ebx58Bnib0aiWyzo9xdfdvfldgKQuLur+Hl939+anANfXtb9fSbXb9fyMr7t789MxtNvNcJgkJyeZzf75e9REe/Xl7cUivV6SHB/n7i6tVlarXF3l6WmbyzXBNwG0Lf4JwwwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwAwAMwDMADADwF4B5hYxvdgSlnQAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABy0lEQVR4nO3XIU4kURRA0c8YDJ20JL0WVoAlYTVsA08QCCwbQGLYB7JRCESNm4TqnmQSmLqizslXT/3k/pdUnUyD0q/6AmsnQEyAmAAxAWIHAbbbcXc33t/n88vL8fGxzJ1W5SDA09N4fR3T16/TzWbc3IzPz8WutSLT7JyfT2NM+/2X4e3tdH09Hzo/cQ424O1tPrm4GLvdeHxc5kGszvEyfx776en08jLtdkfWwvkvGzBzdTU2m/HwMJ6fx9nZuL9f5FWsyMl0dLzfj+32n4Z8j/+A2F82gKXYgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxASICRATICZATIDYb1ZLKOCdK3ISAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACA0lEQVR4nO3XPWoCURhG4de4AVu7gGQNNmlTxTalvRDchYW9ZYq4hqxAiBsQa20VbCadReCmkfyYQJowBzLn4TZ3mOKDc2eGaSUl4lzQAzSdAWAGgBkAZgDYeYBOJ/N5Xl5O25ubbLdZLLJYZDKpe7iGKJ/X83MZj0tVnbbDYRmNytk9rj9c50/A3V1ms49tt5vdrtbj0DTnAfb7L9tuN7e3WS7z9JRer76xmuOXj3ApWa1yfZ35PA8P9YzUOD+8mN6/AZeXpd0uSWm3y+HAvzH/3/rlCZhOMxgkSb+f9bqO49A0raR8v1pV6XSS5Ooqj495fc3xmPv7bDY1j/f//RxAtfFPGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYGlUk0Rog/aRIAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_tokens": 96,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "http_status": 200,
+      "response": {
+        "id": "chatcmpl-a21069968ada0314",
+        "object": "chat.completion",
+        "created": 1789644178,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Last image (15) is blue.</think>Blue",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": 154827,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.1.dev20880+g1048fc543-tp4-f536ea89",
+        "usage": {
+          "prompt_tokens": 462,
+          "total_tokens": 473,
+          "completion_tokens": 11,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      },
+      "elapsed_seconds": 0.35884943418204784,
+      "passed": true
+    },
+    {
+      "name": "history_eight_cold",
+      "image_count": 8,
+      "request": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABwUlEQVR4nO3XvY3CQBRF4QsNOEEsP61QiDPqQFRDB45cANABFIEFCQ0wm+5svnuCOZ9e5uRJx9LTzEpEmtMLtM4AMAPADAAzAKwO0HUZhlyvGYZ0HbRSW+oAx2PO5+x2uVxyOEArNab8nPu9bDYlKdttud3Kr6/OH8yseog9n/n6yueT+TyPR5ZL6rdoh0cYVgeYpqxWSbJeZ5qQhVpTBxjH9H2S9H3GEVmoNfUN6LqcTlks8nplv8/7Ta3VjjqA/p1HGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYNPnmmW3pgPrAAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABYUlEQVR4nO3WsRGDQAwAwccVEFI+PbgO+iCECnBucjbgtgLN32he0zUiffQAb1cArABYAbACYLcA8zzWdZynGOaNbgG+37Ft4+o6fcj0/9LLMvZ9HMeYZzHP69w2YN/FGO/VJ4wVACsAVgDsdgXlWW0AVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAPYD5oYSCypB6mIAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABx0lEQVR4nO3XoU0EURRA0b8bJG6zFWDogA5QSAwSWoI2UFRAsCsQJKynBTQfywIWjph78szMmJfc+ZPMao5Ia73A0hUAKwBWAKwA2I8ANzfj6Wk8P4/zc7HP8syvs93Ox8e5Xs/T0/n6Or89bf5gDk/AZjPu7sbHx3h7G5sNeiWW5ejgar8f+/0YY1xejocHstDi/HIuTk7my8vcbvnxXML8uHV8PHe7eXbGN1vIHF6vVvP+fl5d8bWWM6v59Xt0fT1ub8duN8YY7+/j4kJ8FJflMED+XX/CWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsANgnzBwhH/ovpUoAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABz0lEQVR4nO3XLY4CQRRF4cuPwozGEDw7wCIRsBEsq8AhUYBiFzgUHhaBbAMJNbozM27CEXW+PFMp85KTdKo7JSJ16QVqZwCYAWAGgBkA1g4wGOR0yvmc6zXzObRSXTqtZ+h6nfc7m02Gw1wuGY+hrSrSb512uzRNkkwmeb2QhapTfs7xWJqmzGa/XDn/PX9cLBblcMCXq2Ha5+229PslKb1eeTzw5WqY9ivo6yvLZZJMp7nfP/89rFD7FTQaZb9Pt5vnM6tVbjdqrXq0A+jj/BOGGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAfQM1jKWQt3NyogAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "content": "red"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABpklEQVR4nO3YoU0EARBA0QGD4RL01XIVYGmHApDUgEBQBfLKOYcgYXEEyCHZJ/a/jFszyd8Ruxczy8S51AtsXQGwAmAFwAqAnQ9weztvbytvslFnAux2c38/7+/rL7NFZwI8PMzj43x8rL/MFv0OcDjMfj8vL2SZjVq+5upqOR6X/X6ZWU6n5fuj5p/mxwXc3c1uN8/P8/o619fz9KTeiQ25+Otf0Ok0Nzfr7rJJfQdgf15A1tEFYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmCfKNCZyXnkZksAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAByElEQVR4nO3YrU1lARRG0fMGiUbgSAg1YLAoaIEKaANBCSQIqIEKnqABggaDgBIQkDd27jSwxN2rgi/ZObk/m5ndxPmjB6xdAbACYAXACoAtApyfz/v7bLez3c7NjZq0Lpt/X0OvrmZ/f+7u4J7VWVzA4eF8fqolK/V/gIuLeX6ep6c5PlaT1mURYLebl5c5O5vHx7m/V5PWZfEMODqaj4/5/Z29vfn6moMDOGwtFhdwezuXlzMzp6fz+moGrc3iAk5O5uFhfn7m+3uur+ftDQ5bi01/Q62+hLECYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwv6KJLIntwbqOAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB3UlEQVR4nO3XMYrCUBRG4V8zWE3tAkTcg424AteR1sZVCIJ9OtdhIYi1rWBhbWFhK7zpHLOAmVPkfNwmpLlw3gukl5SI06cX6DoDwAwAMwDMALBWgH4/221OpxwOGY2olbqlFaCu83xmOs1mk/WaWqlzynuOxzIel6QMBmW1Kp+vnD+ar88Uk0kWiywWeTyyXFIHoltan6DBILdb5vPsdmkaaqXO+b0Ol0upqpKUqir3O389uzCtG7DfZzZLktks5zNzHLqml5T3w3CYpsn3d16v1HWuV3CxrmgF0P/zTxhmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQD2A9KOJm6r9V+TAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABs0lEQVR4nO3XoU0tURRA0fMIoQJCCAJFoAQcHeApgOIwFAEWgaYFFB3MN1/wXrCwxN0rR8yMusk+k8nsZraJc6QPsLoCYAXACoAVADv+fvP0NOfnMzMnJ3N9Paen5kxL2Qvw8PD/4vFxLi/Bada0Hcxut72/b2dnh8+b35gfvgH39/P2Np+ff78Kizps8vKy3dz41VhkDt+A29v5+pqPD7IKi9oL8vy83d35vVhn9t6Aq6u5uJjXV7UKK9rNbPoMS+tPGCsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQD7B4iclLTNEfN6AAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_tokens": 96,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "http_status": 200,
+      "response": {
+        "id": "chatcmpl-945ddf987f958a2d",
+        "object": "chat.completion",
+        "created": 1789644179,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "The last image (7) has blue background.</think>blue",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": 154827,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.1.dev20880+g1048fc543-tp4-f536ea89",
+        "usage": {
+          "prompt_tokens": 269,
+          "total_tokens": 282,
+          "completion_tokens": 13,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      },
+      "elapsed_seconds": 0.3465637289918959,
+      "passed": true
+    },
+    {
+      "name": "history_eight_repeat",
+      "image_count": 8,
+      "request": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABwUlEQVR4nO3XvY3CQBRF4QsNOEEsP61QiDPqQFRDB45cANABFIEFCQ0wm+5svnuCOZ9e5uRJx9LTzEpEmtMLtM4AMAPADAAzAKwO0HUZhlyvGYZ0HbRSW+oAx2PO5+x2uVxyOEArNab8nPu9bDYlKdttud3Kr6/OH8yseog9n/n6yueT+TyPR5ZL6rdoh0cYVgeYpqxWSbJeZ5qQhVpTBxjH9H2S9H3GEVmoNfUN6LqcTlks8nplv8/7Ta3VjjqA/p1HGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYNPnmmW3pgPrAAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABYUlEQVR4nO3WsRGDQAwAwccVEFI+PbgO+iCECnBucjbgtgLN32he0zUiffQAb1cArABYAbACYLcA8zzWdZynGOaNbgG+37Ft4+o6fcj0/9LLMvZ9HMeYZzHP69w2YN/FGO/VJ4wVACsAVgDsdgXlWW0AVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAPYD5oYSCypB6mIAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABx0lEQVR4nO3XoU0EURRA0b8bJG6zFWDogA5QSAwSWoI2UFRAsCsQJKynBTQfywIWjph78szMmJfc+ZPMao5Ia73A0hUAKwBWAKwA2I8ANzfj6Wk8P4/zc7HP8syvs93Ox8e5Xs/T0/n6Or89bf5gDk/AZjPu7sbHx3h7G5sNeiWW5ejgar8f+/0YY1xejocHstDi/HIuTk7my8vcbvnxXML8uHV8PHe7eXbGN1vIHF6vVvP+fl5d8bWWM6v59Xt0fT1ub8duN8YY7+/j4kJ8FJflMED+XX/CWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsANgnzBwhH/ovpUoAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABz0lEQVR4nO3XLY4CQRRF4cuPwozGEDw7wCIRsBEsq8AhUYBiFzgUHhaBbAMJNbozM27CEXW+PFMp85KTdKo7JSJ16QVqZwCYAWAGgBkA1g4wGOR0yvmc6zXzObRSXTqtZ+h6nfc7m02Gw1wuGY+hrSrSb512uzRNkkwmeb2QhapTfs7xWJqmzGa/XDn/PX9cLBblcMCXq2Ha5+229PslKb1eeTzw5WqY9ivo6yvLZZJMp7nfP/89rFD7FTQaZb9Pt5vnM6tVbjdqrXq0A+jj/BOGGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAfQM1jKWQt3NyogAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "content": "red"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABpklEQVR4nO3YoU0EARBA0QGD4RL01XIVYGmHApDUgEBQBfLKOYcgYXEEyCHZJ/a/jFszyd8Ruxczy8S51AtsXQGwAmAFwAqAnQ9weztvbytvslFnAux2c38/7+/rL7NFZwI8PMzj43x8rL/MFv0OcDjMfj8vL2SZjVq+5upqOR6X/X6ZWU6n5fuj5p/mxwXc3c1uN8/P8/o619fz9KTeiQ25+Otf0Ok0Nzfr7rJJfQdgf15A1tEFYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmCfKNCZyXnkZksAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAByElEQVR4nO3YrU1lARRG0fMGiUbgSAg1YLAoaIEKaANBCSQIqIEKnqABggaDgBIQkDd27jSwxN2rgi/ZObk/m5ndxPmjB6xdAbACYAXACoAtApyfz/v7bLez3c7NjZq0Lpt/X0OvrmZ/f+7u4J7VWVzA4eF8fqolK/V/gIuLeX6ep6c5PlaT1mURYLebl5c5O5vHx7m/V5PWZfEMODqaj4/5/Z29vfn6moMDOGwtFhdwezuXlzMzp6fz+moGrc3iAk5O5uFhfn7m+3uur+ftDQ5bi01/Q62+hLECYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwv6KJLIntwbqOAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB3UlEQVR4nO3XMYrCUBRG4V8zWE3tAkTcg424AteR1sZVCIJ9OtdhIYi1rWBhbWFhK7zpHLOAmVPkfNwmpLlw3gukl5SI06cX6DoDwAwAMwDMALBWgH4/221OpxwOGY2olbqlFaCu83xmOs1mk/WaWqlzynuOxzIel6QMBmW1Kp+vnD+ar88Uk0kWiywWeTyyXFIHoltan6DBILdb5vPsdmkaaqXO+b0Ol0upqpKUqir3O389uzCtG7DfZzZLktks5zNzHLqml5T3w3CYpsn3d16v1HWuV3CxrmgF0P/zTxhmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQD2A9KOJm6r9V+TAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABs0lEQVR4nO3XoU0tURRA0fMIoQJCCAJFoAQcHeApgOIwFAEWgaYFFB3MN1/wXrCwxN0rR8yMusk+k8nsZraJc6QPsLoCYAXACoAVADv+fvP0NOfnMzMnJ3N9Paen5kxL2Qvw8PD/4vFxLi/Bada0Hcxut72/b2dnh8+b35gfvgH39/P2Np+ff78Kizps8vKy3dz41VhkDt+A29v5+pqPD7IKi9oL8vy83d35vVhn9t6Aq6u5uJjXV7UKK9rNbPoMS+tPGCsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQD7B4iclLTNEfN6AAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_tokens": 96,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "http_status": 200,
+      "response": {
+        "id": "chatcmpl-84059661d1390468",
+        "object": "chat.completion",
+        "created": 1789644179,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Blue.</think>blue",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": 154827,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.1.dev20880+g1048fc543-tp4-f536ea89",
+        "usage": {
+          "prompt_tokens": 269,
+          "total_tokens": 274,
+          "completion_tokens": 5,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      },
+      "elapsed_seconds": 0.22635904303751886,
+      "passed": true
+    },
+    {
+      "name": "history_changed_image",
+      "image_count": 8,
+      "request": {
+        "model": "GLM-5.3-Flash-NVFP4",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABwUlEQVR4nO3XvY3CQBRF4QsNOEEsP61QiDPqQFRDB45cANABFIEFCQ0wm+5svnuCOZ9e5uRJx9LTzEpEmtMLtM4AMAPADAAzAKwO0HUZhlyvGYZ0HbRSW+oAx2PO5+x2uVxyOEArNab8nPu9bDYlKdttud3Kr6/OH8yseog9n/n6yueT+TyPR5ZL6rdoh0cYVgeYpqxWSbJeZ5qQhVpTBxjH9H2S9H3GEVmoNfUN6LqcTlks8nplv8/7Ta3VjjqA/p1HGGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAGYAmAFgBoAZAPYNPnmmW3pgPrAAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABYUlEQVR4nO3WsRGDQAwAwccVEFI+PbgO+iCECnBucjbgtgLN32he0zUiffQAb1cArABYAbACYLcA8zzWdZynGOaNbgG+37Ft4+o6fcj0/9LLMvZ9HMeYZzHP69w2YN/FGO/VJ4wVACsAVgDsdgXlWW0AVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAPYD5oYSCypB6mIAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABx0lEQVR4nO3XoU0EURRA0b8bJG6zFWDogA5QSAwSWoI2UFRAsCsQJKynBTQfywIWjph78szMmJfc+ZPMao5Ia73A0hUAKwBWAKwA2I8ANzfj6Wk8P4/zc7HP8syvs93Ox8e5Xs/T0/n6Or89bf5gDk/AZjPu7sbHx3h7G5sNeiWW5ejgar8f+/0YY1xejocHstDi/HIuTk7my8vcbvnxXML8uHV8PHe7eXbGN1vIHF6vVvP+fl5d8bWWM6v59Xt0fT1ub8duN8YY7+/j4kJ8FJflMED+XX/CWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsANgnzBwhH/ovpUoAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABz0lEQVR4nO3XLY4CQRRF4cuPwozGEDw7wCIRsBEsq8AhUYBiFzgUHhaBbAMJNbozM27CEXW+PFMp85KTdKo7JSJ16QVqZwCYAWAGgBkA1g4wGOR0yvmc6zXzObRSXTqtZ+h6nfc7m02Gw1wuGY+hrSrSb512uzRNkkwmeb2QhapTfs7xWJqmzGa/XDn/PX9cLBblcMCXq2Ha5+229PslKb1eeTzw5WqY9ivo6yvLZZJMp7nfP/89rFD7FTQaZb9Pt5vnM6tVbjdqrXq0A+jj/BOGGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAfQM1jKWQt3NyogAAAABJRU5ErkJggg=="
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "content": "red"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABpklEQVR4nO3YoU0EARBA0QGD4RL01XIVYGmHApDUgEBQBfLKOYcgYXEEyCHZJ/a/jFszyd8Ruxczy8S51AtsXQGwAmAFwAqAnQ9weztvbytvslFnAux2c38/7+/rL7NFZwI8PMzj43x8rL/MFv0OcDjMfj8vL2SZjVq+5upqOR6X/X6ZWU6n5fuj5p/mxwXc3c1uN8/P8/o619fz9KTeiQ25+Otf0Ok0Nzfr7rJJfQdgf15A1tEFYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmCfKNCZyXnkZksAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAByElEQVR4nO3YrU1lARRG0fMGiUbgSAg1YLAoaIEKaANBCSQIqIEKnqABggaDgBIQkDd27jSwxN2rgi/ZObk/m5ndxPmjB6xdAbACYAXACoAtApyfz/v7bLez3c7NjZq0Lpt/X0OvrmZ/f+7u4J7VWVzA4eF8fqolK/V/gIuLeX6ep6c5PlaT1mURYLebl5c5O5vHx7m/V5PWZfEMODqaj4/5/Z29vfn6moMDOGwtFhdwezuXlzMzp6fz+moGrc3iAk5O5uFhfn7m+3uur+ftDQ5bi01/Q62+hLECYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwv6KJLIntwbqOAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB3UlEQVR4nO3XMYrCUBRG4V8zWE3tAkTcg424AteR1sZVCIJ9OtdhIYi1rWBhbWFhK7zpHLOAmVPkfNwmpLlw3gukl5SI06cX6DoDwAwAMwDMALBWgH4/221OpxwOGY2olbqlFaCu83xmOs1mk/WaWqlzynuOxzIel6QMBmW1Kp+vnD+ar88Uk0kWiywWeTyyXFIHoltan6DBILdb5vPsdmkaaqXO+b0Ol0upqpKUqir3O389uzCtG7DfZzZLktks5zNzHLqml5T3w3CYpsn3d16v1HWuV3CxrmgF0P/zTxhmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQBmAJgBYAaAGQD2A9KOJm6r9V+TAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAB0ElEQVR4nO3YoUpeYQDH4fNNMU0GziAOTOL6QGTsAkw2gxcgFqNgNgvexYJhzTuwLHgFRotBGFgE48KKOvP3hPf3pHNO+sOPl8M5s+lsCvRBDxhdAbACYAXACoAtvry53L9c+7g2TdPSwtLW563V81W0aiCvAhz8Ovh3cfjtcOPThtgznMX/H82m2fH28e7P3fmvGdA774C9r3s39zcPTw/zXzOgd07AyfeTo6uj+U8Z09sTsPNl5/H58fbPLVkzoLcBTn+cXvy+IFPG9CrA5srm+vL69d21WjOgWX9Drb6EsQJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbACYAXACoAVACsAVgCsAFgBsAJgBcAKgBUAKwBWAKwAWAGwAmAFwAqAFQArAFYArABYAbC/0OYek5EaZucAAAAASUVORK5CYII="
+                }
+              },
+              {
+                "type": "text",
+                "text": "What is the dominant background color of the LAST image? Answer only with the color name."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_tokens": 96,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "http_status": 200,
+      "response": {
+        "id": "chatcmpl-afd0be9b460de736",
+        "object": "chat.completion",
+        "created": 1789644179,
+        "model": "GLM-5.3-Flash-NVFP4",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Last image is green.</think>green",
+              "refusal": null,
+              "annotations": null,
+              "audio": null,
+              "function_call": null,
+              "reasoning": null
+            },
+            "logprobs": null,
+            "finish_reason": "stop",
+            "stop_reason": 154827,
+            "token_ids": null,
+            "routed_experts": null
+          }
+        ],
+        "service_tier": null,
+        "system_fingerprint": "vllm-0.1.dev20880+g1048fc543-tp4-f536ea89",
+        "usage": {
+          "prompt_tokens": 269,
+          "total_tokens": 277,
+          "completion_tokens": 8,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "prompt_logprobs": null,
+        "prompt_token_ids": null,
+        "prompt_text": null,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "metrics": null
+      },
+      "elapsed_seconds": 0.2793052280321717,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

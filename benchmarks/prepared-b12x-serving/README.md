@@ -185,8 +185,12 @@ records; the example uses the measured GLM DFlash2 image. For prefill, replace
 The benchmark warms and drains cells and checks exact repetition by default.
 Those checks do not establish semantic output quality.
 
-The complete image is locally built, not registry-published. The automatic
-GHCR publisher's designated qualification GPU is occupied by production work;
-publication has not bypassed its GPU test gate. These records are source-review
-and reproducibility evidence, not an announcement that a registry tag is
-available.
+The measured image identity describes a local build, not a registry pull
+digest. Automatic GHCR publications have their own immutable
+[release manifests](https://github.com/local-inference-lab/blackwell-llm-docker/releases)
+and packaging qualification. Do not infer a published image's complete-model
+performance from a source or tag name alone.
+
+[Prepared-kernel/API contract checks](../prepared-b12x-contracts/) record the
+separately measured B12X reconciliation, PCIe lookup, breakable-prefill and
+multimodal request boundaries.

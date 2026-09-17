@@ -1,0 +1,25 @@
+Using Python 3.12.3 environment at: /opt/venv
+Resolved 2 packages in 44ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 2 packages in 2ms
+ + pytest-asyncio==1.2.0
+ + tblib==3.1.0
+.............................................                            [100%]
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/dist-packages/torch/jit/_script.py:365: 14 warnings
+  /usr/local/lib/python3.12/dist-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/utils.py:2031
+  /validation/tests/utils.py:2031: PytestUnknownMarkWarning: Unknown pytest.mark.distributed - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    test_selector = pytest.mark.distributed(num_gpus=num_gpus)
+
+tests/distributed/test_b12x_pcie_all_reduce.py::test_b12x_fused_allreduce_gpu
+tests/distributed/test_b12x_pcie_all_reduce.py::test_b12x_twoshot_gpu
+  /validation/tests/utils.py:1759: DeprecationWarning: This process (pid=7) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+45 passed, 17 warnings in 64.85s (0:01:04)

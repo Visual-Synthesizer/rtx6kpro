@@ -1,0 +1,859 @@
+{
+  "model": "DeepSeek-V4.1-Flash",
+  "base": "http://127.0.0.1:5058",
+  "temperature": 1,
+  "cases": [
+    {
+      "name": "string_input",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "input": "What is 7 times 8? Reply with the number only.",
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_output_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "resp_9231416269c825d5",
+        "created_at": 1789646393,
+        "incomplete_details": null,
+        "instructions": null,
+        "metadata": null,
+        "model": "DeepSeek-V4.1-Flash",
+        "object": "response",
+        "output": [
+          {
+            "id": "msg_9644db336fc4f363",
+            "content": [
+              {
+                "annotations": [],
+                "text": "56",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null
+          }
+        ],
+        "parallel_tool_calls": true,
+        "temperature": 1.0,
+        "tool_choice": "none",
+        "tools": [],
+        "top_p": 0.95,
+        "background": false,
+        "max_output_tokens": 256,
+        "max_tool_calls": null,
+        "previous_response_id": null,
+        "prompt": null,
+        "reasoning": null,
+        "service_tier": "auto",
+        "status": "completed",
+        "text": null,
+        "top_logprobs": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 18,
+          "input_tokens_details": {
+            "cached_tokens": 0,
+            "input_tokens_per_turn": [],
+            "cached_tokens_per_turn": []
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0,
+            "tool_output_tokens": 0,
+            "output_tokens_per_turn": [],
+            "tool_output_tokens_per_turn": []
+          },
+          "total_tokens": 20
+        },
+        "user": null,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "input_messages": null,
+        "output_messages": null
+      },
+      "http_status": 200,
+      "events": [],
+      "elapsed_seconds": 0.18680345290340483,
+      "passed": true
+    },
+    {
+      "name": "input_text",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "input": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "What is 7 times 8? Reply with the number only."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_output_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "resp_b086f9e4d7570340",
+        "created_at": 1789646393,
+        "incomplete_details": null,
+        "instructions": null,
+        "metadata": null,
+        "model": "DeepSeek-V4.1-Flash",
+        "object": "response",
+        "output": [
+          {
+            "id": "msg_8ebb4239b226bf36",
+            "content": [
+              {
+                "annotations": [],
+                "text": "56",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null
+          }
+        ],
+        "parallel_tool_calls": true,
+        "temperature": 1.0,
+        "tool_choice": "none",
+        "tools": [],
+        "top_p": 0.95,
+        "background": false,
+        "max_output_tokens": 256,
+        "max_tool_calls": null,
+        "previous_response_id": null,
+        "prompt": null,
+        "reasoning": null,
+        "service_tier": "auto",
+        "status": "completed",
+        "text": null,
+        "top_logprobs": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 18,
+          "input_tokens_details": {
+            "cached_tokens": 0,
+            "input_tokens_per_turn": [],
+            "cached_tokens_per_turn": []
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0,
+            "tool_output_tokens": 0,
+            "output_tokens_per_turn": [],
+            "tool_output_tokens_per_turn": []
+          },
+          "total_tokens": 20
+        },
+        "user": null,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "input_messages": null,
+        "output_messages": null
+      },
+      "http_status": 200,
+      "events": [],
+      "elapsed_seconds": 0.18185867206193507,
+      "passed": true
+    },
+    {
+      "name": "input_text_stream",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "input": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "What is 7 times 8? Reply with the number only."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_output_tokens": 256,
+        "stream": true,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "resp_826b6b3166d56362",
+        "created_at": 1789646393,
+        "incomplete_details": null,
+        "instructions": null,
+        "metadata": null,
+        "model": "DeepSeek-V4.1-Flash",
+        "object": "response",
+        "output": [
+          {
+            "id": "msg_ba928aa014954fbd",
+            "content": [
+              {
+                "annotations": [],
+                "text": "56",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null
+          }
+        ],
+        "parallel_tool_calls": true,
+        "temperature": 1.0,
+        "tool_choice": "none",
+        "tools": [],
+        "top_p": 0.95,
+        "background": false,
+        "max_output_tokens": 256,
+        "max_tool_calls": null,
+        "previous_response_id": null,
+        "prompt": null,
+        "reasoning": null,
+        "service_tier": "auto",
+        "status": "completed",
+        "text": null,
+        "top_logprobs": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 18,
+          "input_tokens_details": {
+            "cached_tokens": 0,
+            "input_tokens_per_turn": [],
+            "cached_tokens_per_turn": []
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0,
+            "tool_output_tokens": 0,
+            "output_tokens_per_turn": [],
+            "tool_output_tokens_per_turn": []
+          },
+          "total_tokens": 20
+        },
+        "user": null,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "input_messages": null,
+        "output_messages": null
+      },
+      "http_status": 200,
+      "events": [
+        {
+          "response": {
+            "id": "resp_826b6b3166d56362",
+            "created_at": 1789646393,
+            "incomplete_details": null,
+            "instructions": null,
+            "metadata": null,
+            "model": "DeepSeek-V4.1-Flash",
+            "object": "response",
+            "output": [],
+            "parallel_tool_calls": true,
+            "temperature": 1.0,
+            "tool_choice": "none",
+            "tools": [],
+            "top_p": 0.95,
+            "background": false,
+            "max_output_tokens": 256,
+            "max_tool_calls": null,
+            "previous_response_id": null,
+            "prompt": null,
+            "reasoning": null,
+            "service_tier": "auto",
+            "status": "in_progress",
+            "text": null,
+            "top_logprobs": null,
+            "truncation": "disabled",
+            "usage": null,
+            "user": null,
+            "presence_penalty": 0.0,
+            "frequency_penalty": 0.0,
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "input_messages": null,
+            "output_messages": null
+          },
+          "sequence_number": 0,
+          "type": "response.created"
+        },
+        {
+          "response": {
+            "id": "resp_826b6b3166d56362",
+            "created_at": 1789646393,
+            "incomplete_details": null,
+            "instructions": null,
+            "metadata": null,
+            "model": "DeepSeek-V4.1-Flash",
+            "object": "response",
+            "output": [],
+            "parallel_tool_calls": true,
+            "temperature": 1.0,
+            "tool_choice": "none",
+            "tools": [],
+            "top_p": 0.95,
+            "background": false,
+            "max_output_tokens": 256,
+            "max_tool_calls": null,
+            "previous_response_id": null,
+            "prompt": null,
+            "reasoning": null,
+            "service_tier": "auto",
+            "status": "in_progress",
+            "text": null,
+            "top_logprobs": null,
+            "truncation": "disabled",
+            "usage": null,
+            "user": null,
+            "presence_penalty": 0.0,
+            "frequency_penalty": 0.0,
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "input_messages": null,
+            "output_messages": null
+          },
+          "sequence_number": 1,
+          "type": "response.in_progress"
+        },
+        {
+          "item": {
+            "id": "88a4ce00f7bfd079",
+            "content": [],
+            "role": "assistant",
+            "status": "in_progress",
+            "type": "message",
+            "phase": null
+          },
+          "output_index": 0,
+          "sequence_number": 2,
+          "type": "response.output_item.added"
+        },
+        {
+          "content_index": 0,
+          "item_id": "88a4ce00f7bfd079",
+          "output_index": 0,
+          "part": {
+            "annotations": [],
+            "text": "",
+            "type": "output_text",
+            "logprobs": []
+          },
+          "sequence_number": 3,
+          "type": "response.content_part.added"
+        },
+        {
+          "content_index": 0,
+          "delta": "56",
+          "item_id": "88a4ce00f7bfd079",
+          "logprobs": [],
+          "output_index": 0,
+          "sequence_number": 4,
+          "type": "response.output_text.delta"
+        },
+        {
+          "content_index": 0,
+          "item_id": "88a4ce00f7bfd079",
+          "logprobs": [],
+          "output_index": 0,
+          "sequence_number": 5,
+          "text": "56",
+          "type": "response.output_text.done"
+        },
+        {
+          "content_index": 0,
+          "item_id": "88a4ce00f7bfd079",
+          "output_index": 0,
+          "part": {
+            "annotations": [],
+            "text": "56",
+            "type": "output_text",
+            "logprobs": null
+          },
+          "sequence_number": 6,
+          "type": "response.content_part.done"
+        },
+        {
+          "item": {
+            "id": "88a4ce00f7bfd079",
+            "content": [
+              {
+                "annotations": [],
+                "text": "56",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null,
+            "summary": []
+          },
+          "output_index": 0,
+          "sequence_number": 7,
+          "type": "response.output_item.done"
+        },
+        {
+          "response": {
+            "id": "resp_826b6b3166d56362",
+            "created_at": 1789646393,
+            "incomplete_details": null,
+            "instructions": null,
+            "metadata": null,
+            "model": "DeepSeek-V4.1-Flash",
+            "object": "response",
+            "output": [
+              {
+                "id": "msg_ba928aa014954fbd",
+                "content": [
+                  {
+                    "annotations": [],
+                    "text": "56",
+                    "type": "output_text",
+                    "logprobs": null
+                  }
+                ],
+                "role": "assistant",
+                "status": "completed",
+                "type": "message",
+                "phase": null
+              }
+            ],
+            "parallel_tool_calls": true,
+            "temperature": 1.0,
+            "tool_choice": "none",
+            "tools": [],
+            "top_p": 0.95,
+            "background": false,
+            "max_output_tokens": 256,
+            "max_tool_calls": null,
+            "previous_response_id": null,
+            "prompt": null,
+            "reasoning": null,
+            "service_tier": "auto",
+            "status": "completed",
+            "text": null,
+            "top_logprobs": null,
+            "truncation": "disabled",
+            "usage": {
+              "input_tokens": 18,
+              "input_tokens_details": {
+                "cached_tokens": 0,
+                "input_tokens_per_turn": [],
+                "cached_tokens_per_turn": []
+              },
+              "output_tokens": 2,
+              "output_tokens_details": {
+                "reasoning_tokens": 0,
+                "tool_output_tokens": 0,
+                "output_tokens_per_turn": [],
+                "tool_output_tokens_per_turn": []
+              },
+              "total_tokens": 20
+            },
+            "user": null,
+            "presence_penalty": 0.0,
+            "frequency_penalty": 0.0,
+            "kv_transfer_params": null,
+            "ec_transfer_params": null,
+            "input_messages": null,
+            "output_messages": null
+          },
+          "sequence_number": 8,
+          "type": "response.completed"
+        }
+      ],
+      "elapsed_seconds": 0.18063126597553492,
+      "passed": true
+    },
+    {
+      "name": "output_text_history",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "input": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Choose a marker."
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "role": "assistant",
+            "id": "msg_marker",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "cedar-418",
+                "annotations": []
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Repeat your marker exactly."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_output_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "resp_9ea76e35f1f3144e",
+        "created_at": 1789646394,
+        "incomplete_details": null,
+        "instructions": null,
+        "metadata": null,
+        "model": "DeepSeek-V4.1-Flash",
+        "object": "response",
+        "output": [
+          {
+            "id": "msg_8cd1e5bb96aaff7e",
+            "content": [
+              {
+                "annotations": [],
+                "text": "cedar-418",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null
+          }
+        ],
+        "parallel_tool_calls": true,
+        "temperature": 1.0,
+        "tool_choice": "none",
+        "tools": [],
+        "top_p": 0.95,
+        "background": false,
+        "max_output_tokens": 256,
+        "max_tool_calls": null,
+        "previous_response_id": null,
+        "prompt": null,
+        "reasoning": null,
+        "service_tier": "auto",
+        "status": "completed",
+        "text": null,
+        "top_logprobs": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 21,
+          "input_tokens_details": {
+            "cached_tokens": 0,
+            "input_tokens_per_turn": [],
+            "cached_tokens_per_turn": []
+          },
+          "output_tokens": 5,
+          "output_tokens_details": {
+            "reasoning_tokens": 0,
+            "tool_output_tokens": 0,
+            "output_tokens_per_turn": [],
+            "tool_output_tokens_per_turn": []
+          },
+          "total_tokens": 26
+        },
+        "user": null,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "input_messages": null,
+        "output_messages": null
+      },
+      "http_status": 200,
+      "events": [],
+      "elapsed_seconds": 0.18403867399320006,
+      "passed": true
+    },
+    {
+      "name": "function_result_history",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "input": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Look up the saved marker."
+              }
+            ]
+          },
+          {
+            "type": "function_call",
+            "call_id": "call_marker",
+            "name": "lookup",
+            "arguments": "{}"
+          },
+          {
+            "type": "function_call_output",
+            "call_id": "call_marker",
+            "output": "{\"marker\":\"birch-642\"}"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Reply with only the marker returned by the tool."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_output_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        },
+        "tools": [
+          {
+            "type": "function",
+            "name": "lookup",
+            "description": "Look up the saved marker.",
+            "parameters": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "tool_choice": "none"
+      },
+      "response": {
+        "id": "resp_bbe65c6be4087ad1",
+        "created_at": 1789646394,
+        "incomplete_details": null,
+        "instructions": null,
+        "metadata": null,
+        "model": "DeepSeek-V4.1-Flash",
+        "object": "response",
+        "output": [
+          {
+            "id": "msg_af320a26a450338f",
+            "content": [
+              {
+                "annotations": [],
+                "text": "birch-642",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null
+          }
+        ],
+        "parallel_tool_calls": true,
+        "temperature": 1.0,
+        "tool_choice": "none",
+        "tools": [
+          {
+            "name": "lookup",
+            "parameters": {
+              "type": "object",
+              "properties": {}
+            },
+            "strict": null,
+            "type": "function",
+            "allowed_callers": null,
+            "defer_loading": null,
+            "description": "Look up the saved marker.",
+            "output_schema": null
+          }
+        ],
+        "top_p": 0.95,
+        "background": false,
+        "max_output_tokens": 256,
+        "max_tool_calls": null,
+        "previous_response_id": null,
+        "prompt": null,
+        "reasoning": null,
+        "service_tier": "auto",
+        "status": "completed",
+        "text": null,
+        "top_logprobs": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 306,
+          "input_tokens_details": {
+            "cached_tokens": 0,
+            "input_tokens_per_turn": [],
+            "cached_tokens_per_turn": []
+          },
+          "output_tokens": 5,
+          "output_tokens_details": {
+            "reasoning_tokens": 0,
+            "tool_output_tokens": 0,
+            "output_tokens_per_turn": [],
+            "tool_output_tokens_per_turn": []
+          },
+          "total_tokens": 311
+        },
+        "user": null,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "input_messages": null,
+        "output_messages": null
+      },
+      "http_status": 200,
+      "events": [],
+      "elapsed_seconds": 0.19028722099028528,
+      "passed": true
+    },
+    {
+      "name": "input_image",
+      "request": {
+        "model": "DeepSeek-V4.1-Flash",
+        "input": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "input_image",
+                "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABLElEQVR4nO3RQREAIAzAMIZ/zyAjjzUKetd5J9LVAds1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgH8/hAf+bYtS1AAAAAElFTkSuQmCC",
+                "detail": "auto"
+              },
+              {
+                "type": "input_text",
+                "text": "Name only the background color."
+              }
+            ]
+          }
+        ],
+        "temperature": 1,
+        "top_p": 0.95,
+        "max_output_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "thinking": false,
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "resp_b25fffa9c9829d31",
+        "created_at": 1789646394,
+        "incomplete_details": null,
+        "instructions": null,
+        "metadata": null,
+        "model": "DeepSeek-V4.1-Flash",
+        "object": "response",
+        "output": [
+          {
+            "id": "msg_8a61ca180de952a3",
+            "content": [
+              {
+                "annotations": [],
+                "text": "Red",
+                "type": "output_text",
+                "logprobs": null
+              }
+            ],
+            "role": "assistant",
+            "status": "completed",
+            "type": "message",
+            "phase": null
+          }
+        ],
+        "parallel_tool_calls": true,
+        "temperature": 1.0,
+        "tool_choice": "none",
+        "tools": [],
+        "top_p": 0.95,
+        "background": false,
+        "max_output_tokens": 256,
+        "max_tool_calls": null,
+        "previous_response_id": null,
+        "prompt": null,
+        "reasoning": null,
+        "service_tier": "auto",
+        "status": "completed",
+        "text": null,
+        "top_logprobs": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 195,
+          "input_tokens_details": {
+            "cached_tokens": 0,
+            "input_tokens_per_turn": [],
+            "cached_tokens_per_turn": []
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0,
+            "tool_output_tokens": 0,
+            "output_tokens_per_turn": [],
+            "tool_output_tokens_per_turn": []
+          },
+          "total_tokens": 197
+        },
+        "user": null,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "kv_transfer_params": null,
+        "ec_transfer_params": null,
+        "input_messages": null,
+        "output_messages": null
+      },
+      "http_status": 200,
+      "events": [],
+      "elapsed_seconds": 0.2072920890059322,
+      "passed": true
+    }
+  ],
+  "passed": true
+}
