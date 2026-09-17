@@ -1,5 +1,10 @@
 # DeepSeek-V4-Flash Jovian Judgement r9
 
+Historical image-specific deployment and measurement record. For the
+profile-enabled shared image, use [DeepSeek V4 text](deepseek-v4-flash.md),
+[Vision](deepseek-v4-flash-vision.md) and the
+[unified Docker guide](../docs/unified-vllm-docker.md).
+
 This serving specification covers DeepSeek-V4-Flash text and Vision inference
 on two 96 GiB NVIDIA RTX PRO 6000 Blackwell GPUs. The runtime combines B12X
 sparse attention and routed experts, DeepGEMM FP8 dense projections, fixed

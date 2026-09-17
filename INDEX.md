@@ -13,19 +13,25 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 ## Landing Pages And Hubs
 
 - [Glossary And Acronym Guide](GLOSSARY.md) - `GLOSSARY.md`
-- [RTX PRO 6000 Blackwell Wiki Index](INDEX.md) - `INDEX.md`
+- [INDEX](INDEX.md) - `INDEX.md`
 - [RTX PRO 6000 Blackwell LLM Wiki](README.md) - `README.md`
 
 ## Contributor And Onboarding Guides
 
 - [Newcomer Onboarding Without Lowering The Signal](docs/newcomer-onboarding.md) - `docs/newcomer-onboarding.md`
+- [One Docker image for GLM, Qwen and DeepSeek](docs/unified-vllm-docker.md) - `docs/unified-vllm-docker.md`
 - [ML Primitive Glossary](docs/wiki/ML-Primitive-Glossary.md) - `docs/wiki/ML-Primitive-Glossary.md`
 
 ## Model Runbooks
 
-- [DeepSeek-V4-Flash Runbook Hub](models/deepseek-v4-flash.md) - `models/deepseek-v4-flash.md`
+- [DeepSeek-V4-Flash Vision](models/deepseek-v4-flash-vision.md) - `models/deepseek-v4-flash-vision.md`
+- [DeepSeek-V4-Flash](models/deepseek-v4-flash.md) - `models/deepseek-v4-flash.md`
 - [DeepSeek-V4-Pro TP16 Lucifer on 16x RTX PRO 6000 Blackwell](models/deepseek-v4-pro-tp16-lucifer.md) - `models/deepseek-v4-pro-tp16-lucifer.md`
-- [DeepSeek-V4.1-Flash — Jovian Judgement](models/deepseek-v4.1-flash.md) - `models/deepseek-v4.1-flash.md`
+- [DeepSeek-V4.1-Flash — Jovian Judgement](models/deepseek-v4.1-flash/r36/release.md) - `models/deepseek-v4.1-flash/r36/release.md`
+- [DS4.1 TP4/DCP1 artifact qualification](models/deepseek-v4.1-flash/r37/README.md) - `models/deepseek-v4.1-flash/r37/README.md`
+- [Historical R37 release — DeepSeek-V4.1-Flash](models/deepseek-v4.1-flash/r37/release.md) - `models/deepseek-v4.1-flash/r37/release.md`
+- [DeepSeek-V4.1-Flash — community R38 deployment and measurement archive](models/deepseek-v4.1-flash-community-r38.md) - `models/deepseek-v4.1-flash-community-r38.md`
+- [DeepSeek-V4.1-Flash](models/deepseek-v4.1-flash.md) - `models/deepseek-v4.1-flash.md`
 - [DeepSeek-V4-Flash v1 on 8x RTX PRO 6000 Blackwell](models/ds4-flash-v1.md) - `models/ds4-flash-v1.md`
 - [DeepSeek-V4-Flash v2 B12X PR11 vs Lucifer Cutlass](models/ds4-flash-v2.md) - `models/ds4-flash-v2.md`
 - [DeepSeek-V4-Flash v3 B12X vs Standard Lucifer Cutlass](models/ds4-flash-v3.md) - `models/ds4-flash-v3.md`
@@ -87,6 +93,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [SwiGLU-correct public source composition: R35 release](models/glm-5.3-flash/validation/swiglu-reviewed-composition-r35.md) - `models/glm-5.3-flash/validation/swiglu-reviewed-composition-r35.md`
 - [Warmup buffer reuse and host-RAM retention: R31 qualification](models/glm-5.3-flash/validation/warmup-retention-r31.md) - `models/glm-5.3-flash/validation/warmup-retention-r31.md`
 - [GLM-5.3-Flash verifier-backed behavioral fidelity](models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/verifier-backed-behavioral-fidelity.md`
+- [GLM-5.3-Flash — community R35 deployment and measurement archive](models/glm-5.3-flash-community-r35.md) - `models/glm-5.3-flash-community-r35.md`
 - [GLM-5.3-Flash Spark on two GPUs](models/glm-5.3-flash-spark-tp2.md) - `models/glm-5.3-flash-spark-tp2.md`
 - [GLM-5.3-Flash](models/glm-5.3-flash.md) - `models/glm-5.3-flash.md`
 - [GLM-4.7 on RTX PRO 6000 Blackwell](models/glm47.md) - `models/glm47.md`
@@ -181,6 +188,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Qwen3.8-Flash-Next direct-answer arithmetic stability: NVFP4 versus QAD](models/qwen38-flash-next/direct-arithmetic-stability-nvfp4-vs-qad.md) - `models/qwen38-flash-next/direct-arithmetic-stability-nvfp4-vs-qad.md`
 - [Qwen TP1/MTP3 qualification for the Jovian Judgement R28.1 image](models/qwen38-flash-next/validation/r28.1-tp1.md) - `models/qwen38-flash-next/validation/r28.1-tp1.md`
 - [Qwen TP1 engine throughput comparison](models/qwen38-flash-next/validation/tp1-engine-comparison.md) - `models/qwen38-flash-next/validation/tp1-engine-comparison.md`
+- [Qwen3.8-Flash-Next — community R35 deployment and measurement archive](models/qwen38-flash-next-community-r35.md) - `models/qwen38-flash-next-community-r35.md`
 - [Qwen3.8-Flash-Next](models/qwen38-flash-next.md) - `models/qwen38-flash-next.md`
 - [Qwen3.8-27B QSRT K5 dense-MLP recovery](models/qwen38-qsrt-k5-r16.md) - `models/qwen38-qsrt-k5-r16.md`
 - [Qwen3.8-27B QSRT K5 recovery: what the training result means](models/qwen38-qsrt-k5-training-result.md) - `models/qwen38-qsrt-k5-training-result.md`
@@ -197,6 +205,8 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Qwen3.5 SGLang KLD reproduction record](benchmarks/kld-evaluation.md) - `benchmarks/kld-evaluation.md`
 - [MTP Quality Evaluation](benchmarks/mtp-quality-evaluation.md) - `benchmarks/mtp-quality-evaluation.md`
 - [Qwen3.5-397B-A17B Quantization Comparison: AWQ vs NVFP4](benchmarks/nvfp4-quantization-comparison.md) - `benchmarks/nvfp4-quantization-comparison.md`
+- [Prepared-kernel ownership and API compatibility qualification](benchmarks/prepared-b12x-contracts/README.md) - `benchmarks/prepared-b12x-contracts/README.md`
+- [Wheel-composed model runtime qualification](benchmarks/prepared-b12x-serving/README.md) - `benchmarks/prepared-b12x-serving/README.md`
 - [Benchmark Results -- RTX 6000 Pro Blackwell](benchmarks/results.md) - `benchmarks/results.md`
 
 ## Distribution Fidelity
@@ -461,6 +471,11 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary — 2026-09-09](daily-summaries/2026-09/2026-09-10.md) - `daily-summaries/2026-09/2026-09-10.md`
 - [Daily Summary — 2026-09-10](daily-summaries/2026-09/2026-09-11.md) - `daily-summaries/2026-09/2026-09-11.md`
 - [Daily Summary - 2026-09-11](daily-summaries/2026-09/2026-09-12.md) - `daily-summaries/2026-09/2026-09-12.md`
+- [Daily Summary - 2026-09-12](daily-summaries/2026-09/2026-09-13.md) - `daily-summaries/2026-09/2026-09-13.md`
+- [Daily Summary - 2026-09-13](daily-summaries/2026-09/2026-09-14.md) - `daily-summaries/2026-09/2026-09-14.md`
+- [Daily Summary - 2026-09-14](daily-summaries/2026-09/2026-09-15.md) - `daily-summaries/2026-09/2026-09-15.md`
+- [Daily Summary - 2026-09-15](daily-summaries/2026-09/2026-09-16.md) - `daily-summaries/2026-09/2026-09-16.md`
+- [Daily Summary - 2026-09-16](daily-summaries/2026-09/2026-09-17.md) - `daily-summaries/2026-09/2026-09-17.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents

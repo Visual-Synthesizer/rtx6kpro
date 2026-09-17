@@ -2,6 +2,19 @@
 
 Docker is the primary deployment method for inference engines on RTX PRO 6000 Blackwell systems. CUDA 13.x and SM120 support require specific nightly or custom images.
 
+## Shared GLM, Qwen and DeepSeek image
+
+For GLM-5.3-Flash, Qwen3.8-Flash-Next, DeepSeek V4 text/Vision and V4.1, use
+the **[unified Docker guide](../docs/unified-vllm-docker.md)**. It owns the image
+selection, model profiles, launch command, speculation and LMCache options.
+The non-beta and beta channels share one recipe and interface but different
+vLLM/B12X source branches. Publication tests and model throughput measurements
+have explicitly separate qualification boundaries.
+
+The CUDA 13.0 images and raw shell examples below are historical or alternate
+engine records, not the launcher for those five unified profiles. Model-specific
+community releases remain linked from each model's historical section.
+
 ## Table of Contents
 
 - [Available Docker Images](#available-docker-images)

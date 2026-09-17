@@ -1,5 +1,20 @@
 # Benchmark Results -- RTX 6000 Pro Blackwell
 
+## Unified GLM, Qwen and DeepSeek measurements
+
+The [shared Docker guide](../docs/unified-vllm-docker.md#performance-evidence)
+contains the recorded six-profile comparison: stock RTX PRO 6000 Workstation,
+GLM MTP3/DFlash2, DS4 text/Vision, DS4.1 DSpark and Qwen MTP3, with C1,
+concurrent output and uncached 32K prefill. The
+[source-locked report and raw samples](prepared-b12x-serving/) identify each
+reference image and the measured wheel-built image. The
+[component comparisons](prepared-b12x-contracts/) cover prepared B12X plans,
+PCIe lookup, breakable prefill and the unresolved Qwen prefill difference.
+
+These are previously recorded measurements, not a repeated matrix for every
+subsequently published beta digest. Historical results below retain their own
+hardware, sampling and release conditions.
+
 ## Table of Contents
 
 - [Qwen3.5-397B Benchmarks](#qwen35-397b-benchmarks)

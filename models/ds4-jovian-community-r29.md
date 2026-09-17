@@ -1,5 +1,10 @@
 # DeepSeek V4 on the shared Jovian Judgement image
 
+Historical community-image deployment and measurement record. The
+profile-enabled wheel-built image uses the [unified Docker guide](../docs/unified-vllm-docker.md)
+and separate [text](deepseek-v4-flash.md) / [Vision](deepseek-v4-flash-vision.md)
+model pages. Do not copy this record's shell launcher into that image.
+
 The shared Docker image serves GLM-5.3-Flash, Qwen3.8-Flash-Next and DeepSeek
 V4 using one installed vLLM/B12X/LMCache source composition. Each model uses
 its own launcher profile; GLM precision, scheduler and cache settings are not
