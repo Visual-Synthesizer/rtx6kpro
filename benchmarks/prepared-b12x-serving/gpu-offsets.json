@@ -1,0 +1,26 @@
+[
+  {
+    "index": 4,
+    "uuid": "GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e",
+    "memory_offset": 0,
+    "graphics_offset": 0
+  },
+  {
+    "index": 5,
+    "uuid": "GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4",
+    "memory_offset": 0,
+    "graphics_offset": 0
+  },
+  {
+    "index": 6,
+    "uuid": "GPU-1a0323f7-8113-a1e1-c68b-f23fecf77171",
+    "memory_offset": 0,
+    "graphics_offset": 0
+  },
+  {
+    "index": 7,
+    "uuid": "GPU-0027fc86-3322-ce2a-856c-f49eb61eb63e",
+    "memory_offset": 0,
+    "graphics_offset": 0
+  }
+]

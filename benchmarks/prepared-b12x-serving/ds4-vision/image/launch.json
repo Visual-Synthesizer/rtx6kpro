@@ -1,0 +1,435 @@
+{
+  "name": "qualify-ds4-vision-beta-wheel-memory",
+  "profile": "ds4-vision",
+  "arm": "beta",
+  "image": "sha256:dada56080b813ffcd38b18f4d3dc7c548058cfe2222fe3e5a49e2893cd674b92",
+  "argv": [
+    "docker",
+    "run",
+    "-d",
+    "--name",
+    "qualify-ds4-vision-beta-wheel-memory",
+    "--init",
+    "--restart=no",
+    "--gpus",
+    "\"device=4,5\"",
+    "--network",
+    "host",
+    "--ipc",
+    "host",
+    "--shm-size",
+    "32g",
+    "--cpus",
+    "64",
+    "--memory",
+    "512g",
+    "--memory-swap",
+    "512g",
+    "--ulimit",
+    "memlock=-1",
+    "--ulimit",
+    "stack=67108864:67108864",
+    "--security-opt",
+    "seccomp=unconfined",
+    "--mount",
+    "type=bind,src=/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-Vision-Exp,dst=/model-repo,readonly",
+    "--mount",
+    "type=volume,src=qualification-ds4-vision-beta,dst=/cache",
+    "-e",
+    "PORT=5058",
+    "-e",
+    "TP=2",
+    "-e",
+    "DCP=1",
+    "-e",
+    "HF_HUB_OFFLINE=1",
+    "-e",
+    "HF_HOME=/cache/huggingface",
+    "-e",
+    "NCCL_SOCKET_IFNAME=lo",
+    "-e",
+    "GLOO_SOCKET_IFNAME=lo",
+    "-e",
+    "MODEL=/model-repo/snapshots/6821d6ad3681a4b137b066b76094fa82ebd0a380",
+    "-e",
+    "SERVED_MODEL_NAME=DeepSeek-V4-Flash-Vision-Exp",
+    "-e",
+    "MAX_MODEL_LEN=1048576",
+    "-e",
+    "MAX_NUM_SEQS=4",
+    "-e",
+    "MAX_NUM_BATCHED_TOKENS=4096",
+    "-e",
+    "GPU_MEMORY_UTILIZATION=0.975",
+    "-e",
+    "OMP_NUM_THREADS=2",
+    "-e",
+    "PROFILE=ds4-vision",
+    "-e",
+    "HARDWARE_PROFILE=rtx-pro-6000-pcie",
+    "-e",
+    "SPECULATOR=dspark",
+    "-e",
+    "DSPARK_TOKENS=3",
+    "sha256:dada56080b813ffcd38b18f4d3dc7c548058cfe2222fe3e5a49e2893cd674b92",
+    "--",
+    "--override-generation-config",
+    "{\"temperature\":1.0,\"top_p\":1.0}"
+  ],
+  "checkpoint": {
+    "target": "/root/.cache/huggingface/hub/models--deepseek-ai--DeepSeek-V4-Flash-Vision-Exp/snapshots/6821d6ad3681a4b137b066b76094fa82ebd0a380"
+  },
+  "gpus": [
+    4,
+    5
+  ],
+  "device_query": "4, GPU-8800cf0c-1ba5-7136-d796-2a91f9e9586e, 0\n5, GPU-4a0aa20b-8e36-2e05-4efb-8befbf1181d4, 0\n",
+  "checkpoint_files": {
+    "target": {
+      "metadata_sha256": {
+        "config.json": "6cd841bdd6702f5e2ac34671bc78047ed80817102465525ae2a41c502abbcd75",
+        "model.safetensors.index.json": "507977e3d3818865264e68c0fdab139aa7f3929d0d0cf693dacc47428da56395",
+        "generation_config.json": "5fccff80f55a4d455bbe516bdd552edf3e9623df95e99fbf2a3c3389fdf91af0"
+      },
+      "shards": [
+        {
+          "name": "model-00001-of-00048.safetensors",
+          "bytes": 1991876272,
+          "inode": 173999062,
+          "device": 66310,
+          "mtime_ns": 1788474544210146150
+        },
+        {
+          "name": "model-00002-of-00048.safetensors",
+          "bytes": 3566323424,
+          "inode": 173999069,
+          "device": 66310,
+          "mtime_ns": 1788474640402671843
+        },
+        {
+          "name": "model-00003-of-00048.safetensors",
+          "bytes": 3566323424,
+          "inode": 173999075,
+          "device": 66310,
+          "mtime_ns": 1788474649617628385
+        },
+        {
+          "name": "model-00004-of-00048.safetensors",
+          "bytes": 3596231504,
+          "inode": 173999081,
+          "device": 66310,
+          "mtime_ns": 1788474629424724042
+        },
+        {
+          "name": "model-00005-of-00048.safetensors",
+          "bytes": 3568770088,
+          "inode": 173999087,
+          "device": 66310,
+          "mtime_ns": 1788474639850674456
+        },
+        {
+          "name": "model-00006-of-00048.safetensors",
+          "bytes": 3590025888,
+          "inode": 173999100,
+          "device": 66310,
+          "mtime_ns": 1788474732185252658
+        },
+        {
+          "name": "model-00007-of-00048.safetensors",
+          "bytes": 3568770088,
+          "inode": 173999104,
+          "device": 66310,
+          "mtime_ns": 1788474695409417080
+        },
+        {
+          "name": "model-00008-of-00048.safetensors",
+          "bytes": 3590025888,
+          "inode": 173999110,
+          "device": 66310,
+          "mtime_ns": 1788474694739420118
+        },
+        {
+          "name": "model-00009-of-00048.safetensors",
+          "bytes": 3568770088,
+          "inode": 174001946,
+          "device": 66310,
+          "mtime_ns": 1788474832379825903
+        },
+        {
+          "name": "model-00010-of-00048.safetensors",
+          "bytes": 3590025888,
+          "inode": 174002248,
+          "device": 66310,
+          "mtime_ns": 1788474920892471212
+        },
+        {
+          "name": "model-00011-of-00048.safetensors",
+          "bytes": 3568770088,
+          "inode": 174002253,
+          "device": 66310,
+          "mtime_ns": 1788474995716185114
+        },
+        {
+          "name": "model-00012-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002258,
+          "device": 66310,
+          "mtime_ns": 1788474954643340725
+        },
+        {
+          "name": "model-00013-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002264,
+          "device": 66310,
+          "mtime_ns": 1788474992874195774
+        },
+        {
+          "name": "model-00014-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002269,
+          "device": 66310,
+          "mtime_ns": 1788475041784014426
+        },
+        {
+          "name": "model-00015-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002276,
+          "device": 66310,
+          "mtime_ns": 1788474993368193920
+        },
+        {
+          "name": "model-00016-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002281,
+          "device": 66310,
+          "mtime_ns": 1788475037012031928
+        },
+        {
+          "name": "model-00017-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002286,
+          "device": 66310,
+          "mtime_ns": 1788475118509738259
+        },
+        {
+          "name": "model-00018-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002295,
+          "device": 66310,
+          "mtime_ns": 1788475232239344919
+        },
+        {
+          "name": "model-00019-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002301,
+          "device": 66310,
+          "mtime_ns": 1788475270582216020
+        },
+        {
+          "name": "model-00020-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002307,
+          "device": 66310,
+          "mtime_ns": 1788475315185068156
+        },
+        {
+          "name": "model-00021-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002313,
+          "device": 66310,
+          "mtime_ns": 1788475317629060114
+        },
+        {
+          "name": "model-00022-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002319,
+          "device": 66310,
+          "mtime_ns": 1788475324350038031
+        },
+        {
+          "name": "model-00023-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002325,
+          "device": 66310,
+          "mtime_ns": 1788475470180569147
+        },
+        {
+          "name": "model-00024-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002330,
+          "device": 66310,
+          "mtime_ns": 1788475463941588841
+        },
+        {
+          "name": "model-00025-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002337,
+          "device": 66310,
+          "mtime_ns": 1788475558788292477
+        },
+        {
+          "name": "model-00026-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002513,
+          "device": 66310,
+          "mtime_ns": 1788475751779706204
+        },
+        {
+          "name": "model-00027-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002520,
+          "device": 66310,
+          "mtime_ns": 1788475746946720658
+        },
+        {
+          "name": "model-00028-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002588,
+          "device": 66310,
+          "mtime_ns": 1788476452663682335
+        },
+        {
+          "name": "model-00029-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002596,
+          "device": 66310,
+          "mtime_ns": 1788475806646542805
+        },
+        {
+          "name": "model-00030-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002600,
+          "device": 66310,
+          "mtime_ns": 1788475802529555023
+        },
+        {
+          "name": "model-00031-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002606,
+          "device": 66310,
+          "mtime_ns": 1788475906331248885
+        },
+        {
+          "name": "model-00032-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002610,
+          "device": 66310,
+          "mtime_ns": 1788475919505210297
+        },
+        {
+          "name": "model-00033-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002619,
+          "device": 66310,
+          "mtime_ns": 1788475941030147367
+        },
+        {
+          "name": "model-00034-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002626,
+          "device": 66310,
+          "mtime_ns": 1788476046428841133
+        },
+        {
+          "name": "model-00035-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002631,
+          "device": 66310,
+          "mtime_ns": 1788476054027819167
+        },
+        {
+          "name": "model-00036-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002637,
+          "device": 66310,
+          "mtime_ns": 1788476120875626515
+        },
+        {
+          "name": "model-00037-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002642,
+          "device": 66310,
+          "mtime_ns": 1788476142621564056
+        },
+        {
+          "name": "model-00038-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002647,
+          "device": 66310,
+          "mtime_ns": 1788476188919431395
+        },
+        {
+          "name": "model-00039-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002653,
+          "device": 66310,
+          "mtime_ns": 1788476190150919780
+        },
+        {
+          "name": "model-00040-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002660,
+          "device": 66310,
+          "mtime_ns": 1788476210259370384
+        },
+        {
+          "name": "model-00041-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002666,
+          "device": 66310,
+          "mtime_ns": 1788476316326068286
+        },
+        {
+          "name": "model-00042-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002672,
+          "device": 66310,
+          "mtime_ns": 1788476314520073415
+        },
+        {
+          "name": "model-00043-of-00048.safetensors",
+          "bytes": 3568771664,
+          "inode": 174002683,
+          "device": 66310,
+          "mtime_ns": 1788476377513894778
+        },
+        {
+          "name": "model-00044-of-00048.safetensors",
+          "bytes": 3590027464,
+          "inode": 174002688,
+          "device": 66310,
+          "mtime_ns": 1788476400826828801
+        },
+        {
+          "name": "model-00045-of-00048.safetensors",
+          "bytes": 1059332516,
+          "inode": 174002694,
+          "device": 66310,
+          "mtime_ns": 1788476328656033281
+        },
+        {
+          "name": "model-00046-of-00048.safetensors",
+          "bytes": 3610456288,
+          "inode": 174002700,
+          "device": 66310,
+          "mtime_ns": 1788476446326700224
+        },
+        {
+          "name": "model-00047-of-00048.safetensors",
+          "bytes": 3560113064,
+          "inode": 174002706,
+          "device": 66310,
+          "mtime_ns": 1788476451353686033
+        },
+        {
+          "name": "model-00048-of-00048.safetensors",
+          "bytes": 3692776348,
+          "inode": 174002712,
+          "device": 66310,
+          "mtime_ns": 1788476460411660469
+        }
+      ]
+    }
+  },
+  "source_overrides": {}
+}

@@ -1,0 +1,42 @@
+{
+  "status": "completed",
+  "error": null,
+  "all_smoke_passed": true,
+  "bench_sha256": "053989edff8c9c93e2b96e61342b2ffbd9851e03deba17e6d3fc96fcd6694c1e",
+  "logical_kv_capacity_tokens": 1293619,
+  "verified_speculative_config": {
+    "method": "dspark",
+    "draft_sample_method": "probabilistic",
+    "rejection_sample_method": "standard",
+    "num_speculative_tokens": 5,
+    "model": "/model-repo/snapshots/9e165c30e2704aec5d9d593cce3eebd58bbef1cb"
+  },
+  "invalid_decode_cells": [],
+  "missing_decode_cells": [],
+  "smoke": [
+    {
+      "name": "arithmetic",
+      "passed": true,
+      "content": "56",
+      "finish_reason": "stop"
+    },
+    {
+      "name": "prefix_cold",
+      "passed": true,
+      "content": "COBALT",
+      "finish_reason": "stop"
+    },
+    {
+      "name": "prefix_repeated",
+      "passed": true,
+      "content": "COBALT",
+      "finish_reason": "stop"
+    },
+    {
+      "name": "prefix_changed",
+      "passed": true,
+      "content": "AMBER",
+      "finish_reason": "stop"
+    }
+  ]
+}

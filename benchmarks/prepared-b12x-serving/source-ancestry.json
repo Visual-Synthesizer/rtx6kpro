@@ -1,0 +1,112 @@
+{
+  "schema": "integrated-source-qualification/v1",
+  "checked_at": "2026-09-17T07:06:30.582605+00:00",
+  "scope": "Verify public PR ancestry and production identity for a measured image.\n\nOnly changes under tests/ are allowed between an image's recorded source\nrevision and the pushed integration revision. This does not qualify an image\nrebuilt with different dependencies or replace native and serving tests.\n",
+  "components": {
+    "vllm": {
+      "repository": "local-inference-lab/vllm",
+      "integration": "8edf83d96ec488f3bef7340952afdfa4cff020d7",
+      "published_integration": "8edf83d96ec488f3bef7340952afdfa4cff020d7",
+      "image_source": "1048fc5439d693d99e73cb7f5f09b0a06ee70b6c",
+      "changed_files_from_image": [
+        "tests/v1/attention/test_ds4_workspace_envelope.py"
+      ],
+      "production_identity_matches": true,
+      "pull_requests": [
+        {
+          "number": 780,
+          "url": "https://github.com/local-inference-lab/vllm/pull/780",
+          "head": "42627f07f551a5a38575eb1baca9693d7856c35e",
+          "base": "dev/jovian-judgement",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        },
+        {
+          "number": 782,
+          "url": "https://github.com/local-inference-lab/vllm/pull/782",
+          "head": "2b2fa507b89d9652c5d87db61c44ee89b5fe864f",
+          "base": "dev/jovian-judgement",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        },
+        {
+          "number": 783,
+          "url": "https://github.com/local-inference-lab/vllm/pull/783",
+          "head": "5c9d251cca6a5d9a81c54194005eefb988db3a0b",
+          "base": "dev/jovian-judgement",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        },
+        {
+          "number": 784,
+          "url": "https://github.com/local-inference-lab/vllm/pull/784",
+          "head": "ea358a87e72e6f44baf14c436d278b5f4d52b92c",
+          "base": "dev/jovian-judgement",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        },
+        {
+          "number": 785,
+          "url": "https://github.com/local-inference-lab/vllm/pull/785",
+          "head": "983c38e2ef0b8f3acaaa029f952ba1c2f26f8033",
+          "base": "dev/jovian-judgement",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        },
+        {
+          "number": 786,
+          "url": "https://github.com/local-inference-lab/vllm/pull/786",
+          "head": "4b7b86dd057e334bc5fb953eea732ee395bfdc15",
+          "base": "dev/jovian-judgement",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        }
+      ],
+      "errors": []
+    },
+    "b12x": {
+      "repository": "local-inference-lab/b12x",
+      "integration": "d9b572754a8a81888b355523888b778fe73e1b6b",
+      "published_integration": "d9b572754a8a81888b355523888b778fe73e1b6b",
+      "image_source": "d9b572754a8a81888b355523888b778fe73e1b6b",
+      "changed_files_from_image": [],
+      "production_identity_matches": true,
+      "pull_requests": [
+        {
+          "number": 379,
+          "url": "https://github.com/local-inference-lab/b12x/pull/379",
+          "head": "59f0cad9e4aa9eab57b8773ed83c064be608d95a",
+          "base": "master",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        },
+        {
+          "number": 380,
+          "url": "https://github.com/local-inference-lab/b12x/pull/380",
+          "head": "619dea775bceb1ddcfa799da755487ce24b0dfc5",
+          "base": "master",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "in_integrated_head": true
+        }
+      ],
+      "errors": []
+    }
+  },
+  "status": "qualified"
+}
