@@ -1,6 +1,7 @@
 # Kimi-K3 MXFP4 Runtime
 
-Status: **qualified** on 16 RTX PRO 6000 Blackwell GPUs.
+Status: **qualified** on 16 RTX PRO 6000 Blackwell GPUs under the profile-specific
+conditions below.
 
 The runtime serves the official `moonshotai/Kimi-K3` MXFP4 checkpoint in three
 profiles:
@@ -10,24 +11,30 @@ profiles:
 - target-only decode without speculation;
 - modal-labs DFlash speculative decode.
 
-Inferact DSpark is the production profile. It exposes a 1,000,000-token request
-limit and 1,016,293 physical FP8 target-KV tokens while retaining 32 GiB of host
-RAM for native vLLM KV offload.
+The Frank2 production service uses target-only decode with vision, native vLLM
+host-KV offload, a 950,000-token request limit, 950,000 physical FP8 KV tokens,
+and at most 12 active sequences. Speculative decoding is disabled in that
+service. The reference DSpark and DFlash profiles remain qualified performance
+configurations but are not the active Frank2 service.
 
-The machine-readable evidence is
-[`validation/kimi-k3-upstream-aligned-r36-20260822.json`](validation/kimi-k3-upstream-aligned-r36-20260822.json).
+Machine-readable evidence:
+
+- [`validation/kimi-k3-upstream-aligned-r38-20260918.json`](validation/kimi-k3-upstream-aligned-r38-20260918.json)
+  records the Frank2 target-only multimodal memory qualification;
+- [`validation/kimi-k3-upstream-aligned-r36-20260822.json`](validation/kimi-k3-upstream-aligned-r36-20260822.json)
+  records target-only, DSpark, and DFlash decode throughput.
 
 ## Immutable artifacts
 
 | Component | Identity |
 |---|---|
-| vLLM image | `voipmonitor/vllm@sha256:c41bf15095b2316c7335d305115ad26bab14ec4234f3109b1d1ebb807895a3ea` |
-| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllme755f87-b12x2d466e3-cu133-torch213-20260822-r36` |
-| Image ID | `sha256:8fcc05178c94b38ecfc068c51cdaa7daaa0f1f13c5f00742c64581cc221dbc86` |
-| Docker recipe | `local-inference-lab/blackwell-llm-docker@a892bb8` |
-| Qualification record | `local-inference-lab/blackwell-llm-docker@3dd078a` |
+| vLLM image | `voipmonitor/vllm@sha256:32ff80279164365b21cdb420d7a22101be704df42b66db2c17d64d5e0558f240` |
+| Image tag | `voipmonitor/vllm:kimi-k3-upstream-aligned-dspark-nativekv-vllm6e843eb-b12x2d466e3-cu133-torch213-20260918-r38` |
+| Image ID | `sha256:5849d0fe2b83438109c03ec28a8425762a7bc9cb7c84503608066e860565aa6c` |
+| Immutable Docker build input | `local-inference-lab/blackwell-llm-docker@5924b0511dc335800d7678f04cbe3b8a1266c1fe` |
+| Published Docker recipe and receipt | `local-inference-lab/blackwell-llm-docker@acf16e7c66f0a4b30d592a40b806bb758fa53e81` |
 | Dependency foundation | `voipmonitor/vllm@sha256:03b67e53dda73c3fa317d4cb529ad38a220c51c7365ee8d54c16e5063fcc54e2` |
-| vLLM source tree | `e755f87b8e00d76e1aeacfa0835a2c7608925390` |
+| vLLM source tree | `6e843eb0f26cc60aa068b97b917e55d2d3a96a3f` |
 | B12X source tree | `2d466e350e518193f9edd57809e050b3aa8b8dcb` |
 | FlashInfer wheels | `voipmonitor/vllm:flashinfer-wheels-fi1ac6942-cu133-torch213-20260820-r1@sha256:477a3b55b973df48b08a6dfae4a2a1e64c975a990dda22f65e31acd5217b86bb` |
 | LLMConduit image | `voipmonitor/llmconduit@sha256:856b53ad893b47f7f868ac64ec899d3b23c89689e02cb85a108685e1eb05bc61` |
@@ -49,7 +56,9 @@ installed packages and does not mount or activate a source overlay.
 | Decode-context parallelism | 16 |
 | Target KV dtype | FP8 |
 | Scheduler chunk | 4,096 tokens |
-| Active sequence limit | 1 |
+| Frank2 active sequence limit | 12 |
+| Frank2 request and physical KV limit | 950,000 tokens |
+| Frank2 image-count limit | unspecified; vLLM's modality default applies |
 
 The target dense overlay quantizes KDA Q, K, V, B, and F-A projections. The
 vision tower and multimodal projector use the same runtime MXFP8 dense-linear
@@ -61,7 +70,7 @@ The Hugging Face cache must contain the pinned target and Inferact DSpark
 snapshots. Do not set `NCCL_GRAPH_FILE` to an empty value.
 
 ```bash
-IMAGE=voipmonitor/vllm@sha256:c41bf15095b2316c7335d305115ad26bab14ec4234f3109b1d1ebb807895a3ea
+IMAGE=voipmonitor/vllm@sha256:32ff80279164365b21cdb420d7a22101be704df42b66db2c17d64d5e0558f240
 CACHE_DIR=/mnt/luke/kimi-k3-cache/kimi-k3-cu133-torch213
 
 mkdir -p "$CACHE_DIR"
@@ -94,7 +103,6 @@ docker run -d \
   -e KV_OFFLOADING_SIZE=32 \
   -e ENABLE_PREFIX_CACHING=1 \
   -e ENABLE_VISION=1 \
-  -e MAX_IMAGES_PER_PROMPT=5 \
   "$IMAGE" \
   --max-num-scheduled-tokens 4096
 ```
@@ -110,30 +118,49 @@ curl -fsS http://127.0.0.1:8001/v1/models | jq .
 Port 8001 is the vLLM API. The launcher loads the target with InstantTensor,
 uses B12X MLA and routed-MoE kernels, and converts the supported target and
 draft dense projections to MXFP8 before allocating the physical KV cache.
+The server does not impose an image-count cap unless
+`MAX_IMAGES_PER_PROMPT` is supplied by the operator. The per-image processor
+limits remain 40,960 input patches and 512 patches on one side.
 
-## Start the target-only service
+## Start the Frank2 target-only production profile
 
-The target-only profile is text-only and disables prefix caching and host-KV
-offload. It provides 1,058,823 physical FP8 target-KV tokens.
+The deployed target-only profile retains vision, prefix caching, 32 GiB native
+host-KV offload, a 4,096-token scheduler chunk, and CUDA Graphs for batch sizes
+1 through 12. The launch below assumes exactly 16 selected GPUs. On a host with
+additional GPUs, set `CUDA_VISIBLE_DEVICES` to the intended 16 GPU UUIDs before
+starting the container.
 
 ```bash
 docker run -d \
-  --name kimi-k3-target-only \
+  --name kimi-k3-production-nospec \
+  --restart unless-stopped \
   --gpus all --network host --ipc=host \
+  --env-file /root/.config/lilinference/qwen38-api.env \
   --ulimit memlock=-1 --ulimit stack=67108864 \
   -v /root/.cache/huggingface:/root/.cache/huggingface:ro \
   -v "$CACHE_DIR":/cache/jit:rw \
-  -e PORT=8001 -e TP_SIZE=16 -e DCP_SIZE=16 \
-  -e MAX_MODEL_LEN=1000000 -e MAX_NUM_BATCHED_TOKENS=4102 \
-  -e MAX_NUM_SEQS=1 -e KV_CACHE_MEMORY_BYTES=960000000 \
-  -e ENABLE_PREFIX_CACHING=0 \
+  -e CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:?select 16 GPU UUIDs}" \
+  -e HOST=0.0.0.0 -e PORT=30001 -e TP_SIZE=16 -e DCP_SIZE=16 \
+  -e MAX_MODEL_LEN=950000 -e MAX_NUM_BATCHED_TOKENS=4096 \
+  -e MAX_NUM_SEQS=12 -e KV_CACHE_MEMORY_BYTES=900000000 \
+  -e ENABLE_PREFIX_CACHING=1 -e HOST_KV_BACKEND=native \
+  -e KV_OFFLOADING_SIZE=32 -e ENABLE_VISION=1 \
   -e B12X_MOE_WORKSPACE_TOKEN_LIMIT=4096 \
   -e B12X_W4A16_PREFILL_FUSED_SUM=1 \
   -e B12X_W4A16_STABLE_ROUTE_PACK=1 \
   -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   --entrypoint /usr/local/bin/serve-kimi-k3-full-mxfp4-nospec-ii \
-  "$IMAGE" --max-num-scheduled-tokens 4096
+  "$IMAGE" --host 0.0.0.0 --port 30001 \
+    --max-num-scheduled-tokens 4096 \
+    --speculative-config None \
+    --compilation-config '{"mode":0,"cudagraph_mode":"FULL_AND_PIECEWISE","cudagraph_capture_sizes":[1,2,3,4,5,6,7,8,9,10,11,12],"pass_config":{"fuse_allreduce_rms":true}}'
 ```
+
+The four-image regression request uses 65,232 patches in grids
+`[1,168,120]`, `[1,168,120]`, `[1,168,120]`, and `[1,72,66]`. It returned
+HTTP 200 with 16,448 prompt tokens in 10.70 seconds. The engine retained
+950,000 physical KV tokens and recorded zero restarts. A six-image request
+also returned HTTP 200.
 
 ## Start the DFlash service
 
@@ -279,8 +306,8 @@ omp --thinking high
 ```
 
 Supported OMP reasoning values are `minimal`, `low`, `medium`, `high`, `xhigh`,
-and `max`. OMP retains at most five images for this provider, matching the vLLM
-request limit.
+and `max`. OMP image-history retention is a client policy; the r38 vLLM
+launcher leaves the server image-count limit unspecified.
 
 ## Source composition
 
@@ -288,7 +315,8 @@ The Docker source lock composes these pull-request heads in order:
 
 ```text
 vLLM: 414, 295, 294, 320, 413, 422, 310, 415, 418, 419, 459, 460,
-      463, 464, 467, 468, 469, 471, then #473 at ee69840
+      463, 464, 467, 468, 469, 471, then #473 at ee69840 and the
+      #459 rotary-product continuation at 78f8123
 B12X: 227, 238, 239, then #241 at bebd334
 ```
 
@@ -297,9 +325,9 @@ The vLLM staged auxiliary projection integration is published for review as
 before #473. The exact heads, merge commits, bases, and trees are stored in:
 
 ```text
-patches/releases/kimi-k3-upstream-aligned-20260822/vllm/source.lock.json
-patches/releases/kimi-k3-upstream-aligned-20260822/b12x/source.lock.json
-patches/releases/kimi-k3-upstream-aligned-20260822/lmcache/source.lock.json
+patches/releases/kimi-k3-upstream-aligned-20260918/vllm/source.lock.json
+patches/releases/kimi-k3-upstream-aligned-20260918/b12x/source.lock.json
+patches/releases/kimi-k3-upstream-aligned-20260918/lmcache/source.lock.json
 ```
 
 The maintainer merge order and official-vLLM disposition are maintained in
@@ -310,7 +338,7 @@ The maintainer merge order and official-vLLM disposition are maintained in
 ```bash
 git clone https://github.com/local-inference-lab/blackwell-llm-docker.git
 cd blackwell-llm-docker
-git checkout 3dd078a
+git checkout acf16e7c66f0a4b30d592a40b806bb758fa53e81
 ./build-kimi-k3-upstream-aligned-runtime.sh
 ```
 
@@ -330,9 +358,11 @@ FlashInfer.
 - One million token positions are allocation-qualified. Long-context checks
   cover target-only and speculative execution as listed above; they do not
   establish semantic quality at every depth.
-- The production scheduler permits one active sequence.
-- DSpark permits at most five images per prompt. DFlash and target-only are
-  qualified as text-only profiles.
+- The Frank2 target-only scheduler permits 12 active sequences. The throughput
+  table uses one active sequence and must not be read as a concurrency result.
+- The r38 launcher leaves image-count admission unspecified. Qualification
+  covers the exact four-image memory regression and a six-image admission
+  request; it does not establish unrestricted multimodal admission safety.
 - Native host-KV offload is the qualified production cache backend. LMCache is
   packaged but is not the low-latency production default.
 
