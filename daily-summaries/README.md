@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-10-14](2026-10/2026-10-14.md) | Confirmed report: P2P between a PCIe card and GB300 is unsupported, and RTX PRO 6000-to-RTX PRO 6000 |
 | [2026-10-12](2026-10/2026-10-12.md) | DS4.1-Flash reasoning-loop repro on karmic-kraken-beta-20261008.2, 4x RTX PRO 6000 Blackwell Max-Q T |
 | [2026-10-10](2026-10/2026-10-10.md) | DeepSeek's DSpark is described as assigning each drafted token a confidence score and using a hardwa |
 | [2026-10-09](2026-10/2026-10-09.md) | On 8x RTX PRO 6000 Blackwell Server (driver 615.71.09, ~755 GiB RAM), ufear verified native KV offlo |
