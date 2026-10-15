@@ -1828,6 +1828,9 @@ runtime/checkpoint boundaries of these independent reports:
   and [QAD TV-nucleus](glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md).
 - [BF16/NVFP4 distribution fidelity](../kld/glm-5.3-flash-bf16-nvfp4.md)
   and [QAD quantization reports](../kld/glm-5.3-flash-qad-step2500.md).
+- [aider polyglot benchmark, release-10152026](glm-5.3-flash/aider-polyglot-release-10152026.md):
+  five full runs of the 225-exercise benchmark on the default `glm53-tp2` checkpoint,
+  pass@2 88.0 ± 1.1 %, per-language rates, run-to-run spread and topology throughput.
 - [Greedy checksum stability and MoE activation precision](glm-5.3-flash/checksum-stability-moe-activations.md):
   W4A4 vs W4A8 vs W4A16, FP32 router weights, speed cost and determinism.
 - [Community R35 deployment and measurement archive](glm-5.3-flash-community-r35.md):

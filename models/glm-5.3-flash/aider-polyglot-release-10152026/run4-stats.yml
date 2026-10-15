@@ -1,0 +1,46 @@
+──────────────────── /benchmarks/2026-10-15-19-05-12--run4 ─────────────────────
+- dirname: 2026-10-15-19-05-12--run4
+  test_cases: 225
+  model: openai/GLM-5.3-Flash
+  edit_format: whole
+  commit_hash: 5dc9490
+  pass_rate_1: 47.6
+  pass_rate_2: 89.3
+  pass_num_1: 107
+  pass_num_2: 201
+  percent_cases_well_formed: 99.6
+  error_outputs: 1
+  num_malformed_responses: 1
+  num_with_malformed_responses: 1
+  user_asks: 8
+  lazy_comments: 0
+  syntax_errors: 0
+  indentation_errors: 0
+  exhausted_context_windows: 0
+  prompt_tokens: 1634227
+  completion_tokens: 6275961
+  test_timeouts: 0
+  total_tests: 225
+  command: aider --model openai/GLM-5.3-Flash
+  date: 2026-10-15
+  versions: 0.86.3.dev
+  seconds_per_case: 450.2
+  total_cost: 0.0000
+
+costs: $0.0000/test-case, $0.00 total, $0.00 projected
+────────────────────────────────────────────────────────────────────────────────
+
+Language     |   PR1 |   PR2 |   PN1 |   PN2 | Cases |  Asks | Malformed |     P_Tok |     C_Tok | Sec/Case
+-----------------------------------------------------------------------------------------------------------
+cpp          |  34.6 |  92.3 |     9 |    24 |    26 |     0 |         1 |    810945 |    353740 |    282.9
+go           |  61.5 |  87.2 |    24 |    34 |    39 |     1 |         0 |    106956 |   1234319 |    519.3
+java         |  40.4 |  87.2 |    19 |    41 |    47 |     7 |         0 |    303731 |   1371735 |    488.2
+javascript   |  42.9 |  93.9 |    21 |    46 |    49 |     0 |         0 |    193912 |   1365563 |    420.3
+python       |  41.2 |  88.2 |    14 |    30 |    34 |     0 |         0 |    131704 |    929188 |    436.5
+rust         |  66.7 |  86.7 |    20 |    26 |    30 |     0 |         0 |     86979 |   1021416 |    509.9
+TOTAL        |  47.6 |  89.3 |   107 |   201 |   225 |     8 |         1 |   1634227 |   6275961 |    450.2
+
+requests: 656  ok: 654  failed: 2  (log: /root/vllm/qwen38next/results/aider-20261015/run4/requests.jsonl)
+  sent 656x: {"max_tokens": 160000, "model": "GLM-5.3-Flash"}
+  finish stop: 654
+  error 2x: RuntimeError: cannot schedule new futures after shutdown
