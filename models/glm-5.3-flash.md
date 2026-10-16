@@ -44,6 +44,9 @@ MXFP8 checkpoint, into the shared HF volume. Add
 `-e SERVED_MODEL_NAME=GLM-5.3-Flash` before the image for that shorter API name.
 For two GPUs use the [Spark TP2 recipe](glm-5.3-flash-spark-tp2.md); its
 checkpoint and memory budget differ from this four-GPU configuration.
+The two-GPU release recipe (`PRESET=glm53-tp2`, release-10152026) is also
+available as a [plain `vllm serve` command](glm-5.3-flash/plain-vllm-command.md)
+without the preset launcher.
 
 Measured Karmic Kraken results and saved JJ comparisons are in the
 [model benchmark table](../benchmarks/karmic-kraken-serving.md).

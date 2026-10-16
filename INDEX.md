@@ -86,6 +86,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [GLM-5.3-Flash: aider polyglot benchmark, release-10152026](models/glm-5.3-flash/aider-polyglot-release-10152026.md) - `models/glm-5.3-flash/aider-polyglot-release-10152026.md`
 - [GLM community R27 build inputs](models/glm-5.3-flash/build/README.md) - `models/glm-5.3-flash/build/README.md`
 - [GLM-5.3-Flash: greedy checksum stability and MoE activation precision](models/glm-5.3-flash/checksum-stability-moe-activations.md) - `models/glm-5.3-flash/checksum-stability-moe-activations.md`
+- [GLM-5.3-Flash: the release recipe as a plain `vllm serve` command](models/glm-5.3-flash/plain-vllm-command.md) - `models/glm-5.3-flash/plain-vllm-command.md`
 - [GLM-5.3-Flash QAD step 2,500 verifier-backed behavioral fidelity](models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/qad-step2500-verifier-backed-behavioral-fidelity.md`
 - [GLM-5.3-Flash QAD TV-nucleus step 2,500 verifier-backed behavioral fidelity](models/glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md) - `models/glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md`
 - [Concurrent immutable checkpoint publication: R32 qualification](models/glm-5.3-flash/validation/concurrent-checkpoints-r32.md) - `models/glm-5.3-flash/validation/concurrent-checkpoints-r32.md`
@@ -519,6 +520,7 @@ python3 scripts/generate-wiki-index.py > INDEX.md
 - [Daily Summary - 2026-10-11](daily-summaries/2026-10/2026-10-12.md) - `daily-summaries/2026-10/2026-10-12.md`
 - [Daily Summary - 2026-10-13](daily-summaries/2026-10/2026-10-14.md) - `daily-summaries/2026-10/2026-10-14.md`
 - [Daily Summary - 2026-10-14](daily-summaries/2026-10/2026-10-15.md) - `daily-summaries/2026-10/2026-10-15.md`
+- [Daily Summary - 2026-10-15](daily-summaries/2026-10/2026-10-16.md) - `daily-summaries/2026-10/2026-10-16.md`
 - [Daily Summaries](daily-summaries/README.md) - `daily-summaries/README.md`
 
 ## Other Documents
