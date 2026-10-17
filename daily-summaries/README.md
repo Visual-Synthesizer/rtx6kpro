@@ -10,6 +10,30 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-10-16](2026-10/2026-10-16.md) | Panchovix released nvidia-linux-vbios-vix-loader for loading custom VBIOSes on Linux. Panchovix repo |
+| [2026-10-15](2026-10/2026-10-15.md) | NVIDIA Nemotron Bolt 3.5 74B A9B was reported to be scheduled for release on 2026-10-15; it reported |
+| [2026-10-14](2026-10/2026-10-14.md) | Confirmed report: P2P between a PCIe card and GB300 is unsupported, and RTX PRO 6000-to-RTX PRO 6000 |
+| [2026-10-12](2026-10/2026-10-12.md) | DS4.1-Flash reasoning-loop repro on karmic-kraken-beta-20261008.2, 4x RTX PRO 6000 Blackwell Max-Q T |
+| [2026-10-10](2026-10/2026-10-10.md) | DeepSeek's DSpark is described as assigning each drafted token a confidence score and using a hardwa |
+| [2026-10-09](2026-10/2026-10-09.md) | On 8x RTX PRO 6000 Blackwell Server (driver 615.71.09, ~755 GiB RAM), ufear verified native KV offlo |
+| [2026-10-08](2026-10/2026-10-08.md) | CSF/MegaMoE support implemented with a load-time encoder and a patched kernel that decodes compresse |
+| [2026-10-07](2026-10/2026-10-07.md) | The b12x kernel stack moved wholesale under FlashInfer as a submodule at commit fc8fdc17, keeping th |
+| [2026-10-05](2026-10/2026-10-05.md) | A runnable MiniMax-H3 SM120 image recipe is available with Dockerfile, build.sh, launcher and reques |
+| [2026-10-04](2026-10/2026-10-04.md) | With the step-5500 QAD weight update (MXFP8 attention and NVFP4 MTP experts) on KarmicKraken beta a7 |
+| [2026-10-03](2026-10/2026-10-03.md) | A community post referenced a 64GB DGX Spark; a separate community post mentioned a $4,999 starting  |
+| [2026-10-02](2026-10/2026-10-02.md) | On vLLM 0.1.dev21968+g5df66adce (image karmic-kraken-beta-20260930-7ec3133af4492daf), DeepSeek-V4.1- |
+| [2026-10-01](2026-10/2026-10-01.md) | On DeepSeek-V4.1-Flash DGX Spark, unique-prefix real text (documentation and source code) measured 4 |
+| [2026-09-30](2026-09/2026-09-30.md) | KK beta image enables fastokens tokenizer by default (docker #112, vllm #934): a 300K-token conversa |
+| [2026-09-29](2026-09/2026-09-29.md) | Karmic Kraken Engram tables now load into RAM by default. On TP4 measured about 190 tok/s at C1, whi |
+| [2026-09-28](2026-09/2026-09-28.md) | LIL vLLM beta ghcr.io/local-inference-lab/vllm:karmic-kraken-beta-20260927-a7739316 (TP2/DCP2, fixed |
+| [2026-09-27](2026-09/2026-09-27.md) | mrweiner reproduced on GLM-5.3-Flash with vLLM 04c30fa98e79 and LMCache 2915c9d3cd7e: publishing a p |
+| [2026-09-26](2026-09/2026-09-26.md) | A lossless one-bit scale codec reportedly reduces routed-expert E8M0 scale data to about 14% of its  |
+| [2026-09-24](2026-09/2026-09-24.md) | MiMo V2.6 Flash RL b12x rc3/rc4 release and fixes |
+| [2026-09-23](2026-09/2026-09-23.md) | DeepSeek-V4.1-Flash at TP3 on 3×96 GB RTX PRO 6000 (PCIe 4.0 x16, driver 615.71.09, CUDA 13.4): EXL3 |
+| [2026-09-22](2026-09/2026-09-22.md) | vLLM v0.30.0 was released on GitHub (vllm-project/vllm). |
+| [2026-09-21](2026-09/2026-09-21.md) | D-Rock published qad-kk-mtp3-20260920 and -r3 (digest sha256:2ce695acaf709e7d77d15035a6282957398aedc |
+| [2026-09-20](2026-09/2026-09-20.md) | GLM-5.3-Flash NVFP4-Spark on vLLM karmic-kraken-beta 5927520c, 2x RTX 6000 Pro Blackwell WS 96GB TP2 |
+| [2026-09-19](2026-09/2026-09-19.md) | kanadaj/sglang pull request 18 added the --prefill-batches-before-decode option (0.5 = one prefill t |
 | [2026-09-18](2026-09/2026-09-18.md) | Reported CUDA 615 on Blackwell: release notes document cuTensorMapEncodeTiled/Im2col MMU faults (XID |
 | [2026-09-17](2026-09/2026-09-17.md) | NVIDIA published DeepSeek-V4.1-Flash-NVFP4 on Hugging Face; the model link was shared in the DS4.1-F |
 | [2026-09-16](2026-09/2026-09-16.md) | Measured r37 to r38 on 4x Max-Q at 300W stock with TP4/DCP1 and VLLM_USE_BREAKABLE_CUDAGRAPH=1: KV p |

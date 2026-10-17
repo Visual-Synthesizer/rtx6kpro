@@ -12,63 +12,1767 @@ The same image serves Qwen and DeepSeek; a model-specific image or entrypoint
 is not required. The shared guide owns the image tag, launch command, LMCache
 configuration and general option reference.
 
-Status: **implemented** profile. **Qualified** bounded TP4/DCP1 MTP3 and
-DFlash2 measurements are recorded below with their actual image identities.
-The published beta's packaging tests do not imply a repeated full serving or
-external-cache matrix on that exact registry digest.
-
 ## Start the server
 
-Select `LIL_IMAGE` from the [image section](../docs/unified-vllm-docker.md#select-the-image),
-then use these values in the [common launch command](../docs/unified-vllm-docker.md#start-a-server):
+This starts MTP3 on four GPUs with the shared Karmic Kraken beta image:
 
 ```bash
-PROFILE=glm53-flash
-GPU_DEVICES=0,1,2,3
-TP=4
-PORT=8000
-SERVE_ARGS=(--mode mtp --draft-tokens 3)
+IMAGE=ghcr.io/local-inference-lab/vllm:karmic-kraken-beta
+docker pull "$IMAGE"
+docker run -d --name glm53 --init --restart unless-stopped \
+  --gpus '"device=0,1,2,3"' --network host --ipc host --shm-size 32g \
+  -v lil-huggingface:/root/.cache/huggingface -v glm53-runtime:/cache \
+  -e PROFILE=glm53-flash -e HARDWARE_PROFILE=rtx-pro-6000-pcie \
+  -e TP=4 -e PORT=8000 "$IMAGE" --mode mtp --draft-tokens 3
 ```
 
-Choose one speculation setting before running that command:
+The API is on port 8000 with model name `GLM-5.3-Flash-NVFP4`.
+Change `-e PORT=8000` to choose a port and `device=0,1,2,3` to choose GPUs.
+Check readiness with `docker logs -f glm53` and
+`curl -fsS http://127.0.0.1:8000/health`.
 
-```bash
-SERVE_ARGS=(--mode off)
-```
+Replace the arguments **after `"$IMAGE"`** to select another mode:
 
-```bash
-SERVE_ARGS=(--mode mtp --draft-tokens 3)
-```
-
-```bash
-SERVE_ARGS=(--mode dflash2 --draft-tokens 7)
-```
+| Mode | Arguments after the image |
+|---|---|
+| No speculation | `--mode off` |
+| MTP3 | `--mode mtp --draft-tokens 3` |
+| DFlash2 K7 | `--mode dflash2 --draft-tokens 7` |
 
 DFlash2 downloads `local-inference-lab/GLM-5.3-Flash-DFlash2`, an offline
-MXFP8 draft checkpoint, through the shared Hugging Face volume. It is not
-online weight quantization. No absolute host model paths are required.
+MXFP8 checkpoint, into the shared HF volume. Add
+`-e SERVED_MODEL_NAME=GLM-5.3-Flash` before the image for that shorter API name.
+For two GPUs use the [Spark TP2 recipe](glm-5.3-flash-spark-tp2.md); its
+checkpoint and memory budget differ from this four-GPU configuration.
+The two-GPU release recipe (`PRESET=glm53-tp2`, release-10152026) is also
+available as a [plain `vllm serve` command](glm-5.3-flash/plain-vllm-command.md)
+without the preset launcher.
 
-The API model name is `GLM-5.3-Flash-NVFP4`. Clients requiring the name
-`GLM-5.3-Flash` can append `--served-model-name GLM-5.3-Flash` to `SERVE_ARGS`.
-Changing the API name does not change the checkpoint.
+Measured Karmic Kraken results and saved JJ comparisons are in the
+[model benchmark table](../benchmarks/karmic-kraken-serving.md).
 
-## Serving defaults and alternatives
+<!-- BEGIN LIL-COMPOSE-REFERENCE -->
+## Expand the complete default configurations
 
-| Setting | Profile behavior |
-|---|---|
-| Parallelism | TP4/DCP1; four 96-GB GPUs in the measured configuration |
-| Speculation when omitted | Off; the explicit examples select MTP3 or DFlash2 K7 |
-| Target precision | ModelOpt NVFP4; B12X MoE and dense backends |
-| Attention | B12X sparse attention/selection; FlashKDA recurrent prefill |
-| MTP | B12X attention, Marlin draft MoE, private NVFP4 draft vocabulary head; BF16 target head |
-| DFlash2 | Offline MXFP8 weights, B12X dense path, FLASH_ATTN draft attention, automatic draft KV dtype |
-| Target KV | FP8; `--kv-cache-dtype nvfp4_ds_mla` is an explicit, separately unqualified option for this artifact |
-| Graphs | Full-and-piecewise target/draft decode graphs, capture sizes through 256 |
-| Scheduler | 4096 tokens, 32 sequences, one prefill lane, compute share 0.4 |
-| Context / GPU fraction | 1,048,576 configured tokens / 0.93; configuration is not a million-token test |
-| Prefix policy | `request_boundaries` with `mamba-cache-mode=align`; no manual retention interval needed |
-| Sampling / reasoning | Temperature 1, top-p .95, reasoning `high`, `clear_thinking=false` |
-| Vision | No artificial one/two-image profile cap; native encoder/context/memory limits remain |
+Each block contains a runnable release-tagged Compose file, all image/profile
+ENV settings and the resolved vLLM command. Requires Docker Compose 2.23.1+.
+These snapshots use GPU-only prefix caching; inactive cache options do not
+start LMCache. They are deployment defaults, not benchmark-only overrides.
+
+For ordinary TP, speculation or cache changes, use the short commands above
+so dependent settings are recalculated. See the
+[expanded-file editing guide](../docs/unified-vllm-docker.md#expand-the-complete-default-configurations)
+before modifying a frozen configuration. No credentials are included.
+
+<details>
+<summary>GLM-5.3 Flash: TP4, no speculation: full Compose, ENV and vLLM command</summary>
+
+[Download the complete Compose file](https://raw.githubusercontent.com/local-inference-lab/rtx6kpro/master/docs/compose/karmic-kraken-beta/glm53-tp4-off.compose.yaml). Save it as `glm53-tp4-off.compose.yaml`,
+choose GPU IDs, then run:
+
+```bash
+docker compose -f glm53-tp4-off.compose.yaml up -d
+```
+
+Logs: `docker compose -f glm53-tp4-off.compose.yaml logs -f model`.
+Stop: `docker compose -f glm53-tp4-off.compose.yaml down` (keeps model/cache volumes).
+
+```yaml
+# Generated from the selected image's shared runtime profiles.
+# Requires Docker Compose 2.23.1 or newer. No HF credentials are embedded.
+name: glm53-tp4-off
+services:
+  model:
+    image: ghcr.io/local-inference-lab/vllm:karmic-kraken-beta-20260922-3221ccacf71002ea
+    container_name: glm53-tp4-off
+    init: true
+    network_mode: host
+    ipc: host
+    shm_size: 32g
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      stack:
+        soft: 67108864
+        hard: 67108864
+    volumes:
+    - lil-huggingface:/root/.cache/huggingface
+    - glm53-tp4-off-runtime:/cache
+    entrypoint:
+    - /opt/venv/bin/python
+    - -m
+    - runtime.explicit
+    command:
+    - --config
+    - /etc/lil-launch.yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+            capabilities:
+            - gpu
+    environment:
+      B12X_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/compile
+      B12X_CUTE_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/cute
+      B12X_DYNAMIC_DIRECT_EXPERT_SCALES: '1'
+      B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET: '1'
+      B12X_DYNAMIC_SPLIT_COMPUTE_MAC: '224'
+      B12X_DYNAMIC_SPLIT_FAST_PREPARE: '1'
+      B12X_DYNAMIC_SPLIT_LOW_SMEM: '1'
+      B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE: '1'
+      B12X_DYNAMIC_WORK_SOURCE: persistent_grid
+      B12X_MHC_PDL: '1'
+      B12X_PCIE_ONESHOT_BLOCK_LIMIT: '4'
+      B12X_PCIE_ONESHOT_PDL: '1'
+      B12X_PCIE_ONESHOT_THREADS: '512'
+      BASH_ENV: /etc/bash.bashrc
+      CCCL_VERSION: 13.3.4.2.1
+      COCOAPI_VERSION: 2.0+nv0.8.1
+      CUBLASMP_VERSION: 0.10.0.3695
+      CUBLAS_VERSION: 13.7.0.27
+      CUDA_ARCH_LIST: 7.5 8.0 8.6 9.0 10.0 12.0
+      CUDA_BINARY_LOADER_THREAD_COUNT: '8'
+      CUDA_CACHE_PATH: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/cuda
+      CUDA_COMPONENT_LIST: crt nvrtc driver-dev culibos-dev cudart cudart-dev nvcc tileiras cupti
+      CUDA_DEVICE_ORDER: PCI_BUS_ID
+      CUDA_DRIVER_VERSION: 615.65.02
+      CUDA_HOME: /usr/local/cuda
+      CUDA_MODULE_LOADING: LAZY
+      CUDA_VERSION: 13.4.1.012
+      CUDLA_VERSION: 13.4.49
+      CUDNN_FRONTEND_VERSION: 1.27.0
+      CUDNN_VERSION: 9.25.0.28
+      CUFFT_VERSION: 12.4.0.34
+      CUFILE_VERSION: 1.19.0.109
+      CURAND_VERSION: 10.4.4.49
+      CUSOLVERMP_VERSION: 0.9.0.6427
+      CUSOLVER_VERSION: 12.3.2.15
+      CUSPARSELT_VERSION: 0.9.1.1
+      CUSPARSE_VERSION: 12.8.6.49
+      CUTE_DSL_ARCH: sm_120a
+      CUTE_DSL_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/cute-dsl
+      CUTILE_PYTHON_VERSION: 1.5.0
+      CUTLASS_DSL_VERSION: 4.6.2
+      DALI_BUILD: ''
+      DALI_URL_SUFFIX: '130'
+      DALI_VERSION: 2.2.0
+      DOCA_VERSION: 3.5.0
+      EFA_VERSION: 1.48.0
+      ENV: /etc/shinit_v2
+      GDRCOPY_VERSION: 2.5.1
+      HF_HOME: /root/.cache/huggingface
+      HPCX_VERSION: '2.50'
+      INSTANTTENSOR_BACKEND: BUFFERED
+      JUPYTER_PORT: '8888'
+      LC_ALL: C.UTF-8
+      LD_LIBRARY_PATH: /usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+      LIBRARY_PATH: '/usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64/stubs:'
+      MAXSMVER: ''
+      MODEL_OPT_VERSION: 0.45.0
+      MOFED_VERSION: 5.4-rdmacore63.0
+      NCCL_BUFFSIZE: '2097152'
+      NCCL_IB_DISABLE: '1'
+      NCCL_MAX_NCHANNELS: '16'
+      NCCL_MIN_NCHANNELS: '16'
+      NCCL_NET_PLUGIN: spcx
+      NCCL_P2P_LEVEL: SYS
+      NCCL_PROTO: LL,LL128,Simple
+      NCCL_VERSION: 2.30.7+cuda13.3
+      NIXL_VERSION: 1.3.0
+      NPP_VERSION: 13.2.0.35
+      NSIGHT_COMPUTE_VERSION: 2026.3.0.13
+      NSIGHT_SYSTEMS_VERSION: 2026.5.1.18
+      NVFATBIN_VERSION: 13.4.49
+      NVFUSER_BUILD_VERSION: 0.1.4a0+nvidia
+      NVFUSER_VERSION: ''
+      NVIDIA_BUILD_ID: '406036884'
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      NVIDIA_PRODUCT_NAME: PyTorch
+      NVIDIA_PYTORCH_VERSION: '26.08'
+      NVIDIA_REQUIRE_CUDA: cuda>=9.0
+      NVIDIA_VISIBLE_DEVICES: 0,1,2,3
+      NVJITLINK_VERSION: 13.4.52
+      NVJPEG_VERSION: 13.2.2.35
+      NVPL_LAPACK_MATH_MODE: PEDANTIC
+      NVPTXCOMPILER_VERSION: 13.4.59
+      NVRX_VERSION: 0.6.0
+      NVSHMEM_VERSION: 3.7.1
+      NVVM_VERSION: 13.4.59
+      OMPI_MCA_coll_hcoll_enable: '0'
+      OMP_NUM_THREADS: '1'
+      OPAL_PREFIX: /usr/local/mpi
+      OPENMPI_VERSION: 5.0.10
+      OPENUCX_VERSION: 1.21.0
+      PATH: /opt/venv/bin:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin
+      PIP_BREAK_SYSTEM_PACKAGES: '1'
+      PIP_CONSTRAINT: /etc/pip/constraint.txt
+      PIP_DEFAULT_TIMEOUT: '100'
+      POLYGRAPHY_VERSION: 0.53.3
+      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+      PYTHONIOENCODING: utf-8
+      PYTORCH_BUILD_NUMBER: '0'
+      PYTORCH_BUILD_VERSION: 2.14.0a0+4fdf77b
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      PYTORCH_HOME: /opt/pytorch/pytorch
+      PYTORCH_VERSION: 2.14.0a0+4fdf77b
+      RDMACORE_VERSION: '63.0'
+      SAFETENSORS_FAST_GPU: '1'
+      SHELL: /bin/bash
+      SPARKINFER_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/compile
+      TENSORBOARD_PORT: '6006'
+      TORCHAO_BUILD_VERSION: +gitdd0efc75
+      TORCHINDUCTOR_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/torchinductor
+      TORCHINDUCTOR_CUTLASS_DIR: /opt/pytorch/pytorch/third_party/cutlass
+      TORCHINDUCTOR_LOOP_ORDERING_AFTER_FUSION: '0'
+      TORCHTITAN_BUILD_VERSION: 0.2.2+gitbadf21a1
+      TORCH_ALLOW_TF32_CUBLAS_OVERRIDE: '1'
+      TORCH_CUDA_ARCH_LIST: 7.5 8.0 8.6 9.0 10.0 12.0+PTX
+      TORCH_NCCL_USE_COMM_NONBLOCKING: '0'
+      TRANSFORMER_ENGINE_VERSION: '2.18'
+      TRITON_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/triton
+      TRITON_CUDACRT_PATH: /usr/local/cuda/include
+      TRITON_CUDART_PATH: /usr/local/cuda/include
+      TRITON_CUOBJDUMP_PATH: /usr/local/cuda/bin/cuobjdump
+      TRITON_CUPTI_INCLUDE_PATH: /usr/local/cuda/include
+      TRITON_CUPTI_LIB_PATH: /usr/local/cuda/lib64
+      TRITON_NVDISASM_PATH: /usr/local/cuda/bin/nvdisasm
+      TRITON_PTXAS_PATH: /usr/local/cuda/bin/ptxas
+      TRTOSS_VERSION: ''
+      TRT_VERSION: 11.2.1.2+cuda13.3
+      UCC_CL_BASIC_TLS: ^sharp
+      UCC_EC_CUDA_EXEC_NUM_THREADS: '256'
+      VIRTUAL_ENV: /opt/venv
+      VLLM_B12X_MLA_CKV_GATHER: '0'
+      VLLM_B12X_MOE_FP4_FORCE_A16: '0'
+      VLLM_B12X_NVFP4_ACTIVATION_MODE: quantized
+      VLLM_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/vllm
+      VLLM_CACHE_ROOT: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/vllm
+      VLLM_CAUSAL_CONV1D_UPDATE_HOIST: '1'
+      VLLM_DISABLED_KERNELS: MarlinFP8ScaledMMLinearKernel
+      VLLM_DISABLE_SHARED_EXPERTS_STREAM: '0'
+      VLLM_ENABLE_PCIE_ALLREDUCE: '1'
+      VLLM_GLM53_DFLASH_ATTN: '1'
+      VLLM_GLM53_KDA_GATE_SIDE_STREAM: '1'
+      VLLM_GLM53_L2_PREFETCH: '1'
+      VLLM_GLM53_L2_PREFETCH_PERSIST_MB: '0'
+      VLLM_GLM53_MTP_DRAFT_HEAD: nvfp4
+      VLLM_GLM53_ONLINE_DENSE_MXFP8: '0'
+      VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE: auto
+      VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE: '2048'
+      VLLM_LM_HEAD_A16: '1'
+      VLLM_MTP_NVFP4_LM_HEAD: '0'
+      VLLM_MXFP8_LM_HEAD: '0'
+      VLLM_PCIE_ALLREDUCE_BACKEND: b12x
+      VLLM_PCIE_DMA_MIN_BYTES: 6MB
+      VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE: 'off'
+      VLLM_PLUGINS: ''
+      VLLM_USE_FLASHINFER_SAMPLER: '1'
+      VLLM_USE_V2_MODEL_RUNNER: '1'
+      VLLM_WORKER_MULTIPROC_METHOD: spawn
+      XDG_CACHE_HOME: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb
+      _CUDA_COMPAT_PATH: /usr/local/cuda/compat
+    configs:
+    - source: lil-launch
+      target: /etc/lil-launch.yaml
+volumes:
+  glm53-tp4-off-runtime:
+    name: glm53-tp4-off-runtime
+  lil-huggingface:
+    name: lil-huggingface
+configs:
+  lil-launch:
+    content: |
+      schema: lil-explicit-launch/v1
+      profile: glm53-flash
+      hardware: rtx-pro-6000-pcie
+      options:
+        cache-transfer-mode: engine_driven
+        cache-l1-gib: 64.0
+        cache-l1-init-gib: 2
+        cache-l2-gib: 512.0
+        cache-l2-enabled: true
+        cache-cpu-workers: 16
+        cache-l2-workers: 8
+        cache-directory: /cache/lmcache
+        cache-object-tokens: 4096
+        cache-native-gib: 64.0
+        cache-host: 127.0.0.1
+        cache-http-host: 127.0.0.1
+        cache-start-timeout: 120.0
+        cache-prefetch-policy: retain
+        cache-broker-directory: /cache/lmcache-cumem
+        cache-load-failure-policy: recompute
+        host: 0.0.0.0
+        port: 8000
+        pipeline-parallel-size: 1
+        decode-context-parallel-size: 1
+        dtype: bfloat16
+        kv-cache-dtype: fp8
+        load-format: instanttensor
+        enable-prefix-caching: true
+        enable-prompt-tokens-details: true
+        enable-chunked-prefill: true
+        enable-auto-tool-choice: true
+        cache-mode: vram
+        cache-gpu-workers: 8
+        model: local-inference-lab/GLM-5.3-Flash-NVFP4
+        served-model-name: GLM-5.3-Flash-NVFP4
+        tensor-parallel-size: 4
+        mode: 'off'
+        prefill-compute-share: '0.4'
+        prefill-schedule-interval: 1
+        max-parallel-prefills: 1
+        max-model-len: 1048576
+        max-num-seqs: 32
+        max-num-batched-tokens: 4096
+        gpu-memory-utilization: 0.93
+        block-size: 256
+        target-page-size: '2048'
+        recurrent-page-size: auto
+        recurrent-checkpoint-policy: request_boundaries
+        mamba-cache-mode: align
+        cp-kv-cache-interleave-size: 4
+        dcp-kv-cache-interleave-size: 4
+        dcp-ckv-gather: auto
+        attention-backend: B12X
+        moe-backend: b12x
+        linear-backend: b12x
+        quantization: modelopt_mixed
+        enable-flashinfer-autotune: false
+        max-cudagraph-capture-size: 256
+        cudagraph-capture-sizes:
+        - 1
+        - 2
+        - 4
+        - 8
+        - 16
+        - 32
+        - 40
+        - 48
+        - 64
+        - 96
+        - 128
+        - 192
+        - 256
+        compilation-config:
+          cudagraph_mode: FULL_AND_PIECEWISE
+        additional-config:
+          glm53_kda_decode_backend: auto
+          kda_prefill_backend: b12x
+        reasoning-parser: glm45
+        tool-call-parser: glm47
+        default-chat-template-kwargs:
+          reasoning_effort: high
+          clear_thinking: false
+        override-generation-config:
+          temperature: 1.0
+          top_p: 0.95
+        draft-tokens: 0
+      passthrough: []
+      vllm_defaults:
+      - async-scheduling
+      - code-revision
+      - decode-refill-target
+      - disable-custom-all-reduce
+      - enable-force-include-usage
+      - enable-request-id-headers
+      - engram-config
+      - gdn-decode-kernel
+      - generation-config
+      - hf-overrides
+      - jit-monitor-mode
+      - kv-cache-memory-bytes
+      - language-model-only
+      - mamba-ssm-cache-dtype
+      - mm-encoder-tp-mode
+      - mm-processor-cache-gb
+      - prefill-compute-half-life
+      - prefill-policy
+      - prefix-cache-retention-interval
+      - prefix-match-unit
+      - revision
+      - safetensors-load-strategy
+      - scheduler-reserve-full-isl
+      - speculative-config
+      - swa-block-size
+      - tokenizer-mode
+      - trust-remote-code
+      runtime_bindings:
+        UNBOUND-RUNTIME: Runtime lock from the selected immutable image
+        checkpoint_identity: Verified target/draft revisions before opening external storage
+      environment_keys:
+      - B12X_COMPILE_CACHE_DIR
+      - B12X_CUTE_COMPILE_CACHE_DIR
+      - B12X_DYNAMIC_DIRECT_EXPERT_SCALES
+      - B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET
+      - B12X_DYNAMIC_SPLIT_COMPUTE_MAC
+      - B12X_DYNAMIC_SPLIT_FAST_PREPARE
+      - B12X_DYNAMIC_SPLIT_LOW_SMEM
+      - B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE
+      - B12X_DYNAMIC_WORK_SOURCE
+      - B12X_MHC_PDL
+      - B12X_PCIE_ONESHOT_BLOCK_LIMIT
+      - B12X_PCIE_ONESHOT_PDL
+      - B12X_PCIE_ONESHOT_THREADS
+      - BASH_ENV
+      - CCCL_VERSION
+      - COCOAPI_VERSION
+      - CUBLASMP_VERSION
+      - CUBLAS_VERSION
+      - CUDA_ARCH_LIST
+      - CUDA_BINARY_LOADER_THREAD_COUNT
+      - CUDA_CACHE_PATH
+      - CUDA_COMPONENT_LIST
+      - CUDA_DEVICE_ORDER
+      - CUDA_DRIVER_VERSION
+      - CUDA_HOME
+      - CUDA_MODULE_LOADING
+      - CUDA_VERSION
+      - CUDLA_VERSION
+      - CUDNN_FRONTEND_VERSION
+      - CUDNN_VERSION
+      - CUFFT_VERSION
+      - CUFILE_VERSION
+      - CURAND_VERSION
+      - CUSOLVERMP_VERSION
+      - CUSOLVER_VERSION
+      - CUSPARSELT_VERSION
+      - CUSPARSE_VERSION
+      - CUTE_DSL_ARCH
+      - CUTE_DSL_CACHE_DIR
+      - CUTILE_PYTHON_VERSION
+      - CUTLASS_DSL_VERSION
+      - DALI_BUILD
+      - DALI_URL_SUFFIX
+      - DALI_VERSION
+      - DOCA_VERSION
+      - EFA_VERSION
+      - ENV
+      - GDRCOPY_VERSION
+      - HF_HOME
+      - HPCX_VERSION
+      - INSTANTTENSOR_BACKEND
+      - JUPYTER_PORT
+      - LC_ALL
+      - LD_LIBRARY_PATH
+      - LIBRARY_PATH
+      - MAXSMVER
+      - MODEL_OPT_VERSION
+      - MOFED_VERSION
+      - NCCL_BUFFSIZE
+      - NCCL_IB_DISABLE
+      - NCCL_MAX_NCHANNELS
+      - NCCL_MIN_NCHANNELS
+      - NCCL_NET_PLUGIN
+      - NCCL_P2P_LEVEL
+      - NCCL_PROTO
+      - NCCL_VERSION
+      - NIXL_VERSION
+      - NPP_VERSION
+      - NSIGHT_COMPUTE_VERSION
+      - NSIGHT_SYSTEMS_VERSION
+      - NVFATBIN_VERSION
+      - NVFUSER_BUILD_VERSION
+      - NVFUSER_VERSION
+      - NVIDIA_BUILD_ID
+      - NVIDIA_DRIVER_CAPABILITIES
+      - NVIDIA_PRODUCT_NAME
+      - NVIDIA_PYTORCH_VERSION
+      - NVIDIA_REQUIRE_CUDA
+      - NVIDIA_VISIBLE_DEVICES
+      - NVJITLINK_VERSION
+      - NVJPEG_VERSION
+      - NVPL_LAPACK_MATH_MODE
+      - NVPTXCOMPILER_VERSION
+      - NVRX_VERSION
+      - NVSHMEM_VERSION
+      - NVVM_VERSION
+      - OMPI_MCA_coll_hcoll_enable
+      - OMP_NUM_THREADS
+      - OPAL_PREFIX
+      - OPENMPI_VERSION
+      - OPENUCX_VERSION
+      - PATH
+      - PIP_BREAK_SYSTEM_PACKAGES
+      - PIP_CONSTRAINT
+      - PIP_DEFAULT_TIMEOUT
+      - POLYGRAPHY_VERSION
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+      - PYTHONIOENCODING
+      - PYTORCH_BUILD_NUMBER
+      - PYTORCH_BUILD_VERSION
+      - PYTORCH_CUDA_ALLOC_CONF
+      - PYTORCH_HOME
+      - PYTORCH_VERSION
+      - RDMACORE_VERSION
+      - SAFETENSORS_FAST_GPU
+      - SHELL
+      - SPARKINFER_COMPILE_CACHE_DIR
+      - TENSORBOARD_PORT
+      - TORCHAO_BUILD_VERSION
+      - TORCHINDUCTOR_CACHE_DIR
+      - TORCHINDUCTOR_CUTLASS_DIR
+      - TORCHINDUCTOR_LOOP_ORDERING_AFTER_FUSION
+      - TORCHTITAN_BUILD_VERSION
+      - TORCH_ALLOW_TF32_CUBLAS_OVERRIDE
+      - TORCH_CUDA_ARCH_LIST
+      - TORCH_NCCL_USE_COMM_NONBLOCKING
+      - TRANSFORMER_ENGINE_VERSION
+      - TRITON_CACHE_DIR
+      - TRITON_CUDACRT_PATH
+      - TRITON_CUDART_PATH
+      - TRITON_CUOBJDUMP_PATH
+      - TRITON_CUPTI_INCLUDE_PATH
+      - TRITON_CUPTI_LIB_PATH
+      - TRITON_NVDISASM_PATH
+      - TRITON_PTXAS_PATH
+      - TRTOSS_VERSION
+      - TRT_VERSION
+      - UCC_CL_BASIC_TLS
+      - UCC_EC_CUDA_EXEC_NUM_THREADS
+      - VIRTUAL_ENV
+      - VLLM_B12X_MLA_CKV_GATHER
+      - VLLM_B12X_MOE_FP4_FORCE_A16
+      - VLLM_B12X_NVFP4_ACTIVATION_MODE
+      - VLLM_CACHE_DIR
+      - VLLM_CACHE_ROOT
+      - VLLM_CAUSAL_CONV1D_UPDATE_HOIST
+      - VLLM_DISABLED_KERNELS
+      - VLLM_DISABLE_SHARED_EXPERTS_STREAM
+      - VLLM_ENABLE_PCIE_ALLREDUCE
+      - VLLM_GLM53_DFLASH_ATTN
+      - VLLM_GLM53_KDA_GATE_SIDE_STREAM
+      - VLLM_GLM53_L2_PREFETCH
+      - VLLM_GLM53_L2_PREFETCH_PERSIST_MB
+      - VLLM_GLM53_MTP_DRAFT_HEAD
+      - VLLM_GLM53_ONLINE_DENSE_MXFP8
+      - VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE
+      - VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE
+      - VLLM_LM_HEAD_A16
+      - VLLM_MTP_NVFP4_LM_HEAD
+      - VLLM_MXFP8_LM_HEAD
+      - VLLM_PCIE_ALLREDUCE_BACKEND
+      - VLLM_PCIE_DMA_MIN_BYTES
+      - VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE
+      - VLLM_PLUGINS
+      - VLLM_USE_FLASHINFER_SAMPLER
+      - VLLM_USE_V2_MODEL_RUNNER
+      - VLLM_WORKER_MULTIPROC_METHOD
+      - XDG_CACHE_HOME
+      - _CUDA_COMPAT_PATH
+```
+
+The explicit runner passes these native arguments to vLLM through the image's
+CUDA/NCCL bootstrap. This command is shown for inspection; the Compose file
+above also supplies its environment and persistent volumes.
+
+```bash
+/opt/venv/bin/python -m vllm.entrypoints.cli.main serve local-inference-lab/GLM-5.3-Flash-NVFP4 \
+  --additional-config '{"glm53_kda_decode_backend":"auto","kda_prefill_backend":"b12x"}' \
+  --attention-backend B12X \
+  --block-size 256 \
+  --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE"}' \
+  --cp-kv-cache-interleave-size 4 \
+  --cudagraph-capture-sizes 1 2 4 8 16 32 40 48 64 96 128 192 256 \
+  --dcp-kv-cache-interleave-size 4 \
+  --decode-context-parallel-size 1 \
+  --default-chat-template-kwargs '{"reasoning_effort":"high","clear_thinking":false}' \
+  --dtype bfloat16 \
+  --enable-auto-tool-choice \
+  --enable-chunked-prefill \
+  --no-enable-flashinfer-autotune \
+  --enable-prefix-caching \
+  --enable-prompt-tokens-details \
+  --gpu-memory-utilization 0.93 \
+  --host 0.0.0.0 \
+  --kv-cache-dtype fp8 \
+  --linear-backend b12x \
+  --load-format instanttensor \
+  --mamba-cache-mode align \
+  --max-cudagraph-capture-size 256 \
+  --max-model-len 1048576 \
+  --max-num-batched-tokens 4096 \
+  --max-num-seqs 32 \
+  --max-parallel-prefills 1 \
+  --moe-backend b12x \
+  --override-generation-config '{"temperature":1.0,"top_p":0.95}' \
+  --pipeline-parallel-size 1 \
+  --port 8000 \
+  --prefill-compute-share 0.4 \
+  --prefill-schedule-interval 1 \
+  --quantization modelopt_mixed \
+  --reasoning-parser glm45 \
+  --recurrent-checkpoint-policy request_boundaries \
+  --served-model-name GLM-5.3-Flash-NVFP4 \
+  --tensor-parallel-size 4 \
+  --tool-call-parser glm47
+```
+
+</details>
+
+<details>
+<summary>GLM-5.3 Flash: TP4, MTP3: full Compose, ENV and vLLM command</summary>
+
+[Download the complete Compose file](https://raw.githubusercontent.com/local-inference-lab/rtx6kpro/master/docs/compose/karmic-kraken-beta/glm53-tp4-mtp3.compose.yaml). Save it as `glm53-tp4-mtp3.compose.yaml`,
+choose GPU IDs, then run:
+
+```bash
+docker compose -f glm53-tp4-mtp3.compose.yaml up -d
+```
+
+Logs: `docker compose -f glm53-tp4-mtp3.compose.yaml logs -f model`.
+Stop: `docker compose -f glm53-tp4-mtp3.compose.yaml down` (keeps model/cache volumes).
+
+```yaml
+# Generated from the selected image's shared runtime profiles.
+# Requires Docker Compose 2.23.1 or newer. No HF credentials are embedded.
+name: glm53-tp4-mtp3
+services:
+  model:
+    image: ghcr.io/local-inference-lab/vllm:karmic-kraken-beta-20260922-3221ccacf71002ea
+    container_name: glm53-tp4-mtp3
+    init: true
+    network_mode: host
+    ipc: host
+    shm_size: 32g
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      stack:
+        soft: 67108864
+        hard: 67108864
+    volumes:
+    - lil-huggingface:/root/.cache/huggingface
+    - glm53-tp4-mtp3-runtime:/cache
+    entrypoint:
+    - /opt/venv/bin/python
+    - -m
+    - runtime.explicit
+    command:
+    - --config
+    - /etc/lil-launch.yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+            capabilities:
+            - gpu
+    environment:
+      B12X_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/compile
+      B12X_CUTE_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/cute
+      B12X_DYNAMIC_DIRECT_EXPERT_SCALES: '1'
+      B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET: '1'
+      B12X_DYNAMIC_SPLIT_COMPUTE_MAC: '224'
+      B12X_DYNAMIC_SPLIT_FAST_PREPARE: '1'
+      B12X_DYNAMIC_SPLIT_LOW_SMEM: '1'
+      B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE: '1'
+      B12X_DYNAMIC_WORK_SOURCE: persistent_grid
+      B12X_MHC_PDL: '1'
+      B12X_PCIE_ONESHOT_BLOCK_LIMIT: '4'
+      B12X_PCIE_ONESHOT_PDL: '1'
+      B12X_PCIE_ONESHOT_THREADS: '512'
+      BASH_ENV: /etc/bash.bashrc
+      CCCL_VERSION: 13.3.4.2.1
+      COCOAPI_VERSION: 2.0+nv0.8.1
+      CUBLASMP_VERSION: 0.10.0.3695
+      CUBLAS_VERSION: 13.7.0.27
+      CUDA_ARCH_LIST: 7.5 8.0 8.6 9.0 10.0 12.0
+      CUDA_BINARY_LOADER_THREAD_COUNT: '8'
+      CUDA_CACHE_PATH: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/cuda
+      CUDA_COMPONENT_LIST: crt nvrtc driver-dev culibos-dev cudart cudart-dev nvcc tileiras cupti
+      CUDA_DEVICE_ORDER: PCI_BUS_ID
+      CUDA_DRIVER_VERSION: 615.65.02
+      CUDA_HOME: /usr/local/cuda
+      CUDA_MODULE_LOADING: LAZY
+      CUDA_VERSION: 13.4.1.012
+      CUDLA_VERSION: 13.4.49
+      CUDNN_FRONTEND_VERSION: 1.27.0
+      CUDNN_VERSION: 9.25.0.28
+      CUFFT_VERSION: 12.4.0.34
+      CUFILE_VERSION: 1.19.0.109
+      CURAND_VERSION: 10.4.4.49
+      CUSOLVERMP_VERSION: 0.9.0.6427
+      CUSOLVER_VERSION: 12.3.2.15
+      CUSPARSELT_VERSION: 0.9.1.1
+      CUSPARSE_VERSION: 12.8.6.49
+      CUTE_DSL_ARCH: sm_120a
+      CUTE_DSL_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/cute-dsl
+      CUTILE_PYTHON_VERSION: 1.5.0
+      CUTLASS_DSL_VERSION: 4.6.2
+      DALI_BUILD: ''
+      DALI_URL_SUFFIX: '130'
+      DALI_VERSION: 2.2.0
+      DOCA_VERSION: 3.5.0
+      EFA_VERSION: 1.48.0
+      ENV: /etc/shinit_v2
+      GDRCOPY_VERSION: 2.5.1
+      HF_HOME: /root/.cache/huggingface
+      HPCX_VERSION: '2.50'
+      INSTANTTENSOR_BACKEND: BUFFERED
+      JUPYTER_PORT: '8888'
+      LC_ALL: C.UTF-8
+      LD_LIBRARY_PATH: /usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+      LIBRARY_PATH: '/usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64/stubs:'
+      MAXSMVER: ''
+      MODEL_OPT_VERSION: 0.45.0
+      MOFED_VERSION: 5.4-rdmacore63.0
+      NCCL_BUFFSIZE: '2097152'
+      NCCL_IB_DISABLE: '1'
+      NCCL_MAX_NCHANNELS: '16'
+      NCCL_MIN_NCHANNELS: '16'
+      NCCL_NET_PLUGIN: spcx
+      NCCL_P2P_LEVEL: SYS
+      NCCL_PROTO: LL,LL128,Simple
+      NCCL_VERSION: 2.30.7+cuda13.3
+      NIXL_VERSION: 1.3.0
+      NPP_VERSION: 13.2.0.35
+      NSIGHT_COMPUTE_VERSION: 2026.3.0.13
+      NSIGHT_SYSTEMS_VERSION: 2026.5.1.18
+      NVFATBIN_VERSION: 13.4.49
+      NVFUSER_BUILD_VERSION: 0.1.4a0+nvidia
+      NVFUSER_VERSION: ''
+      NVIDIA_BUILD_ID: '406036884'
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      NVIDIA_PRODUCT_NAME: PyTorch
+      NVIDIA_PYTORCH_VERSION: '26.08'
+      NVIDIA_REQUIRE_CUDA: cuda>=9.0
+      NVIDIA_VISIBLE_DEVICES: 0,1,2,3
+      NVJITLINK_VERSION: 13.4.52
+      NVJPEG_VERSION: 13.2.2.35
+      NVPL_LAPACK_MATH_MODE: PEDANTIC
+      NVPTXCOMPILER_VERSION: 13.4.59
+      NVRX_VERSION: 0.6.0
+      NVSHMEM_VERSION: 3.7.1
+      NVVM_VERSION: 13.4.59
+      OMPI_MCA_coll_hcoll_enable: '0'
+      OMP_NUM_THREADS: '1'
+      OPAL_PREFIX: /usr/local/mpi
+      OPENMPI_VERSION: 5.0.10
+      OPENUCX_VERSION: 1.21.0
+      PATH: /opt/venv/bin:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin
+      PIP_BREAK_SYSTEM_PACKAGES: '1'
+      PIP_CONSTRAINT: /etc/pip/constraint.txt
+      PIP_DEFAULT_TIMEOUT: '100'
+      POLYGRAPHY_VERSION: 0.53.3
+      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+      PYTHONIOENCODING: utf-8
+      PYTORCH_BUILD_NUMBER: '0'
+      PYTORCH_BUILD_VERSION: 2.14.0a0+4fdf77b
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      PYTORCH_HOME: /opt/pytorch/pytorch
+      PYTORCH_VERSION: 2.14.0a0+4fdf77b
+      RDMACORE_VERSION: '63.0'
+      SAFETENSORS_FAST_GPU: '1'
+      SHELL: /bin/bash
+      SPARKINFER_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/compile
+      TENSORBOARD_PORT: '6006'
+      TORCHAO_BUILD_VERSION: +gitdd0efc75
+      TORCHINDUCTOR_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/torchinductor
+      TORCHINDUCTOR_CUTLASS_DIR: /opt/pytorch/pytorch/third_party/cutlass
+      TORCHINDUCTOR_LOOP_ORDERING_AFTER_FUSION: '0'
+      TORCHTITAN_BUILD_VERSION: 0.2.2+gitbadf21a1
+      TORCH_ALLOW_TF32_CUBLAS_OVERRIDE: '1'
+      TORCH_CUDA_ARCH_LIST: 7.5 8.0 8.6 9.0 10.0 12.0+PTX
+      TORCH_NCCL_USE_COMM_NONBLOCKING: '0'
+      TRANSFORMER_ENGINE_VERSION: '2.18'
+      TRITON_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/triton
+      TRITON_CUDACRT_PATH: /usr/local/cuda/include
+      TRITON_CUDART_PATH: /usr/local/cuda/include
+      TRITON_CUOBJDUMP_PATH: /usr/local/cuda/bin/cuobjdump
+      TRITON_CUPTI_INCLUDE_PATH: /usr/local/cuda/include
+      TRITON_CUPTI_LIB_PATH: /usr/local/cuda/lib64
+      TRITON_NVDISASM_PATH: /usr/local/cuda/bin/nvdisasm
+      TRITON_PTXAS_PATH: /usr/local/cuda/bin/ptxas
+      TRTOSS_VERSION: ''
+      TRT_VERSION: 11.2.1.2+cuda13.3
+      UCC_CL_BASIC_TLS: ^sharp
+      UCC_EC_CUDA_EXEC_NUM_THREADS: '256'
+      VIRTUAL_ENV: /opt/venv
+      VLLM_B12X_MLA_CKV_GATHER: '0'
+      VLLM_B12X_MOE_FP4_FORCE_A16: '0'
+      VLLM_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/vllm
+      VLLM_CACHE_ROOT: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/vllm
+      VLLM_CAUSAL_CONV1D_UPDATE_HOIST: '1'
+      VLLM_DISABLED_KERNELS: MarlinFP8ScaledMMLinearKernel
+      VLLM_DISABLE_SHARED_EXPERTS_STREAM: '0'
+      VLLM_ENABLE_PCIE_ALLREDUCE: '1'
+      VLLM_GLM53_DFLASH_ATTN: '1'
+      VLLM_GLM53_KDA_GATE_SIDE_STREAM: '1'
+      VLLM_GLM53_L2_PREFETCH: '1'
+      VLLM_GLM53_L2_PREFETCH_PERSIST_MB: '0'
+      VLLM_GLM53_MTP_DRAFT_HEAD: nvfp4
+      VLLM_GLM53_ONLINE_DENSE_MXFP8: '0'
+      VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE: auto
+      VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE: '2048'
+      VLLM_LM_HEAD_A16: '1'
+      VLLM_MTP_NVFP4_LM_HEAD: '0'
+      VLLM_MXFP8_LM_HEAD: '0'
+      VLLM_PCIE_ALLREDUCE_BACKEND: b12x
+      VLLM_PCIE_DMA_MIN_BYTES: 6MB
+      VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE: 'off'
+      VLLM_PLUGINS: ''
+      VLLM_USE_FLASHINFER_SAMPLER: '1'
+      VLLM_USE_V2_MODEL_RUNNER: '1'
+      VLLM_WORKER_MULTIPROC_METHOD: spawn
+      XDG_CACHE_HOME: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb
+      _CUDA_COMPAT_PATH: /usr/local/cuda/compat
+    configs:
+    - source: lil-launch
+      target: /etc/lil-launch.yaml
+volumes:
+  glm53-tp4-mtp3-runtime:
+    name: glm53-tp4-mtp3-runtime
+  lil-huggingface:
+    name: lil-huggingface
+configs:
+  lil-launch:
+    content: |
+      schema: lil-explicit-launch/v1
+      profile: glm53-flash
+      hardware: rtx-pro-6000-pcie
+      options:
+        cache-transfer-mode: engine_driven
+        cache-l1-gib: 64.0
+        cache-l1-init-gib: 2
+        cache-l2-gib: 512.0
+        cache-l2-enabled: true
+        cache-cpu-workers: 16
+        cache-l2-workers: 8
+        cache-directory: /cache/lmcache
+        cache-object-tokens: 4096
+        cache-native-gib: 64.0
+        cache-host: 127.0.0.1
+        cache-http-host: 127.0.0.1
+        cache-start-timeout: 120.0
+        cache-prefetch-policy: retain
+        cache-broker-directory: /cache/lmcache-cumem
+        cache-load-failure-policy: recompute
+        host: 0.0.0.0
+        port: 8000
+        pipeline-parallel-size: 1
+        decode-context-parallel-size: 1
+        dtype: bfloat16
+        kv-cache-dtype: fp8
+        load-format: instanttensor
+        enable-prefix-caching: true
+        enable-prompt-tokens-details: true
+        enable-chunked-prefill: true
+        enable-auto-tool-choice: true
+        cache-mode: vram
+        cache-gpu-workers: 8
+        model: local-inference-lab/GLM-5.3-Flash-NVFP4
+        served-model-name: GLM-5.3-Flash-NVFP4
+        tensor-parallel-size: 4
+        mode: mtp
+        prefill-compute-share: '0.4'
+        prefill-schedule-interval: 1
+        max-parallel-prefills: 1
+        max-model-len: 1048576
+        max-num-seqs: 32
+        max-num-batched-tokens: 4096
+        gpu-memory-utilization: 0.93
+        block-size: 256
+        target-page-size: '2048'
+        recurrent-page-size: auto
+        recurrent-checkpoint-policy: request_boundaries
+        mamba-cache-mode: align
+        cp-kv-cache-interleave-size: 4
+        dcp-kv-cache-interleave-size: 4
+        dcp-ckv-gather: auto
+        attention-backend: B12X
+        moe-backend: b12x
+        linear-backend: b12x
+        quantization: modelopt_mixed
+        enable-flashinfer-autotune: false
+        max-cudagraph-capture-size: 256
+        cudagraph-capture-sizes:
+        - 1
+        - 2
+        - 4
+        - 8
+        - 16
+        - 32
+        - 40
+        - 48
+        - 64
+        - 96
+        - 128
+        - 192
+        - 256
+        compilation-config:
+          cudagraph_mode: FULL_AND_PIECEWISE
+        additional-config:
+          glm53_kda_decode_backend: auto
+          kda_prefill_backend: b12x
+        reasoning-parser: glm45
+        tool-call-parser: glm47
+        default-chat-template-kwargs:
+          reasoning_effort: high
+          clear_thinking: false
+        override-generation-config:
+          temperature: 1.0
+          top_p: 0.95
+        draft-tokens: 3
+        speculative-config:
+          method: mtp
+          draft_sample_method: probabilistic
+          rejection_sample_method: standard
+          moe_backend: marlin
+          attention_backend: B12X
+          num_speculative_tokens: 3
+      passthrough: []
+      vllm_defaults:
+      - async-scheduling
+      - code-revision
+      - decode-refill-target
+      - disable-custom-all-reduce
+      - enable-force-include-usage
+      - enable-request-id-headers
+      - engram-config
+      - gdn-decode-kernel
+      - generation-config
+      - hf-overrides
+      - jit-monitor-mode
+      - kv-cache-memory-bytes
+      - language-model-only
+      - mamba-ssm-cache-dtype
+      - mm-encoder-tp-mode
+      - mm-processor-cache-gb
+      - prefill-compute-half-life
+      - prefill-policy
+      - prefix-cache-retention-interval
+      - prefix-match-unit
+      - revision
+      - safetensors-load-strategy
+      - scheduler-reserve-full-isl
+      - swa-block-size
+      - tokenizer-mode
+      - trust-remote-code
+      runtime_bindings:
+        UNBOUND-RUNTIME: Runtime lock from the selected immutable image
+        checkpoint_identity: Verified target/draft revisions before opening external storage
+      environment_keys:
+      - B12X_COMPILE_CACHE_DIR
+      - B12X_CUTE_COMPILE_CACHE_DIR
+      - B12X_DYNAMIC_DIRECT_EXPERT_SCALES
+      - B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET
+      - B12X_DYNAMIC_SPLIT_COMPUTE_MAC
+      - B12X_DYNAMIC_SPLIT_FAST_PREPARE
+      - B12X_DYNAMIC_SPLIT_LOW_SMEM
+      - B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE
+      - B12X_DYNAMIC_WORK_SOURCE
+      - B12X_MHC_PDL
+      - B12X_PCIE_ONESHOT_BLOCK_LIMIT
+      - B12X_PCIE_ONESHOT_PDL
+      - B12X_PCIE_ONESHOT_THREADS
+      - BASH_ENV
+      - CCCL_VERSION
+      - COCOAPI_VERSION
+      - CUBLASMP_VERSION
+      - CUBLAS_VERSION
+      - CUDA_ARCH_LIST
+      - CUDA_BINARY_LOADER_THREAD_COUNT
+      - CUDA_CACHE_PATH
+      - CUDA_COMPONENT_LIST
+      - CUDA_DEVICE_ORDER
+      - CUDA_DRIVER_VERSION
+      - CUDA_HOME
+      - CUDA_MODULE_LOADING
+      - CUDA_VERSION
+      - CUDLA_VERSION
+      - CUDNN_FRONTEND_VERSION
+      - CUDNN_VERSION
+      - CUFFT_VERSION
+      - CUFILE_VERSION
+      - CURAND_VERSION
+      - CUSOLVERMP_VERSION
+      - CUSOLVER_VERSION
+      - CUSPARSELT_VERSION
+      - CUSPARSE_VERSION
+      - CUTE_DSL_ARCH
+      - CUTE_DSL_CACHE_DIR
+      - CUTILE_PYTHON_VERSION
+      - CUTLASS_DSL_VERSION
+      - DALI_BUILD
+      - DALI_URL_SUFFIX
+      - DALI_VERSION
+      - DOCA_VERSION
+      - EFA_VERSION
+      - ENV
+      - GDRCOPY_VERSION
+      - HF_HOME
+      - HPCX_VERSION
+      - INSTANTTENSOR_BACKEND
+      - JUPYTER_PORT
+      - LC_ALL
+      - LD_LIBRARY_PATH
+      - LIBRARY_PATH
+      - MAXSMVER
+      - MODEL_OPT_VERSION
+      - MOFED_VERSION
+      - NCCL_BUFFSIZE
+      - NCCL_IB_DISABLE
+      - NCCL_MAX_NCHANNELS
+      - NCCL_MIN_NCHANNELS
+      - NCCL_NET_PLUGIN
+      - NCCL_P2P_LEVEL
+      - NCCL_PROTO
+      - NCCL_VERSION
+      - NIXL_VERSION
+      - NPP_VERSION
+      - NSIGHT_COMPUTE_VERSION
+      - NSIGHT_SYSTEMS_VERSION
+      - NVFATBIN_VERSION
+      - NVFUSER_BUILD_VERSION
+      - NVFUSER_VERSION
+      - NVIDIA_BUILD_ID
+      - NVIDIA_DRIVER_CAPABILITIES
+      - NVIDIA_PRODUCT_NAME
+      - NVIDIA_PYTORCH_VERSION
+      - NVIDIA_REQUIRE_CUDA
+      - NVIDIA_VISIBLE_DEVICES
+      - NVJITLINK_VERSION
+      - NVJPEG_VERSION
+      - NVPL_LAPACK_MATH_MODE
+      - NVPTXCOMPILER_VERSION
+      - NVRX_VERSION
+      - NVSHMEM_VERSION
+      - NVVM_VERSION
+      - OMPI_MCA_coll_hcoll_enable
+      - OMP_NUM_THREADS
+      - OPAL_PREFIX
+      - OPENMPI_VERSION
+      - OPENUCX_VERSION
+      - PATH
+      - PIP_BREAK_SYSTEM_PACKAGES
+      - PIP_CONSTRAINT
+      - PIP_DEFAULT_TIMEOUT
+      - POLYGRAPHY_VERSION
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+      - PYTHONIOENCODING
+      - PYTORCH_BUILD_NUMBER
+      - PYTORCH_BUILD_VERSION
+      - PYTORCH_CUDA_ALLOC_CONF
+      - PYTORCH_HOME
+      - PYTORCH_VERSION
+      - RDMACORE_VERSION
+      - SAFETENSORS_FAST_GPU
+      - SHELL
+      - SPARKINFER_COMPILE_CACHE_DIR
+      - TENSORBOARD_PORT
+      - TORCHAO_BUILD_VERSION
+      - TORCHINDUCTOR_CACHE_DIR
+      - TORCHINDUCTOR_CUTLASS_DIR
+      - TORCHINDUCTOR_LOOP_ORDERING_AFTER_FUSION
+      - TORCHTITAN_BUILD_VERSION
+      - TORCH_ALLOW_TF32_CUBLAS_OVERRIDE
+      - TORCH_CUDA_ARCH_LIST
+      - TORCH_NCCL_USE_COMM_NONBLOCKING
+      - TRANSFORMER_ENGINE_VERSION
+      - TRITON_CACHE_DIR
+      - TRITON_CUDACRT_PATH
+      - TRITON_CUDART_PATH
+      - TRITON_CUOBJDUMP_PATH
+      - TRITON_CUPTI_INCLUDE_PATH
+      - TRITON_CUPTI_LIB_PATH
+      - TRITON_NVDISASM_PATH
+      - TRITON_PTXAS_PATH
+      - TRTOSS_VERSION
+      - TRT_VERSION
+      - UCC_CL_BASIC_TLS
+      - UCC_EC_CUDA_EXEC_NUM_THREADS
+      - VIRTUAL_ENV
+      - VLLM_B12X_MLA_CKV_GATHER
+      - VLLM_B12X_MOE_FP4_FORCE_A16
+      - VLLM_CACHE_DIR
+      - VLLM_CACHE_ROOT
+      - VLLM_CAUSAL_CONV1D_UPDATE_HOIST
+      - VLLM_DISABLED_KERNELS
+      - VLLM_DISABLE_SHARED_EXPERTS_STREAM
+      - VLLM_ENABLE_PCIE_ALLREDUCE
+      - VLLM_GLM53_DFLASH_ATTN
+      - VLLM_GLM53_KDA_GATE_SIDE_STREAM
+      - VLLM_GLM53_L2_PREFETCH
+      - VLLM_GLM53_L2_PREFETCH_PERSIST_MB
+      - VLLM_GLM53_MTP_DRAFT_HEAD
+      - VLLM_GLM53_ONLINE_DENSE_MXFP8
+      - VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE
+      - VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE
+      - VLLM_LM_HEAD_A16
+      - VLLM_MTP_NVFP4_LM_HEAD
+      - VLLM_MXFP8_LM_HEAD
+      - VLLM_PCIE_ALLREDUCE_BACKEND
+      - VLLM_PCIE_DMA_MIN_BYTES
+      - VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE
+      - VLLM_PLUGINS
+      - VLLM_USE_FLASHINFER_SAMPLER
+      - VLLM_USE_V2_MODEL_RUNNER
+      - VLLM_WORKER_MULTIPROC_METHOD
+      - XDG_CACHE_HOME
+      - _CUDA_COMPAT_PATH
+```
+
+The explicit runner passes these native arguments to vLLM through the image's
+CUDA/NCCL bootstrap. This command is shown for inspection; the Compose file
+above also supplies its environment and persistent volumes.
+
+```bash
+/opt/venv/bin/python -m vllm.entrypoints.cli.main serve local-inference-lab/GLM-5.3-Flash-NVFP4 \
+  --additional-config '{"glm53_kda_decode_backend":"auto","kda_prefill_backend":"b12x"}' \
+  --attention-backend B12X \
+  --block-size 256 \
+  --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE"}' \
+  --cp-kv-cache-interleave-size 4 \
+  --cudagraph-capture-sizes 1 2 4 8 16 32 40 48 64 96 128 192 256 \
+  --dcp-kv-cache-interleave-size 4 \
+  --decode-context-parallel-size 1 \
+  --default-chat-template-kwargs '{"reasoning_effort":"high","clear_thinking":false}' \
+  --dtype bfloat16 \
+  --enable-auto-tool-choice \
+  --enable-chunked-prefill \
+  --no-enable-flashinfer-autotune \
+  --enable-prefix-caching \
+  --enable-prompt-tokens-details \
+  --gpu-memory-utilization 0.93 \
+  --host 0.0.0.0 \
+  --kv-cache-dtype fp8 \
+  --linear-backend b12x \
+  --load-format instanttensor \
+  --mamba-cache-mode align \
+  --max-cudagraph-capture-size 256 \
+  --max-model-len 1048576 \
+  --max-num-batched-tokens 4096 \
+  --max-num-seqs 32 \
+  --max-parallel-prefills 1 \
+  --moe-backend b12x \
+  --override-generation-config '{"temperature":1.0,"top_p":0.95}' \
+  --pipeline-parallel-size 1 \
+  --port 8000 \
+  --prefill-compute-share 0.4 \
+  --prefill-schedule-interval 1 \
+  --quantization modelopt_mixed \
+  --reasoning-parser glm45 \
+  --recurrent-checkpoint-policy request_boundaries \
+  --served-model-name GLM-5.3-Flash-NVFP4 \
+  --speculative-config '{"method":"mtp","draft_sample_method":"probabilistic","rejection_sample_method":"standard","moe_backend":"marlin","attention_backend":"B12X","num_speculative_tokens":3}' \
+  --tensor-parallel-size 4 \
+  --tool-call-parser glm47
+```
+
+</details>
+
+<details>
+<summary>GLM-5.3 Flash: TP4, DFlash2 K7: full Compose, ENV and vLLM command</summary>
+
+[Download the complete Compose file](https://raw.githubusercontent.com/local-inference-lab/rtx6kpro/master/docs/compose/karmic-kraken-beta/glm53-tp4-dflash2.compose.yaml). Save it as `glm53-tp4-dflash2.compose.yaml`,
+choose GPU IDs, then run:
+
+```bash
+docker compose -f glm53-tp4-dflash2.compose.yaml up -d
+```
+
+Logs: `docker compose -f glm53-tp4-dflash2.compose.yaml logs -f model`.
+Stop: `docker compose -f glm53-tp4-dflash2.compose.yaml down` (keeps model/cache volumes).
+
+```yaml
+# Generated from the selected image's shared runtime profiles.
+# Requires Docker Compose 2.23.1 or newer. No HF credentials are embedded.
+name: glm53-tp4-dflash2
+services:
+  model:
+    image: ghcr.io/local-inference-lab/vllm:karmic-kraken-beta-20260922-3221ccacf71002ea
+    container_name: glm53-tp4-dflash2
+    init: true
+    network_mode: host
+    ipc: host
+    shm_size: 32g
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      stack:
+        soft: 67108864
+        hard: 67108864
+    volumes:
+    - lil-huggingface:/root/.cache/huggingface
+    - glm53-tp4-dflash2-runtime:/cache
+    entrypoint:
+    - /opt/venv/bin/python
+    - -m
+    - runtime.explicit
+    command:
+    - --config
+    - /etc/lil-launch.yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+            capabilities:
+            - gpu
+    environment:
+      B12X_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/compile
+      B12X_CUTE_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/cute
+      B12X_DYNAMIC_DIRECT_EXPERT_SCALES: '1'
+      B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET: '1'
+      B12X_DYNAMIC_SPLIT_COMPUTE_MAC: '224'
+      B12X_DYNAMIC_SPLIT_FAST_PREPARE: '1'
+      B12X_DYNAMIC_SPLIT_LOW_SMEM: '1'
+      B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE: '1'
+      B12X_DYNAMIC_WORK_SOURCE: persistent_grid
+      B12X_MHC_PDL: '1'
+      B12X_PCIE_ONESHOT_BLOCK_LIMIT: '4'
+      B12X_PCIE_ONESHOT_PDL: '1'
+      B12X_PCIE_ONESHOT_THREADS: '512'
+      BASH_ENV: /etc/bash.bashrc
+      CCCL_VERSION: 13.3.4.2.1
+      COCOAPI_VERSION: 2.0+nv0.8.1
+      CUBLASMP_VERSION: 0.10.0.3695
+      CUBLAS_VERSION: 13.7.0.27
+      CUDA_ARCH_LIST: 7.5 8.0 8.6 9.0 10.0 12.0
+      CUDA_BINARY_LOADER_THREAD_COUNT: '8'
+      CUDA_CACHE_PATH: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/cuda
+      CUDA_COMPONENT_LIST: crt nvrtc driver-dev culibos-dev cudart cudart-dev nvcc tileiras cupti
+      CUDA_DEVICE_ORDER: PCI_BUS_ID
+      CUDA_DRIVER_VERSION: 615.65.02
+      CUDA_HOME: /usr/local/cuda
+      CUDA_MODULE_LOADING: LAZY
+      CUDA_VERSION: 13.4.1.012
+      CUDLA_VERSION: 13.4.49
+      CUDNN_FRONTEND_VERSION: 1.27.0
+      CUDNN_VERSION: 9.25.0.28
+      CUFFT_VERSION: 12.4.0.34
+      CUFILE_VERSION: 1.19.0.109
+      CURAND_VERSION: 10.4.4.49
+      CUSOLVERMP_VERSION: 0.9.0.6427
+      CUSOLVER_VERSION: 12.3.2.15
+      CUSPARSELT_VERSION: 0.9.1.1
+      CUSPARSE_VERSION: 12.8.6.49
+      CUTE_DSL_ARCH: sm_120a
+      CUTE_DSL_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/cute-dsl
+      CUTILE_PYTHON_VERSION: 1.5.0
+      CUTLASS_DSL_VERSION: 4.6.2
+      DALI_BUILD: ''
+      DALI_URL_SUFFIX: '130'
+      DALI_VERSION: 2.2.0
+      DOCA_VERSION: 3.5.0
+      EFA_VERSION: 1.48.0
+      ENV: /etc/shinit_v2
+      GDRCOPY_VERSION: 2.5.1
+      HF_HOME: /root/.cache/huggingface
+      HPCX_VERSION: '2.50'
+      INSTANTTENSOR_BACKEND: BUFFERED
+      JUPYTER_PORT: '8888'
+      LC_ALL: C.UTF-8
+      LD_LIBRARY_PATH: /usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+      LIBRARY_PATH: '/usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64/stubs:'
+      MAXSMVER: ''
+      MODEL_OPT_VERSION: 0.45.0
+      MOFED_VERSION: 5.4-rdmacore63.0
+      NCCL_BUFFSIZE: '2097152'
+      NCCL_IB_DISABLE: '1'
+      NCCL_MAX_NCHANNELS: '16'
+      NCCL_MIN_NCHANNELS: '16'
+      NCCL_NET_PLUGIN: spcx
+      NCCL_P2P_LEVEL: SYS
+      NCCL_PROTO: LL,LL128,Simple
+      NCCL_VERSION: 2.30.7+cuda13.3
+      NIXL_VERSION: 1.3.0
+      NPP_VERSION: 13.2.0.35
+      NSIGHT_COMPUTE_VERSION: 2026.3.0.13
+      NSIGHT_SYSTEMS_VERSION: 2026.5.1.18
+      NVFATBIN_VERSION: 13.4.49
+      NVFUSER_BUILD_VERSION: 0.1.4a0+nvidia
+      NVFUSER_VERSION: ''
+      NVIDIA_BUILD_ID: '406036884'
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      NVIDIA_PRODUCT_NAME: PyTorch
+      NVIDIA_PYTORCH_VERSION: '26.08'
+      NVIDIA_REQUIRE_CUDA: cuda>=9.0
+      NVIDIA_VISIBLE_DEVICES: 0,1,2,3
+      NVJITLINK_VERSION: 13.4.52
+      NVJPEG_VERSION: 13.2.2.35
+      NVPL_LAPACK_MATH_MODE: PEDANTIC
+      NVPTXCOMPILER_VERSION: 13.4.59
+      NVRX_VERSION: 0.6.0
+      NVSHMEM_VERSION: 3.7.1
+      NVVM_VERSION: 13.4.59
+      OMPI_MCA_coll_hcoll_enable: '0'
+      OMP_NUM_THREADS: '1'
+      OPAL_PREFIX: /usr/local/mpi
+      OPENMPI_VERSION: 5.0.10
+      OPENUCX_VERSION: 1.21.0
+      PATH: /opt/venv/bin:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin
+      PIP_BREAK_SYSTEM_PACKAGES: '1'
+      PIP_CONSTRAINT: /etc/pip/constraint.txt
+      PIP_DEFAULT_TIMEOUT: '100'
+      POLYGRAPHY_VERSION: 0.53.3
+      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+      PYTHONIOENCODING: utf-8
+      PYTORCH_BUILD_NUMBER: '0'
+      PYTORCH_BUILD_VERSION: 2.14.0a0+4fdf77b
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      PYTORCH_HOME: /opt/pytorch/pytorch
+      PYTORCH_VERSION: 2.14.0a0+4fdf77b
+      RDMACORE_VERSION: '63.0'
+      SAFETENSORS_FAST_GPU: '1'
+      SHELL: /bin/bash
+      SPARKINFER_COMPILE_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/b12x/compile
+      TENSORBOARD_PORT: '6006'
+      TORCHAO_BUILD_VERSION: +gitdd0efc75
+      TORCHINDUCTOR_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/torchinductor
+      TORCHINDUCTOR_CUTLASS_DIR: /opt/pytorch/pytorch/third_party/cutlass
+      TORCHINDUCTOR_LOOP_ORDERING_AFTER_FUSION: '0'
+      TORCHTITAN_BUILD_VERSION: 0.2.2+gitbadf21a1
+      TORCH_ALLOW_TF32_CUBLAS_OVERRIDE: '1'
+      TORCH_CUDA_ARCH_LIST: 7.5 8.0 8.6 9.0 10.0 12.0+PTX
+      TORCH_NCCL_USE_COMM_NONBLOCKING: '0'
+      TRANSFORMER_ENGINE_VERSION: '2.18'
+      TRITON_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/triton
+      TRITON_CUDACRT_PATH: /usr/local/cuda/include
+      TRITON_CUDART_PATH: /usr/local/cuda/include
+      TRITON_CUOBJDUMP_PATH: /usr/local/cuda/bin/cuobjdump
+      TRITON_CUPTI_INCLUDE_PATH: /usr/local/cuda/include
+      TRITON_CUPTI_LIB_PATH: /usr/local/cuda/lib64
+      TRITON_NVDISASM_PATH: /usr/local/cuda/bin/nvdisasm
+      TRITON_PTXAS_PATH: /usr/local/cuda/bin/ptxas
+      TRTOSS_VERSION: ''
+      TRT_VERSION: 11.2.1.2+cuda13.3
+      UCC_CL_BASIC_TLS: ^sharp
+      UCC_EC_CUDA_EXEC_NUM_THREADS: '256'
+      VIRTUAL_ENV: /opt/venv
+      VLLM_B12X_MLA_CKV_GATHER: '0'
+      VLLM_B12X_MOE_FP4_FORCE_A16: '0'
+      VLLM_CACHE_DIR: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/vllm
+      VLLM_CACHE_ROOT: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb/vllm
+      VLLM_CAUSAL_CONV1D_UPDATE_HOIST: '1'
+      VLLM_DISABLED_KERNELS: MarlinFP8ScaledMMLinearKernel
+      VLLM_DISABLE_SHARED_EXPERTS_STREAM: '0'
+      VLLM_ENABLE_PCIE_ALLREDUCE: '1'
+      VLLM_GLM53_DFLASH_ATTN: '1'
+      VLLM_GLM53_KDA_GATE_SIDE_STREAM: '1'
+      VLLM_GLM53_L2_PREFETCH: '1'
+      VLLM_GLM53_L2_PREFETCH_PERSIST_MB: '0'
+      VLLM_GLM53_MTP_DRAFT_HEAD: nvfp4
+      VLLM_GLM53_ONLINE_DENSE_MXFP8: '0'
+      VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE: auto
+      VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE: '2048'
+      VLLM_LM_HEAD_A16: '1'
+      VLLM_MTP_NVFP4_LM_HEAD: '0'
+      VLLM_MXFP8_LM_HEAD: '0'
+      VLLM_PCIE_ALLREDUCE_BACKEND: b12x
+      VLLM_PCIE_DMA_MIN_BYTES: 6MB
+      VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE: 'off'
+      VLLM_PLUGINS: ''
+      VLLM_USE_FLASHINFER_SAMPLER: '1'
+      VLLM_USE_V2_MODEL_RUNNER: '1'
+      VLLM_WORKER_MULTIPROC_METHOD: spawn
+      XDG_CACHE_HOME: /cache/jit/UNBOUND-RUNTIME/glm53-flash-59dc36a79e6582cb
+      _CUDA_COMPAT_PATH: /usr/local/cuda/compat
+    configs:
+    - source: lil-launch
+      target: /etc/lil-launch.yaml
+volumes:
+  glm53-tp4-dflash2-runtime:
+    name: glm53-tp4-dflash2-runtime
+  lil-huggingface:
+    name: lil-huggingface
+configs:
+  lil-launch:
+    content: |
+      schema: lil-explicit-launch/v1
+      profile: glm53-flash
+      hardware: rtx-pro-6000-pcie
+      options:
+        cache-transfer-mode: engine_driven
+        cache-l1-gib: 64.0
+        cache-l1-init-gib: 2
+        cache-l2-gib: 512.0
+        cache-l2-enabled: true
+        cache-cpu-workers: 16
+        cache-l2-workers: 8
+        cache-directory: /cache/lmcache
+        cache-object-tokens: 4096
+        cache-native-gib: 64.0
+        cache-host: 127.0.0.1
+        cache-http-host: 127.0.0.1
+        cache-start-timeout: 120.0
+        cache-prefetch-policy: retain
+        cache-broker-directory: /cache/lmcache-cumem
+        cache-load-failure-policy: recompute
+        host: 0.0.0.0
+        port: 8000
+        pipeline-parallel-size: 1
+        decode-context-parallel-size: 1
+        dtype: bfloat16
+        kv-cache-dtype: fp8
+        load-format: instanttensor
+        enable-prefix-caching: true
+        enable-prompt-tokens-details: true
+        enable-chunked-prefill: true
+        enable-auto-tool-choice: true
+        cache-mode: vram
+        cache-gpu-workers: 8
+        model: local-inference-lab/GLM-5.3-Flash-NVFP4
+        served-model-name: GLM-5.3-Flash-NVFP4
+        tensor-parallel-size: 4
+        mode: dflash2
+        prefill-compute-share: '0.4'
+        prefill-schedule-interval: 1
+        max-parallel-prefills: 1
+        max-model-len: 1048576
+        max-num-seqs: 32
+        max-num-batched-tokens: 4096
+        gpu-memory-utilization: 0.93
+        block-size: 256
+        target-page-size: '2048'
+        recurrent-page-size: auto
+        recurrent-checkpoint-policy: request_boundaries
+        mamba-cache-mode: align
+        cp-kv-cache-interleave-size: 4
+        dcp-kv-cache-interleave-size: 4
+        dcp-ckv-gather: auto
+        attention-backend: B12X
+        moe-backend: b12x
+        linear-backend: b12x
+        quantization: modelopt_mixed
+        enable-flashinfer-autotune: false
+        max-cudagraph-capture-size: 256
+        cudagraph-capture-sizes:
+        - 1
+        - 2
+        - 4
+        - 8
+        - 16
+        - 32
+        - 40
+        - 48
+        - 64
+        - 96
+        - 128
+        - 192
+        - 256
+        compilation-config:
+          cudagraph_mode: FULL_AND_PIECEWISE
+        additional-config:
+          glm53_kda_decode_backend: auto
+          kda_prefill_backend: b12x
+        reasoning-parser: glm45
+        tool-call-parser: glm47
+        default-chat-template-kwargs:
+          reasoning_effort: high
+          clear_thinking: false
+        override-generation-config:
+          temperature: 1.0
+          top_p: 0.95
+        draft-tokens: 7
+        speculative-config:
+          method: dflash
+          model: local-inference-lab/GLM-5.3-Flash-DFlash2
+          draft_sample_method: probabilistic
+          rejection_sample_method: standard
+          attention_backend: FLASH_ATTN
+          kv_cache_dtype: auto
+          num_speculative_tokens: 7
+      passthrough: []
+      vllm_defaults:
+      - async-scheduling
+      - code-revision
+      - decode-refill-target
+      - disable-custom-all-reduce
+      - enable-force-include-usage
+      - enable-request-id-headers
+      - engram-config
+      - gdn-decode-kernel
+      - generation-config
+      - hf-overrides
+      - jit-monitor-mode
+      - kv-cache-memory-bytes
+      - language-model-only
+      - mamba-ssm-cache-dtype
+      - mm-encoder-tp-mode
+      - mm-processor-cache-gb
+      - prefill-compute-half-life
+      - prefill-policy
+      - prefix-cache-retention-interval
+      - prefix-match-unit
+      - revision
+      - safetensors-load-strategy
+      - scheduler-reserve-full-isl
+      - swa-block-size
+      - tokenizer-mode
+      - trust-remote-code
+      runtime_bindings:
+        UNBOUND-RUNTIME: Runtime lock from the selected immutable image
+        checkpoint_identity: Verified target/draft revisions before opening external storage
+      environment_keys:
+      - B12X_COMPILE_CACHE_DIR
+      - B12X_CUTE_COMPILE_CACHE_DIR
+      - B12X_DYNAMIC_DIRECT_EXPERT_SCALES
+      - B12X_DYNAMIC_SKIP_SPLIT_BARRIER_RESET
+      - B12X_DYNAMIC_SPLIT_COMPUTE_MAC
+      - B12X_DYNAMIC_SPLIT_FAST_PREPARE
+      - B12X_DYNAMIC_SPLIT_LOW_SMEM
+      - B12X_DYNAMIC_SPLIT_ROUTE_COMPUTE
+      - B12X_DYNAMIC_WORK_SOURCE
+      - B12X_MHC_PDL
+      - B12X_PCIE_ONESHOT_BLOCK_LIMIT
+      - B12X_PCIE_ONESHOT_PDL
+      - B12X_PCIE_ONESHOT_THREADS
+      - BASH_ENV
+      - CCCL_VERSION
+      - COCOAPI_VERSION
+      - CUBLASMP_VERSION
+      - CUBLAS_VERSION
+      - CUDA_ARCH_LIST
+      - CUDA_BINARY_LOADER_THREAD_COUNT
+      - CUDA_CACHE_PATH
+      - CUDA_COMPONENT_LIST
+      - CUDA_DEVICE_ORDER
+      - CUDA_DRIVER_VERSION
+      - CUDA_HOME
+      - CUDA_MODULE_LOADING
+      - CUDA_VERSION
+      - CUDLA_VERSION
+      - CUDNN_FRONTEND_VERSION
+      - CUDNN_VERSION
+      - CUFFT_VERSION
+      - CUFILE_VERSION
+      - CURAND_VERSION
+      - CUSOLVERMP_VERSION
+      - CUSOLVER_VERSION
+      - CUSPARSELT_VERSION
+      - CUSPARSE_VERSION
+      - CUTE_DSL_ARCH
+      - CUTE_DSL_CACHE_DIR
+      - CUTILE_PYTHON_VERSION
+      - CUTLASS_DSL_VERSION
+      - DALI_BUILD
+      - DALI_URL_SUFFIX
+      - DALI_VERSION
+      - DOCA_VERSION
+      - EFA_VERSION
+      - ENV
+      - GDRCOPY_VERSION
+      - HF_HOME
+      - HPCX_VERSION
+      - INSTANTTENSOR_BACKEND
+      - JUPYTER_PORT
+      - LC_ALL
+      - LD_LIBRARY_PATH
+      - LIBRARY_PATH
+      - MAXSMVER
+      - MODEL_OPT_VERSION
+      - MOFED_VERSION
+      - NCCL_BUFFSIZE
+      - NCCL_IB_DISABLE
+      - NCCL_MAX_NCHANNELS
+      - NCCL_MIN_NCHANNELS
+      - NCCL_NET_PLUGIN
+      - NCCL_P2P_LEVEL
+      - NCCL_PROTO
+      - NCCL_VERSION
+      - NIXL_VERSION
+      - NPP_VERSION
+      - NSIGHT_COMPUTE_VERSION
+      - NSIGHT_SYSTEMS_VERSION
+      - NVFATBIN_VERSION
+      - NVFUSER_BUILD_VERSION
+      - NVFUSER_VERSION
+      - NVIDIA_BUILD_ID
+      - NVIDIA_DRIVER_CAPABILITIES
+      - NVIDIA_PRODUCT_NAME
+      - NVIDIA_PYTORCH_VERSION
+      - NVIDIA_REQUIRE_CUDA
+      - NVIDIA_VISIBLE_DEVICES
+      - NVJITLINK_VERSION
+      - NVJPEG_VERSION
+      - NVPL_LAPACK_MATH_MODE
+      - NVPTXCOMPILER_VERSION
+      - NVRX_VERSION
+      - NVSHMEM_VERSION
+      - NVVM_VERSION
+      - OMPI_MCA_coll_hcoll_enable
+      - OMP_NUM_THREADS
+      - OPAL_PREFIX
+      - OPENMPI_VERSION
+      - OPENUCX_VERSION
+      - PATH
+      - PIP_BREAK_SYSTEM_PACKAGES
+      - PIP_CONSTRAINT
+      - PIP_DEFAULT_TIMEOUT
+      - POLYGRAPHY_VERSION
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+      - PYTHONIOENCODING
+      - PYTORCH_BUILD_NUMBER
+      - PYTORCH_BUILD_VERSION
+      - PYTORCH_CUDA_ALLOC_CONF
+      - PYTORCH_HOME
+      - PYTORCH_VERSION
+      - RDMACORE_VERSION
+      - SAFETENSORS_FAST_GPU
+      - SHELL
+      - SPARKINFER_COMPILE_CACHE_DIR
+      - TENSORBOARD_PORT
+      - TORCHAO_BUILD_VERSION
+      - TORCHINDUCTOR_CACHE_DIR
+      - TORCHINDUCTOR_CUTLASS_DIR
+      - TORCHINDUCTOR_LOOP_ORDERING_AFTER_FUSION
+      - TORCHTITAN_BUILD_VERSION
+      - TORCH_ALLOW_TF32_CUBLAS_OVERRIDE
+      - TORCH_CUDA_ARCH_LIST
+      - TORCH_NCCL_USE_COMM_NONBLOCKING
+      - TRANSFORMER_ENGINE_VERSION
+      - TRITON_CACHE_DIR
+      - TRITON_CUDACRT_PATH
+      - TRITON_CUDART_PATH
+      - TRITON_CUOBJDUMP_PATH
+      - TRITON_CUPTI_INCLUDE_PATH
+      - TRITON_CUPTI_LIB_PATH
+      - TRITON_NVDISASM_PATH
+      - TRITON_PTXAS_PATH
+      - TRTOSS_VERSION
+      - TRT_VERSION
+      - UCC_CL_BASIC_TLS
+      - UCC_EC_CUDA_EXEC_NUM_THREADS
+      - VIRTUAL_ENV
+      - VLLM_B12X_MLA_CKV_GATHER
+      - VLLM_B12X_MOE_FP4_FORCE_A16
+      - VLLM_CACHE_DIR
+      - VLLM_CACHE_ROOT
+      - VLLM_CAUSAL_CONV1D_UPDATE_HOIST
+      - VLLM_DISABLED_KERNELS
+      - VLLM_DISABLE_SHARED_EXPERTS_STREAM
+      - VLLM_ENABLE_PCIE_ALLREDUCE
+      - VLLM_GLM53_DFLASH_ATTN
+      - VLLM_GLM53_KDA_GATE_SIDE_STREAM
+      - VLLM_GLM53_L2_PREFETCH
+      - VLLM_GLM53_L2_PREFETCH_PERSIST_MB
+      - VLLM_GLM53_MTP_DRAFT_HEAD
+      - VLLM_GLM53_ONLINE_DENSE_MXFP8
+      - VLLM_GLM53_SPLIT_MAMBA_BLOCK_SIZE
+      - VLLM_GLM53_SPLIT_TARGET_BLOCK_SIZE
+      - VLLM_LM_HEAD_A16
+      - VLLM_MTP_NVFP4_LM_HEAD
+      - VLLM_MXFP8_LM_HEAD
+      - VLLM_PCIE_ALLREDUCE_BACKEND
+      - VLLM_PCIE_DMA_MIN_BYTES
+      - VLLM_PCIE_TWOSHOT_ALLREDUCE_MAX_SIZE
+      - VLLM_PLUGINS
+      - VLLM_USE_FLASHINFER_SAMPLER
+      - VLLM_USE_V2_MODEL_RUNNER
+      - VLLM_WORKER_MULTIPROC_METHOD
+      - XDG_CACHE_HOME
+      - _CUDA_COMPAT_PATH
+```
+
+The explicit runner passes these native arguments to vLLM through the image's
+CUDA/NCCL bootstrap. This command is shown for inspection; the Compose file
+above also supplies its environment and persistent volumes.
+
+```bash
+/opt/venv/bin/python -m vllm.entrypoints.cli.main serve local-inference-lab/GLM-5.3-Flash-NVFP4 \
+  --additional-config '{"glm53_kda_decode_backend":"auto","kda_prefill_backend":"b12x"}' \
+  --attention-backend B12X \
+  --block-size 256 \
+  --compilation-config '{"cudagraph_mode":"FULL_AND_PIECEWISE"}' \
+  --cp-kv-cache-interleave-size 4 \
+  --cudagraph-capture-sizes 1 2 4 8 16 32 40 48 64 96 128 192 256 \
+  --dcp-kv-cache-interleave-size 4 \
+  --decode-context-parallel-size 1 \
+  --default-chat-template-kwargs '{"reasoning_effort":"high","clear_thinking":false}' \
+  --dtype bfloat16 \
+  --enable-auto-tool-choice \
+  --enable-chunked-prefill \
+  --no-enable-flashinfer-autotune \
+  --enable-prefix-caching \
+  --enable-prompt-tokens-details \
+  --gpu-memory-utilization 0.93 \
+  --host 0.0.0.0 \
+  --kv-cache-dtype fp8 \
+  --linear-backend b12x \
+  --load-format instanttensor \
+  --mamba-cache-mode align \
+  --max-cudagraph-capture-size 256 \
+  --max-model-len 1048576 \
+  --max-num-batched-tokens 4096 \
+  --max-num-seqs 32 \
+  --max-parallel-prefills 1 \
+  --moe-backend b12x \
+  --override-generation-config '{"temperature":1.0,"top_p":0.95}' \
+  --pipeline-parallel-size 1 \
+  --port 8000 \
+  --prefill-compute-share 0.4 \
+  --prefill-schedule-interval 1 \
+  --quantization modelopt_mixed \
+  --reasoning-parser glm45 \
+  --recurrent-checkpoint-policy request_boundaries \
+  --served-model-name GLM-5.3-Flash-NVFP4 \
+  --speculative-config '{"method":"dflash","model":"local-inference-lab/GLM-5.3-Flash-DFlash2","draft_sample_method":"probabilistic","rejection_sample_method":"standard","attention_backend":"FLASH_ATTN","kv_cache_dtype":"auto","num_speculative_tokens":7}' \
+  --tensor-parallel-size 4 \
+  --tool-call-parser glm47
+```
+
+</details>
+<!-- END LIL-COMPOSE-REFERENCE -->
+
+## Common settings
+
+Keep the profile defaults unless your workload needs a different capacity.
+Place the following `-e` overrides **before `"$IMAGE"`**:
+
+| Setting | Default / recommendation | Example override |
+|---|---|---|
+| GPUs | TP4; expose four GPU IDs | `-e TP=4` |
+| Context parallelism | DCP1 for the speed table | `-e DCP=4` for full-CKV gather; DCP must divide TP |
+| Active requests | 32 | `-e MAX_NUM_SEQS=16` |
+| Prefill budget | 4096 tokens | `-e MAX_NUM_BATCHED_TOKENS=4096` |
+| Per-request context limit | 1,048,576, subject to available KV | `-e MAX_MODEL_LEN=131072` |
+| GPU memory fraction | 0.93 | `-e GPU_MEMORY_UTILIZATION=0.90` to leave more working space |
+| External prefix storage | GPU-only | `-e CACHE_MODE=lmcache` with the RAM/disk settings below |
+
+TP2 needs the [Spark checkpoint and preset](glm-5.3-flash-spark-tp2.md),
+not just `-e TP=2` on this command. Changing slots or draft length can change
+graph memory and KV capacity.
+
+### Backend and request defaults
+
+The target uses ModelOpt NVFP4, B12X attention, B12X KDA prefill, B12X MoE
+and dense kernels, FP8 KV, and full-and-piecewise CUDA graphs. Two-shot
+all-reduce is off. MTP uses Marlin draft MoE and a private NVFP4 vocabulary
+head; the target head remains BF16. DFlash2 uses offline MXFP8 weights,
+B12X dense kernels, FLASH_ATTN draft attention and automatic draft KV dtype.
+
+GPU prefix caching uses `request_boundaries` with aligned recurrent states.
+Keep this default: no manual `--prefix-cache-retention-interval` is needed.
+Vision has no artificial one/two-image profile cap; image resolution and
+context still consume memory.
+
+Request defaults are temperature 1, top-p .95, reasoning `high` and
+`clear_thinking=false`. For example, a request can select
+`"chat_template_kwargs":{"reasoning_effort":"high"}`.
 
 Explicit request sampling and template options override their corresponding
 server defaults. If replacing the complete template-default JSON, retain
@@ -76,55 +1780,44 @@ server defaults. If replacing the complete template-default JSON, retain
 
 The [shared cache section](../docs/unified-vllm-docker.md#cache-storage-gpu-lmcache-or-native-offload)
 documents GPU-local, LMCache RAM/filesystem and native KV offload. LMCache is
-opt-in; the published image's 91 cache contract tests are not a model-level
-RAM/restart-filesystem performance result.
+opt-in; text prefixes support CPU restore and persistent restart recovery.
+External recurrent restore does not apply to image-bearing requests.
 
-`--decode-context-parallel-size 4` selects DCP4 and automatic full-CKV gather;
-this is not specific to DFlash2. DCP4 and TP8 are **implemented**, but the
-six-profile wheel comparison below qualifies DCP1, not those alternatives.
-The [Spark TP2 recipe](glm-5.3-flash-spark-tp2.md) has a different checkpoint
-and capacity contract; it is not this four-GPU profile with TP changed to two.
+`-e DCP=4` selects DCP4 and automatic full-CKV gather in both MTP and DFlash2.
+The speed table uses DCP1; it does not predict DCP4 speed. For an explicit
+NVFP4 target-cache experiment, append `--kv-cache-dtype nvfp4_ds_mla` after
+the image. That changes the numerical and memory configuration and is not
+the FP8 measurement below.
 
 ## Measured performance
 
-Stock RTX PRO 6000 Workstation quartet, TP4/DCP1, 4096-token budget, GPU-only
-FP8 target cache, full-and-piecewise graphs, temperature 1/top-p .95. Decode:
-context zero, medians of three warmed 30-second runs. Prefill: sustained
-uncached nominal-32K requests, client time to first token. C8 is aggregate.
-Image identities, runtime arguments and raw samples are in the
-[wheel-image qualification](../benchmarks/prepared-b12x-serving/).
+Four RTX PRO 6000 **Max-Q**, **VRAM +6000**, automatic graphics clocks;
+TP4/DCP1, 4096-token budget, 32 slots, GPU-only FP8 target cache,
+full-and-piecewise graphs and temperature 1/top-p .95. Five warmed
+30-second windows per cell; context-zero decode and uncached nominal-32K
+prefill measured from client TTFT. C8 is aggregate.
 
-| Mode | C1 tok/s, R35 → wheel image | C8 tok/s, R35 → wheel image | 32K prefill tok/s, R35 → wheel image | Sieve tok/s, R35 → wheel image |
+| Mode | C1 output | C8 aggregate output | 32K prefill | Change from saved R35: C1 / C8 / prefill |
 |---|---:|---:|---:|---:|
-| MTP3 | 247.12 → 249.33 (+0.89%) | 872.67 → 875.86 (+0.37%) | 15,332 → 15,580 (+1.62%) | 326.15 → 325.75 (−0.12%) |
-| DFlash2 K7 | 211.23 → 219.83 (+4.07%) | 673.26 → 717.84 (+6.62%) | 15,538 → 15,734 (+1.26%) | 458.14 → 461.42 (+0.72%) |
+| MTP3 | 281.3 tok/s | 897.6 tok/s | 13,816 tok/s | +12.99% / +2.72% / +2.23% |
+| DFlash2 K7 | 229.0 tok/s | 702.6 tok/s | 13,955 tok/s | +4.22% / +3.67% / +0.83% |
 
-Sieve uses five measured requests and is not a coding-correctness evaluation.
-No no-spec measurement exists in this wheel-image matrix. Historical no-spec,
-DCP4 and +6000-clock values remain in the archive, not substituted here.
+The corresponding C1 verifier rates are 112.14 steps/s for MTP3 and 87.56
+steps/s for DFlash2. Startup reports 5,595,903 and 5,816,930 logical KV tokens,
+respectively, shared across requests. Both modes pass arithmetic and
+repeated/changed-prefix checks.
+[Exact images, settings and all samples](../benchmarks/karmic-kraken-serving.md).
 
-### Prepared B12X plan integration
+Speed varies across server starts: a separate five-run C1 check measured
+265.7–277.0 tok/s for MTP3 and 212.9–225.2 tok/s for DFlash2. The lower
+DFlash2 result is below the saved R35 219.7 tok/s. These are separate startup
+series, not extra samples added to the table. See the
+[startup comparison](../benchmarks/glm-startup-consistency.md); clearing the
+compilation cache is not a recommended fix.
 
-A separate same-GPU component comparison qualifies the B12X master
-reconciliation and vLLM #789, which retains GLM's prepared selection plan:
-
-| Metric | Control → prepared-plan image | Change |
-|---|---:|---:|
-| MTP3 C8 output | 856.05 → 857.27 tok/s | +0.14% |
-| MTP3 32K prefill | 15,486 → 15,531 tok/s | +0.29% |
-| DFlash2 C1 output | 214.31 → 212.08 tok/s | −1.04% |
-| DFlash2 C8 output | 695.88 → 708.64 tok/s | +1.83% |
-| DFlash2 32K prefill | 15,702 → 15,702 tok/s | 0.00% |
-
-DFlash C1 verifier throughput rises 0.22% while acceptance changes; negative
-output deltas are retained rather than called zero regression. The MTP control
-contains C8 only. Read the
-[component receipts](../benchmarks/prepared-b12x-contracts/#retained-pooled-selection-glm)
-separately from the whole-image table. Two-shot is disabled in both comparisons.
-
-Functional checks include arithmetic, repeated/changed prefix requests,
-2/8/16 small images and image history. These are bounded checks, not general
-language quality, arbitrary image resolution or million-token qualification.
+Sieve, no-spec and DCP4 were not remeasured in this matrix. Their preceding
+results, including stock Workstation measurements, remain in the
+[versioned guide archive](../archive/serving-guides/README.md).
 
 ## Quality evaluation and historical releases
 
@@ -138,8 +1831,13 @@ runtime/checkpoint boundaries of these independent reports:
   and [QAD TV-nucleus](glm-5.3-flash/qad-tvn-step2500-verifier-backed-behavioral-fidelity.md).
 - [BF16/NVFP4 distribution fidelity](../kld/glm-5.3-flash-bf16-nvfp4.md)
   and [QAD quantization reports](../kld/glm-5.3-flash-qad-step2500.md).
+- [aider polyglot benchmark, release-10152026](glm-5.3-flash/aider-polyglot-release-10152026.md):
+  five full runs of the 225-exercise benchmark on the default `glm53-tp2` checkpoint,
+  pass@2 88.0 ± 1.1 %, per-language rates, run-to-run spread and topology throughput.
+- [Greedy checksum stability and MoE activation precision](glm-5.3-flash/checksum-stability-moe-activations.md):
+  W4A4 vs W4A8 vs W4A16, FP32 router weights, speed cost and determinism.
 - [Community R35 deployment and measurement archive](glm-5.3-flash-community-r35.md):
   release-specific launchers, DCP and no-spec matrices, +6000 measurements,
   source locks, historical LMCache restores and reported constrained-output limits.
 
-Source review and unresolved items: [issue #773](https://github.com/local-inference-lab/vllm/issues/773).
+Source review and integration checklist: [issue #808](https://github.com/local-inference-lab/vllm/issues/808).
