@@ -10,6 +10,7 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-10-20](2026-10/2026-10-20.md) | Jon Nielsen's independent rerun of the K3 TP4 recipe on 4x RTX PRO 6000 (SM120, driver 615.71.09, MX |
 | [2026-10-17](2026-10/2026-10-17.md) | OffloadingConnector on Qwen3.8-Flash-Next TP1 (karmic-kraken-beta-20261011.2, RTX PRO 6000, vLLM) li |
 | [2026-10-16](2026-10/2026-10-16.md) | Panchovix released nvidia-linux-vbios-vix-loader for loading custom VBIOSes on Linux. Panchovix repo |
 | [2026-10-15](2026-10/2026-10-15.md) | NVIDIA Nemotron Bolt 3.5 74B A9B was reported to be scheduled for release on 2026-10-15; it reported |
