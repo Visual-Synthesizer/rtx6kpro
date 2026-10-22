@@ -10,6 +10,8 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-10-22](2026-10/2026-10-22.md) | Catid released DeepInfer patches enabling DeepSeek-V4.1-Flash on an 8x NVIDIA B300 server; it does n |
+| [2026-10-21](2026-10/2026-10-21.md) | On 4x RTX PRO 6000, 1017-abliterated-CSF DSpark d3 beat d7 by about 7%; CSF d3 gave +3% C8 and +60%  |
 | [2026-10-20](2026-10/2026-10-20.md) | Jon Nielsen's independent rerun of the K3 TP4 recipe on 4x RTX PRO 6000 (SM120, driver 615.71.09, MX |
 | [2026-10-17](2026-10/2026-10-17.md) | OffloadingConnector on Qwen3.8-Flash-Next TP1 (karmic-kraken-beta-20261011.2, RTX PRO 6000, vLLM) li |
 | [2026-10-16](2026-10/2026-10-16.md) | Panchovix released nvidia-linux-vbios-vix-loader for loading custom VBIOSes on Linux. Panchovix repo |
