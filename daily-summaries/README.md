@@ -10,6 +10,10 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-11-10](2026-11/2026-11-10.md) | A caching engine modeled after LMCache and SGLang with reduced write-through supports distributed of |
+| [2026-11-09](2026-11/2026-11-09.md) | GLM-5.3 Flash's separate reasoning stream dies around 128k prompt tokens in the karmic-kraken servin |
+| [2026-11-08](2026-11/2026-11-08.md) | Disk engram prefill: DeepSeek-V4.1-Flash showed the same 28 reads/token on two machines, with relati |
+| [2026-11-07](2026-11/2026-11-07.md) | HashSpamJam pointed disk-engram users at commit c2606aae, advertising about 60% higher random prefil |
 | [2026-11-06](2026-11/2026-11-06.md) | NVIDIA driver 620.70.06 / CUDA 13.5 now runs an IOMMU/PCI ACS topology check before allowing PCIe P2 |
 | [2026-11-05](2026-11/2026-11-05.md) | Moonshot AI released moonshotai/Kimi-K3.1-Pro on Hugging Face. Relative to Kimi K3, the full-attenti |
 | [2026-11-04](2026-11/2026-11-04.md) | Flare engine 18b16e1 vs 6fa01a4 on the same gb202 package, 4x RTX PRO 6000 (2x Max-Q + 2x WS) at 250 |
