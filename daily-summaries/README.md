@@ -10,6 +10,17 @@ Each highlight links directly to the relevant Discord message.
 
 | Date | Highlights |
 |------|
+| [2026-11-20](2026-11/2026-11-20.md) | WARMIND-1017 is released as a 668 KB safetensors steering sidecar with 33 directions across layers 4 |
+| [2026-11-19](2026-11/2026-11-19.md) | A Discord message linked v2 of Dsturb/Qwen3.8-Flash-Next-FLARE-Abliterated-YaRN-512k and described i |
+| [2026-11-18](2026-11/2026-11-18.md) | Pmot12 reported Carbon's deepseek-v41-flash-pp2-pair recipe changes: +23.2% at C1, cold TTFT -18.6%, |
+| [2026-11-17](2026-11/2026-11-17.md) | JCartu measured ds4.1f warmind-1017 v1.1 CSF on FLARE 6b68b9b4 at concurrency 4 over 9,000 POPE item |
+| [2026-11-16](2026-11/2026-11-16.md) | JCartu released WARMIND-1017 v1.1: projecting out a 4D epistemic-abstention basis across layers L4-3 |
+| [2026-11-14](2026-11/2026-11-14.md) | HashSpamJam benchmarked four RTX 6000 Blackwell cards at a 250 W per-card cap, two runs per configur |
+| [2026-11-13](2026-11/2026-11-13.md) | pete8359 compared Hyperflare-tp3-20261111 (HOT=342, --scheduler-policy interactive) with vLLM .11 on |
+| [2026-11-12](2026-11/2026-11-12.md) | ebfio measured vanilla DSv4.1F on two DGX Stations in PP=2: 410 tok/s single-stream (9.25 ms/step),  |
+| [2026-11-11](2026-11/2026-11-11.md) | pangfather reported Kimi K3.1 Pro extreme-prefill work on 9x RTX PRO 6000 Blackwell (TP9/DCP9, 93 la |
+| [2026-11-01](2026-11/2026-11-01.md) | Bernd reported GLM-5.3 hung in 4 of 7 boots on 8x RTX PRO 6000 with glm53-csf-tp6 and glm53-flash-tp |
+| [2026-10-31](2026-10/2026-10-31.md) | A user measured a Flare build from main with the GB202 format-6 package on four GPUs capped at 250 W |
 | [2026-11-10](2026-11/2026-11-10.md) | A caching engine modeled after LMCache and SGLang with reduced write-through supports distributed of |
 | [2026-11-09](2026-11/2026-11-09.md) | GLM-5.3 Flash's separate reasoning stream dies around 128k prompt tokens in the karmic-kraken servin |
 | [2026-11-08](2026-11/2026-11-08.md) | Disk engram prefill: DeepSeek-V4.1-Flash showed the same 28 reads/token on two machines, with relati |
